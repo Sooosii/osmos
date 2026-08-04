@@ -36,8 +36,17 @@ import type { Perfume, ScentFamily, Volatility } from '@/data/types';
 /** SVG'nin iç koordinat genişliği; ekranda `width:100%` ile esniyor. */
 const VIEW_WIDTH = 300;
 const PAD = 8;
-/** Nota adı sütunu. */
-const LABEL_WIDTH = 56;
+/**
+ * Nota adı sütunu.
+ *
+ * Veri setindeki en uzun nota adına göre ayarlı: "Çarkıfelek meyvesi" (18 karakter).
+ * Etiket kırpılmıyor, `textLength` ile sıkıştırılmıyor — bu yüzden sütun onu
+ * taşımadan barındıracak kadar geniş olmak zorunda. 56 değeriyle bu ad (ve ondan
+ * kısa dokuz başka ad) çubuğun üzerine biniyordu; 84'e çıkarmanın bedeli çubuk
+ * uzunluğunun (span) ~14% kısalması — kabul edilen ödün. Küçültmeden önce veri
+ * setindeki en uzun adları kontrol et.
+ */
+const LABEL_WIDTH = 84;
 /** Yüzde sütunu. */
 const VALUE_WIDTH = 26;
 /** İlk satırın üstündeki boşluk. */
