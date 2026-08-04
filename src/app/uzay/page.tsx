@@ -1,7 +1,7 @@
 import { PERFUMES } from '@/data/perfumes';
-import { FAMILIES } from '@/data/families';
+import { FAMILIES, dominantFamily } from '@/data/families';
 import { familyVector, nearestNeighbors } from '@/lib/similarity';
-import { buildMarks, dominantFamily } from '@/lib/space-marks';
+import { buildMarks } from '@/lib/space-marks';
 import { ScentSpace } from '@/components/ScentSpace';
 import type { ScentFamily } from '@/data/types';
 

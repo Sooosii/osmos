@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PERFUMES } from '@/data/perfumes';
-import { getFamily } from '@/data/families';
+import { dominantFamily, getFamily } from '@/data/families';
 import { familyVector } from '@/lib/similarity';
-import { dominantFamily } from '@/lib/space-marks';
 import { EvolutionChart } from '@/components/EvolutionChart';
 
 /**
