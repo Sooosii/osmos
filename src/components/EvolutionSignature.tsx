@@ -42,7 +42,7 @@ const PAD = 8;
  * Veri setindeki en uzun nota adına göre ayarlı: "Çarkıfelek meyvesi" (18 karakter).
  * Etiket kırpılmıyor, `textLength` ile sıkıştırılmıyor — bu yüzden sütun onu
  * taşımadan barındıracak kadar geniş olmak zorunda. 56 değeriyle bu ad (ve ondan
- * kısa dokuz başka ad) çubuğun üzerine biniyordu; 84'e çıkarmanın bedeli çubuk
+ * kısa sekiz başka ad) çubuğun üzerine biniyordu; 84'e çıkarmanın bedeli çubuk
  * uzunluğunun (span) ~14% kısalması — kabul edilen ödün. Küçültmeden önce veri
  * setindeki en uzun adları kontrol et.
  */
@@ -161,6 +161,12 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
 
   const geometry = useMemo(() => geometryFor(rows.length), [rows.length]);
 
+  /** Bu parfümde geçen aileler, `FAMILY_ORDER` sırasında ve tekrarsız. */
+  const families = useMemo(() => {
+    const seen = new Set(rows.map((row) => row.family));
+    return FAMILY_ORDER.filter((family) => seen.has(family)).map(getFamily);
+  }, [rows]);
+
   /**
    * Sunucuda çizilen ilk kare — `progress = 0`, yani saf eğri hâli.
    *
@@ -278,6 +284,24 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
           </g>
         ))}
       </svg>
+
+      {/*
+        Renk = aile. Katman göstergesi (Üst/Kalp/Dip) burada YOK: imzada renk
+        katmanı değil aileyi anlatıyor, o gösterge yanlış bilgi verirdi. Katmanlı
+        hâli kaydıraçlı çizelgede, `/evrim`'de duruyor.
+      */}
+      <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2">
+        {families.map((family) => (
+          <span key={family.id} className="flex items-center gap-2 text-xs text-white/35">
+            <span
+              aria-hidden="true"
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: family.color }}
+            />
+            {family.name.tr}
+          </span>
+        ))}
+      </div>
 
       <p className="mt-10 max-w-lg text-xs leading-relaxed text-white/25">
         Bu çizelge bir tahmindir, ölçüm değil. Notaların uçuculuğundan modellenmiştir;
