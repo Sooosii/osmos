@@ -1,0 +1,279 @@
+'use client';
+
+import { useEffect, useMemo, useRef } from 'react';
+import { getNote } from '@/data/notes';
+import { FAMILY_ORDER, dominantFamily, getFamily } from '@/data/families';
+import { intensityAt } from '@/lib/evolution';
+import {
+  cycleProgress,
+  formatDuration,
+  minutesAt,
+  morphAt,
+  phaseLabel,
+} from '@/lib/evolution-loop';
+import type { Perfume, ScentFamily, Volatility } from '@/data/types';
+
+/**
+ * Evrim imzası — parfümün 12 saatlik ömrü, kendiliğinden ve hiç durmadan.
+ *
+ * Kaydıraç yok, kaydırma yok, tetikleyici yok. Turda iki şey birden döngüde:
+ * **biçim** (eğriler ↔ çizelge çubukları) ve **zaman** (0 → 12 saat → 0).
+ * Bu bir süs değil: eğri dümdüz olup çubuğa oturduğunda çubuğun uzunluğu o
+ * notanın o andaki yüzdesi. Aynı sayılar, iki biçim — "aa, o aslında veriymiş".
+ *
+ * Neden tuval değil SVG: nota adları ve yüzdeler gerçek `<text>` kalmalı.
+ * `ScentSpaceCanvas.tsx:216` aynı kararı bir kez zaten vermiş.
+ *
+ * Neden kare başına `setState` yok: `EvolutionChart.tsx:26`'nın ölçerek koyduğu
+ * kural. Burada React yalnızca iskeleti bir kez kuruyor; her kare `d`, `opacity`
+ * ve metin içeriği ref üzerinden DOM'a yazılıyor.
+ *
+ * Erişilebilirlik notu: `prefers-reduced-motion` ayrımı **bilerek yok** —
+ * kullanıcı kararı. Bilinçli bir ödün; hareketin büyük alanlı bir kayma değil
+ * çubuk uzunluğu değişimi olması riski sınırlıyor.
+ */
+
+/** SVG'nin iç koordinat genişliği; ekranda `width:100%` ile esniyor. */
+const VIEW_WIDTH = 300;
+const PAD = 8;
+/** Nota adı sütunu. */
+const LABEL_WIDTH = 56;
+/** Yüzde sütunu. */
+const VALUE_WIDTH = 26;
+/** İlk satırın üstündeki boşluk. */
+const TOP = 14;
+/** Çizelge hâlindeki satır aralığı. */
+const ROW_GAP = 22;
+/** Her eğriyi kaç parçaya bölerek çiziyoruz. */
+const SAMPLES = 80;
+/** Etiketler bu morph değerinden sonra belirmeye başlıyor. */
+const LABEL_FADE_START = 0.15;
+
+interface Geometry {
+  readonly viewHeight: number;
+  readonly x0: number;
+  readonly span: number;
+  readonly baseY: number;
+  readonly curveHeight: number;
+}
+
+interface SignatureRow {
+  readonly noteId: string;
+  readonly label: string;
+  readonly family: ScentFamily;
+  readonly volatility: Volatility;
+  readonly weight: number;
+}
+
+function rowY(index: number): number {
+  return TOP + ROW_GAP * index;
+}
+
+function geometryFor(rowCount: number): Geometry {
+  const viewHeight = TOP + ROW_GAP * Math.max(rowCount - 1, 0) + PAD;
+  const x0 = PAD + LABEL_WIDTH;
+  return {
+    viewHeight,
+    x0,
+    span: VIEW_WIDTH - PAD - VALUE_WIDTH - x0,
+    baseY: viewHeight - PAD,
+    curveHeight: viewHeight - PAD - TOP,
+  };
+}
+
+/**
+ * Bir notanın o karedeki yolu.
+ *
+ * `morph = 0` eğri, `morph = 1` çubuk, arası doğrusal karışım. Nokta sayısı iki
+ * hâlde de aynı olduğu için karışım nokta nokta yapılabiliyor — SVG'nin morph
+ * için ayrı bir mekanizmasına ihtiyaç yok.
+ */
+function pathFor(
+  row: SignatureRow,
+  index: number,
+  morph: number,
+  level: number,
+  geometry: Geometry,
+): string {
+  const y1 = rowY(index);
+  let d = '';
+
+  for (let j = 0; j <= SAMPLES; j += 1) {
+    const u = j / SAMPLES;
+    const curveX = geometry.x0 + u * geometry.span;
+    const curveY =
+      geometry.baseY -
+      intensityAt(row.volatility, minutesAt(u)) * row.weight * geometry.curveHeight;
+    const barX = geometry.x0 + u * level * geometry.span;
+
+    const x = curveX + (barX - curveX) * morph;
+    const y = curveY + (y1 - curveY) * morph;
+    d += `${j === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)} `;
+  }
+
+  return d;
+}
+
+/** Etiket saydamlığı — biçim çizelgeye yaklaştıkça beliriyor. */
+function labelOpacity(morph: number, max: number): string {
+  if (morph <= LABEL_FADE_START) return '0';
+  return (((morph - LABEL_FADE_START) / (1 - LABEL_FADE_START)) * max).toFixed(2);
+}
+
+interface EvolutionSignatureProps {
+  readonly perfume: Perfume;
+}
+
+export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
+  const pathRefs = useRef<(SVGPathElement | null)[]>([]);
+  const nameRefs = useRef<(SVGTextElement | null)[]>([]);
+  const valueRefs = useRef<(SVGTextElement | null)[]>([]);
+  const phaseRef = useRef<HTMLSpanElement>(null);
+  const durationRef = useRef<HTMLSpanElement>(null);
+
+  /** Sabit satır bilgisi — parfüm değişmedikçe yeniden hesaplanmıyor. */
+  const rows = useMemo<readonly SignatureRow[]>(
+    () =>
+      perfume.notes.map((entry) => {
+        const note = getNote(entry.noteId);
+        // Ham vektör: `dominantFamily` sırayı `FAMILY_ORDER`'dan bekliyor.
+        // Yeni bir argmax yazmıyoruz ki eşitlikler uzaydakiyle aynı çözülsün.
+        const vector = FAMILY_ORDER.map((family) => note.families[family] ?? 0);
+        return {
+          noteId: entry.noteId,
+          label: note.name.tr,
+          family: dominantFamily(vector),
+          volatility: note.volatility,
+          weight: entry.weight,
+        };
+      }),
+    [perfume],
+  );
+
+  const geometry = useMemo(() => geometryFor(rows.length), [rows.length]);
+
+  /**
+   * Sunucuda çizilen ilk kare — `progress = 0`, yani saf eğri hâli.
+   *
+   * Boş `d` ile başlansaydı JavaScript inene kadar (ve JS hiç çalışmazsa
+   * tamamen) boş bir kutu görünürdü. Bu hâliyle imza, animasyon başlamadan
+   * önce de doğru şeyi gösteriyor.
+   */
+  const initialPaths = useMemo(
+    () =>
+      rows.map((row, index) =>
+        pathFor(row, index, 0, intensityAt(row.volatility, 0) * row.weight, geometry),
+      ),
+    [rows, geometry],
+  );
+
+  useEffect(() => {
+    const start = performance.now();
+    let frame = requestAnimationFrame(function step(now: number) {
+      const progress = cycleProgress(now - start);
+      const morph = morphAt(progress);
+      const minutes = minutesAt(progress);
+
+      rows.forEach((row, index) => {
+        const level = intensityAt(row.volatility, minutes) * row.weight;
+
+        const path = pathRefs.current[index];
+        if (path) {
+          path.setAttribute('d', pathFor(row, index, morph, level, geometry));
+          path.setAttribute('stroke-width', (1.8 + morph * 1.4).toFixed(2));
+        }
+
+        const name = nameRefs.current[index];
+        if (name) name.setAttribute('opacity', labelOpacity(morph, 0.55));
+
+        const value = valueRefs.current[index];
+        if (value) {
+          value.setAttribute('opacity', labelOpacity(morph, 0.4));
+          value.textContent = `${Math.round(level * 100)}%`;
+        }
+      });
+
+      if (phaseRef.current) phaseRef.current.textContent = phaseLabel(minutes);
+      if (durationRef.current) durationRef.current.textContent = formatDuration(minutes);
+
+      frame = requestAnimationFrame(step);
+    });
+
+    // Sökülürken kareyi iptal et. `ScentSpaceCanvas.tsx:634` aynı tuzağı
+    // anlatıyor: iptal edilmeyen kare, bileşen geri geldiğinde "zaten kare
+    // bekliyor" sanılıp döngüyü kilitliyor.
+    return () => cancelAnimationFrame(frame);
+  }, [rows, geometry]);
+
+  return (
+    <div className="w-full">
+      {/* Saat yazısı — hareketin neyi anlattığını söyleyen tek satır. */}
+      <div className="mb-6 flex items-baseline gap-2">
+        <span ref={phaseRef} className="text-sm tracking-wide text-white/80">
+          Açılış
+        </span>
+        <span className="text-white/25">·</span>
+        <span ref={durationRef} className="text-sm tabular-nums text-white/50">
+          ilk saniyeler
+        </span>
+      </div>
+
+      <svg
+        viewBox={`0 0 ${VIEW_WIDTH} ${geometry.viewHeight}`}
+        className="block w-full"
+        role="img"
+        aria-label={`${perfume.name} evrim imzası: ${rows
+          .map((row) => row.label)
+          .join(', ')} notalarının 12 saat boyunca yükselip düşüşü.`}
+      >
+        {rows.map((row, index) => (
+          <g key={row.noteId}>
+            <path
+              ref={(element) => {
+                pathRefs.current[index] = element;
+              }}
+              d={initialPaths[index]}
+              fill="none"
+              stroke={getFamily(row.family).color}
+              strokeWidth={1.8}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <text
+              ref={(element) => {
+                nameRefs.current[index] = element;
+              }}
+              x={PAD}
+              y={rowY(index) + 3}
+              opacity="0"
+              fill="#ffffff"
+              fontSize="8.5"
+            >
+              {row.label}
+            </text>
+            <text
+              ref={(element) => {
+                valueRefs.current[index] = element;
+              }}
+              x={VIEW_WIDTH - PAD}
+              y={rowY(index) + 3}
+              opacity="0"
+              textAnchor="end"
+              fill="#ffffff"
+              fontSize="8.5"
+              /* Sürekli değişen yüzdeyi ekran okuyucuya canlı okutmak gürültü olurdu. */
+              aria-hidden="true"
+            >
+              0%
+            </text>
+          </g>
+        ))}
+      </svg>
+
+      <p className="mt-10 max-w-lg text-xs leading-relaxed text-white/25">
+        Bu çizelge bir tahmindir, ölçüm değil. Notaların uçuculuğundan modellenmiştir;
+        gerçek gelişim sıcaklığa, tene ve konsantrasyona göre değişir.
+      </p>
+    </div>
+  );
+}

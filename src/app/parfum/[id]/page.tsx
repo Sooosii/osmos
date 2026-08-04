@@ -3,18 +3,23 @@ import { notFound } from 'next/navigation';
 import { PERFUMES } from '@/data/perfumes';
 import { dominantFamily, getFamily } from '@/data/families';
 import { familyVector } from '@/lib/similarity';
-import { EvolutionChart } from '@/components/EvolutionChart';
+import { EvolutionSignature } from '@/components/EvolutionSignature';
 
 /**
- * Parfüm sayfası — yol haritasının ① ve ③ bölümleri.
+ * Parfüm sayfası — yol haritasının ①, ② ve ③ bölümleri.
  *
  *   ①  isim + marka + küratör cümlesi        ← yalnızca duygu
  *          ↓
- *   ③  evrim çizelgesi                        ← altındaki veri
+ *   ②③ evrim imzası                          ← altındaki veri, kendi kendine dönen
  *
- * ② (imzanın grafiğe dönüşmesi — morph) Aşama 2'ye ait. ④ (künye + uzaydaki
- * komşular) kullanıcı kararıyla ertelendi: 44 parfümün 23'ünde parfümör,
- * 18'inde yıl bilgisi yok; yarısı boş bir künye bölümü sayfayı eksik gösterirdi.
+ * ② ile ③ tek bir şeyde birleşti: imza, çizelgenin başka bir hâli. Kaydıraç yok —
+ * biçim ve zaman 12 saniyelik bir turda hiç durmadan dönüyor (`EvolutionSignature`).
+ * Kaydıraçlı çizelge `/evrim` doğrulama ekranında duruyor; orası iki parfümü aynı
+ * dakikada karşılaştırmak için var.
+ *
+ * ④ (künye + uzaydaki komşular) kullanıcı kararıyla ertelendi: 44 parfümün 23'ünde
+ * parfümör, 18'inde yıl bilgisi yok; yarısı boş bir künye bölümü sayfayı eksik
+ * gösterirdi.
  *
  * Renk uzaydaki noktanın renginden **türetilmiyor, aynı zincirden geliyor**:
  * `familyVector → dominantFamily → getFamily().color`. İkinci bir kaynak
@@ -114,7 +119,7 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
         {/* ③ — "aa, o aslında veriymiş" */}
         <section className="pt-14">
           <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">EVRİM</h2>
-          <EvolutionChart perfume={perfume} />
+          <EvolutionSignature perfume={perfume} />
         </section>
 
         <div className="mt-24">
