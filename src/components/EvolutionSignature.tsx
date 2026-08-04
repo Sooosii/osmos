@@ -41,10 +41,10 @@ const PAD = 8;
  *
  * Veri setindeki en uzun nota adına göre ayarlı: "Çarkıfelek meyvesi" (18 karakter).
  * Etiket kırpılmıyor, `textLength` ile sıkıştırılmıyor — bu yüzden sütun onu
- * taşımadan barındıracak kadar geniş olmak zorunda. 56 değeriyle bu ad (ve ondan
- * kısa sekiz başka ad) çubuğun üzerine biniyordu; 84'e çıkarmanın bedeli çubuk
- * uzunluğunun (span) ~14% kısalması — kabul edilen ödün. Küçültmeden önce veri
- * setindeki en uzun adları kontrol et.
+ * taşımadan barındıracak kadar geniş olmak zorunda. 56 değeriyle bu ad (ve veri
+ * setinde 13+ karakterli dokuz ad daha) çubuğun üzerine biniyordu; 84'e çıkarmanın
+ * bedeli çubuk uzunluğunun (span) ~14% kısalması — kabul edilen ödün. Küçültmeden
+ * önce veri setindeki en uzun adları kontrol et.
  */
 const LABEL_WIDTH = 84;
 /** Yüzde sütunu. */
