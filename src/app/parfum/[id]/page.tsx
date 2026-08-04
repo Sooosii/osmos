@@ -4,7 +4,7 @@ import { PERFUMES } from '@/data/perfumes';
 import { dominantFamily, getFamily } from '@/data/families';
 import { familyVector } from '@/lib/similarity';
 import { EvolutionSignature } from '@/components/EvolutionSignature';
-import { NeighborMap } from '@/components/NeighborMap';
+import { Neighbors } from '@/components/Neighbors';
 
 /**
  * Parfüm sayfası — yol haritasının ①, ②, ③ ve ④'ün komşular yarısı.
@@ -20,11 +20,14 @@ import { NeighborMap } from '@/components/NeighborMap';
  * Kaydıraçlı çizelge `/evrim` doğrulama ekranında duruyor; orası iki parfümü aynı
  * dakikada karşılaştırmak için var.
  *
- * ④ ikiye ayrıldı. Komşular geldi: konumlar uzaydaki gerçek yerleri, adı yazılanlar
- * en benzeyenler. İkisi aynı küme değil (ölçüldü: ortalama örtüşme 3.16/5) ve bu
- * bilerek gizlenmiyor — uzağa düşen komşu, projeksiyonun üç ölçüyü ikiye
- * indirdiğini gösteriyor. **Künye** hâlâ bekliyor: 44 parfümün 23'ünde parfümör,
- * 18'inde yıl bilgisi yok; veri elle tamamlandıktan sonra tasarlanacak.
+ * ④ ikiye ayrıldı. Komşular geldi: hiç durmadan dönen üç boyutlu bir takımyıldız.
+ * Yarıçap benzerlik, yükseklik `depth` — uzayın iki boyuta sığdıramadığı üçüncü
+ * bileşen. Konumlar uzaydaki gerçek yerler DEĞİL; "en benzeyen en yakında dursun"
+ * garantisiyle gerçek konumlar aynı anda mümkün olmuyordu (ölçüldü: örtüşme
+ * 3.16/5) ve kullanıcı garantiyi seçti. Karar geçmişi `lib/neighbor-orbit.ts`te.
+ *
+ * **Künye** hâlâ bekliyor: 44 parfümün 23'ünde parfümör, 18'inde yıl bilgisi yok;
+ * veri elle tamamlandıktan sonra tasarlanacak.
  *
  * Renk uzaydaki noktanın renginden **türetilmiyor, aynı zincirden geliyor**:
  * `familyVector → dominantFamily → getFamily().color`. İkinci bir kaynak
@@ -130,7 +133,7 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
         {/* ④ — "peki buna benzeyen ne var?" */}
         <section className="pt-20">
           <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">KOMŞULAR</h2>
-          <NeighborMap perfume={perfume} />
+          <Neighbors perfume={perfume} />
         </section>
 
         <div className="mt-24">
