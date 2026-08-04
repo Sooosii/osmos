@@ -73,6 +73,61 @@
   }
 }
 
+/*
+ * Komşuların dağılması.
+ *
+ * Hepsi merkezde toplu başlıyor, sonra ayrışıp yerlerini alıyor — en benzeyen
+ * önce, sırayla. Amaç süs değil anlatım: çember bir anda hazır gelseydi "bunlar
+ * onun komşusu" bağı kurulmazdı, dağılma o bağı gözün önünde kuruyor.
+ *
+ * Öteleme her nokta için ayrı: `--dx`/`--dy` satır içi stille veriliyor. SVG
+ * içinde CSS `transform`unun px birimi kullanıcı birimine denk geliyor, yani
+ * viewBox koordinatlarıyla aynı ölçekte.
+ *
+ * `backwards` şart: gecikmeli başlayan noktalar beklerken de başlangıç hâlinde
+ * (merkezde ve saydam) durmalı, yoksa önce yerinde görünüp sonra merkeze sıçrarlar.
+ */
+@keyframes osmos-komsu-dagil {
+  from {
+    transform: translate(var(--dx), var(--dy));
+    opacity: 0;
+  }
+  to {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+
+/*
+ * Animasyon YALNIZCA bölüm görüş alanına girdiğinde başlıyor (`RevealOnView`).
+ * Sayfa yüklenir yüklenmez başlasaydı, bölüm ekranın altında olduğu için kullanıcı
+ * oraya kaydırdığında dağılma çoktan bitmiş olurdu — efekt var ama görünmez.
+ *
+ * Varsayılan hâl **görünür**: kural yalnızca `data-shown="true"` olduğunda animasyon
+ * EKLİYOR, gizleme yapmıyor. JavaScript hiç inmezse komşular yerlerinde durur;
+ * efekt kaybolur, içerik kaybolmaz.
+ */
+[data-shown='true'] .osmos-komsu {
+  animation: osmos-komsu-dagil var(--sure) cubic-bezier(0.16, 1, 0.3, 1) var(--gecikme)
+    backwards;
+}
+
+/*
+ * Hareket azaltılmış modda komşular yerlerinde beliriyor: bilgi aynı, yolculuk yok.
+ * İmzadaki `prefers-reduced-motion` ödünü buraya taşınmıyor — orada hareketin
+ * kendisi anlatının parçasıydı, burada yalnızca bir giriş.
+ */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes osmos-komsu-dagil {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

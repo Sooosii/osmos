@@ -4,22 +4,27 @@ import { PERFUMES } from '@/data/perfumes';
 import { dominantFamily, getFamily } from '@/data/families';
 import { familyVector } from '@/lib/similarity';
 import { EvolutionSignature } from '@/components/EvolutionSignature';
+import { NeighborMap } from '@/components/NeighborMap';
 
 /**
- * Parfüm sayfası — yol haritasının ①, ② ve ③ bölümleri.
+ * Parfüm sayfası — yol haritasının ①, ②, ③ ve ④'ün komşular yarısı.
  *
  *   ①  isim + marka + küratör cümlesi        ← yalnızca duygu
  *          ↓
  *   ②③ evrim imzası                          ← altındaki veri, kendi kendine dönen
+ *          ↓
+ *   ④  uzaydaki komşular                     ← "peki buna benzeyen ne var?"
  *
  * ② ile ③ tek bir şeyde birleşti: imza, çizelgenin başka bir hâli. Kaydıraç yok —
  * biçim ve zaman 12 saniyelik bir turda hiç durmadan dönüyor (`EvolutionSignature`).
  * Kaydıraçlı çizelge `/evrim` doğrulama ekranında duruyor; orası iki parfümü aynı
  * dakikada karşılaştırmak için var.
  *
- * ④ (künye + uzaydaki komşular) kullanıcı kararıyla ertelendi: 44 parfümün 23'ünde
- * parfümör, 18'inde yıl bilgisi yok; yarısı boş bir künye bölümü sayfayı eksik
- * gösterirdi.
+ * ④ ikiye ayrıldı. Komşular geldi: konumlar uzaydaki gerçek yerleri, adı yazılanlar
+ * en benzeyenler. İkisi aynı küme değil (ölçüldü: ortalama örtüşme 3.16/5) ve bu
+ * bilerek gizlenmiyor — uzağa düşen komşu, projeksiyonun üç ölçüyü ikiye
+ * indirdiğini gösteriyor. **Künye** hâlâ bekliyor: 44 parfümün 23'ünde parfümör,
+ * 18'inde yıl bilgisi yok; veri elle tamamlandıktan sonra tasarlanacak.
  *
  * Renk uzaydaki noktanın renginden **türetilmiyor, aynı zincirden geliyor**:
  * `familyVector → dominantFamily → getFamily().color`. İkinci bir kaynak
@@ -120,6 +125,12 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
         <section className="pt-14">
           <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">EVRİM</h2>
           <EvolutionSignature perfume={perfume} />
+        </section>
+
+        {/* ④ — "peki buna benzeyen ne var?" */}
+        <section className="pt-20">
+          <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">KOMŞULAR</h2>
+          <NeighborMap perfume={perfume} />
         </section>
 
         <div className="mt-24">
