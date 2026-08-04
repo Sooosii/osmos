@@ -23,6 +23,7 @@ export const CURATED_D: readonly Perfume[] = [
     name: 'Oud Maracujá',
     brand: 'Maison Crivelli',
     year: 2021,
+    perfumer: 'Jordi Fernández',
     curated: true,
     line: {
       en: 'Passion fruit and a darkened wood beneath it — not the sweet side.',
@@ -47,6 +48,8 @@ export const CURATED_D: readonly Perfume[] = [
     id: 'aaron-terence-hughes-oud',
     name: 'Oud',
     brand: 'Aaron Terence Hughes',
+    year: 2021,
+    perfumer: 'Aaron Terence Hughes',
     curated: true,
     line: {
       en: 'The wood itself, with nothing dressed on top of it.',
@@ -68,9 +71,13 @@ export const CURATED_D: readonly Perfume[] = [
     // ve listenin en kalabalık kompozisyonlarından biri — ama oud gövde değil,
     // iz. Ağırlık meyvede ve beyaz miskte; ağır reçineler bilerek yok, onlar
     // kokuyu "temiz yazlık" olmaktan çıkarırdı.
+    // `perfumer` YOK ve bu eksik veri değil: marka burnu bilerek öne çıkarmıyor,
+    // anlatısını kavram üzerine kuruyor. Vanille Abricot ile birlikte 44'ün
+    // açıklanmamış iki adı; tahminle doldurulmasın.
     id: 'spirit-of-dubai-ajyal',
     name: 'Ajyal',
     brand: 'Spirit of Dubai',
+    year: 2023,
     curated: true,
     line: {
       en: 'So much fruit that the wood underneath forgets to speak.',
@@ -97,6 +104,8 @@ export const CURATED_D: readonly Perfume[] = [
     id: 'jovoy-les-jeux-sont-faits',
     name: 'Les Jeux sont Faits',
     brand: 'Jovoy',
+    year: 2012,
+    perfumer: 'Amélie Bourgeois',
     curated: true,
     line: {
       en: 'A cigar left on the table, an unfinished glass beside it.',
@@ -123,6 +132,7 @@ export const CURATED_D: readonly Perfume[] = [
     name: 'Myrrh & Tonka',
     brand: 'Jo Malone',
     year: 2016,
+    perfumer: 'Mathilde Bijaoui',
     curated: true,
     line: {
       en: 'Incense softened — not the church, the memory of one.',
@@ -143,7 +153,8 @@ export const CURATED_D: readonly Perfume[] = [
     id: 'atelier-des-ors-lune-feline',
     name: 'Lune Féline',
     brand: 'Atelier des Ors',
-    year: 2019,
+    year: 2015,
+    perfumer: 'Marie Salamagne',
     curated: true,
     line: {
       en: 'An animal approaching in the dark, and it is not frightening.',

@@ -169,6 +169,7 @@ export const CURATED_A: readonly Perfume[] = [
     id: 'orto-parisi-viride',
     name: 'Viride',
     brand: 'Orto Parisi',
+    year: 2014,
     perfumer: 'Alessandro Gualtieri',
     curated: true,
     line: {
@@ -215,6 +216,8 @@ export const CURATED_A: readonly Perfume[] = [
     id: 'argos-triumph-of-bacchus',
     name: 'Triumph of Bacchus',
     brand: 'Argos',
+    year: 2019,
+    perfumer: 'Christian Petrovich',
     curated: true,
     line: {
       en: 'Grapes left in the cellar: sweet, heavy, faintly holy.',
