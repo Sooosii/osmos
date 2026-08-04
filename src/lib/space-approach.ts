@@ -48,13 +48,12 @@ export const APPROACH_DISTANCE = 500;
  * `'mark'` — sessiz bir im; yalnızca "kaydırılabilir" diyor, başka hiçbir şey
  * söylemiyor. `'name'` — yalnızca OSMOS, harfleri aralıklı.
  *
- * Hiç yazı koymamak da denenebilirdi ama korkulan boşluk "neredeyim" sorusu
- * değil, "ne yapacağım" sorusu — ve ona bir isim de cevap vermiyor. Bu yüzden
- * varsayılan im: kimliği değil, hareketi söylüyor.
- *
- * Ekranda görülüp karara bağlanacak; o yüzden tek sabit.
+ * İkisi de ekranda görüldü, isim seçildi: uzaktaki toz bulutunun altında duran
+ * sönük OSMOS sahneyi bir yere ait kılıyor; çıplak im ise ekranı "bir şey bekliyor"
+ * hissinde bırakıyordu. İsim varışta ikinci kez, bu kez yerine yerleşerek geliyor —
+ * tekrar bir kayıp değil, kavuşma.
  */
-export const APPROACH_CUE: 'mark' | 'name' = 'mark';
+export const APPROACH_CUE: 'mark' | 'name' = 'name';
 
 /**
  * Sahne her ziyarette mi, oturumda bir kez mi?
@@ -62,8 +61,9 @@ export const APPROACH_CUE: 'mark' | 'name' = 'mark';
  * `false` — her seferinde: kapı hep kapı, tutarlı ve törensel.
  * `true`  — bir kez: varış hissi bir kere yaşanır, günlük kullanımda duvar olmaz.
  *
- * Bu da ekranda görülüp karara bağlanacak. Hangi tarafın doğru olduğu sahneyi
- * ikinci, üçüncü kez görmeden bilinemez.
+ * Sahne ikinci, üçüncü kez görüldükten sonra `false`'ta karar kılındı: eşik beş
+ * tekerlek hareketi, geçmesi ucuz; her ziyarette geçilmesi uzayı kazanılmış
+ * tutuyor. Atlama yolları (`?mark=`, `prefers-reduced-motion`) zaten duruyor.
  */
 export const APPROACH_ONCE = false;
 
