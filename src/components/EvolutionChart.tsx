@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getNote } from '@/data/notes';
 import { evolutionAt } from '@/lib/evolution';
 import {
+  SLIDER_MAX_MINUTES,
   SLIDER_STEPS,
   formatDuration,
   minutesAt,
@@ -122,7 +123,12 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
     [perfume],
   );
 
-  const minutes = useMemo(() => minutesAt(step / SLIDER_STEPS), [step]);
+  // 12 saat, imzanın 8 saatiyle bilerek farklı: burası modeli sınayan ekran, yarı
+  // ömür hatası imzadan attığımız o düz kuyrukta görünür.
+  const minutes = useMemo(
+    () => minutesAt(step / SLIDER_STEPS, SLIDER_MAX_MINUTES),
+    [step],
+  );
   const bars = useMemo(() => evolutionAt(perfume.notes, minutes), [perfume, minutes]);
 
   return (

@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import {
   CYCLE_MS,
-  MAX_MINUTES,
+  SIGNATURE_MAX_MINUTES,
+  SLIDER_MAX_MINUTES,
   cycleProgress,
   formatDuration,
   minutesAt,
@@ -39,26 +40,53 @@ describe('cycleProgress', () => {
 });
 
 describe('minutesAt', () => {
-  test('uçlar tam oturuyor', () => {
-    expect(minutesAt(0)).toBe(0);
-    expect(minutesAt(1)).toBeCloseTo(MAX_MINUTES, 6);
+  /** İki tüketici, iki aralık — sınamaların çoğu ikisinde de geçmek zorunda. */
+  const SPANS = [SIGNATURE_MAX_MINUTES, SLIDER_MAX_MINUTES];
+
+  test('uçlar tam oturuyor — her iki aralıkta da', () => {
+    for (const span of SPANS) {
+      expect(minutesAt(0, span)).toBe(0);
+      expect(minutesAt(1, span)).toBeCloseTo(span, 6);
+    }
+  });
+
+  test('aralık gerçekten parametre — imza turu kaydıraçtan daha az dakika kapsıyor', () => {
+    // İki sabitin ayrı durmasının tek sebebi bu. Biri diğerine sabitlenirse ya da
+    // fonksiyon bir varsayılana düşerse iki eğri üst üste biner ve burada yakalanır.
+    for (let p = 0.1; p < 1; p += 0.1) {
+      expect(minutesAt(p, SIGNATURE_MAX_MINUTES)).toBeLessThan(
+        minutesAt(p, SLIDER_MAX_MINUTES),
+      );
+    }
   });
 
   test('tek yönlü artıyor — zaman hiç geri gitmiyor', () => {
-    let previous = minutesAt(0);
-    for (let p = 0.05; p <= 1; p += 0.05) {
-      const current = minutesAt(p);
-      expect(current).toBeGreaterThan(previous);
-      previous = current;
+    for (const span of SPANS) {
+      let previous = minutesAt(0, span);
+      for (let p = 0.05; p <= 1; p += 0.05) {
+        const current = minutesAt(p, span);
+        expect(current).toBeGreaterThan(previous);
+        previous = current;
+      }
     }
   });
 
   test('turun yarısından fazlası ilk saate ayrılıyor', () => {
     // "12 saniye ama notaları takip etmek kolay olsun" isteğini karşılayan şey bu:
     // eşleme logaritmik, kokunun ilginç kısmı turun büyük bölümünü kaplıyor.
-    expect(minutesAt(0.5)).toBeLessThan(60);
-    expect(minutesAt(0.6)).toBeLessThan(60);
-    expect(minutesAt(0.7)).toBeGreaterThan(60);
+    for (const span of SPANS) {
+      expect(minutesAt(0.5, span)).toBeLessThan(60);
+      expect(minutesAt(0.6, span)).toBeLessThan(60);
+      expect(minutesAt(0.7, span)).toBeGreaterThan(60);
+    }
+  });
+
+  test('imza turunun ortası — çubukların okunduğu an — 21 dakikayı gösteriyor', () => {
+    // Turun ortası `morphAt`in tepesi, yani biçimin çizelgeye oturduğu an. Ekranda
+    // o sırada hangi saatin yazdığı doğrudan kullanıcı deneyimi: 12 saatlik turda
+    // 26 dakikaydı, 8 saatlik turda 21. Sayı değil, görünen metin sınanıyor.
+    expect(formatDuration(minutesAt(0.5, SIGNATURE_MAX_MINUTES))).toBe('21 dakika');
+    expect(formatDuration(minutesAt(0.5, SLIDER_MAX_MINUTES))).toBe('26 dakika');
   });
 });
 

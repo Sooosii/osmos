@@ -18,8 +18,25 @@
 /** Tam bir turun süresi. Doğrudan kullanıcı kararı. */
 export const CYCLE_MS = 12_000;
 
-/** Turun kapsadığı koku ömrü — 12 saat. */
-export const MAX_MINUTES = 720;
+/**
+ * İmza turunun kapsadığı koku ömrü — 8 saat.
+ *
+ * Eskiden 12 saatti ve sahip canlı sitede şunu gördü: "8'den 12'ye zaten sabit
+ * kalıyor gibi". Haklı — `intensityAt` modeli 8. saatten sonra düzleşiyor, turun
+ * son bölümü kıpırdamayan çubukları seyretmekle geçiyordu. Asıl kazanç kuyrukta:
+ * etiketlerin söndüğü an 7 sa 52 dk'dan 5 sa 23 dk'ya inince okunamayan ölü kuyruk
+ * 4 sa 08 dk'dan 2 sa 37 dk'ya düştü.
+ */
+export const SIGNATURE_MAX_MINUTES = 480;
+
+/**
+ * `/evrim` kaydıracının kapsadığı koku ömrü — 12 saat.
+ *
+ * İmzayla birlikte 8'e **inmedi** ve inmemeli: o ekranın işi eğri modelini sınamak
+ * (`EvolutionTimeline.tsx:8`), yarı ömür hatası ise tam da imzadan attığımız o düz
+ * kuyrukta görünür. İki ekranın iki farklı işi var, o yüzden iki sabit.
+ */
+export const SLIDER_MAX_MINUTES = 720;
 
 /** Kaydıracın adım sayısı; `EvolutionChart` ham adımı buna bölüp ilerleme buluyor. */
 export const SLIDER_STEPS = 1000;
@@ -38,12 +55,19 @@ export function cycleProgress(elapsedMs: number): number {
 /**
  * İlerlemeden dakika — logaritmik.
  *
- * Uçlar tam oturuyor: `minutesAt(0) === 0`, `minutesAt(1) === MAX_MINUTES`.
- * Ortası oturmuyor ve oturmamalı: turun yarısı ilk ~26 dakikayı, %62'si ilk saati
- * kaplıyor. Kalan %38'de 11 saat akıp gidiyor — o bölümde zaten pek bir şey olmuyor.
+ * Aralık **varsayılansız** bir parametre: çağıran hangi zaman ölçeğinde olduğunu
+ * yazmak zorunda. İmza 480, kaydıraç 720 kullanıyor ve bir varsayılan konsaydı biri
+ * diğerine sessizce kayardı — ölçek hatası ekranda değil, aylar sonra fark edilir.
+ *
+ * Uçlar oturuyor: `minutesAt(0, span) === 0`, `minutesAt(1, span)` kayan nokta
+ * payıyla `span` (sınama bu yüzden `toBeCloseTo`).
+ *
+ * Ortası oturmuyor ve oturmamalı: 8 saatlik turda yarısı ilk ~21 dakikayı, %66.6'sı
+ * ilk saati kaplıyor. Kokunun bütün ilginç kısmı orada; kalan bölümde zaten pek bir
+ * şey olmuyor. Doğrusal olsaydı o ilk yarım saat turun ilk yarım saniyesinde biterdi.
  */
-export function minutesAt(progress: number): number {
-  return Math.expm1(progress * Math.log1p(MAX_MINUTES));
+export function minutesAt(progress: number, spanMinutes: number): number {
+  return Math.expm1(progress * Math.log1p(spanMinutes));
 }
 
 /**
@@ -56,15 +80,20 @@ export function minutesAt(progress: number): number {
  *
  * Neden iki değil bir: ilk sürümde katsayı `4π`'ydi — turda iki gidiş geliş.
  * Sorun şuydu: **biçim** turda iki kez dönerken **zaman** (`minutesAt`) yalnızca
- * bir kez 0 → 12 saate gidiyordu; ikisi senkron değildi. Çubuk anları p = 0.25
- * ve p = 0.75'e denk geliyordu — yani saat 4. dakikayı ve 2 saat 18. dakikayı
- * gösterirken. Saatin 12. saati ise p = 1'e, yani eğri anına denk geliyordu:
- * etiketlerin gizlendiği tam nokta. Sahibi canlı örnekte üç seçeneği yan yana
- * görüp bunu seçti: **tek** gidiş geliş, çubuk anı turun ortasında (~26 dakika),
- * 12. saat yine eğri anına denk geliyor ama etiketler artık turun ~%87'sinde
- * (kabaca 8. saate kadar) okunur kalıyor — kabul edilen ödün. "12. saati çubuk
- * hâlinde de görelim" ayrı, ertelenmiş bir iş; bunu çözmeye çalışmak için
- * katsayıyı tekrar `4π`'ye çevirmeyin.
+ * bir kez 0 → tur sonuna gidiyordu; ikisi senkron değildi. Aşağıdaki dakikalar o
+ * dönemin okumaları — aralık henüz 720 (12 saat) idi, sayılar ona göre: çubuk
+ * anları p = 0.25 ve p = 0.75'e denk geliyordu, yani saat 4. dakikayı ve 2 saat
+ * 18. dakikayı gösterirken. Saatin 12. saati ise p = 1'e, yani eğri anına denk
+ * geliyordu: etiketlerin gizlendiği tam nokta. Sahibi canlı örnekte üç seçeneği
+ * yan yana görüp bunu seçti: **tek** gidiş geliş, çubuk anı turun ortasında.
+ *
+ * Bugünkü aralıkla (`SIGNATURE_MAX_MINUTES` = 480) o an ~21 dakikaya denk geliyor.
+ * Turun son saati hâlâ eğri anında kalıyor — kabul edilen ödün — ama etiketler
+ * turun ~%87'sinde, kabaca 5.5. saate kadar okunur. O yüzde `morphAt`in şeklinden
+ * geliyor, aralıktan değil: span değişse de %87 değişmez.
+ *
+ * "Son saati çubuk hâlinde de görelim" ayrı, ertelenmiş bir iş; bunu çözmeye
+ * çalışmak için katsayıyı tekrar `4π`'ye çevirmeyin.
  */
 export function morphAt(progress: number): number {
   return 0.5 - 0.5 * Math.cos(progress * Math.PI * 2);

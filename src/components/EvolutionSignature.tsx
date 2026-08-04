@@ -5,6 +5,7 @@ import { getNote } from '@/data/notes';
 import { FAMILY_ORDER, dominantFamily, getFamily } from '@/data/families';
 import { intensityAt } from '@/lib/evolution';
 import {
+  SIGNATURE_MAX_MINUTES,
   cycleProgress,
   formatDuration,
   minutesAt,
@@ -14,10 +15,10 @@ import {
 import type { Perfume, ScentFamily, Volatility } from '@/data/types';
 
 /**
- * Evrim imzası — parfümün 12 saatlik ömrü, kendiliğinden ve hiç durmadan.
+ * Evrim imzası — parfümün 8 saatlik ömrü, kendiliğinden ve hiç durmadan.
  *
  * Kaydıraç yok, kaydırma yok, tetikleyici yok. Turda iki şey birden döngüde:
- * **biçim** (eğriler ↔ çizelge çubukları) ve **zaman** (0 → 12 saat → 0).
+ * **biçim** (eğriler ↔ çizelge çubukları) ve **zaman** (0 → 8 saat → 0).
  * Bu bir süs değil: eğri dümdüz olup çubuğa oturduğunda çubuğun uzunluğu o
  * notanın o andaki yüzdesi. Aynı sayılar, iki biçim — "aa, o aslında veriymiş".
  *
@@ -119,7 +120,9 @@ function pathFor(
     const curveX = geometry.x0 + u * geometry.span;
     const curveY =
       geometry.baseY -
-      intensityAt(row.volatility, minutesAt(u)) * row.weight * geometry.curveHeight;
+      intensityAt(row.volatility, minutesAt(u, SIGNATURE_MAX_MINUTES)) *
+        row.weight *
+        geometry.curveHeight;
     const barX = geometry.x0 + u * level * geometry.span;
 
     const x = curveX + (barX - curveX) * morph;
@@ -200,7 +203,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
     let frame = requestAnimationFrame(function step(now: number) {
       const progress = cycleProgress(now - start);
       const morph = morphAt(progress);
-      const minutes = minutesAt(progress);
+      const minutes = minutesAt(progress, SIGNATURE_MAX_MINUTES);
 
       rows.forEach((row, index) => {
         const level = intensityAt(row.volatility, minutes) * row.weight;
@@ -267,7 +270,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
         role="img"
         aria-label={`${perfume.name} evrim imzası: ${rows
           .map((row) => row.label)
-          .join(', ')} notalarının 12 saat boyunca yükselip düşüşü.`}
+          .join(', ')} notalarının 8 saat boyunca yükselip düşüşü.`}
       >
         {rows.map((row, index) => (
           <g key={row.noteId}>
