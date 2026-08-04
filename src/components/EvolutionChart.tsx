@@ -3,6 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getNote } from '@/data/notes';
 import { evolutionAt } from '@/lib/evolution';
+import {
+  SLIDER_STEPS,
+  formatDuration,
+  minutesAt,
+  phaseLabel,
+} from '@/lib/evolution-loop';
 import type { Perfume, PyramidTier } from '@/data/types';
 
 /**
@@ -14,9 +20,10 @@ import type { Perfume, PyramidTier } from '@/data/types';
  * başlığını kendisi kuruyor. Seçici `EvolutionTimeline`'da kaldı — orası
  * `/evrim` doğrulama ekranı, iki ucu karşılaştırmak için var.
  *
- * Kaydıraç logaritmik: ilk yarısı ilk saati, ikinci yarısı kalan 11 saati
- * kaplıyor. Doğrusal olsaydı bütün hareket kaydıracın ilk %2'sinde sıkışırdı —
- * kokunun ilginç kısmı ilk bir saatte oluyor.
+ * Kaydıraç logaritmik: yarısı ilk yarım saati, %62'si ilk saati kaplıyor.
+ * Doğrusal olsaydı bütün hareket kaydıracın ilk %2'sinde sıkışırdı — kokunun
+ * ilginç kısmı ilk bir saatte oluyor. Eşleme `evolution-loop.ts`'te; imza da
+ * aynı yerden besleniyor.
  *
  * Akıcılık için üç kural (ölçülerek konuldu, korunmalı):
  *   1. Çubuklar `width` ile değil `transform: scaleX()` ile büyüyor.
@@ -27,8 +34,6 @@ import type { Perfume, PyramidTier } from '@/data/types';
  *      Fare 120 Hz olay üretse bile render 60 fps'te kalıyor.
  */
 
-const MAX_MINUTES = 720;
-const SLIDER_STEPS = 1000;
 /** Kaydıraç en baştan açılıyor. Taban varlığı sayesinde 0. dakikada da
  *  hiçbir çubuk boş değil — kompozisyonun tamamı zaten tende. */
 const INITIAL_STEP = 0;
@@ -45,26 +50,6 @@ const TIER_LABEL: Record<PyramidTier, string> = {
   heart: 'Kalp',
   base: 'Dip',
 };
-
-function sliderToMinutes(step: number): number {
-  const position = step / SLIDER_STEPS;
-  return Math.expm1(position * Math.log1p(MAX_MINUTES));
-}
-
-function formatDuration(minutes: number): string {
-  if (minutes < 1) return 'ilk saniyeler';
-  if (minutes < 60) return `${Math.round(minutes)} dakika`;
-
-  const hours = Math.floor(minutes / 60);
-  const rest = Math.round(minutes % 60);
-  return rest === 0 ? `${hours} saat` : `${hours} saat ${rest} dakika`;
-}
-
-function phaseLabel(minutes: number): string {
-  if (minutes < 15) return 'Açılış';
-  if (minutes < 120) return 'Kalp';
-  return 'Dip';
-}
 
 interface EvolutionChartProps {
   readonly perfume: Perfume;
@@ -137,7 +122,7 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
     [perfume],
   );
 
-  const minutes = useMemo(() => sliderToMinutes(step), [step]);
+  const minutes = useMemo(() => minutesAt(step / SLIDER_STEPS), [step]);
   const bars = useMemo(() => evolutionAt(perfume.notes, minutes), [perfume, minutes]);
 
   return (

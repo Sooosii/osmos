@@ -1,0 +1,75 @@
+/**
+ * Evrim imzasının saati.
+ *
+ * `space-approach.ts` ile aynı sözleşme: React, DOM, SVG bilmiyor ve hiçbir şey
+ * import etmiyor — tek başına okunup sınanabiliyor. Ekranda hiç durmadan dönen
+ * animasyonun tamamı bu dosyadaki üç sayıdan ibaret; bileşenin işi yalnızca çizmek.
+ *
+ * Zaman eşlemesi logaritmik ve bu bir süsleme değil zorunluluk: doğrusal olsaydı
+ * kokunun bütün ilginç kısmı (ilk yarım saat) 12 saniyelik turun ilk yarım
+ * saniyesinde biter, geri kalan 11.5 saniye neredeyse hiç kıpırdamayan çubukları
+ * seyretmekle geçerdi.
+ *
+ * Eşleme eskiden `EvolutionChart` içindeki kaydıracın eşlemesiydi; buraya taşındı
+ * ki imza ile çizelge aynı zamanı göstersin. İki kopya olsaydı biri düzeltilip
+ * diğeri unutulduğunda parfüm sayfası ile `/evrim` farklı dakikalar gösterirdi.
+ */
+
+/** Tam bir turun süresi. Doğrudan kullanıcı kararı. */
+export const CYCLE_MS = 12_000;
+
+/** Turun kapsadığı koku ömrü — 12 saat. */
+export const MAX_MINUTES = 720;
+
+/** Kaydıracın adım sayısı; `EvolutionChart` ham adımı buna bölüp ilerleme buluyor. */
+export const SLIDER_STEPS = 1000;
+
+/**
+ * Geçen süreden döngüsel ilerleme, 0–1.
+ *
+ * Negatif girdi de sarılıyor: `performance.now()` farkı teoride negatif çıkmaz
+ * ama saat kaynağı değişirse fonksiyon aralık dışına çıkmaktansa geriye sarsın.
+ */
+export function cycleProgress(elapsedMs: number): number {
+  const wrapped = elapsedMs % CYCLE_MS;
+  return (wrapped < 0 ? wrapped + CYCLE_MS : wrapped) / CYCLE_MS;
+}
+
+/**
+ * İlerlemeden dakika — logaritmik.
+ *
+ * Uçlar tam oturuyor: `minutesAt(0) === 0`, `minutesAt(1) === MAX_MINUTES`.
+ * Ortası oturmuyor ve oturmamalı: turun yarısı ilk ~26 dakikayı, %62'si ilk saati
+ * kaplıyor. Kalan %38'de 11 saat akıp gidiyor — o bölümde zaten pek bir şey olmuyor.
+ */
+export function minutesAt(progress: number): number {
+  return Math.expm1(progress * Math.log1p(MAX_MINUTES));
+}
+
+/**
+ * İlerlemeden biçim: 0 = eğri, 1 = çizelge.
+ *
+ * Turda iki tam gidiş geliş. Kosinüs seçildi çünkü uçlarda türev sıfır — biçim
+ * yerine oturduğunda bir an duraklıyor ve çizelge okunacak zaman buluyor. Ayrıca
+ * `morphAt(0) === morphAt(1)`, yani sonsuz döngüde ek yeri görünmüyor.
+ */
+export function morphAt(progress: number): number {
+  return 0.5 - 0.5 * Math.cos(progress * Math.PI * 4);
+}
+
+/** Dakikayı okunur süreye çevirir. */
+export function formatDuration(minutes: number): string {
+  if (minutes < 1) return 'ilk saniyeler';
+  if (minutes < 60) return `${Math.round(minutes)} dakika`;
+
+  const hours = Math.floor(minutes / 60);
+  const rest = Math.round(minutes % 60);
+  return rest === 0 ? `${hours} saat` : `${hours} saat ${rest} dakika`;
+}
+
+/** Dakikanın hangi evrede olduğu. */
+export function phaseLabel(minutes: number): string {
+  if (minutes < 15) return 'Açılış';
+  if (minutes < 120) return 'Kalp';
+  return 'Dip';
+}

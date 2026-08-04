@@ -70,7 +70,7 @@ export function morphAt(progress: number): number;
 ```
 
 `minutesAt` bugünkü kaydıracın eşlemesiyle **aynı formül** (`EvolutionChart.tsx:49`,
-`sliderToMinutes`). Turun ilk yarısı ilk 1 saati, ikinci yarısı kalan 11 saati kaplıyor.
+`sliderToMinutes`). Turun ilk yarısı ilk yarım saati, %62'si ilk saati kaplıyor.
 "12 saniye ama notaları takip etmek kolay olsun" isteğini karşılayan şey bu: kokunun
 ilginç kısmı yavaş, sakin kısmı hızlı geçiyor.
 
@@ -132,7 +132,7 @@ Nota adları gerçek `<text>` olarak kalıyor.
 
 - `cycleProgress(0) === 0`; `cycleProgress(CYCLE_MS)` başa dönüyor; hep 0–1 arasında
 - `minutesAt(0) === 0`, `minutesAt(1) === 720`
-- `minutesAt(0.5)` ≈ 60 — "ilk yarı ilk saat" iddiasının sınandığı yer
+- `minutesAt(0.5) < 60 < minutesAt(0.7)` — turun yarıdan fazlasının ilk saate ayrıldığı
 - `morphAt` uçları ve ortası; 0–1 dışına çıkmıyor
 
 Bileşen ve E2E testi kapsam dışı: projede altyapısı yok.
