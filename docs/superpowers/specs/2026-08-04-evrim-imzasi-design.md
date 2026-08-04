@@ -65,7 +65,7 @@ export function cycleProgress(elapsedMs: number): number;
 /** İlerlemeden dakika — logaritmik. */
 export function minutesAt(progress: number): number;
 
-/** İlerlemeden biçim, 0 = eğri, 1 = çizelge. Turda iki kez gidip geliyor. */
+/** İlerlemeden biçim, 0 = eğri, 1 = çizelge. Turda tek kez gidip geliyor. */
 export function morphAt(progress: number): number;
 ```
 
@@ -77,7 +77,23 @@ ilginç kısmı yavaş, sakin kısmı hızlı geçiyor.
 İki kopya bırakmamak için `sliderToMinutes` bu modüle taşınıyor ve `EvolutionChart` da
 buradan alıyor. Davranışı değişmiyor — aynı fonksiyon, yeni ev.
 
-`morphAt(p) = 0.5 − 0.5·cos(4πp)` — turda iki tam gidiş geliş.
+`morphAt(p) = 0.5 − 0.5·cos(2πp)` — turda **tek** tam gidiş geliş.
+
+> **Sonradan not (Task 6, 2026-08-04):** İlk sürümde katsayı `4π`'ydi — turda iki
+> gidiş geliş. Sahibi canlı siteyi izleyince şunu bildirdi: "grafik saat daha 2.
+> saati gösterirken bitiyor, sonra baştan başlıyor, 12. saati hiç görmüyoruz."
+> Kök neden: **biçim** (`morphAt`) turda iki kez dönerken **zaman** (`minutesAt`)
+> yalnızca bir kez 0 → 12 saate gidiyordu — ikisi senkron değildi. Çubuk anları
+> p = 0.25 (7. dakika) ve p = 0.75 (2 saat 36. dakika) idi; 12. saat p = 1'e,
+> yani etiketlerin gizlendiği eğri anına denk geliyordu.
+>
+> Sahibiyle üç seçenek (iki gidiş geliş / tek gidiş geliş / başka bir eşleme)
+> canlı, etkileşimli bir örnekte karşılaştırıldı. Seçilen: **tek gidiş geliş**.
+> Kabul edilen sonuç: çubuk anı artık turun ortasında (~26. dakika) ve 12. saat
+> yine eğri anına denk geliyor — ama etiketlerin çok daha kalıcı olmasıyla
+> (`LABEL_FADE_START` ve kare-kök solma eğrisi, `EvolutionSignature.tsx`)
+> okunur bant turun ~%87'sine (kabaca 8. saate kadar) çıkıyor. "12. saati çubuk
+> hâlinde de görmek" bilerek çözülmedi — ayrı, ertelenmiş bir iş.
 
 ### 2. `src/components/EvolutionSignature.tsx` — yeni bileşen
 

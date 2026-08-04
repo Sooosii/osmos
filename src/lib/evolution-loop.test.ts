@@ -63,12 +63,25 @@ describe('minutesAt', () => {
 });
 
 describe('morphAt', () => {
-  test('turda iki tam gidiş geliş', () => {
+  test('turda tek tam gidiş geliş — eğride başlıyor, ortada çizelgeye oturuyor, eğriye dönüyor', () => {
     expect(morphAt(0)).toBeCloseTo(0);
-    expect(morphAt(0.25)).toBeCloseTo(1);
-    expect(morphAt(0.5)).toBeCloseTo(0);
-    expect(morphAt(0.75)).toBeCloseTo(1);
+    expect(morphAt(0.5)).toBeCloseTo(1);
     expect(morphAt(1)).toBeCloseTo(0);
+  });
+
+  test('ilk yarıda tekdüze artıyor, ikinci yarıda tekdüze azalıyor', () => {
+    let previous = morphAt(0);
+    for (let p = 0.05; p <= 0.5; p += 0.05) {
+      const current = morphAt(p);
+      expect(current).toBeGreaterThan(previous);
+      previous = current;
+    }
+
+    for (let p = 0.55; p <= 1; p += 0.05) {
+      const current = morphAt(p);
+      expect(current).toBeLessThan(previous);
+      previous = current;
+    }
   });
 
   test('tur başı ile tur sonu aynı — döngüde ek yeri görünmüyor', () => {

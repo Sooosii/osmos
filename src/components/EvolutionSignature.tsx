@@ -55,8 +55,15 @@ const TOP = 14;
 const ROW_GAP = 22;
 /** Her eğriyi kaç parçaya bölerek çiziyoruz. */
 const SAMPLES = 80;
-/** Etiketler bu morph değerinden sonra belirmeye başlıyor. */
-const LABEL_FADE_START = 0.15;
+/**
+ * Etiketler bu morph değerinden sonra belirmeye başlıyor.
+ *
+ * `morphAt` turda tek gidiş geliş yaptığı için okunur bant zaten turun büyük
+ * kısmını kaplıyor; bu değer (eskiden 0.15) ve aşağıdaki kare-kök eğrisiyle
+ * birlikte bant turun ~%87'sine çıkıyor — sahibin canlı örnekte onayladığı
+ * değer. Amaç: notalar erkenden kaybolmasın, "vanish too early" şikâyeti.
+ */
+const LABEL_FADE_START = 0.04;
 
 interface Geometry {
   readonly viewHeight: number;
@@ -123,10 +130,16 @@ function pathFor(
   return d;
 }
 
-/** Etiket saydamlığı — biçim çizelgeye yaklaştıkça beliriyor. */
+/**
+ * Etiket saydamlığı — biçim çizelgeye yaklaştıkça beliriyor.
+ *
+ * Kare kök eğrisi bilerek: doğrusala göre etiket hızlı belirip uzun süre
+ * kalıyor (eğrinin başındaki dik yükseliş, sonundaki yatay seyir). Sahibin
+ * "isimler ve yüzdeler çok erken kayboluyor" şikâyetine karşılık geldi.
+ */
 function labelOpacity(morph: number, max: number): string {
   if (morph <= LABEL_FADE_START) return '0';
-  return (((morph - LABEL_FADE_START) / (1 - LABEL_FADE_START)) * max).toFixed(2);
+  return (Math.sqrt((morph - LABEL_FADE_START) / (1 - LABEL_FADE_START)) * max).toFixed(2);
 }
 
 interface EvolutionSignatureProps {
@@ -199,17 +212,32 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
         }
 
         const name = nameRefs.current[index];
-        if (name) name.setAttribute('opacity', labelOpacity(morph, 0.55));
+        if (name) name.setAttribute('opacity', labelOpacity(morph, 0.72));
 
         const value = valueRefs.current[index];
         if (value) {
-          value.setAttribute('opacity', labelOpacity(morph, 0.4));
-          value.textContent = `${Math.round(level * 100)}%`;
+          value.setAttribute('opacity', labelOpacity(morph, 0.5));
+          // Yüzde her karede aynı yuvarlanmış değere düşebiliyor; aynı metni
+          // tekrar yazmak gereksiz layout kirletiyordu (sahip: "hafif bir
+          // takılma" fark etti) — değişmemişse dokunma.
+          const percentText = `${Math.round(level * 100)}%`;
+          if (value.textContent !== percentText) value.textContent = percentText;
         }
       });
 
-      if (phaseRef.current) phaseRef.current.textContent = phaseLabel(minutes);
-      if (durationRef.current) durationRef.current.textContent = formatDuration(minutes);
+      // Saat metinleri saniyede birkaç kez değil, yalnızca gösterdikleri değer
+      // gerçekten değiştiğinde yazılıyor — aynı gerekçe: gereksiz yazım, gereksiz
+      // layout kirliliği, hissedilir takılma.
+      if (phaseRef.current) {
+        const phaseText = phaseLabel(minutes);
+        if (phaseRef.current.textContent !== phaseText) phaseRef.current.textContent = phaseText;
+      }
+      if (durationRef.current) {
+        const durationText = formatDuration(minutes);
+        if (durationRef.current.textContent !== durationText) {
+          durationRef.current.textContent = durationText;
+        }
+      }
 
       frame = requestAnimationFrame(step);
     });

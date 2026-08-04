@@ -49,12 +49,25 @@ export function minutesAt(progress: number): number {
 /**
  * İlerlemeden biçim: 0 = eğri, 1 = çizelge.
  *
- * Turda iki tam gidiş geliş. Kosinüs seçildi çünkü uçlarda türev sıfır — biçim
- * yerine oturduğunda bir an duraklıyor ve çizelge okunacak zaman buluyor. Ayrıca
- * `morphAt(0) === morphAt(1)`, yani sonsuz döngüde ek yeri görünmüyor.
+ * Turda **tek** tam gidiş geliş: eğri → çizelge → eğri. Kosinüs seçildi çünkü
+ * uçlarda ve ortada türev sıfır — biçim çizelgeye oturduğunda bir an duraklıyor
+ * ve çubuklar okunacak zaman buluyor. Ayrıca `morphAt(0) === morphAt(1)`, yani
+ * sonsuz döngüde ek yeri görünmüyor.
+ *
+ * Neden iki değil bir: ilk sürümde katsayı `4π`'ydi — turda iki gidiş geliş.
+ * Sorun şuydu: **biçim** turda iki kez dönerken **zaman** (`minutesAt`) yalnızca
+ * bir kez 0 → 12 saate gidiyordu; ikisi senkron değildi. Çubuk anları p = 0.25
+ * ve p = 0.75'e denk geliyordu — yani saat 7. dakikayı ve 2 saat 36. dakikayı
+ * gösterirken. Saatin 12. saati ise p = 1'e, yani eğri anına denk geliyordu:
+ * etiketlerin gizlendiği tam nokta. Sahibi canlı örnekte üç seçeneği yan yana
+ * görüp bunu seçti: **tek** gidiş geliş, çubuk anı turun ortasında (~26 dakika),
+ * 12. saat yine eğri anına denk geliyor ama etiketler artık turun ~%87'sinde
+ * (kabaca 8. saate kadar) okunur kalıyor — kabul edilen ödün. "12. saati çubuk
+ * hâlinde de görelim" ayrı, ertelenmiş bir iş; bunu çözmeye çalışmak için
+ * katsayıyı tekrar `4π`'ye çevirmeyin.
  */
 export function morphAt(progress: number): number {
-  return 0.5 - 0.5 * Math.cos(progress * Math.PI * 4);
+  return 0.5 - 0.5 * Math.cos(progress * Math.PI * 2);
 }
 
 /** Dakikayı okunur süreye çevirir. */
