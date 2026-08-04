@@ -57,7 +57,7 @@ export function minutesAt(progress: number): number {
  * Neden iki değil bir: ilk sürümde katsayı `4π`'ydi — turda iki gidiş geliş.
  * Sorun şuydu: **biçim** turda iki kez dönerken **zaman** (`minutesAt`) yalnızca
  * bir kez 0 → 12 saate gidiyordu; ikisi senkron değildi. Çubuk anları p = 0.25
- * ve p = 0.75'e denk geliyordu — yani saat 7. dakikayı ve 2 saat 36. dakikayı
+ * ve p = 0.75'e denk geliyordu — yani saat 4. dakikayı ve 2 saat 18. dakikayı
  * gösterirken. Saatin 12. saati ise p = 1'e, yani eğri anına denk geliyordu:
  * etiketlerin gizlendiği tam nokta. Sahibi canlı örnekte üç seçeneği yan yana
  * görüp bunu seçti: **tek** gidiş geliş, çubuk anı turun ortasında (~26 dakika),

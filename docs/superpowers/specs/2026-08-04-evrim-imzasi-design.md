@@ -84,7 +84,7 @@ buradan alıyor. Davranışı değişmiyor — aynı fonksiyon, yeni ev.
 > saati gösterirken bitiyor, sonra baştan başlıyor, 12. saati hiç görmüyoruz."
 > Kök neden: **biçim** (`morphAt`) turda iki kez dönerken **zaman** (`minutesAt`)
 > yalnızca bir kez 0 → 12 saate gidiyordu — ikisi senkron değildi. Çubuk anları
-> p = 0.25 (7. dakika) ve p = 0.75 (2 saat 36. dakika) idi; 12. saat p = 1'e,
+> p = 0.25 (4. dakika) ve p = 0.75 (2 saat 18. dakika) idi; 12. saat p = 1'e,
 > yani etiketlerin gizlendiği eğri anına denk geliyordu.
 >
 > Sahibiyle üç seçenek (iki gidiş geliş / tek gidiş geliş / başka bir eşleme)
