@@ -98,15 +98,54 @@ function geometryFor(rowCount: number): Geometry {
   };
 }
 
+interface CurvePoint {
+  /** Örneğin tur içindeki yeri, 0–1. Çubuk hâlindeki x'i bundan türüyor. */
+  readonly u: number;
+  readonly x: number;
+  readonly y: number;
+}
+
+/**
+ * Bir notanın eğri hâlindeki noktaları.
+ *
+ * Zamandan **tamamen bağımsız**: yalnızca notanın uçuculuğuna, ağırlığına ve
+ * geometriye bakıyor. O yüzden parfüm başına bir kez hesaplanıyor, kare başına
+ * değil. Eskiden `pathFor`un içindeydi ve her karede yeniden üretiliyordu — altı
+ * notalı bir parfümde saniyede ~29 bin `intensityAt` çağrısı. Kare başına gerçekten
+ * değişen tek şey `morph` ve `level`.
+ */
+function curveFor(row: SignatureRow, geometry: Geometry): readonly CurvePoint[] {
+  const points: CurvePoint[] = [];
+
+  for (let j = 0; j <= SAMPLES; j += 1) {
+    const u = j / SAMPLES;
+    points.push({
+      u,
+      x: geometry.x0 + u * geometry.span,
+      y:
+        geometry.baseY -
+        intensityAt(row.volatility, minutesAt(u, SIGNATURE_MAX_MINUTES)) *
+          row.weight *
+          geometry.curveHeight,
+    });
+  }
+
+  return points;
+}
+
 /**
  * Bir notanın o karedeki yolu.
  *
  * `morph = 0` eğri, `morph = 1` çubuk, arası doğrusal karışım. Nokta sayısı iki
  * hâlde de aynı olduğu için karışım nokta nokta yapılabiliyor — SVG'nin morph
  * için ayrı bir mekanizmasına ihtiyaç yok.
+ *
+ * Eğri tarafı hazır geliyor (`curveFor`); kare başına kalan iş çubuk x'i ve iki
+ * harmanlama. `morph = 1`'de çubuğun ucu tam `x0 + level·span` oluyor — çubuk
+ * uzunluğunun yanındaki yüzdeyle birebir aynı şeyi söylemesi buna dayanıyor.
  */
 function pathFor(
-  row: SignatureRow,
+  curve: readonly CurvePoint[],
   index: number,
   morph: number,
   level: number,
@@ -115,18 +154,12 @@ function pathFor(
   const y1 = rowY(index);
   let d = '';
 
-  for (let j = 0; j <= SAMPLES; j += 1) {
-    const u = j / SAMPLES;
-    const curveX = geometry.x0 + u * geometry.span;
-    const curveY =
-      geometry.baseY -
-      intensityAt(row.volatility, minutesAt(u, SIGNATURE_MAX_MINUTES)) *
-        row.weight *
-        geometry.curveHeight;
-    const barX = geometry.x0 + u * level * geometry.span;
+  for (let j = 0; j < curve.length; j += 1) {
+    const point = curve[j];
+    const barX = geometry.x0 + point.u * level * geometry.span;
 
-    const x = curveX + (barX - curveX) * morph;
-    const y = curveY + (y1 - curveY) * morph;
+    const x = point.x + (barX - point.x) * morph;
+    const y = point.y + (y1 - point.y) * morph;
     d += `${j === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)} `;
   }
 
@@ -183,19 +216,24 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
     return FAMILY_ORDER.filter((family) => seen.has(family)).map(getFamily);
   }, [rows]);
 
+  /** Eğri noktaları — zamandan bağımsız, parfüm başına bir kez. */
+  const curves = useMemo(() => rows.map((row) => curveFor(row, geometry)), [rows, geometry]);
+
   /**
    * Sunucuda çizilen ilk kare — `progress = 0`, yani saf eğri hâli.
    *
    * Boş `d` ile başlansaydı JavaScript inene kadar (ve JS hiç çalışmazsa
    * tamamen) boş bir kutu görünürdü. Bu hâliyle imza, animasyon başlamadan
    * önce de doğru şeyi gösteriyor.
+   *
+   * `level` olarak 0 geçiliyor çünkü `morph = 0`'da harmanlama çubuk x'ini
+   * tamamen atıyor — eğri hâlinde çubuk uzunluğunun bir anlamı yok. Burada
+   * eskiden `intensityAt(...)` ile hesaplanmış bir değer vardı; sonucu hiçbir
+   * yere gitmiyordu ama okuyana anlamlıymış gibi görünüyordu.
    */
   const initialPaths = useMemo(
-    () =>
-      rows.map((row, index) =>
-        pathFor(row, index, 0, intensityAt(row.volatility, 0) * row.weight, geometry),
-      ),
-    [rows, geometry],
+    () => curves.map((curve, index) => pathFor(curve, index, 0, 0, geometry)),
+    [curves, geometry],
   );
 
   useEffect(() => {
@@ -210,7 +248,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
 
         const path = pathRefs.current[index];
         if (path) {
-          path.setAttribute('d', pathFor(row, index, morph, level, geometry));
+          path.setAttribute('d', pathFor(curves[index], index, morph, level, geometry));
           path.setAttribute('stroke-width', (1.8 + morph * 1.4).toFixed(2));
         }
 
@@ -249,7 +287,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
     // anlatıyor: iptal edilmeyen kare, bileşen geri geldiğinde "zaten kare
     // bekliyor" sanılıp döngüyü kilitliyor.
     return () => cancelAnimationFrame(frame);
-  }, [rows, geometry]);
+  }, [rows, curves, geometry]);
 
   return (
     <div className="w-full">
