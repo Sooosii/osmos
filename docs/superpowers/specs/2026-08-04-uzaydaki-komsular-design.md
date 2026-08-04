@@ -28,9 +28,15 @@ yerine göstermek gerekiyor.
 |---|---|---|
 | Biçim | Harita parçası | Üç seçenek (liste / liste+gerekçe / parça) sunuldu |
 | İşlev | Adlar yazılı, tıklanınca o parfüme gidiyor | Doğrudan seçildi |
-| Konum kaynağı | **Gerçek uzay konumları (kırpılmış)** | Ölçüldü, üç seçenek çizilip görüldü |
+| Konum kaynağı | ~~Gerçek uzay konumları (kırpılmış)~~ → **benzerlikten üretiliyor** | Ekranda görülünce değişti, aşağıya bak |
 | Komşu tanımı | **Benzerlik top-5** (haritadaki yakınlık değil) | Sahip kararı, ölçümü gördükten sonra |
 | Komşu sayısı | **5** | Aşağıda gerekçesi |
+| Biçim | ~~Kırpılmış harita parçası~~ → **dönen üç boyutlu yörünge** | Ekranda görülünce değişti |
+
+> **Bu bölümün altındaki "harita parçası / kırpma / gerçek konumlar" anlatısı
+> AŞILDI.** Yazıldığı hâliyle bırakılıyor çünkü bugünkü çözüm o yoldan geçerek
+> bulundu ve ölçümleri hâlâ geçerli. Bugün ne olduğunu okumak için doğrudan
+> [Son hâl](#son-hâl--dönen-üç-boyutlu-yörünge) bölümüne git.
 
 Beş, sabitlenmiş bir sayı değil bir başlangıç: `nearestNeighbors`'ın `count`
 parametresi zaten var, değiştirmek tek satır. Beşle başlanıyor çünkü etiket
@@ -87,6 +93,78 @@ komşu olmayan noktalar doluyor:
 En kötü vakada 44 parfümün 16'sı pencereye giriyor. Sahibe bu sayılarla söylendi ve
 B yine de seçildi — bilinçli ödün, "sonradan fark edildi" değil.
 
+---
+
+## Son hâl — dönen üç boyutlu yörünge
+
+Yukarıdaki B kararı **uygulandı ve ekranda görülünce geri alındı.** Sebebi tahmin
+değil gözlem: kırpılmış gerçek konumlarla parça okunmuyordu. Merkez parfüm pencerenin
+kenarına kaçıyor ("neredeyim?" sorusu cevapsız), 28 nokta neredeyse aynı boy ve
+soluklukta bir bulut oluşturuyor, "en benzeyen" çoğu sayfada en yakın olmuyordu.
+
+Sahibin istediği cümle net: **en benzeyen en yakında dursun, komşular dört bir yana
+dağılsın, sıra hâlinde değil.** Bu cümlenin her sayfada tutmasının tek yolu konumları
+benzerlikten üretmek — ölçüm zaten gerçek konumlarla tutmadığını göstermişti (3.16/5).
+
+Ardından ilk çember hâli de beğenilmedi ("slop gibi duruyor"); istenen 7/24 dönen,
+gerçekten üç boyutlu, şık bir şey.
+
+### Üç eksen, üçü de veri
+
+| Eksen | Ne taşıyor |
+|---|---|
+| Yarıçap | Benzerlik skoru — mutlak, kümedeki sıralama değil |
+| Açı | Ayrışma; eşit bölünüyor ki sıra değil çember olsun |
+| **Yükseklik** | **`depth` farkı** — `projectToSpace`in üçüncü bileşeni |
+
+Üçüncü boyut süs değil: `depth` bugüne kadar hiçbir yerde kullanılmıyordu ve
+benzerlik ile 2B yakınlığın ayrışmasının (3.16/5) sebebi tam olarak o kayıp
+bileşendi. Takımyıldız dönerken onu geri veriyor — bir komşu yakın görünüp
+derinlikte uzak durabiliyor. Yani eğim sahte bir 3B efekti değil; perspektif
+gerçek, yükseklik gerçek veri.
+
+Yarıçap mutlak skordan alınıyor, sıralamadan değil: komşuları zayıf bir parfümün
+yörüngesi geniş açılıyor, sıkı bir kümenin ortasındakinin dar kalıyor. Sıralamayla
+normalleştirilseydi her sayfada en benzeyen aynı mesafede durur, "ne kadar" bilgisi
+kaybolurdu.
+
+### Denenip bırakılanlar
+
+- **Merkezden dağılma efekti** (komşular merkezde toplanıp ayrışıyordu): sürekli
+  dönüş gelince gereksizleşti, kaldırıldı. Ondan önce bir kusuru da ölçülmüştü —
+  animasyon sayfa yüklenince başlıyordu, bölüm ekranın altında olduğu için kimse
+  göremiyordu.
+- **Merkezden komşulara bağ çizgileri:** halka zaten yörüngeyi anlatıyordu,
+  çizgiler üstüne binip kalabalık yapıyordu.
+- **Etiketin noktanın sağına/soluna yaslanması:** komşu merkezin öbür yanına
+  geçtiği anda ad sıçrıyordu. Yan seçimi tamamen kaldırıldı, ad noktanın üstünde
+  ortalı.
+- **Dikey yörünge** (`PITCH` 1.15): hareket istenen gibi yukarı-aşağı oldu ama
+  halka tam daireye dönüşünce düz bir çember gibi okundu ve daha az üç boyutlu
+  durdu. Yatık elipse dönüldü. Gerekçe `lib/neighbor-orbit.ts`teki `PITCH`
+  yorumunda.
+
+### Dosyalar
+
+| Dosya | Sorumluluk |
+|---|---|
+| `src/lib/neighbor-orbit.ts` | Saf geometri: koltuklar, perspektif izdüşümü, ufuk halkası. Import'suz, tek başına sınanabilir. |
+| `src/lib/neighbor-orbit.test.ts` | Yukarıdakinin sınamaları — 11 sınama. |
+| `src/components/Neighbors.tsx` | **Sunucu bileşeni.** Benzerlik ve `depth` burada hesaplanıyor. |
+| `src/components/NeighborOrbit.tsx` | İstemci bileşeni: `requestAnimationFrame` döngüsü, ref üzerinden çizim. |
+
+Ayrım şart: benzerlik motoru 44×44'lük bir kosinüs matrisi kuruyor
+(`space-marks.ts:11-13`). İstemciye inseydi bütün veri seti ve hesap tarayıcı
+paketine binerdi. Kare başına `setState` yok — `EvolutionChart.tsx:26`'nın kuralı.
+
+Öndeki komşu merkezin önünden, arkadaki arkasından geçiyor. Bu örtme, dönüşün
+gerçekten derinlik taşıdığını anlatan en güçlü işaret; taraf değişimi yalnızca
+kesişme anında DOM'a dokunuyor, her karede değil.
+
+Hareket azaltılmışsa dönmüyor, sabit bir çeyrek turda duruyor. İmza bu ayrımı
+bilerek yapmıyor ama gerekçesi oraya özgü: orada hareket anlatının konusu (zamanın
+geçişi), burada yalnızca üçüncü boyutu gösterme yolu ve bilgi durduğunda da ayakta.
+
 **Bunu düzeltmeye çalışan biri için:** pencereyi daraltıp uzak komşuyu kenara
 kelepçelemek (off-screen göstergesi) akla gelen ilk çözüm. Denenebilir, ama ancak
 Doğrulama 6'daki etiket ölçümü gerçek bir çakışma gösterirse. Ölçüm temizse
@@ -94,21 +172,13 @@ dokunulmayacak: B'nin bütün değeri o uzaklığı göstermesinde.
 
 ## Mimari
 
-Üç parça, her biri tek işli:
+Dosyalar ve sorumlulukları [Son hâl](#son-hâl--dönen-üç-boyutlu-yörünge) bölümünde.
+Buradaki kurallar biçim değişse de geçerli kaldı:
 
-**`src/lib/neighbor-map.ts`** — saf geometri. `space-approach.ts` ve
-`evolution-loop.ts` ile aynı sözleşme: React, DOM, SVG bilmiyor, hiçbir şey import
-etmiyor. Vitest'te `@/` takma adı olmadığı için bu şart gevşetilemez. Sorumluluğu:
-kırpma penceresi, uzay koordinatlarından ([−1,1] karesi) parça koordinatlarına
-ölçekleme, etiket yerleşimi ve çakışma çözümü.
-
-**`src/components/NeighborMap.tsx`** — `'use client'` **yok**, sunucu bileşeni.
-Gereken tek etkileşim gezinme; onu `next/link` veriyor, vurgu durumları saf CSS.
-Böylece 44×44'lük benzerlik motoru istemci paketine inmiyor — `space-marks.ts:11-13`
-kuralı.
-
-**`src/app/parfum/[id]/page.tsx`** — `nearestNeighbors` ve `projectToSpace` burada,
-sunucuda çağrılıyor; sonuç düz veri olarak bileşene geçiyor.
+- Saf geometri modülü hiçbir şey import etmiyor — vitest'te `@/` takma adı
+  çözülmediği için bu şart gevşetilemez.
+- Hesap sunucuda, çizim istemcide. Benzerlik motoru tarayıcı paketine inmiyor.
+- Kare başına `setState` yok.
 
 ### Çizim kuralları
 
@@ -116,38 +186,39 @@ sunucuda çağrılıyor; sonuç düz veri olarak bileşene geçiyor.
   ışıkla **aynı kaynak**; ikinci bir renk yolu açılmıyor (`page.tsx:24-27`).
 - Merkez parfüm ayırt edilir ama tıklanmaz — zaten oradasın.
 - Adlar gerçek `<text>`, kırpılmıyor. `ScentSpaceCanvas.tsx:216` ve imza aynı kararı
-  zaten verdi. Uzun adların yeri ölçülerek ayrılacak: imzada `LABEL_WIDTH` tahminle
-  56 konmuş, gerçek adlarla 84'e çıkmak zorunda kalınmıştı.
-- **Pencereye düşen komşu-olmayan noktalar da çiziliyor**, sönük ve etiketsiz.
-  Yoksa kırpma yalan söyler: gerçek haritada orada duran bir nokta parçada yokmuş
-  gibi görünür. Kırpmanın dürüst olmasının şartı bu.
+  zaten verdi. Adın yeri ölçülerek ayrıldı: yarıçapları büyütürken sınamada boşluk
+  çıktı — nokta konumu denetleniyordu ama etiket genişliği değil, oysa çerçeveden
+  asıl taşan şey ad. `LABEL_HALF_WIDTH` o sınamanın ölçüsü.
+- Adın arkasında koyu kontur: dönen bir düzende iki adın üst üste gelmesi kaçınılmaz,
+  engellemek yerine okunabilir kılınıyor.
 
 ### Erişilebilirlik
 
-SVG `role="img"` ve komşuları sayan bir `aria-label`. Bağlantılar gerçek `<a>`
-olduğu için klavyeyle gezilebiliyor — imzadaki `prefers-reduced-motion` ödünü gibi
-bir taviz burada gerekmiyor, çünkü parça hareket etmiyor.
+SVG `role="img"` ve komşuları yüzdeleriyle sayan bir `aria-label`. Bağlantılar
+gerçek `<a>` olduğu için klavyeyle gezilebiliyor. Hareket azaltılmışsa yörünge
+dönmüyor.
 
 ## Sınama
 
-`src/lib/neighbor-map.test.ts` — saf modülün sınamaları: pencere bütün noktaları
-kapsıyor mu, ölçekleme uçlara oturuyor mu, çakışan iki etiket gerçekten ayrılıyor mu.
+`src/lib/neighbor-orbit.test.ts` — saf modülün 11 sınaması: en benzeyen gerçekten
+en yakında mı, derinlik dikeye gidiyor mu, komşular dört bir yana dağılıyor mu, tur
+boyunca nokta ve **etiket** çerçeveden taşıyor mu, perspektif gerçek mi (öndeki
+arkadakinden belirgin biçimde büyük), tam tur başa dönüyor mu.
 
 Bileşen ve E2E sınaması kapsam dışı: projede altyapısı yok. Bileşen tarayıcıda
-ölçülerek doğrulanıyor (aşağıda).
+ölçülerek doğrulanıyor.
 
 ## Doğrulama
 
 1. `npm run build`, `npm test`, `npm run lint` yeşil (lint'in 2 hatası
    `ScentSpaceCanvas.tsx`'te ve bu dalın işi değil; 2'yi geçerse bizim işimiz)
 2. Bir komşuya tıkla → doğru parfüm sayfası açılıyor
-3. Açılan sayfanın parçasında **eski parfüm görünüyor** — komşuluk simetrik değil
-   ama yakınlık bir kenar; görünmüyorsa pencere dar
-4. Parçadaki renkler `/uzay`'daki aynı parfümlerin renkleriyle birebir
-5. Gerçek konumlar seçildiyse: göreli diziliş `/uzay` ile uyuşuyor (üç parfümde)
-6. En uzun adda etiket taşmıyor/çakışmıyor — `getBBox()` ile ölçülerek, gözle değil
+3. Yörünge hiç durmuyor; öndeki komşu merkezin önünden, arkadaki arkasından geçiyor
+4. Noktaların renkleri `/uzay`daki aynı parfümlerin renkleriyle birebir
+5. En benzeyen gerçekten en yakında — her sayfada, tesadüfe bırakılmadan
+6. Ad taşmıyor ve dönerken bir yandan diğerine sıçramıyor
 7. 375 px genişlikte okunur
-8. Konsol: dört sayfada da 0 hata / 0 uyarı
+8. Konsol dört sayfada da temiz
 
 ## Bu işe dahil olmayanlar
 

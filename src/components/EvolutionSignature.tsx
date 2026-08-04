@@ -66,6 +66,17 @@ const SAMPLES = 80;
  */
 const LABEL_FADE_START = 0.04;
 
+/**
+ * Eğri hâlindeki çizgi kalınlığı ve çizelgeye oturunca eklenen fark.
+ *
+ * Sabit olmalarının sebebi tek bir yerde durmaları: taban değer hem sunucuda
+ * çizilen ilk kareye (JSX `strokeWidth`) hem de her karede yazılan değere giriyor.
+ * İki ayrı `1.8` olduğunda biri değiştirilip diğeri unutulursa mount anında tek
+ * karelik bir titreme kalıyordu.
+ */
+const STROKE_BASE = 1.8;
+const STROKE_GROWTH = 1.4;
+
 interface Geometry {
   readonly viewHeight: number;
   readonly x0: number;
@@ -210,7 +221,14 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
 
   const geometry = useMemo(() => geometryFor(rows.length), [rows.length]);
 
-  /** Bu parfümde geçen aileler, `FAMILY_ORDER` sırasında ve tekrarsız. */
+  /**
+   * Bu parfümde geçen aileler — göstergeyi besleyen liste.
+   *
+   * Sıra `FAMILY_ORDER`dan geliyor, notaların sırasından değil: gösterge her
+   * parfümde aynı düzende okunsun ki `families.ts:6-7`'nin istediği "kullanıcı
+   * 15-20 parfüm gezdikten sonra renk kodunu çözebilmeli" işlesin. Nota sırasına
+   * bırakılsaydı aynı aile her sayfada başka yerde çıkar, kod öğrenilemezdi.
+   */
   const families = useMemo(() => {
     const seen = new Set(rows.map((row) => row.family));
     return FAMILY_ORDER.filter((family) => seen.has(family)).map(getFamily);
@@ -249,7 +267,10 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
         const path = pathRefs.current[index];
         if (path) {
           path.setAttribute('d', pathFor(curves[index], index, morph, level, geometry));
-          path.setAttribute('stroke-width', (1.8 + morph * 1.4).toFixed(2));
+          path.setAttribute(
+            'stroke-width',
+            (STROKE_BASE + morph * STROKE_GROWTH).toFixed(2),
+          );
         }
 
         const name = nameRefs.current[index];
@@ -319,7 +340,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
               d={initialPaths[index]}
               fill="none"
               stroke={getFamily(row.family).color}
-              strokeWidth={1.8}
+              strokeWidth={STROKE_BASE}
               strokeLinecap="round"
               strokeLinejoin="round"
             />

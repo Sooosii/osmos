@@ -138,6 +138,13 @@ describe('formatDuration', () => {
     expect(formatDuration(120)).toBe('2 saat');
   });
 
+  test('60 dakika sınırı — saat biçimine tam burada geçiyor', () => {
+    // Sınır sınanmıyordu: `< 60` yanlışlıkla `<= 60` yapılsa 60 dakika
+    // "60 dakika" diye yazılır ve hiçbir sınama bunu yakalamazdı.
+    expect(formatDuration(59)).toBe('59 dakika');
+    expect(formatDuration(60)).toBe('1 saat');
+  });
+
   test('saat ve dakika birlikte', () => {
     expect(formatDuration(185)).toBe('3 saat 5 dakika');
   });
