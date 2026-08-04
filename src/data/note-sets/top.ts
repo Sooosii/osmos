@@ -1,0 +1,304 @@
+import type { Note } from '../types';
+
+/**
+ * Uçucu bant — tepe noktası 15 dakikadan önce.
+ *
+ * Açılışı kuran notalar: narenciyeler, aromatikler, keskin yeşiller,
+ * hafif meyveler ve baharatın uçucu ucu. Çoğu bir saat içinde susuyor.
+ *
+ * Açıklama alanı bilinçli olarak boş — nota ansiklopedisiyle birlikte
+ * (Aşama 3) doldurulacak. İlk 15 nota üslup örneği olarak açıklamalı.
+ */
+export const TOP_NOTES: readonly Note[] = [
+  {
+    id: 'aldehydes',
+    name: { en: 'Aldehydes', tr: 'Aldehitler' },
+    families: { aldehydic: 1.0, musk: 0.2 },
+    volatility: { peakMinutes: 1, halfLifeMinutes: 30 },
+    character: { temperature: -0.5, texture: 0.3, cleanliness: 0.9, proximity: -0.9 },
+    description: {
+      en: 'A cold fizz above the perfume — soap, starched linen, and the smell of air itself.',
+      tr: 'Parfümün üstünde soğuk bir kabarcık — sabun, kolalı keten, havanın kendi kokusu.',
+    },
+  },
+  {
+    id: 'bergamot',
+    name: { en: 'Bergamot', tr: 'Bergamot' },
+    families: { citrus: 1.0, green: 0.2 },
+    volatility: { peakMinutes: 2, halfLifeMinutes: 20 },
+    character: { temperature: -0.6, texture: -0.3, cleanliness: 0.8, proximity: -0.7 },
+    description: {
+      en: 'Bitter citrus peel with a floral shadow. The most common opening in perfumery.',
+      tr: 'Çiçeksi bir gölgesi olan acı narenciye kabuğu. Parfümeride en yaygın açılış.',
+    },
+  },
+  {
+    id: 'lemon',
+    name: { en: 'Lemon', tr: 'Limon' },
+    families: { citrus: 1.0 },
+    volatility: { peakMinutes: 2, halfLifeMinutes: 15 },
+    character: { temperature: -0.7, texture: 0.0, cleanliness: 0.9, proximity: -0.8 },
+  },
+  {
+    id: 'grapefruit',
+    name: { en: 'Grapefruit', tr: 'Greyfurt' },
+    families: { citrus: 1.0, fruity: 0.2 },
+    volatility: { peakMinutes: 2, halfLifeMinutes: 18 },
+    character: { temperature: -0.6, texture: 0.2, cleanliness: 0.8, proximity: -0.7 },
+  },
+  {
+    id: 'mandarin',
+    name: { en: 'Mandarin', tr: 'Mandalina' },
+    families: { citrus: 1.0, fruity: 0.3 },
+    volatility: { peakMinutes: 2, halfLifeMinutes: 22 },
+    character: { temperature: 0.0, texture: -0.2, cleanliness: 0.7, proximity: -0.6 },
+  },
+  {
+    id: 'bitter-orange',
+    name: { en: 'Bitter Orange', tr: 'Acı portakal' },
+    families: { citrus: 1.0, green: 0.2, aromatic: 0.2 },
+    volatility: { peakMinutes: 3, halfLifeMinutes: 25 },
+    character: { temperature: -0.3, texture: 0.4, cleanliness: 0.6, proximity: -0.6 },
+  },
+  {
+    id: 'petitgrain',
+    name: { en: 'Petitgrain', tr: 'Petitgrain' },
+    families: { citrus: 0.7, green: 0.6, aromatic: 0.3 },
+    volatility: { peakMinutes: 3, halfLifeMinutes: 30 },
+    character: { temperature: -0.5, texture: 0.3, cleanliness: 0.7, proximity: -0.5 },
+  },
+  {
+    id: 'pink-pepper',
+    name: { en: 'Pink Pepper', tr: 'Pembe biber' },
+    families: { spicy: 0.8, fruity: 0.3, citrus: 0.2 },
+    volatility: { peakMinutes: 3, halfLifeMinutes: 25 },
+    character: { temperature: 0.2, texture: 0.6, cleanliness: 0.4, proximity: -0.4 },
+    description: {
+      en: 'Not truly pepper — a rosy, sparkling prickle that lifts everything around it.',
+      tr: 'Aslında biber değil — çevresindeki her şeyi kaldıran gülsü, kıvılcımlı bir batış.',
+    },
+  },
+  {
+    id: 'black-pepper',
+    name: { en: 'Black Pepper', tr: 'Kara biber' },
+    families: { spicy: 1.0, woody: 0.2 },
+    volatility: { peakMinutes: 3, halfLifeMinutes: 30 },
+    character: { temperature: 0.5, texture: 0.8, cleanliness: 0.2, proximity: -0.3 },
+  },
+  {
+    id: 'ginger',
+    name: { en: 'Ginger', tr: 'Zencefil' },
+    families: { spicy: 0.9, citrus: 0.3 },
+    volatility: { peakMinutes: 3, halfLifeMinutes: 30 },
+    character: { temperature: 0.7, texture: 0.6, cleanliness: 0.4, proximity: -0.4 },
+  },
+  {
+    id: 'cardamom',
+    name: { en: 'Cardamom', tr: 'Kakule' },
+    families: { spicy: 0.9, aromatic: 0.4, citrus: 0.2 },
+    volatility: { peakMinutes: 4, halfLifeMinutes: 40 },
+    character: { temperature: 0.3, texture: 0.4, cleanliness: 0.6, proximity: -0.3 },
+  },
+  {
+    id: 'coriander',
+    name: { en: 'Coriander', tr: 'Kişniş' },
+    families: { spicy: 0.7, aromatic: 0.5, citrus: 0.2 },
+    volatility: { peakMinutes: 4, halfLifeMinutes: 35 },
+    character: { temperature: 0.2, texture: 0.3, cleanliness: 0.4, proximity: -0.3 },
+  },
+  {
+    id: 'mint',
+    name: { en: 'Mint', tr: 'Nane' },
+    families: { aromatic: 1.0, green: 0.4 },
+    volatility: { peakMinutes: 2, halfLifeMinutes: 20 },
+    character: { temperature: -0.9, texture: 0.5, cleanliness: 0.8, proximity: -0.7 },
+  },
+  {
+    id: 'basil',
+    name: { en: 'Basil', tr: 'Fesleğen' },
+    families: { aromatic: 0.9, green: 0.5 },
+    volatility: { peakMinutes: 3, halfLifeMinutes: 25 },
+    character: { temperature: -0.2, texture: 0.4, cleanliness: 0.5, proximity: -0.5 },
+  },
+  {
+    id: 'rosemary',
+    name: { en: 'Rosemary', tr: 'Biberiye' },
+    families: { aromatic: 1.0, green: 0.3 },
+    volatility: { peakMinutes: 4, halfLifeMinutes: 35 },
+    character: { temperature: 0.0, texture: 0.5, cleanliness: 0.6, proximity: -0.4 },
+  },
+  {
+    id: 'juniper',
+    name: { en: 'Juniper', tr: 'Ardıç' },
+    families: { aromatic: 0.8, green: 0.4, resinous: 0.2 },
+    volatility: { peakMinutes: 4, halfLifeMinutes: 40 },
+    character: { temperature: -0.3, texture: 0.6, cleanliness: 0.5, proximity: -0.4 },
+  },
+  {
+    id: 'clary-sage',
+    name: { en: 'Clary Sage', tr: 'Misk adaçayı' },
+    families: { aromatic: 0.9, green: 0.3, animalic: 0.2 },
+    volatility: { peakMinutes: 5, halfLifeMinutes: 50 },
+    character: { temperature: 0.1, texture: 0.3, cleanliness: 0.2, proximity: -0.2 },
+  },
+  {
+    id: 'galbanum',
+    name: { en: 'Galbanum', tr: 'Galbanum' },
+    families: { green: 1.0, aromatic: 0.3, mossy: 0.2 },
+    volatility: { peakMinutes: 4, halfLifeMinutes: 45 },
+    character: { temperature: -0.8, texture: 0.8, cleanliness: 0.2, proximity: -0.3 },
+    description: {
+      en: 'The coldest green there is: crushed stems, bitter sap, almost hostile at first.',
+      tr: 'Var olan en soğuk yeşil: ezilmiş sap, acı özsu, ilk anda neredeyse düşmanca.',
+    },
+  },
+  {
+    id: 'fig-leaf',
+    name: { en: 'Fig Leaf', tr: 'İncir yaprağı' },
+    families: { green: 1.0, aromatic: 0.3, mineral: 0.2 },
+    volatility: { peakMinutes: 4, halfLifeMinutes: 50 },
+    character: { temperature: -0.6, texture: 0.5, cleanliness: 0.3, proximity: -0.4 },
+    description: {
+      en: 'Bitter, milky sap and rough leaf — the shade of the tree rather than its fruit.',
+      tr: 'Acı, sütsü özsu ve pürüzlü yaprak — ağacın meyvesi değil, gölgesi.',
+    },
+  },
+  {
+    id: 'violet-leaf',
+    name: { en: 'Violet Leaf', tr: 'Menekşe yaprağı' },
+    families: { green: 1.0, floral: 0.3, mineral: 0.2 },
+    volatility: { peakMinutes: 5, halfLifeMinutes: 55 },
+    character: { temperature: -0.7, texture: 0.4, cleanliness: 0.4, proximity: -0.3 },
+  },
+  {
+    id: 'tomato-leaf',
+    name: { en: 'Tomato Leaf', tr: 'Domates yaprağı' },
+    families: { green: 1.0, aromatic: 0.3 },
+    volatility: { peakMinutes: 4, halfLifeMinutes: 45 },
+    character: { temperature: -0.4, texture: 0.6, cleanliness: 0.1, proximity: -0.4 },
+  },
+  {
+    id: 'mastic',
+    name: { en: 'Mastic', tr: 'Sakız reçinesi' },
+    families: { resinous: 0.6, green: 0.5, aromatic: 0.4 },
+    volatility: { peakMinutes: 6, halfLifeMinutes: 70 },
+    character: { temperature: 0.0, texture: 0.5, cleanliness: 0.4, proximity: -0.2 },
+  },
+  {
+    id: 'saffron',
+    name: { en: 'Saffron', tr: 'Safran' },
+    families: { spicy: 0.9, leather: 0.3, resinous: 0.2 },
+    volatility: { peakMinutes: 8, halfLifeMinutes: 90 },
+    character: { temperature: 0.5, texture: 0.5, cleanliness: 0.0, proximity: -0.1 },
+    description: {
+      en: 'Dry, faintly medicinal and metallic. Almost always found guarding a rose.',
+      tr: 'Kuru, hafif tıbbi ve metalik. Neredeyse her zaman bir gülün başında nöbette.',
+    },
+  },
+  {
+    id: 'apple',
+    name: { en: 'Apple', tr: 'Elma' },
+    families: { fruity: 1.0, green: 0.3 },
+    volatility: { peakMinutes: 3, halfLifeMinutes: 28 },
+    character: { temperature: -0.1, texture: 0.1, cleanliness: 0.5, proximity: -0.5 },
+  },
+  {
+    id: 'pear',
+    name: { en: 'Pear', tr: 'Armut' },
+    families: { fruity: 1.0 },
+    volatility: { peakMinutes: 3, halfLifeMinutes: 28 },
+    character: { temperature: 0.0, texture: -0.3, cleanliness: 0.5, proximity: -0.5 },
+  },
+  {
+    id: 'blackcurrant',
+    name: { en: 'Blackcurrant', tr: 'Frenk üzümü' },
+    families: { fruity: 1.0, green: 0.4 },
+    volatility: { peakMinutes: 3, halfLifeMinutes: 30 },
+    character: { temperature: -0.1, texture: 0.5, cleanliness: -0.1, proximity: -0.5 },
+  },
+  {
+    id: 'lychee',
+    name: { en: 'Lychee', tr: 'Liçi' },
+    families: { fruity: 1.0, floral: 0.3 },
+    volatility: { peakMinutes: 3, halfLifeMinutes: 30 },
+    character: { temperature: 0.2, texture: -0.3, cleanliness: 0.4, proximity: -0.5 },
+  },
+  {
+    id: 'raspberry',
+    name: { en: 'Raspberry', tr: 'Ahududu' },
+    families: { fruity: 1.0, gourmand: 0.2 },
+    volatility: { peakMinutes: 4, halfLifeMinutes: 35 },
+    character: { temperature: 0.3, texture: -0.1, cleanliness: 0.3, proximity: -0.4 },
+  },
+  {
+    id: 'pineapple',
+    name: { en: 'Pineapple', tr: 'Ananas' },
+    families: { fruity: 1.0, gourmand: 0.2 },
+    volatility: { peakMinutes: 4, halfLifeMinutes: 35 },
+    character: { temperature: 0.4, texture: 0.3, cleanliness: 0.1, proximity: -0.5 },
+  },
+  {
+    id: 'passionfruit',
+    name: { en: 'Passionfruit', tr: 'Çarkıfelek meyvesi' },
+    families: { fruity: 1.0, green: 0.2 },
+    volatility: { peakMinutes: 5, halfLifeMinutes: 40 },
+    character: { temperature: 0.3, texture: 0.5, cleanliness: -0.2, proximity: -0.5 },
+    description: {
+      en: 'Tropical and slightly sulphurous — sweetness with something faintly rotten under it.',
+      tr: 'Tropikal ve hafif kükürtlü — altında hafif çürümüş bir şey taşıyan tatlılık.',
+    },
+  },
+  {
+    id: 'davana',
+    name: { en: 'Davana', tr: 'Davana' },
+    families: { fruity: 0.7, aromatic: 0.4, gourmand: 0.3 },
+    volatility: { peakMinutes: 6, halfLifeMinutes: 70 },
+    character: { temperature: 0.4, texture: 0.2, cleanliness: -0.1, proximity: -0.2 },
+  },
+  {
+    id: 'ozone',
+    name: { en: 'Ozone', tr: 'Ozon' },
+    families: { mineral: 0.8, aldehydic: 0.4 },
+    volatility: { peakMinutes: 3, halfLifeMinutes: 60 },
+    character: { temperature: -0.6, texture: 0.0, cleanliness: 0.9, proximity: -0.8 },
+  },
+  {
+    id: 'marine',
+    name: { en: 'Marine Accord', tr: 'Deniz akoru' },
+    families: { mineral: 0.9, aldehydic: 0.2, fruity: 0.2 },
+    volatility: { peakMinutes: 5, halfLifeMinutes: 90 },
+    character: { temperature: -0.5, texture: 0.1, cleanliness: 0.7, proximity: -0.6 },
+  },
+  {
+    id: 'rhubarb',
+    name: { en: 'Rhubarb', tr: 'Ravent' },
+    families: { fruity: 0.7, green: 0.6 },
+    volatility: { peakMinutes: 3, halfLifeMinutes: 25 },
+    character: { temperature: -0.5, texture: 0.4, cleanliness: 0.3, proximity: -0.5 },
+  },
+  {
+    id: 'hyacinth',
+    name: { en: 'Hyacinth', tr: 'Sümbül' },
+    families: { floral: 0.9, green: 0.6 },
+    volatility: { peakMinutes: 7, halfLifeMinutes: 45 },
+    character: { temperature: -0.4, texture: 0.2, cleanliness: 0.4, proximity: -0.4 },
+  },
+  {
+    // `carrot` (havuç tohumu) ayrı bir malzeme: kuru, irismsi, pudralı.
+    // Bu, kökün kendisi — çiğ, tatlı, topraklı. Rabbit'in açılışı bu.
+    id: 'carrot-root',
+    name: { en: 'Fresh Carrot', tr: 'Taze havuç' },
+    families: { green: 0.5, gourmand: 0.4, woody: 0.2 },
+    volatility: { peakMinutes: 10, halfLifeMinutes: 90 },
+    character: { temperature: 0.1, texture: 0.3, cleanliness: -0.2, proximity: 0.2 },
+  },
+  {
+    // Meyveli ama sulu — bu yüzden `mineral` de var. Diğer meyvelerin aksine
+    // kavun serinletiyor, ağırlaştırmıyor; karakteri soğuk tarafta.
+    id: 'melon',
+    name: { en: 'Melon', tr: 'Kavun' },
+    families: { fruity: 0.9, green: 0.3, mineral: 0.2 },
+    volatility: { peakMinutes: 5, halfLifeMinutes: 55 },
+    character: { temperature: -0.4, texture: -0.3, cleanliness: 0.5, proximity: -0.4 },
+  },
+] as const;

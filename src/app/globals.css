@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+/*
+ * OSMOS koyu bir site; açık tema yok, olmayacak da.
+ *
+ * `color-scheme: dark` bunu tarayıcıya da söylüyor. Bu satır olmadan tarayıcı
+ * belgeyi açık temalı sayıyor ve kendi çizdiği parçaları — en görünürü sağ
+ * kenardaki kaydırma çubuğu — beyaz çiziyordu: koyu sayfanın yanında düz beyaz
+ * bir dikdörtgen. Kaydıraç, odak halkası ve metin seçimi de aynı yerden besleniyor.
+ */
+:root {
+  color-scheme: dark;
+  --background: #050507;
+  --foreground: #ededed;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/*
+ * Parfüm sayfasının açılış perdesi.
+ *
+ * Uzayda basılı tutunca tuval aile rengiyle tamamen doluyor; sayfa da aynı
+ * renkten açılıp sönüyor. İki ekran arasında ortak, düz renkli bir kare
+ * olduğu için kesme noktası görünmüyor — sayfa "değişmiyor", perde kalkıyor.
+ *
+ * `forwards` şart: bitince perde saydam kalmalı, yoksa geri dönüp ekranı kapatır.
+ */
+@keyframes osmos-reveal {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Hareketi azaltılmış modda perde hiç görünmüyor: geçiş anında tamamlanıyor. */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes osmos-reveal {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+}
+
+/*
+ * Yaklaşma ipucunun nefesi.
+ *
+ * Hareketsiz bir çizgi süs sanılıyor; nefes alan bir çizgi "burada bir şey
+ * bekliyor" diyor. Ölçek dikey ve alt kenardan büyüyor: yukarı doğru uzanan bir
+ * im, kaydırmanın yönünü de sessizce söylüyor.
+ *
+ * Sahne hareket azaltılmış modda zaten hiç çalışmıyor (kamera doğrudan yerine
+ * konuyor), dolayısıyla bu animasyonun ayrıca susturulmasına gerek yok.
+ */
+@keyframes osmos-breathe {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scaleY(0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
