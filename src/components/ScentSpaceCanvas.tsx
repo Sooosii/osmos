@@ -244,6 +244,29 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     }
   }, []);
 
+  /**
+   * Parfüm sayfasına geçiş — önce adres, sonra gezinme.
+   *
+   * `replaceState` şart. `router.push` geçmişe yeni bir kayıt ekliyor ama altta
+   * duran kayıt sade `/` olarak kalıyordu; tarayıcının geri tuşu oraya düşünce
+   * `?mark=` olmadığı için sahne baştan çalışıyor, dönen göz uzayı yeniden
+   * kazanmak zorunda kalıyordu. `parfum/[id]/page.tsx:82`'nin "iki yol tek
+   * davranışta buluşuyor" iddiası yalnızca sayfadaki bağlantı için doğruydu.
+   * Alttaki kaydı `/?mark=<id>` ile değiştirince geri tuşu da aynı yere düşüyor.
+   *
+   * `window.history` doğrudan kullanılıyor: Next yönlendiricisi bu çağrıyı
+   * tanıyor ve `useSearchParams` ile eşitliyor. Eşitlemenin tetiklediği
+   * `centerOn` kamerayı zaten üstünde durduğu parfüme ortalıyor, yani yerinde
+   * kalıyor — geçişte görünür bir sıçrama yok.
+   */
+  const enterPerfume = useCallback(
+    (id: string) => {
+      window.history.replaceState(null, '', `/?mark=${id}`);
+      router.push(`/parfum/${id}`);
+    },
+    [router],
+  );
+
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     const viewport = viewportRef.current;
@@ -325,12 +348,12 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     if (hold && holdComplete && !navigatingRef.current) {
       navigatingRef.current = true;
       holdRef.current = null;
-      router.push(`/parfum/${hold.markId}`);
+      enterPerfume(hold.markId);
     }
 
     // Tutma sürerken de kare istiyoruz: halka dolmalı.
     if (animationRef.current || holdRef.current) requestDraw();
-  }, [marks, markById, requestDraw, router]);
+  }, [marks, markById, requestDraw, enterPerfume]);
 
   useEffect(() => {
     drawRef.current = draw;
@@ -617,7 +640,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
       // sonraki tekerlek olayları aynı gezinmeyi tekrar tekrar iterdi.
       if (entryRef.current.progress >= 1 && entryRef.current.markId && !navigatingRef.current) {
         navigatingRef.current = true;
-        router.push(`/parfum/${entryRef.current.markId}`);
+        enterPerfume(entryRef.current.markId);
       }
 
       requestDraw();
@@ -625,7 +648,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
 
     canvas.addEventListener('wheel', onWheel, { passive: false });
     return () => canvas.removeEventListener('wheel', onWheel);
-  }, [finishApproach, localPoint, markById, paintScene, requestDraw, router]);
+  }, [enterPerfume, finishApproach, localPoint, markById, paintScene, requestDraw]);
 
   useEffect(
     () => () => {
