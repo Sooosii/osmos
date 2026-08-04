@@ -2,7 +2,8 @@ import { describe, expect, test } from 'vitest';
 import {
   CENTER_X,
   CENTER_Y,
-  LABEL_RESERVE,
+  LABEL_HALF_WIDTH,
+  LABEL_RISE,
   VIEW_HEIGHT,
   VIEW_WIDTH,
   horizonPath,
@@ -81,14 +82,14 @@ describe('projectSeat', () => {
   test('etiketler de çerçeveye sığıyor — asıl taşan şey onlar', () => {
     // Noktanın sığması yetmiyor: adın yazıldığı yer dışarı taşarsa kesilir.
     // Bu sınama olmasaydı yarıçapı büyütürken sessizce kırpma yapardım.
+    // Ad noktanın üstünde ortalı, yani iki yana da yarım genişlik kadar taşıyor.
     for (let step = 0; step < 120; step += 1) {
       const phase = (step / 120) * Math.PI * 2;
       for (const seat of seats) {
         const node = projectSeat(seat, phase);
-        const labelEdge =
-          node.anchor === 'start' ? node.x + LABEL_RESERVE : node.x - LABEL_RESERVE;
-        expect(labelEdge).toBeGreaterThanOrEqual(0);
-        expect(labelEdge).toBeLessThanOrEqual(VIEW_WIDTH);
+        expect(node.x - LABEL_HALF_WIDTH).toBeGreaterThanOrEqual(0);
+        expect(node.x + LABEL_HALF_WIDTH).toBeLessThanOrEqual(VIEW_WIDTH);
+        expect(node.y - LABEL_RISE * node.scale).toBeGreaterThanOrEqual(0);
       }
     }
   });
@@ -123,13 +124,12 @@ describe('projectSeat', () => {
     expect(on.fade).toBeGreaterThan(arka.fade);
   });
 
-  test('etiket yönü merkeze göre dışa bakıyor', () => {
-    for (const seat of seats) {
-      for (let step = 0; step < 24; step += 1) {
-        const node = projectSeat(seat, (step / 24) * Math.PI * 2);
-        expect(node.anchor).toBe(node.x >= CENTER_X ? 'start' : 'end');
-      }
-    }
+  test('etiketin bir yanı yok — sıçrayacak bir şey kalmadı', () => {
+    // Eskiden ad ekrandaki x'e göre sağa ya da sola yaslanıyordu ve komşu merkezin
+    // öbür yanına geçtiği anda bir taraftan diğerine sıçrıyordu. Artık ortalı;
+    // bu sınama `anchor`ın geri gelmesini engelliyor.
+    const node = projectSeat(seats[0], 0) as Record<string, unknown>;
+    expect('anchor' in node).toBe(false);
   });
 });
 

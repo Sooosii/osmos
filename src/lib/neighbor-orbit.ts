@@ -29,19 +29,26 @@
 
 /** SVG'nin iç koordinat genişliği; ekranda `width:100%` ile esniyor. */
 export const VIEW_WIDTH = 420;
-export const VIEW_HEIGHT = 280;
+export const VIEW_HEIGHT = 300;
 
 export const CENTER_X = VIEW_WIDTH / 2;
 export const CENTER_Y = VIEW_HEIGHT / 2;
 
 /**
- * Etiket için noktanın yanında ayrılan yer.
+ * Adın yarı genişliği — etiket noktanın üstünde ORTALANIYOR.
+ *
+ * Eskiden noktanın sağına ya da soluna yaslanıyordu ve yan, ekrandaki x'e göre
+ * seçiliyordu: komşu dönerken merkezin öbür yanına geçtiği anda ad bir taraftan
+ * diğerine sıçrıyordu. Sahip haklı olarak "saçma" dedi. Ortalamak yanı tamamen
+ * ortadan kaldırıyor, dolayısıyla sıçrayacak bir şey de kalmıyor.
  *
  * Veri setindeki en uzun ad "Miami Tropical Confessions" (26 karakter) ve yanına
- * bir de yüzde geliyor. Tahminle konmadı: yarıçapları büyütürken asıl taşan şeyin
- * nokta değil ad olduğu sınamayla yakalandı, sabit de o sınamanın ölçüsü.
+ * bir de yüzde geliyor. Değer tahminle konmadı; taşma sınaması bunu denetliyor.
  */
-export const LABEL_RESERVE = 78;
+export const LABEL_HALF_WIDTH = 46;
+
+/** Adın noktanın ne kadar üstüne yazıldığı. */
+export const LABEL_RISE = 11;
 
 /** En benzeyen komşunun yarıçapı. Merkez çekirdeğine değmeyecek kadar dışarıda. */
 const RADIUS_MIN = 52;
@@ -104,7 +111,6 @@ export interface OrbitNode {
   readonly z: number;
   /** Öndekini parlatan, arkadakini söndüren katsayı, 0–1. */
   readonly fade: number;
-  readonly anchor: 'start' | 'end';
 }
 
 /**
@@ -173,8 +179,6 @@ export function projectSeat(seat: OrbitSeat, phase: number): OrbitNode {
     scale: projected.scale,
     z: projected.z,
     fade,
-    // Sağ yarıdaki etiket sola yaslı yazılsa çerçevenin dışına taşardı.
-    anchor: projected.x >= CENTER_X ? 'start' : 'end',
   };
 }
 

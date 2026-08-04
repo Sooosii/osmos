@@ -7,6 +7,7 @@ import {
   CENTER_Y,
   VIEW_HEIGHT,
   VIEW_WIDTH,
+  LABEL_RISE,
   horizonPath,
   orbitSeats,
   projectSeat,
@@ -54,7 +55,6 @@ export function NeighborOrbit({
   label,
 }: NeighborOrbitProps) {
   const groupRefs = useRef<(SVGGElement | null)[]>([]);
-  const lineRefs = useRef<(SVGLineElement | null)[]>([]);
   const haloRefs = useRef<(SVGCircleElement | null)[]>([]);
   const dotRefs = useRef<(SVGCircleElement | null)[]>([]);
   const textRefs = useRef<(SVGTextElement | null)[]>([]);
@@ -99,13 +99,6 @@ export function NeighborOrbit({
           (isBehind ? backRef.current : frontRef.current)?.appendChild(group);
         }
 
-        const line = lineRefs.current[index];
-        if (line) {
-          line.setAttribute('x2', node.x.toFixed(1));
-          line.setAttribute('y2', node.y.toFixed(1));
-          line.setAttribute('opacity', (0.06 + node.fade * 0.16).toFixed(3));
-        }
-
         const halo = haloRefs.current[index];
         if (halo) {
           halo.setAttribute('cx', node.x.toFixed(1));
@@ -124,12 +117,11 @@ export function NeighborOrbit({
 
         const text = textRefs.current[index];
         if (text) {
-          text.setAttribute(
-            'x',
-            (node.x + (node.anchor === 'end' ? -9 : 9)).toFixed(1),
-          );
-          text.setAttribute('y', (node.y + 3.4).toFixed(1));
-          text.setAttribute('text-anchor', node.anchor);
+          // Ortalı ve hep noktanın üstünde: yan seçimi yok, dolayısıyla dönerken
+          // sıçrama da yok. `text-anchor` bir kez JSX'te veriliyor, her karede
+          // yazılmıyor.
+          text.setAttribute('x', node.x.toFixed(1));
+          text.setAttribute('y', (node.y - LABEL_RISE * node.scale).toFixed(1));
           text.setAttribute('opacity', (0.28 + node.fade * 0.62).toFixed(3));
         }
       });
@@ -172,18 +164,6 @@ export function NeighborOrbit({
                 groupRefs.current[index] = element;
               }}
             >
-              <line
-                ref={(element) => {
-                  lineRefs.current[index] = element;
-                }}
-                x1={CENTER_X}
-                y1={CENTER_Y}
-                x2={CENTER_X}
-                y2={CENTER_Y}
-                stroke={neighbor.color}
-                strokeWidth={0.7}
-                opacity={0}
-              />
               <Link href={`/parfum/${neighbor.id}`} className="group">
                 <circle
                   ref={(element) => {
@@ -212,6 +192,7 @@ export function NeighborOrbit({
                   }}
                   x={CENTER_X}
                   y={CENTER_Y}
+                  textAnchor="middle"
                   fill="#ffffff"
                   fontSize="9.5"
                   opacity={0}
