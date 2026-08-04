@@ -28,7 +28,8 @@ yerine göstermek gerekiyor.
 |---|---|---|
 | Biçim | Harita parçası | Üç seçenek (liste / liste+gerekçe / parça) sunuldu |
 | İşlev | Adlar yazılı, tıklanınca o parfüme gidiyor | Doğrudan seçildi |
-| Konum kaynağı | Ölçülüp karar verilecek — aşağıya bak | "Önce ölçelim, sonra karar" |
+| Konum kaynağı | **Gerçek uzay konumları (kırpılmış)** | Ölçüldü, üç seçenek çizilip görüldü |
+| Komşu tanımı | **Benzerlik top-5** (haritadaki yakınlık değil) | Sahip kararı, ölçümü gördükten sonra |
 | Komşu sayısı | **5** | Aşağıda gerekçesi |
 
 Beş, sabitlenmiş bir sayı değil bir başlangıç: `nearestNeighbors`'ın `count`
@@ -54,6 +55,42 @@ Karar kuralı sonucu görmeden yazıldı ki sonradan eğilip bükülmesin:
 - ortalama örtüşme **< 4/5** → fark büyüklüğüyle birlikte sahibe sunulur; varsayılan
   öneri yine gerçek konumlar, çünkü iki ekranın aynı şeyi farklı göstermesi bu
   projede daha ağır bir kusur
+
+### Ölçüm sonucu (44 parfüm)
+
+| | |
+|---|---|
+| Ortalama örtüşme | **3.16 / 5** (%63) |
+| En kötü | `frederic-malle-bigarade-concentree` — 1/5 |
+| Benzerlik top-5'te olup 2B top-**10** dışında | 35 / 220 (%16) |
+
+Dağılım: 5/5 → 4 parfüm, 4/5 → 15, 3/5 → 13, 2/5 → 8, 1/5 → 4.
+
+Eşik geçilmedi, yani karar sahibe gitti. Üç seçenek gerçek veriyle çizilip yan yana
+gösterildi (en iyi / ortanca / en kötü vaka). **Sahip B'yi seçti: gerçek konumlar,
+komşu tanımı benzerlik.**
+
+Gerekçe: "en benzer" iddiası korunuyor ve projeksiyonun bilgi kaybettiği gizlenmiyor.
+Uzağa düşen bir komşu, kaybın kendisini görünür kılıyor.
+
+### Kabul edilen bedel — ölçülerek
+
+Uzaktaki bir komşuyu çerçeveye almak pencereyi büyütüyor, pencere büyüyünce araya
+komşu olmayan noktalar doluyor:
+
+| Parfüm (örtüşme) | Pencere A | Pencere B | Penceredeki nokta |
+|---|---|---|---|
+| Bonbon Pop (5/5) | 0.185 | 0.185 | 6 → 6 |
+| Blamage (3/5) | 0.270 | 0.517 | 6 → 11 |
+| Bigarade (1/5) | 0.589 | 0.737 | 11 → 16 |
+
+En kötü vakada 44 parfümün 16'sı pencereye giriyor. Sahibe bu sayılarla söylendi ve
+B yine de seçildi — bilinçli ödün, "sonradan fark edildi" değil.
+
+**Bunu düzeltmeye çalışan biri için:** pencereyi daraltıp uzak komşuyu kenara
+kelepçelemek (off-screen göstergesi) akla gelen ilk çözüm. Denenebilir, ama ancak
+Doğrulama 6'daki etiket ölçümü gerçek bir çakışma gösterirse. Ölçüm temizse
+dokunulmayacak: B'nin bütün değeri o uzaklığı göstermesinde.
 
 ## Mimari
 
