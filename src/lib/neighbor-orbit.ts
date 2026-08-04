@@ -75,14 +75,29 @@ const WEAKEST_SCORE = 0.4;
 const HEIGHT_SCALE = 62;
 
 /**
- * Kameranın aşağı bakış açısı.
+ * Yörünge düzleminin dikliği — kameranın aşağı bakış açısı.
  *
- * Sıfır olsaydı yatay çember ekranda düz bir çizgiye çöker, derinlik hiç
- * okunmazdı. Fazlası tepeden bakışa döner ve dönüş hissi kaybolur.
+ * Ekrandaki elipsin dikey yarıçapı `radius · sin(PITCH)`. Sıfır olsaydı halka düz
+ * bir çizgiye çöker, derinlik hiç okunmazdı.
+ *
+ * **Dikey yörünge denendi ve geri alındı.** 1.15'e çıkarılınca (dikey yarıçap
+ * yarıçapın %91'i) komşular yukarı çıkıp aşağı iniyordu; sahibin istediği hareket
+ * buydu ama sonuç daha az üç boyutlu duruyordu: halka neredeyse tam daireye
+ * dönüşünce uzayda yatan bir disk değil, düz bir çember gibi okunuyor. Perspektif
+ * yüzünden halkanın görsel merkezi de çekirdekten kayıyordu. Sahip görüp yatık
+ * hâle dönme kararı verdi. Denemek istersen `PITCH = 1.15`, `FOCAL = 200`,
+ * `VIEW_HEIGHT = 340` — ama önce bu paragrafı oku.
  */
 const PITCH = 0.42;
 
-/** Perspektifin sertliği; büyüdükçe izdüşüm ortogonale yaklaşır. */
+/**
+ * Perspektifin sertliği; büyüdükçe izdüşüm ortogonale yaklaşır.
+ *
+ * `PITCH` ile birlikte ayarlanmalı: dikey yörünge denemesinde eğim büyüyünce
+ * derinlik bileşeni `cos(PITCH)` ile küçülmüş, öndeki ile arkadaki nokta
+ * arasındaki büyüklük farkı %20'nin altına düşmüştü ve sınama yakalamıştı.
+ * Orada 200'e indirmek gerekmişti; yatık hâlde 480 yeterli.
+ */
 const FOCAL = 480;
 
 export interface OrbitNeighbor {
