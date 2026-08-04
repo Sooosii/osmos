@@ -45,3 +45,6 @@ next-env.d.ts
 /.playwright-mcp/
 /OSMOS*.png
 /approach-*.png
+
+# beyin fırtınası görsel sekmesinin mockup'ları — tartışmanın izi, işin kaydı değil
+/.superpowers/
