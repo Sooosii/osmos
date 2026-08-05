@@ -129,7 +129,8 @@ export function NeighborOrbit({
       if (!still) frame = requestAnimationFrame(step);
     });
 
-    // Sökülürken kareyi iptal et. `ScentSpaceCanvas.tsx:634` aynı tuzağı anlatıyor:
+    // Sökülürken kareyi iptal et. `ScentSpaceCanvas.tsx`'in temizleme etkisi aynı
+    // tuzağı anlatıyor:
     // iptal edilmeyen kare, bileşen geri geldiğinde döngüyü kilitliyor.
     return () => cancelAnimationFrame(frame);
   }, [seats]);
