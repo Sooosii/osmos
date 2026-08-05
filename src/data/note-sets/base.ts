@@ -52,6 +52,17 @@ export const BASE_NOTES: readonly Note[] = [
     character: { temperature: 0.6, texture: 0.5, cleanliness: -0.2, proximity: 0.3 },
   },
   {
+    id: 'cypriol',
+    name: { en: 'Cypriol', tr: 'Cypriol' },
+    families: { woody: 0.8, leather: 0.4, mossy: 0.3, resinous: 0.2 },
+    volatility: { peakMinutes: 90, halfLifeMinutes: 600 },
+    character: { temperature: 0.4, texture: 0.8, cleanliness: -0.5, proximity: 0.3 },
+    description: {
+      en: 'A smoked root reading as leather and dry earth — often used where oud is expected.',
+      tr: 'Deri ve kuru toprak gibi okunan, tütsülenmiş bir kök — çoğu zaman udun beklendiği yerde kullanılır.',
+    },
+  },
+  {
     id: 'oud',
     name: { en: 'Oud', tr: 'Oud' },
     families: { woody: 1.0, animalic: 0.7, leather: 0.4, resinous: 0.2 },
@@ -165,6 +176,17 @@ export const BASE_NOTES: readonly Note[] = [
     families: { resinous: 0.8, gourmand: 0.4, musk: 0.3 },
     volatility: { peakMinutes: 120, halfLifeMinutes: 660 },
     character: { temperature: 0.9, texture: -0.5, cleanliness: 0.2, proximity: 0.6 },
+  },
+  {
+    id: 'mystikal',
+    name: { en: 'Mystikal', tr: 'Mystikal' },
+    families: { resinous: 0.6, musk: 0.3, woody: 0.2 },
+    volatility: { peakMinutes: 100, halfLifeMinutes: 700 },
+    character: { temperature: 0.2, texture: 0.2, cleanliness: 0.1, proximity: 0.2 },
+    description: {
+      en: 'A captive molecule with no source in nature — smoky and faintly sacred, incense reduced to one note.',
+      tr: 'Doğada karşılığı olmayan tescilli bir molekül — dumanlı ve hafifçe kutsal; tütsünün tek notaya indirgenmiş hâli.',
+    },
   },
 
   // ——— Deri ———

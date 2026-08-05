@@ -61,6 +61,17 @@ export const HEART_NOTES: readonly Note[] = [
     character: { temperature: 0.3, texture: -0.3, cleanliness: 0.4, proximity: -0.4 },
   },
   {
+    id: 'lily-of-the-valley',
+    name: { en: 'Lily of the Valley', tr: 'Müge' },
+    families: { floral: 1.0, green: 0.4 },
+    volatility: { peakMinutes: 25, halfLifeMinutes: 150 },
+    character: { temperature: -0.4, texture: 0.2, cleanliness: 0.8, proximity: -0.5 },
+    description: {
+      en: 'A flower nobody can extract: green, dewy, and rebuilt from scratch every time.',
+      tr: 'Kimsenin özütleyemediği çiçek: yeşil, çiyli ve her seferinde sıfırdan kurulan.',
+    },
+  },
+  {
     id: 'cherry-blossom',
     name: { en: 'Cherry Blossom', tr: 'Kiraz çiçeği' },
     families: { floral: 0.9, fruity: 0.3, gourmand: 0.2 },
@@ -258,6 +269,28 @@ export const HEART_NOTES: readonly Note[] = [
     character: { temperature: 0.4, texture: -0.2, cleanliness: 0.3, proximity: 0.1 },
   },
   {
+    id: 'dorayaki',
+    name: { en: 'Dorayaki', tr: 'Dorayaki' },
+    families: { gourmand: 1.0, spicy: 0.1 },
+    volatility: { peakMinutes: 35, halfLifeMinutes: 260 },
+    character: { temperature: 0.5, texture: -0.4, cleanliness: 0.2, proximity: 0.3 },
+    description: {
+      en: 'Two warm pancakes around sweet bean paste — sugar with flour in it, not sugar alone.',
+      tr: 'Tatlı fasulye ezmesini saran iki sıcak krep — yalnız şeker değil, içinde un olan şeker.',
+    },
+  },
+  {
+    id: 'solar-accord',
+    name: { en: 'Solar Accord', tr: 'Güneş akordu' },
+    families: { gourmand: 0.5, floral: 0.3, musk: 0.2 },
+    volatility: { peakMinutes: 40, halfLifeMinutes: 300 },
+    character: { temperature: 0.7, texture: -0.6, cleanliness: 0.3, proximity: 0.6 },
+    description: {
+      en: 'Suntan lotion on hot skin — not a material but a memory, built from coconut and salicylates.',
+      tr: 'Sıcak tende güneş kremi — bir malzeme değil bir hatıra; hindistan cevizi ve salisilatlardan kurulmuş.',
+    },
+  },
+  {
     id: 'coffee',
     name: { en: 'Coffee', tr: 'Kahve' },
     families: { gourmand: 0.8, woody: 0.3, spicy: 0.2 },
@@ -317,8 +350,30 @@ export const HEART_NOTES: readonly Note[] = [
     volatility: { peakMinutes: 50, halfLifeMinutes: 400 },
     character: { temperature: 0.8, texture: -0.2, cleanliness: -0.4, proximity: 0.4 },
   },
+  {
+    id: 'immortelle',
+    name: { en: 'Immortelle', tr: 'Ölmez çiçek' },
+    families: { gourmand: 0.6, aromatic: 0.4, floral: 0.3 },
+    volatility: { peakMinutes: 60, halfLifeMinutes: 450 },
+    character: { temperature: 0.7, texture: 0.1, cleanliness: -0.1, proximity: 0.3 },
+    description: {
+      en: 'Maple syrup and curry powder in the same breath — sweet, dry and faintly savoury.',
+      tr: 'Aynı nefeste akçaağaç şurubu ve köri — tatlı, kuru ve hafifçe yemeksi.',
+    },
+  },
 
   // ——— Aromatik ve baharat ———
+  {
+    id: 'black-tea',
+    name: { en: 'Black Tea', tr: 'Siyah çay' },
+    families: { aromatic: 0.5, woody: 0.4, mossy: 0.2 },
+    volatility: { peakMinutes: 25, halfLifeMinutes: 180 },
+    character: { temperature: 0.2, texture: 0.5, cleanliness: 0.4, proximity: -0.2 },
+    description: {
+      en: 'Dry tannin and smoke — a leaf that smells more of paper and wood than of a drink.',
+      tr: 'Kuru tanen ve duman — içecekten çok kâğıt ve odun kokan bir yaprak.',
+    },
+  },
   {
     id: 'lavender',
     name: { en: 'Lavender', tr: 'Lavanta' },

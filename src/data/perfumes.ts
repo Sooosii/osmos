@@ -5,6 +5,7 @@ import { CURATED_B } from './perfume-sets/curated-b';
 import { CURATED_C } from './perfume-sets/curated-c';
 import { CURATED_D } from './perfume-sets/curated-d';
 import { CURATED_E } from './perfume-sets/curated-e';
+import { CURATED_F } from './perfume-sets/curated-f';
 import { FILLERS } from './perfume-sets/fillers';
 
 /**
@@ -21,6 +22,7 @@ export const PERFUMES: readonly Perfume[] = [
   ...CURATED_C,
   ...CURATED_D,
   ...CURATED_E,
+  ...CURATED_F,
   ...FILLERS,
 ];
 
