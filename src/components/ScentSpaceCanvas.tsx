@@ -8,27 +8,16 @@ import {
   type Camera,
   type Viewport,
   centerOn,
-  focusOn,
-  hitTest,
-  panBy,
   worldToScreen,
   boundsOf,
-  zoomAt,
 } from '@/lib/space-camera';
 import { drawSpace } from '@/lib/space-draw';
 import { prefersReducedMotion } from '@/lib/motion';
 import { useCanvasSize } from '@/components/space/use-canvas-size';
-import {
-  type EntryState,
-  HOLD_DURATION,
-  NO_ENTRY,
-  advance,
-  canEnter,
-  holdEnabledFor,
-  holdTargetHit,
-} from '@/lib/space-entry';
+import { type EntryState, HOLD_DURATION, NO_ENTRY } from '@/lib/space-entry';
 import { APPROACH_CUE, START_SCALE } from '@/lib/space-approach';
 import { useApproachScene } from '@/components/space/use-approach-scene';
+import { useSpaceInput } from '@/components/space/use-space-input';
 
 /**
  * Koku Uzayı — sitenin ana ekranı.
@@ -45,15 +34,6 @@ import { useApproachScene } from '@/components/space/use-approach-scene';
  * gelinen nokta) tutuyor; kamera doğrudan tuvale gidiyor.
  */
 
-/** Bu kadar pikselden fazla kaydırıldıysa parmak kalkışı tıklama sayılmıyor. */
-const CLICK_SLOP = 4;
-
-/** Tekerlek hassasiyeti. Üstel çünkü yakınlaşma çarpımsal: her tık aynı oranı ekler. */
-const WHEEL_SENSITIVITY = 0.0015;
-
-/** Tekerleği "satır" biriminde bildiren tarayıcılar için piksel karşılığı. */
-const LINE_HEIGHT = 16;
-
 /** Klavyeyle bir noktaya gitme süresi (ms). */
 const FOCUS_DURATION = 420;
 
@@ -61,20 +41,6 @@ interface Animation {
   readonly from: Camera;
   readonly to: Camera;
   readonly start: number;
-}
-
-/** Ekranda basılı duran tek bir parmak/imleç. */
-interface PointerPosition {
-  readonly x: number;
-  readonly y: number;
-}
-
-/** Süren sürükleme. `moved` toplam yol — dokunuş mu sürükleme mi buradan anlaşılıyor. */
-interface DragState {
-  readonly id: number;
-  readonly lastX: number;
-  readonly lastY: number;
-  readonly moved: number;
 }
 
 interface ScentSpaceCanvasProps {
@@ -146,15 +112,17 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
    * olduğu — ikisi de saniyede birkaç kez değişiyor, kare başına değil.
    */
   const entryRef = useRef<EntryState>(NO_ENTRY);
-  /** Süren basılı tutma. Saat çizim döngüsünde okunuyor — ayrı bir zamanlayıcı yok. */
+  /**
+   * Süren basılı tutma ve "gezinme başladı" bayrağı.
+   *
+   * Girdi kancası bunları yazıyor ama burada bildiriliyorlar: saati işleten
+   * `draw`, yani okuyan taraf burası. Ayrı bir zamanlayıcı yok — tek saat
+   * `performance.now()`, tek tüketici çizim döngüsü.
+   */
   const holdRef = useRef<{ markId: string; startedAt: number } | null>(null);
+  const navigatingRef = useRef(false);
   const [entryHint, setEntryHint] = useState(false);
   const [entryProgress, setEntryProgress] = useState(0);
-  const navigatingRef = useRef(false);
-
-  const pointersRef = useRef(new Map<number, PointerPosition>());
-  const dragRef = useRef<DragState | null>(null);
-  const pinchRef = useRef<number | null>(null);
 
   const markById = useMemo(() => new Map(marks.map((mark) => [mark.id, mark])), [marks]);
   const selected = selectedId ? (markById.get(selectedId) ?? null) : null;
@@ -202,6 +170,125 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     },
     [router],
   );
+
+
+  const select = useCallback(
+    (id: string | null) => {
+      selectedRef.current = id;
+      setSelectedId(id);
+
+      // Seçim değişti: biriken giriş niyeti o parfüme aitti, devredilmiyor.
+      // Sıfırlamasaydık başka bir noktaya basıp tek çentik çevirmek, önceki
+      // parfümde biriktirilmiş yolun üstüne binip sayfayı açardı.
+      entryRef.current = NO_ENTRY;
+      setEntryHint(false);
+      setEntryProgress(0);
+
+      /*
+       * Sayfayı şimdiden hazırla.
+       *
+       * "Tuttum, açılması çok yavaş" şikâyetinin sebebi buydu: `router.push`
+       * ancak basıldığı anda sayfayı istemeye başlıyordu, yani bekleme
+       * animasyonun değil ağın/derlemenin süresiydi. Seçim, açma niyetinden
+       * her zaman önce geliyor — hazırlık için doğru an burası. Kullanıcı
+       * tutmaya karar verdiğinde sayfa çoktan gelmiş oluyor.
+       */
+      if (id) router.prefetch(`/parfum/${id}`);
+
+      requestDraw();
+    },
+    [requestDraw, router],
+  );
+
+  /*
+   * ⚠️ Yaklaşma sahnesi burada, `?mark=` etkisinin ÜSTÜNDE kuruluyor ve sıra
+   * kritik. Kancanın "sahne çalışsın mı?" etkisi iptal kararında kamerayı
+   * `INITIAL_CAMERA`'ya (ölçek 1) alıyor; hemen aşağıdaki `?mark=` etkisi ise
+   * `centerOn` ile ölçeği koruyarak ortalıyor. React etkileri bildirim sırasına
+   * göre çalıştığı için ters sırada ortalama, yaklaşmanın 0.14'lük ölçeğiyle
+   * yapılır ve parfüm sayfasından dönen göz uzayı minicik görürdü.
+   *
+   * Yani bu çağrı aşağı kaydırılamaz. Gerekçenin tamamı `use-approach-scene.ts`te.
+   */
+  const approach = useApproachScene({ canvasRef, cameraRef, cueRef, introRef, requestDraw });
+
+  /**
+   * `/?mark=<id>` ile dönüş — parfüm sayfasından geri gelen göz.
+   *
+   * Kamera animasyonsuz, doğrudan yerine konuyor: bu bir hareket değil, açılış
+   * durumu. Yolculuk animasyonu çalıştırmak, kullanıcının hiç görmediği bir
+   * yerden tanıdık noktaya doğru anlamsız bir kayma üretirdi.
+   *
+   * Adres bilerek temizlenmiyor; sayfayı yenilemek ya da bağlantıyı paylaşmak
+   * aynı görünüme düşüyor.
+   */
+  useEffect(() => {
+    const id = searchParams.get('mark');
+    if (!id) return;
+
+    const mark = markById.get(id);
+    if (!mark) return;
+
+    selectedRef.current = id;
+    setSelectedId(id);
+    cameraRef.current = centerOn(cameraRef.current, mark);
+    requestDraw();
+  }, [markById, requestDraw, searchParams]);
+
+  const setHovered = useCallback(
+    (id: string | null) => {
+      if (hoveredRef.current === id) return;
+      hoveredRef.current = id;
+      setHoveredId(id);
+      requestDraw();
+    },
+    [requestDraw],
+  );
+
+  /** Kamerayı hedefe taşır — hareket kısıtlıysa anında, değilse yumuşayarak. */
+  const moveTo = useCallback(
+    (target: Camera) => {
+      if (prefersReducedMotion()) {
+        animationRef.current = null;
+        cameraRef.current = target;
+      } else {
+        animationRef.current = { from: cameraRef.current, to: target, start: performance.now() };
+      }
+      requestDraw();
+    },
+    [requestDraw],
+  );
+
+  /*
+   * Girdi yolları — işaretçi, sürükleme, sıkıştırma, tutma, tekerlek.
+   *
+   * `draw`'dan ÖNCE kuruluyor çünkü çizim döngüsü tutma saatini bu kancanın
+   * ref'lerinden okuyor. Tekerlek dinleyicisinin burada, yaklaşma ile `?mark=`
+   * etkilerinin arasında bildirilmesi zararsız: etki yalnızca dinleyici bağlıyor,
+   * kameraya dokunmuyor.
+   */
+  useCanvasSize({ canvasRef, viewportRef, boundsRef, requestDraw });
+
+  const input = useSpaceInput({
+    marks,
+    markById,
+    canvasRef,
+    cameraRef,
+    viewportRef,
+    animationRef,
+    selectedRef,
+    entryRef,
+    holdRef,
+    navigatingRef,
+    approach,
+    select,
+    setHovered,
+    moveTo,
+    enterPerfume,
+    setEntryHint,
+    setEntryProgress,
+    requestDraw,
+  });
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -296,174 +383,6 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     requestDraw();
   }, [draw, requestDraw]);
 
-  const select = useCallback(
-    (id: string | null) => {
-      selectedRef.current = id;
-      setSelectedId(id);
-
-      // Seçim değişti: biriken giriş niyeti o parfüme aitti, devredilmiyor.
-      // Sıfırlamasaydık başka bir noktaya basıp tek çentik çevirmek, önceki
-      // parfümde biriktirilmiş yolun üstüne binip sayfayı açardı.
-      entryRef.current = NO_ENTRY;
-      setEntryHint(false);
-      setEntryProgress(0);
-
-      /*
-       * Sayfayı şimdiden hazırla.
-       *
-       * "Tuttum, açılması çok yavaş" şikâyetinin sebebi buydu: `router.push`
-       * ancak basıldığı anda sayfayı istemeye başlıyordu, yani bekleme
-       * animasyonun değil ağın/derlemenin süresiydi. Seçim, açma niyetinden
-       * her zaman önce geliyor — hazırlık için doğru an burası. Kullanıcı
-       * tutmaya karar verdiğinde sayfa çoktan gelmiş oluyor.
-       */
-      if (id) router.prefetch(`/parfum/${id}`);
-
-      requestDraw();
-    },
-    [requestDraw, router],
-  );
-
-  /*
-   * ⚠️ Yaklaşma sahnesi burada, `?mark=` etkisinin ÜSTÜNDE kuruluyor ve sıra
-   * kritik. Kancanın "sahne çalışsın mı?" etkisi iptal kararında kamerayı
-   * `INITIAL_CAMERA`'ya (ölçek 1) alıyor; hemen aşağıdaki `?mark=` etkisi ise
-   * `centerOn` ile ölçeği koruyarak ortalıyor. React etkileri bildirim sırasına
-   * göre çalıştığı için ters sırada ortalama, yaklaşmanın 0.14'lük ölçeğiyle
-   * yapılır ve parfüm sayfasından dönen göz uzayı minicik görürdü.
-   *
-   * Yani bu çağrı aşağı kaydırılamaz. Gerekçenin tamamı `use-approach-scene.ts`te.
-   */
-  const approach = useApproachScene({ canvasRef, cameraRef, cueRef, introRef, requestDraw });
-
-  /**
-   * `/?mark=<id>` ile dönüş — parfüm sayfasından geri gelen göz.
-   *
-   * Kamera animasyonsuz, doğrudan yerine konuyor: bu bir hareket değil, açılış
-   * durumu. Yolculuk animasyonu çalıştırmak, kullanıcının hiç görmediği bir
-   * yerden tanıdık noktaya doğru anlamsız bir kayma üretirdi.
-   *
-   * Adres bilerek temizlenmiyor; sayfayı yenilemek ya da bağlantıyı paylaşmak
-   * aynı görünüme düşüyor.
-   */
-  useEffect(() => {
-    const id = searchParams.get('mark');
-    if (!id) return;
-
-    const mark = markById.get(id);
-    if (!mark) return;
-
-    selectedRef.current = id;
-    setSelectedId(id);
-    cameraRef.current = centerOn(cameraRef.current, mark);
-    requestDraw();
-  }, [markById, requestDraw, searchParams]);
-
-  const setHovered = useCallback(
-    (id: string | null) => {
-      if (hoveredRef.current === id) return;
-      hoveredRef.current = id;
-      setHoveredId(id);
-      requestDraw();
-    },
-    [requestDraw],
-  );
-
-  /** Kamerayı hedefe taşır — hareket kısıtlıysa anında, değilse yumuşayarak. */
-  const moveTo = useCallback(
-    (target: Camera) => {
-      if (prefersReducedMotion()) {
-        animationRef.current = null;
-        cameraRef.current = target;
-      } else {
-        animationRef.current = { from: cameraRef.current, to: target, start: performance.now() };
-      }
-      requestDraw();
-    },
-    [requestDraw],
-  );
-
-  /** Tuvalin sol üst köşesine göre imleç konumu. */
-  const localPoint = useCallback((clientX: number, clientY: number) => {
-    const rect = canvasRef.current?.getBoundingClientRect();
-    return rect ? { sx: clientX - rect.left, sy: clientY - rect.top } : { sx: 0, sy: 0 };
-  }, []);
-
-  /** İki parmağın mesafe oranı → yakınlaşma; çapa parmakların ortası. */
-  const applyPinch = useCallback(() => {
-    const [a, b] = [...pointersRef.current.values()];
-    if (!a || !b) return;
-
-    const distance = Math.hypot(a.x - b.x, a.y - b.y);
-    const previous = pinchRef.current;
-    pinchRef.current = distance;
-    if (previous === null || previous === 0) return;
-
-    const { sx, sy } = localPoint((a.x + b.x) / 2, (a.y + b.y) / 2);
-    cameraRef.current = zoomAt(cameraRef.current, sx, sy, distance / previous, viewportRef.current);
-    requestDraw();
-  }, [localPoint, requestDraw]);
-
-  useCanvasSize({ canvasRef, viewportRef, boundsRef, requestDraw });
-
-  // Tekerlek elle bağlanıyor: React'in onWheel'i pasif, preventDefault çalışmaz
-  // ve sayfa haritayla birlikte kayardı.
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const onWheel = (event: WheelEvent) => {
-      event.preventDefault();
-      animationRef.current = null;
-
-      const delta = event.deltaMode === 1 ? event.deltaY * LINE_HEIGHT : event.deltaY;
-
-      // Yaklaşma sürerken tekerlek yalnızca sahneye ait — `zoomAt` da giriş
-      // `advance`'ı da hiç çalışmıyor. Gerekçesi `consumeWheel`'in üstünde.
-      if (approach.consumeWheel(delta)) return;
-
-      const { sx, sy } = localPoint(event.clientX, event.clientY);
-      cameraRef.current = zoomAt(
-        cameraRef.current,
-        sx,
-        sy,
-        Math.exp(-delta * WHEEL_SENSITIVITY),
-        viewportRef.current,
-      );
-
-      /*
-       * Yakınlaşma ÖNCE, giriş SONRA — sıra önemli.
-       *
-       * `advance` şartları yeni kameraya göre okuyor. Tersi olsaydı tavana
-       * değdiren tekerlek adımı girişe sayılmaz, kullanıcı bir çentik boşa
-       * çevirirdi. Tavanda `zoomAt` kamerayı hiç değiştirmiyor, dolayısıyla
-       * ikisini arka arkaya çağırmak çakışmıyor.
-       */
-      const selected = selectedRef.current ? (markById.get(selectedRef.current) ?? null) : null;
-      entryRef.current = advance(entryRef.current, {
-        deltaY: delta,
-        selected,
-        camera: cameraRef.current,
-        viewport: viewportRef.current,
-      });
-
-      setEntryHint(canEnter(selected, cameraRef.current, viewportRef.current));
-      setEntryProgress(entryRef.current.progress);
-
-      // Eşik: bir kez geçiliyor. Bayrak olmasaydı yolculuk sırasında gelen
-      // sonraki tekerlek olayları aynı gezinmeyi tekrar tekrar iterdi.
-      if (entryRef.current.progress >= 1 && entryRef.current.markId && !navigatingRef.current) {
-        navigatingRef.current = true;
-        enterPerfume(entryRef.current.markId);
-      }
-
-      requestDraw();
-    };
-
-    canvas.addEventListener('wheel', onWheel, { passive: false });
-    return () => canvas.removeEventListener('wheel', onWheel);
-  }, [approach, enterPerfume, localPoint, markById, requestDraw]);
-
   useEffect(
     () => () => {
       if (frameRef.current === null) return;
@@ -478,162 +397,6 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     },
     [],
   );
-
-  /*
-   * Yaklaşma sürerken işaretçi yolları kapalı — sürükleme, tıklama, üstüne gelme.
-   *
-   * Zevk meselesi değil, ölçünün getirdiği bir zorunluluk: ölçek 0.14'te nokta
-   * yarıçapı `(3.4 + depth·4.6) · 0.14^0.5` ≈ 1.3–3 piksel. `hitTest`'in payı 8
-   * piksel, yani o mesafede "isabetli tıklama" diye bir şey yok — olabilecek tek
-   * şey, kullanıcının hangisi olduğunu göremediği bir parfüme yanlışlıkla düşmesi.
-   *
-   * Eşiğin eşik olmasının da tek yolu bu: sahnede yalnızca ileri gidilebiliyor.
-   */
-  const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    if (approach.isActive()) return;
-    animationRef.current = null;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-
-    if (pointersRef.current.size === 1) {
-      dragRef.current = {
-        id: event.pointerId,
-        lastX: event.clientX,
-        lastY: event.clientY,
-        moved: 0,
-      };
-
-      /*
-       * Basılı tutma yalnızca ZATEN SEÇİLİ noktada başlıyor.
-       *
-       * Seçim şartı olmasaydı uzayda gezinirken parmağını bir noktada unutmak
-       * sayfayı açardı. İki aşama — önce seç, sonra tut — niyeti ikiye bölüyor:
-       * ilk dokunuş "bunu merak ettim", ikincisi "içine gir".
-       *
-       * Hedef testi `hitTest` değil `holdTargetHit`: seçimden sonra kamera
-       * noktayı ekranın ortasına taşıdığı için kullanıcının bastığı yerde artık
-       * nokta olmayabiliyor ve tıklama payı (8 px) tutmayı sessizce düşürüyordu.
-       *
-       * Komşu bir noktanın üstündeysek tutma yine de başlamıyor: orada niyet
-       * "şuna geç", "buna gir" değil. Seçimi `handlePointerUp` yapıyor.
-       */
-      const { sx, sy } = localPoint(event.clientX, event.clientY);
-      const under = hitTest(marks, sx, sy, cameraRef.current, viewportRef.current);
-      const selectedMark = selectedRef.current
-        ? (markById.get(selectedRef.current) ?? null)
-        : null;
-      const overNeighbour = under !== null && under.id !== selectedMark?.id;
-
-      if (
-        selectedMark &&
-        !overNeighbour &&
-        holdEnabledFor(selectedMark.id) &&
-        holdTargetHit(selectedMark, sx, sy, cameraRef.current, viewportRef.current)
-      ) {
-        holdRef.current = { markId: selectedMark.id, startedAt: performance.now() };
-        requestDraw();
-      }
-      return;
-    }
-
-    // İkinci parmak indi: artık sıkıştırma. Başlamış tutma iptal.
-    holdRef.current = null;
-
-    // İkinci parmak indi: bu artık sürükleme değil, sıkıştırma.
-    dragRef.current = null;
-    pinchRef.current = null;
-  };
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    if (approach.isActive()) return;
-    const pointers = pointersRef.current;
-    const { sx, sy } = localPoint(event.clientX, event.clientY);
-
-    if (!pointers.has(event.pointerId)) {
-      // Basılı değil: fare geziniyor.
-      setHovered(hitTest(marks, sx, sy, cameraRef.current, viewportRef.current)?.id ?? null);
-      return;
-    }
-
-    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-
-    if (pointers.size >= 2) {
-      applyPinch();
-      return;
-    }
-
-    const drag = dragRef.current;
-    if (!drag) return;
-
-    const dx = event.clientX - drag.lastX;
-    const dy = event.clientY - drag.lastY;
-    dragRef.current = {
-      ...drag,
-      lastX: event.clientX,
-      lastY: event.clientY,
-      moved: drag.moved + Math.hypot(dx, dy),
-    };
-
-    // Parmak kaydıysa bu bir sürükleme; tutma niyeti bitti. Eşik tıklamayla
-    // aynı (`CLICK_SLOP`) — el titremesi iptal etmesin, gezinme etsin.
-    if (holdRef.current && dragRef.current && dragRef.current.moved > CLICK_SLOP) {
-      holdRef.current = null;
-      entryRef.current = NO_ENTRY;
-    }
-
-    cameraRef.current = panBy(cameraRef.current, dx, dy, viewportRef.current);
-    requestDraw();
-  };
-
-  const handlePointerUp = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    if (approach.isActive()) return;
-    const pointers = pointersRef.current;
-    pointers.delete(event.pointerId);
-    if (pointers.size < 2) pinchRef.current = null;
-
-    // Parmak kalktı: süre dolmadıysa açılma yok, halka söner.
-    // `navigatingRef` doluysa geçiş zaten başlamış, dokunmuyoruz.
-    if (holdRef.current) {
-      holdRef.current = null;
-      entryRef.current = NO_ENTRY;
-      requestDraw();
-    }
-
-    const drag = dragRef.current;
-    if (!drag || drag.id !== event.pointerId) {
-      // Sıkıştırmadan tek parmağa düşüş. İkinci parmak inerken sürükleme
-      // bırakılmıştı; kalan parmak devralmazsa harita, kullanıcı elini tamamen
-      // kaldırana kadar donuyor — oysa iki parmakla yakınlaşıp tek parmakla
-      // kaydırmaya devam etmek en yaygın el hareketlerinden biri.
-      if (pointers.size === 1) {
-        const [[id, position]] = [...pointers.entries()];
-        // `moved` eşiğin üstünde başlıyor: bu bir el hareketinin devamı, dokunuş
-        // değil. Sıfırdan başlasaydı parmağı kaldırmak seçim açardı.
-        dragRef.current = { id, lastX: position.x, lastY: position.y, moved: CLICK_SLOP + 1 };
-      }
-      return;
-    }
-    dragRef.current = null;
-
-    // Sürükleyip bırakmak seçim açmasın: harita gezdirilirken elin altındaki
-    // nokta seçilirse kullanıcı istemediği bir şeyi seçmiş olur.
-    if (drag.moved > CLICK_SLOP) return;
-
-    const { sx, sy } = localPoint(event.clientX, event.clientY);
-    const mark = hitTest(marks, sx, sy, cameraRef.current, viewportRef.current);
-
-    // Yeni bir parfüme basmak kamerayı ona getiriyor: seçmek "bunu merak
-    // ettim" demek, kameranın karşılığı yaklaşmak. Zaten seçili olana tekrar
-    // basınca kamera oynamıyor — kullanıcı o sırada tutmaya hazırlanıyor
-    // olabilir, ayağının altından harita kaymasın.
-    if (mark && mark.id !== selectedRef.current) moveTo(focusOn(cameraRef.current, mark));
-
-    // Bir noktaya basmak onu HER ZAMAN seçiyor; seçiliye tekrar basmak kapatmıyor.
-    // Kapatma açıkken kalabalık bölgede şöyle oluyordu: kullanıcı yandaki noktayı
-    // hedefliyor, vuruş seçili olana denk geliyor ve ekrandaki her şey kayboluyordu
-    // — "bastım, hiçbir şey çıkmadı". Seçim yalnızca boşluğa basınca kalkıyor.
-    select(mark?.id ?? null);
-  };
 
   /** Klavye yolu: odaklanılan parfüm seçiliyor ve kamera üstüne gidiyor. */
   const focusMark = (mark: SpaceMark) => {
@@ -660,10 +423,10 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
         ref={canvasRef}
         aria-hidden="true"
         className="h-full w-full cursor-grab touch-none active:cursor-grabbing"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
+        onPointerDown={input.onPointerDown}
+        onPointerMove={input.onPointerMove}
+        onPointerUp={input.onPointerUp}
+        onPointerCancel={input.onPointerUp}
         onPointerLeave={() => setHovered(null)}
       />
 

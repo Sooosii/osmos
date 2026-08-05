@@ -1,0 +1,23 @@
+
+  /** Tuvalin sol üst köşesine göre imleç konumu. */
+  const localPoint = useCallback((clientX: number, clientY: number) => {
+    const rect = canvasRef.current?.getBoundingClientRect();
+    return rect ? { sx: clientX - rect.left, sy: clientY - rect.top } : { sx: 0, sy: 0 };
+  }, []);
+
+  /** İki parmağın mesafe oranı → yakınlaşma; çapa parmakların ortası. */
+  const applyPinch = useCallback(() => {
+    const [a, b] = [...pointersRef.current.values()];
+    if (!a || !b) return;
+
+    const distance = Math.hypot(a.x - b.x, a.y - b.y);
+    const previous = pinchRef.current;
+    pinchRef.current = distance;
+    if (previous === null || previous === 0) return;
+
+    const { sx, sy } = localPoint((a.x + b.x) / 2, (a.y + b.y) / 2);
+    cameraRef.current = zoomAt(cameraRef.current, sx, sy, distance / previous, viewportRef.current);
+    requestDraw();
+  }, [localPoint, requestDraw]);
+
+  useCanvasSize({ canvasRef, viewportRef, boundsRef, requestDraw });
