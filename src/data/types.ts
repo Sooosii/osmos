@@ -87,8 +87,20 @@ export interface Note {
   readonly families: Partial<Readonly<Record<ScentFamily, number>>>;
   readonly volatility: Volatility;
   readonly character: Character;
-  /** Nota ansiklopedisi için kısa tarif. Aşama 3'te tamamlanacak. */
-  readonly description?: Localized;
+  /**
+   * Nota ansiklopedisi için kısa tarif — zorunlu, 136'nın 136'sında dolu.
+   *
+   * `?` Aşama 3'te bilerek kaldırıldı ve gerekçe `year`inkiyle aynı
+   * (`Perfume.year`): ansiklopedi ancak bütün veri tamken ayakta durur ve bunu
+   * derleme zamanında garanti eden tek yer burası. Alan isteğe bağlı kalsaydı
+   * eklenen ilk yeni nota, taze biten ansiklopedide sessiz bir delik açardı —
+   * nota sayfası da `description ? ... : null` gibi hiç çalışmayacak bir dal
+   * taşımak zorunda kalırdı.
+   *
+   * Üslup: tek cümle, duyusal, karşılaştırmalı; pazarlama dili yok. TR birebir
+   * çeviri değil, yeniden yazım.
+   */
+  readonly description: Localized;
 }
 
 /**

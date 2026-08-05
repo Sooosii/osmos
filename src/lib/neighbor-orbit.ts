@@ -25,7 +25,15 @@
  * içinde. Kısası: "en benzeyen en yakında dursun" garantisi ile gerçek konumlar
  * aynı anda mümkün değildi, sahip garantiyi seçti. Gerçek konumlara döndürmeden
  * önce o dosyayı oku.
+ *
+ * ## Kardeşi: nota takımyıldızı
+ *
+ * `note-orbit.ts` aynı kamerayı kullanıyor ama başka bir soruyu cevaplıyor:
+ * burada merkezdeki parfüme **benzeyenler** dönüyor, orada notayı **içerenler**.
+ * İkisi ekranda da bilerek ayrıştı — bu SVG ve pürüzsüz, o canvas ve tram.
  */
+
+import { fadeFromScale, projectPoint, type OrbitCamera } from './orbit-projection';
 
 /** SVG'nin iç koordinat genişliği; ekranda `width:100%` ile esniyor. */
 export const VIEW_WIDTH = 420;
@@ -166,14 +174,23 @@ export function orbitSeats(
   }));
 }
 
+/**
+ * Bu sahnenin kamerası.
+ *
+ * Matematik `orbit-projection.ts`e taşındı; nota takımyıldızı da aynı dünyada
+ * duruyor ve formül ikisinde birebir aynıydı. Taşınan yalnızca formül —
+ * aşağıdaki değerler ekranda tek tek ayarlandı ve burada kalıyor.
+ */
+const CAMERA: OrbitCamera = {
+  pitch: PITCH,
+  focal: FOCAL,
+  centerX: CENTER_X,
+  centerY: CENTER_Y,
+};
+
 /** Yatay düzlemdeki bir noktanın ekran karşılığı. */
 function project(x: number, y: number, z: number) {
-  // Kamera eğimi: düzlem ekranda elips olarak görünsün diye.
-  const y1 = y * Math.cos(PITCH) - z * Math.sin(PITCH);
-  const z1 = y * Math.sin(PITCH) + z * Math.cos(PITCH);
-
-  const scale = FOCAL / (FOCAL + z1);
-  return { x: CENTER_X + x * scale, y: CENTER_Y + y1 * scale, scale, z: z1 };
+  return projectPoint(x, y, z, CAMERA);
 }
 
 /** Koltuğun `phase` kadar dönmüş hâli. */
@@ -186,7 +203,7 @@ export function projectSeat(seat: OrbitSeat, phase: number): OrbitNode {
   );
 
   // Ölçek 1 civarında salınıyor; onu 0–1 aralığına açıp sönümleme katsayısı yapıyoruz.
-  const fade = Math.min(Math.max((projected.scale - 0.78) / 0.5, 0), 1);
+  const fade = fadeFromScale(projected.scale, 0.78, 0.5);
 
   return {
     x: projected.x,
