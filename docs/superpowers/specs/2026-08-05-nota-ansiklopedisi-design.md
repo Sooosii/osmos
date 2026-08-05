@@ -57,10 +57,31 @@ cevaplanmıyor. **Merkezde nota, etrafında onu içeren parfümler dönüyor.**
 Sahip açıkça istedi: çubuk yok, eğri yok, slope yok, "her yerde bulunacak
 tarzdan" bir şey yok. Karar ekranda bir maketle görülüp onaylandı.
 
-⚠️ **Kabul edilmiş risk:** bu, komşu takımyıldızının (`NeighborOrbit`) çok
-yakınına düşüyor — o da üç boyutlu, o da dönüyor. Sahip riski bilerek kabul etti
-("çok aynı gelirse değiştiririz"). Ayrımın nereden geleceği şimdiden belli ve
-tasarımın bunu **öne çıkarması** gerekiyor: komşu takımyıldızında hep **üç** nokta
+### ③b Doku dithered — ayrımı taşıyan şey bu
+
+Yörünge pürüzsüz daireler ve degradelerle değil, **tram noktalarıyla** çiziliyor:
+yoğunluk bir nokta ızgarasına **Bayer 4×4** eşiğiyle çevriliyor. Eşik sıralı,
+rastgele değil — rastgele olsaydı desen dönerken titrerdi.
+
+Fikir sahibin gönderdiği bir referanstan geldi (UnicornStudio ile yapılmış bir
+"ASCII/dithered" hero). **Referanstaki bileşen alınmadı ve alınamazdı:** sahne
+üçüncü tarafın barındırılan proje kimliğiydi, kodun yarısı servisin marka yazısını
+silmeye çalışıyordu, çalışma anında CDN'e bağlanıyordu ve `Math.random()` ile
+hidrasyon uyuşmazlığı üretiyordu. Alınan tek şey **doku**; kendi canvas'ımızda,
+sıfır bağımlılıkla yazıldı.
+
+Referanstaki HUD süsleri de bilerek alınmadı — köşe parantezleri, `LAT/LONG`
+okumaları, `SYSTEM.ACTIVE`, sahte çubuk göstergeler. OSMOS'un tamamı boşluk
+üzerine kurulu (`text-white/25`, tek bir ince aile rengi, fotoğraf yok); o süsler
+sitenin kendi dilini bozardı.
+
+⚠️ **Kabul edilmiş risk ve çözümü:** yörünge komşu takımyıldızının (`NeighborOrbit`)
+çok yakınına düşüyor — o da üç boyutlu, o da dönüyor. Sahip riski bilerek kabul
+etti ("çok aynı gelirse değiştiririz"), ama dithered doku riski büyük ölçüde
+çözüyor: **komşu takımyıldızı pürüzsüz SVG kalıyor, nota yörüngesi tram.** Aynı
+geometri, bambaşka madde.
+
+İkinci ayrım sayıda: komşu takımyıldızında hep **üç** nokta
 döner; nota yörüngesinde sayı **1 ile 26 arası** değişir. `sandalwood` 26 parfümde
 geçiyor, `dorayaki` bir tanesinde. Yoğunluğun kendisi bilgi — `oud` yoğun bir
 sürü, `dorayaki` yalnız bir nokta.
