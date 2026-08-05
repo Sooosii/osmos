@@ -50,7 +50,15 @@ export default function Home() {
           `PERFUMES` hâlâ burada, sunucuda; tarayıcıya yalnızca bir sayı iniyor.
         */}
         <ScentSpaceCanvas marks={marks}>
-          <div className="absolute left-6 top-6 sm:left-10 sm:top-10">
+          {/*
+            Konumlandırma yok — sol üst köşeyi `SpaceOverlays` kuruyor.
+
+            Eskiden burada `absolute left-6 top-6` vardı. Kaydıraçlar da aynı
+            köşeye gelince metnin altında durmaları gerekti ve bunu piksel
+            ofsetiyle yapmak kırılgandı: metin bir satır uzasa kaydıraçlar
+            üstüne binerdi. İkisi artık tek bir sütunda, akışla diziliyor.
+          */}
+          <div>
             <p className="text-xs tracking-[0.3em] text-white/30">OSMOS</p>
             <p className="mt-3 max-w-[15rem] text-xs leading-relaxed text-white/25">
               {PERFUMES.length} parfüm, konumları nota akrabalığından hesaplandı.

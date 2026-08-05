@@ -89,6 +89,14 @@ interface ApproachSceneOptions {
    */
   readonly cueRef: RefObject<HTMLDivElement | null>;
   readonly introRef: RefObject<HTMLDivElement | null>;
+  /**
+   * Sinestezi kaydıraçlarının katmanı — giriş metniyle aynı anda geliyor.
+   *
+   * Uzaktayken sorulacak bir şey ortada yok; kaydıraçlar da eşiğin öbür
+   * tarafında. Giriş metniyle aynı ömrü paylaştıkları için aynı yerden
+   * boyanıyorlar.
+   */
+  readonly feelRef: RefObject<HTMLDivElement | null>;
   readonly requestDraw: () => void;
 }
 
@@ -97,6 +105,7 @@ export function useApproachScene({
   cameraRef,
   cueRef,
   introRef,
+  feelRef,
   requestDraw,
 }: ApproachSceneOptions): ApproachScene {
   const searchParams = useSearchParams();
@@ -125,12 +134,21 @@ export function useApproachScene({
       introRef.current.style.opacity = active ? '0' : '1';
     }
 
+    if (feelRef.current) {
+      feelRef.current.style.opacity = active ? '0' : '1';
+      // Opaklık tek başına yetmiyor: görünmez bir `<input>` hâlâ sekmeyle
+      // odaklanılabilir olurdu ve klavyeyle gelen biri, sahne sürerken ekranda
+      // hiç görünmeyen bir kaydıraca düşerdi. `inert` hem işaretçiyi hem
+      // klavyeyi birlikte kesiyor.
+      feelRef.current.toggleAttribute('inert', active);
+    }
+
     // Sahne sürerken tutulacak bir şey yok; "yakala" imleci gösterip sürüklemeye
     // izin vermemek yalan söylemek olurdu.
     if (canvasRef.current) {
       canvasRef.current.style.cursor = active ? 'default' : '';
     }
-  }, [canvasRef, cueRef, introRef]);
+  }, [canvasRef, cueRef, introRef, feelRef]);
 
   const finish = useCallback(() => {
     if (!approachActiveRef.current) return;

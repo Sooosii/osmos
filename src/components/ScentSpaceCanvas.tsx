@@ -14,6 +14,7 @@ import { drawSpace } from '@/lib/space-draw';
 import { prefersReducedMotion } from '@/lib/motion';
 import { useCanvasSize } from '@/components/space/use-canvas-size';
 import { type EntryState, HOLD_DURATION, NO_ENTRY } from '@/lib/space-entry';
+import { type FeelTarget, NO_FEEL } from '@/lib/space-feel';
 import { START_SCALE } from '@/lib/space-approach';
 import { useApproachScene } from '@/components/space/use-approach-scene';
 import { useSpaceInput } from '@/components/space/use-space-input';
@@ -88,6 +89,20 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
   // içinde, DOM'u burada: opaklıklarını o kanca doğrudan yazıyor.
   const cueRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
+  const feelRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Sinestezi kaydıraçlarının tarifi — kaydıraçlar yazıyor, çizim okuyor.
+   *
+   * Durumda değil ref'te, kamerayla aynı gerekçeyle: topuz sürülürken saniyede
+   * onlarca kez değişiyor ve değiştirdiği tek şey tuval. Bir `setState` demek
+   * her çentikte bir React ağacı demek olurdu — üstelik React'in yeniden
+   * çizeceği hiçbir metin yok.
+   *
+   * `NO_FEEL` ile doğuyor: kaydıraçlar ortada duruyor ama ortası bir tarif
+   * değil. Ayrımın tamamı `space-feel.ts`te.
+   */
+  const feelTargetRef = useRef<FeelTarget>(NO_FEEL);
 
   /*
    * Kamera yaklaşmanın başladığı yerde doğuyor, `INITIAL_CAMERA`'da değil.
@@ -259,7 +274,14 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
    *
    * Yani bu çağrı aşağı kaydırılamaz. Gerekçenin tamamı `use-approach-scene.ts`te.
    */
-  const approach = useApproachScene({ canvasRef, cameraRef, cueRef, introRef, requestDraw });
+  const approach = useApproachScene({
+    canvasRef,
+    cameraRef,
+    cueRef,
+    introRef,
+    feelRef,
+    requestDraw,
+  });
 
   /**
    * `/?mark=<id>` ile dönüş — parfüm sayfasından geri gelen göz.
@@ -391,6 +413,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
       selectedId: selectedRef.current,
       hoveredId: hoveredRef.current,
       entry: entryRef.current,
+      feel: feelTargetRef.current,
     });
 
     // Etiket tuvale değil üstüne bindirilmiş HTML'e çiziliyor: punto haritanın
@@ -485,6 +508,9 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
         introRef={introRef}
         cueRef={cueRef}
         labelRef={labelRef}
+        feelRef={feelRef}
+        feelTargetRef={feelTargetRef}
+        requestDraw={requestDraw}
         labelled={labelled}
         selectedLine={selected?.line ?? null}
         entryHint={entryHint}

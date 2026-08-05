@@ -170,4 +170,18 @@ export interface SpaceMark {
   readonly depth: number;
   /** En yakın komşular, benzerlikten güçlüye göre sıralı. */
   readonly neighborIds: readonly string[];
+  /**
+   * Sinestezi kaydıraçlarının okuduğu dört eksen — `Character` ile aynı sırada
+   * (sıcaklık, doku, temizlik, yakınlık), her biri 0–1.
+   *
+   * Adı bilerek `character` değil. `Character` ham veri ve nota başına duruyor;
+   * bu, onun parfüm düzeyinde ortalanıp **gözlenen aralığa yayılmış** hâli. Aynı
+   * adı vermek aynı sayılar sanılmasına yol açardı — buradaki 0.5 "nötr" değil,
+   * "44 parfümün ortası" demek.
+   *
+   * Dördü de iniyor ama ekranda ikisi açık duruyor; doku ve yakınlık "…" ile
+   * geliyor. Dördü de veride kalmaya ve benzerlik hesabını beslemeye devam
+   * ediyor (`similarity.ts:152`).
+   */
+  readonly feel: readonly [number, number, number, number];
 }
