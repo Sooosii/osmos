@@ -1,7 +1,6 @@
 'use client';
 
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { SpaceMark } from '@/data/types';
 import {
@@ -15,9 +14,11 @@ import { drawSpace } from '@/lib/space-draw';
 import { prefersReducedMotion } from '@/lib/motion';
 import { useCanvasSize } from '@/components/space/use-canvas-size';
 import { type EntryState, HOLD_DURATION, NO_ENTRY } from '@/lib/space-entry';
-import { APPROACH_CUE, START_SCALE } from '@/lib/space-approach';
+import { START_SCALE } from '@/lib/space-approach';
 import { useApproachScene } from '@/components/space/use-approach-scene';
 import { useSpaceInput } from '@/components/space/use-space-input';
+import { SpaceOverlays } from '@/components/space/SpaceOverlays';
+import { SpaceKeyboardList } from '@/components/space/SpaceKeyboardList';
 
 /**
  * Koku Uzayı — sitenin ana ekranı.
@@ -25,8 +26,21 @@ import { useSpaceInput } from '@/components/space/use-space-input';
  * Tuval, çünkü nokta sayısı 44'te durmayacak: 250+ DOM düğümünü her karede
  * yeniden konumlandırmak sürüklemeyi öldürür.
  *
- * Bileşenin işi "ne zaman çizileceği" ve olayları okumak. "Nereye çizileceği"
- * `space-camera.ts`, "neyin çizileceği" `space-draw.ts` içinde — ikisi de saf.
+ * Bileşenin işi "ne zaman çizileceği". "Nereye çizileceği" `space-camera.ts`,
+ * "neyin çizileceği" `space-draw.ts` içinde — ikisi de saf.
+ *
+ * Dosya 971 satıra çıkıp projenin 800 sınırını aşınca sorumluluk dikişlerinden
+ * bölündü; `perfumes.ts` / `perfume-sets/` ile aynı desen — ince bir giriş
+ * noktası, yanında parçalar:
+ *
+ *   space/use-canvas-size    ölçü + cihaz piksel oranı
+ *   space/use-approach-scene yaklaşma sahnesinin ömrü
+ *   space/use-space-input    işaretçi · sürükleme · sıkıştırma · tutma · tekerlek
+ *   space/SpaceOverlays      etiket · ipucu · giriş metni · küratör cümlesi · şerit
+ *   space/SpaceKeyboardList  klavye ve ekran okuyucu yolu
+ *
+ * Burada kalan şey merkez: kare döngüsü, seçim, adres eşitleme ve JSX iskeleti.
+ * Bölme mekanikti — hiçbir mantık değişmedi, davranış birebir aynı.
  *
  * ⚠️ Kamera React durumunda DEĞİL, `useRef` içinde. Sürüklerken kare başına bir
  * `setState` demek kare başına bir React ağacı demek; 44 nokta için gereksiz,
@@ -430,119 +444,19 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
         onPointerLeave={() => setHovered(null)}
       />
 
-      {/*
-        Giriş metni — sunucuda üretiliyor, görünürlüğü burada.
-
-        Sahne boyunca yok: uzaktayken ekranda "44 parfüm" yazması, henüz 44 nokta
-        görünmezken verilmiş bir söz olurdu. Varışta yerine yerleşiyor.
-      */}
-      <div
-        ref={introRef}
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700"
+      <SpaceOverlays
+        introRef={introRef}
+        cueRef={cueRef}
+        labelRef={labelRef}
+        labelled={labelled}
+        selectedLine={selected?.line ?? null}
+        entryHint={entryHint}
+        entryProgress={entryProgress}
       >
         {children}
-      </div>
+      </SpaceOverlays>
 
-      {/*
-        Yaklaşma ipucu.
-
-        Söylediği tek şey "kaydırılabilir" — kimlik değil, hareket. Boşluk
-        korkusunun asıl kaynağı "neredeyim" değil "ne yapacağım" sorusuydu; bir
-        isim ona zaten cevap vermiyor.
-
-        Fare ikonu bilerek yok: sitenin kendi dili saç teli inceliğinde çizgiler
-        (giriş ipucundaki ilerleme şeridi de öyle). Nefes alması, hareketsiz bir
-        çizginin süs sanılmasını engelliyor.
-
-        İlerlemenin ilk üçte ikisinde sönüp bitiyor: kullanıcı kaydırmaya
-        başladığı an ipucunun işi bitmiştir, geri kalan yolda ekranda durması
-        yalnızca gürültü olurdu.
-      */}
-      <div
-        ref={cueRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-[18%] flex justify-center opacity-0 transition-opacity duration-300"
-      >
-        {APPROACH_CUE === 'mark' ? (
-          <span className="block h-10 w-px animate-[osmos-breathe_2.8s_ease-in-out_infinite] bg-white/60" />
-        ) : (
-          <span className="text-[11px] tracking-[0.45em] text-white/35">OSMOS</span>
-        )}
-      </div>
-
-      {/* Etiket katmanı — konumu her karede çizimle birlikte güncelleniyor. */}
-      <div
-        ref={labelRef}
-        className="pointer-events-none absolute left-0 top-0 opacity-0 transition-opacity duration-150"
-      >
-        {/* pb, noktanın yarıçapı + halosu kadar boşluk bırakıyor: etiket seçili
-            noktanın üstüne binmesin. */}
-        <div className="-translate-x-1/2 -translate-y-full pb-5 text-center">
-          <p className="whitespace-nowrap text-[13px] leading-tight text-white/90">
-            {labelled?.name ?? ''}
-          </p>
-          <p className="whitespace-nowrap text-[11px] leading-tight text-white/40">
-            {labelled?.brand ?? ''}
-          </p>
-        </div>
-      </div>
-
-      {/*
-        Ekran okuyucu ve klavye için yol. Tuval onların gözünde boş bir
-        dikdörtgen; SVG sürümünde her noktanın kendi odağı vardı, o yetenek
-        kaybolmamalı. Tab ile geziliyor, odak parfümü seçip kamerayı üstüne getiriyor.
-      */}
-      <ul className="sr-only" aria-label="Koku uzayı — parfüme git">
-        {marks.map((mark) => (
-          <li key={mark.id}>
-            <button type="button" onFocus={() => focusMark(mark)} onClick={() => focusMark(mark)}>
-              {mark.name}, {mark.brand}
-            </button>
-            {/*
-              Tekerleği olmayanın yolu. Kaydırarak giriş fare ve dokunma için;
-              klavyeyle gezen ya da ekran okuyucu kullanan biri için kaydırma
-              diye bir şey yok. Gerçek bir bağlantı: yeni sekmede açılabiliyor,
-              ekran okuyucu "bağlantı" diye duyuruyor, düğme taklidi değil.
-            */}
-            <Link href={`/parfum/${mark.id}`}>{mark.name} sayfası</Link>
-          </li>
-        ))}
-      </ul>
-
-      {/* Küratör cümlesi yalnızca seçimde — fare gezdirirken alt metin sürekli
-          değişip huzursuz etmesin. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 p-6 sm:p-8">
-        <p
-          className={`mx-auto max-w-xl text-center text-sm italic leading-relaxed text-white/50 transition-opacity duration-300 ${
-            selected?.line ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          {selected?.line ?? ' '}
-        </p>
-
-        {/*
-          Keşfedilebilirlik. Kaydırarak giriş, denenmediği sürece görünmez bir
-          hareket; şartlar sağlandığı an kullanıcıya "buradan devam edilebilir"
-          demek zorundayız. İnce çizgi aynı zamanda ilerleme göstergesi: ne
-          kadar kaldığı görülüyor, geri çevirince geri gidiyor.
-        */}
-        <div
-          className={`mx-auto mt-5 flex max-w-xs flex-col items-center gap-2 transition-opacity duration-300 ${
-            entryHint ? 'opacity-100' : 'opacity-0'
-          }`}
-          aria-hidden="true"
-        >
-          <span className="text-[11px] tracking-[0.25em] text-white/40">
-            KAYDIRMAYA DEVAM ET
-          </span>
-          <span className="h-px w-full overflow-hidden bg-white/10">
-            <span
-              className="block h-full w-full origin-left bg-white/60 will-change-transform"
-              style={{ transform: `scaleX(${entryProgress})` }}
-            />
-          </span>
-        </div>
-      </div>
+      <SpaceKeyboardList marks={marks} onFocusMark={focusMark} />
     </div>
   );
 }
