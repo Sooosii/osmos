@@ -1,6 +1,7 @@
 import type { Perfume, SpaceMark } from '@/data/types';
 import { dominantFamily, getFamily } from '@/data/families';
-import { familyVector, nearestNeighbors, projectToSpace } from './similarity';
+import { characterVector, familyVector, nearestNeighbors, projectToSpace } from './similarity';
+import { normalizeAxis } from './space-feel';
 
 /**
  * Parfüm listesinden çizilmeye hazır nokta listesi.
@@ -19,11 +20,29 @@ import { familyVector, nearestNeighbors, projectToSpace } from './similarity';
 /** Uzayda her noktaya çizilen komşu bağlantısı sayısı. */
 const NEIGHBOR_COUNT = 3;
 
+/**
+ * `characterVector`ün eksen sırasındaki yerleri — `similarity.ts:99`'daki dizilim.
+ *
+ * Sinestezi kaydıraçları dördün ikisini kullanıyor. Doku ve yakınlık atlanıyor
+ * ama veride duruyor: benzerlik hesabına girmeye devam ediyorlar.
+ */
+const TEMPERATURE = 0;
+const CLEANLINESS = 2;
+
 export function buildMarks(perfumes: readonly Perfume[]): readonly SpaceMark[] {
   const points = projectToSpace(perfumes);
   const pointById = new Map(points.map((point) => [point.perfumeId, point]));
 
-  return perfumes.map((perfume) => {
+  /*
+   * Kaydıraç eksenleri iki geçişte kuruluyor, tek geçişte değil: bir değeri
+   * gözlenen aralığa yaymak için önce bütün havuzun görülmüş olması gerekiyor.
+   * Gerekçenin tamamı `space-feel.ts`in `normalizeAxis`inde.
+   */
+  const characters = perfumes.map((perfume) => characterVector(perfume));
+  const warmth = normalizeAxis(characters.map((character) => character[TEMPERATURE]));
+  const clean = normalizeAxis(characters.map((character) => character[CLEANLINESS]));
+
+  return perfumes.map((perfume, index) => {
     const point = pointById.get(perfume.id);
     if (!point) {
       throw new Error(`Uzayda yeri hesaplanmamış parfüm: ${perfume.id}`);
@@ -39,6 +58,7 @@ export function buildMarks(perfumes: readonly Perfume[]): readonly SpaceMark[] {
       y: point.y,
       depth: point.depth,
       neighborIds: nearestNeighbors(perfume, perfumes, NEIGHBOR_COUNT).map((n) => n.perfume.id),
+      feel: [warmth[index], clean[index]] as const,
     };
   });
 }
