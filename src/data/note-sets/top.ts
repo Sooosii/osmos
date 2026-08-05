@@ -40,6 +40,28 @@ export const TOP_NOTES: readonly Note[] = [
     character: { temperature: -0.7, texture: 0.0, cleanliness: 0.9, proximity: -0.8 },
   },
   {
+    id: 'lime',
+    name: { en: 'Lime', tr: 'Misket limonu' },
+    families: { citrus: 1.0, green: 0.2 },
+    volatility: { peakMinutes: 2, halfLifeMinutes: 12 },
+    character: { temperature: -0.8, texture: 0.3, cleanliness: 0.9, proximity: -0.85 },
+    description: {
+      en: 'Sharper and greener than lemon — the citrus that cuts rather than shines.',
+      tr: 'Limondan daha keskin, daha yeşil — parlayan değil, kesen narenciye.',
+    },
+  },
+  {
+    id: 'yuzu',
+    name: { en: 'Yuzu', tr: 'Yuzu' },
+    families: { citrus: 1.0, floral: 0.2 },
+    volatility: { peakMinutes: 2, halfLifeMinutes: 18 },
+    character: { temperature: -0.6, texture: 0.1, cleanliness: 0.85, proximity: -0.75 },
+    description: {
+      en: 'Japanese citrus with a floral edge: mandarin sweetness held inside grapefruit bitterness.',
+      tr: 'Çiçeksi bir kenarı olan Japon narenciyesi: mandalinanın tatlısı, greyfurtun acısının içinde.',
+    },
+  },
+  {
     id: 'grapefruit',
     name: { en: 'Grapefruit', tr: 'Greyfurt' },
     families: { citrus: 1.0, fruity: 0.2 },
@@ -128,11 +150,33 @@ export const TOP_NOTES: readonly Note[] = [
     character: { temperature: 0.0, texture: 0.5, cleanliness: 0.6, proximity: -0.4 },
   },
   {
+    id: 'eucalyptus',
+    name: { en: 'Eucalyptus', tr: 'Okaliptüs' },
+    families: { aromatic: 1.0, green: 0.4 },
+    volatility: { peakMinutes: 2, halfLifeMinutes: 25 },
+    character: { temperature: -0.6, texture: 0.7, cleanliness: 0.8, proximity: -0.7 },
+    description: {
+      en: 'Cold and medicinal — the smell of breathing more easily, closer to menthol than to a leaf.',
+      tr: 'Soğuk ve tıbbi — daha rahat nefes almanın kokusu; yapraktan çok mentole yakın.',
+    },
+  },
+  {
     id: 'juniper',
     name: { en: 'Juniper', tr: 'Ardıç' },
     families: { aromatic: 0.8, green: 0.4, resinous: 0.2 },
     volatility: { peakMinutes: 4, halfLifeMinutes: 40 },
     character: { temperature: -0.3, texture: 0.6, cleanliness: 0.5, proximity: -0.4 },
+  },
+  {
+    id: 'spruce',
+    name: { en: 'Spruce', tr: 'Ladin' },
+    families: { aromatic: 0.6, green: 0.5, resinous: 0.4, woody: 0.3 },
+    volatility: { peakMinutes: 5, halfLifeMinutes: 45 },
+    character: { temperature: -0.4, texture: 0.6, cleanliness: 0.5, proximity: -0.5 },
+    description: {
+      en: 'Resin still wet on the bark. Colder and sharper than pine, without any of its dust.',
+      tr: 'Kabuğunda henüz kurumamış reçine. Çamdan daha soğuk ve daha keskin, onun tozu hiç yok.',
+    },
   },
   {
     id: 'clary-sage',
