@@ -46,10 +46,15 @@ haklıydı: dördü de veride zaten hazır duruyordu, saklamak bilgi saklamaktı
 *Reddedilen:* dördünü birden açmak — boşluk üzerine kurulmuş bir ekranda dört
 satır kontrol fazla ve dört ekseni birden ayarlamak iş gibi hissettiriyor.
 
-**Açılım tek yönlü: açılıyor, kapanmıyor.** Kapanabilseydi iki seçenek olurdu ve
-ikisi de kötü. Açılmış eksenler kapanınca tarifte kalsaydı, ekranda görünmeyen
-iki koşul cevabı sürüklerdi — kullanıcı neden o sonucu aldığını göremezdi.
-Sıfırlansaydı kazara kapatmak sessizce ayarı silerdi.
+**Üç nokta hep duruyor; aynı düğme açıyor ve kapatıyor.** İlk sürümde tek yönlüydü
+ve sahip haklı olarak geri alınabilmesini istedi.
+
+Kapanışta doku ve yakınlık **tariften düşüyor.** Tek dürüst davranış bu:
+kapanıp da tarifte kalsalardı ekranda görünmeyen iki koşul cevabı sürüklerdi ve
+kullanıcı neden o sonucu aldığını göremezdi — kaydıraçların en baştan kaçındığı
+şeyin ta kendisi. Kaydıraçları ayrıca sıfırlamaya gerek yok: eksenler DOM'dan
+kalkıyor, yeniden açıldıklarında `defaultValue` ile ortada doğuyorlar. Gördüğün
+topuz ile tarifteki değer hep aynı şeyi söylüyor.
 
 ⚠️ Gizli eksenler yüzünden "dokunulmamışlık" **eksen başına** tutulmak zorunda
 kaldı. "…" ile gelen doku kaydıracı ortada duruyor; ortayı bir tarif saysaydık
@@ -128,6 +133,23 @@ seçilmemiş hem tarife uzak bir nokta iki kez söner, harita çamura dönerdi. 
 iki soru farklı ölçekte: kaydıraç geniş ("şuna benzer bir şey"), seçim dar ("bu
 neye benziyor"). Bir noktaya basmak dar soruya geçmek; boşluğa basıp seçimi
 kaldırmak geniş soruya dönmek.
+
+### Uyanlar sönmüyor, gerçekten parlıyor
+
+İlk sürümde kontrast yalnızca **diğerleri sönerek** oluşuyordu: en iyi eşleşme
+kaydıraca dokunulmadan önceki parlaklığında kalıyor, dolayısıyla ekran
+"seçilenler öne çıktı" değil "her şey biraz karardı" gibi okunuyordu. Ekranda
+görüldü ve düzeltildi.
+
+Uyan nokta artık hem birkaç piksel büyüyor (`FEEL_GROWTH`) hem lekesi
+güçleniyor (`FEEL_GLOW`). Boy, küçük noktalarda opaklıktan daha hızlı okunuyor;
+leke ise koyu zeminde "parlıyor" hissini veren asıl şey. Çekirdeğin opaklığına
+dokunulmadı — derin noktalar zaten 1'e yakın, orada kazanılacak yer yok ve
+zorlamak rengi ağartırdı.
+
+Uyum 0 iken ikisi de etkisiz, yani dokunulmamış uzay birebir eskisi gibi çiziliyor.
+
+### Dip ve ara değer
 
 Dip için ikinci bir sabit uydurulmadı ve çarpma değil **ara değer** kullanıldı
 (`DIM_ALPHA + (full − DIM_ALPHA) × yakınlık`). Çarpma taban değerini de
@@ -216,7 +238,6 @@ ortasından ve altından tutulabiliyor.
 
 ## Kapsam dışı
 
-- "…" açılımının geri alınabilmesi (karar ②).
 - Kaydıraç durumunun adrese yazılması — `?mark=` ile parfüm paylaşılabiliyor ama
   tarif paylaşımı istenmedi. İstenirse ayrı iş.
 - Metin yolunun kaydıraça karşılık vermesi (karar ⑤).
