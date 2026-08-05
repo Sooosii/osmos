@@ -103,18 +103,54 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
   // geri çağrısı okuyor, o yüzden ref'te — yoksa her ölçüde yeniden kurulurdu.
   const bounds = useMemo(() => boundsOf(marks), [marks]);
   const boundsRef = useRef(bounds);
-  boundsRef.current = bounds;
+  /*
+   * Tazeleme render'da DEĞİL, etkide.
+   *
+   * Render sırasında `boundsRef.current = bounds` yazıyordu. React 19 bunu hata
+   * sayıyor ve gerekçesi sağlam: render saf olmak zorunda, yarıda kesilip
+   * atılabiliyor — atılan bir render'ın ref'e bıraktığı iz geri alınmıyor.
+   *
+   * Kaçırılan kare yok. Ref'i yalnızca `useCanvasSize`in `resize`i okuyor; o da
+   * ya bağlanma anında çalışıyor (ref `useRef(bounds)` ile zaten doğru değerle
+   * doğdu) ya da gözlemci/pencere geri çağrısında, yani her hâlükârda bu
+   * etkiden sonra.
+   */
+  useEffect(() => {
+    boundsRef.current = bounds;
+  }, [bounds]);
 
   const viewportRef = useRef<Viewport>({ width: 0, height: 0, ...bounds });
   const frameRef = useRef<number | null>(null);
   const animationRef = useRef<Animation | null>(null);
 
+  const markById = useMemo(() => new Map(marks.map((mark) => [mark.id, mark])), [marks]);
+
   // Seçim ve üstüne gelme hem durumda hem ref'te: durum metni besliyor (ad,
   // küratör cümlesi), ref çizime gidiyor. Çizim, React render'ını beklemeden
   // en güncel değeri görmek zorunda — sürükleme ortasında bir kare geride kalmasın.
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  /**
+   * Seçim `?mark=` ile **doğuyor**, sonradan bir etkiyle atanmıyor.
+   *
+   * Etkiyle yapılıyordu ve bedeli iki render'dı: ilki seçimsiz, hemen ardından
+   * `setSelectedId` ile ikincisi. React 19 bunu `set-state-in-effect` ile
+   * işaretliyor — adres bir dış sistem ve dış sistemin ilk değerini okumanın
+   * yeri etki değil, başlangıcın kendisi.
+   *
+   * Hidrasyon uyuşmazlığı yok: uzay statik üretiliyor, `?mark=` okuyan ağaç ise
+   * Suspense sınırının altında istemcide doğuyor — sunucu HTML'ine yalnızca
+   * yedek giriyor (`app/page.tsx`in Suspense yorumu). Yani bu başlangıç değerini
+   * hesaplayan ilk render zaten tarayıcıda, adres elinin altında.
+   *
+   * Ters yön — adresten türetmek — denenemezdi: boşluğa basmak seçimi kapatıyor
+   * (`use-space-input.ts`, `select(mark?.id ?? null)`), oysa adres `?mark=`i
+   * taşımaya devam ediyor. Türetilmiş bir seçim kapatıldığı anda geri dirilirdi.
+   */
+  const [selectedId, setSelectedId] = useState<string | null>(() => {
+    const id = searchParams.get('mark');
+    return id && markById.has(id) ? id : null;
+  });
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const selectedRef = useRef<string | null>(null);
+  const selectedRef = useRef<string | null>(selectedId);
   const hoveredRef = useRef<string | null>(null);
 
   /**
@@ -138,7 +174,6 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
   const [entryHint, setEntryHint] = useState(false);
   const [entryProgress, setEntryProgress] = useState(0);
 
-  const markById = useMemo(() => new Map(marks.map((mark) => [mark.id, mark])), [marks]);
   const selected = selectedId ? (markById.get(selectedId) ?? null) : null;
   const hovered = hoveredId ? (markById.get(hoveredId) ?? null) : null;
 
@@ -229,6 +264,10 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
   /**
    * `/?mark=<id>` ile dönüş — parfüm sayfasından geri gelen göz.
    *
+   * Seçimi burası yapmıyor; o yukarıda, durumun başlangıcında doğdu. Burada
+   * kalan tek iş kamerayı yerine oturtmak, yani React'in bilmediği bir dış
+   * duruma yazmak — etkinin asıl işi bu.
+   *
    * Kamera animasyonsuz, doğrudan yerine konuyor: bu bir hareket değil, açılış
    * durumu. Yolculuk animasyonu çalıştırmak, kullanıcının hiç görmediği bir
    * yerden tanıdık noktaya doğru anlamsız bir kayma üretirdi.
@@ -243,8 +282,6 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     const mark = markById.get(id);
     if (!mark) return;
 
-    selectedRef.current = id;
-    setSelectedId(id);
     cameraRef.current = centerOn(cameraRef.current, mark);
     requestDraw();
   }, [markById, requestDraw, searchParams]);
