@@ -6,8 +6,8 @@ import type { Note } from '../types';
  * Açılışı kuran notalar: narenciyeler, aromatikler, keskin yeşiller,
  * hafif meyveler ve baharatın uçucu ucu. Çoğu bir saat içinde susuyor.
  *
- * Açıklama alanı bilinçli olarak boş — nota ansiklopedisiyle birlikte
- * (Aşama 3) doldurulacak. İlk 15 nota üslup örneği olarak açıklamalı.
+ * Açıklama alanı Aşama 3'te dolduruldu ve artık zorunlu (`types.ts`); bu bandın
+ * 41 notasının 41'i açıklamalı.
  */
 export const TOP_NOTES: readonly Note[] = [
   {

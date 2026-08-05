@@ -29,6 +29,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { mineral: 0.9, green: 0.4, animalic: 0.2 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 240 },
     character: { temperature: -0.3, texture: 0.5, cleanliness: -0.2, proximity: -0.1 },
+    description: {
+      en: 'Iodine and low tide — the sea at its least romantic.',
+      tr: 'İyot ve cezir — denizin en romantik olmayan hâli.',
+    },
   },
   {
     id: 'flint',
@@ -36,6 +40,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { mineral: 1.0 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 180 },
     character: { temperature: -0.8, texture: 0.7, cleanliness: 0.7, proximity: -0.2 },
+    description: {
+      en: 'Two stones struck together — smoke without fire, and no organic matter at all.',
+      tr: 'Birbirine vurulmuş iki taş — ateşsiz duman, içinde hiç organik madde yok.',
+    },
   },
 
   // ——— Çiçekler ———
@@ -45,6 +53,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { floral: 0.8, citrus: 0.5 },
     volatility: { peakMinutes: 15, halfLifeMinutes: 120 },
     character: { temperature: 0.0, texture: -0.2, cleanliness: 0.7, proximity: -0.4 },
+    description: {
+      en: 'Orange blossom put through water — cleaner, greener and colder than the flower itself.',
+      tr: 'Sudan geçirilmiş portakal çiçeği — çiçeğin kendisinden daha temiz, daha yeşil, daha soğuk.',
+    },
   },
   {
     id: 'magnolia',
@@ -52,6 +64,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { floral: 1.0, citrus: 0.3, green: 0.2 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 150 },
     character: { temperature: 0.1, texture: -0.3, cleanliness: 0.6, proximity: -0.4 },
+    description: {
+      en: 'A flower with lemon inside it — creamy and sharp in the same breath.',
+      tr: 'İçinde limon olan bir çiçek — aynı nefeste kremsi ve keskin.',
+    },
   },
   {
     id: 'honeysuckle',
@@ -59,6 +75,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { floral: 1.0, fruity: 0.3, gourmand: 0.2 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 150 },
     character: { temperature: 0.3, texture: -0.3, cleanliness: 0.4, proximity: -0.4 },
+    description: {
+      en: 'Nectar on a warm evening — sweet, but with the green stem still attached.',
+      tr: 'Sıcak bir akşamda nektar — tatlı, ama yeşil sapı hâlâ üstünde.',
+    },
   },
   {
     id: 'lily-of-the-valley',
@@ -77,6 +97,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { floral: 0.9, fruity: 0.3, gourmand: 0.2 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 160 },
     character: { temperature: 0.2, texture: -0.4, cleanliness: 0.5, proximity: -0.2 },
+    description: {
+      en: 'Almost nothing, and that is the point: a flower better known for how it looks than how it smells.',
+      tr: 'Neredeyse hiçbir şey ve mesele de bu: koktuğundan çok göründüğüyle bilinen bir çiçek.',
+    },
   },
   {
     id: 'geranium',
@@ -84,6 +108,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { floral: 0.7, green: 0.5, aromatic: 0.3 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 150 },
     character: { temperature: -0.2, texture: 0.3, cleanliness: 0.5, proximity: -0.3 },
+    description: {
+      en: 'Rose with the sweetness taken out and mint put in — the most masculine flower.',
+      tr: 'Tatlısı alınıp yerine nane konmuş gül — çiçeklerin en erkeksi olanı.',
+    },
   },
   {
     id: 'rose',
@@ -118,6 +146,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { floral: 1.0, citrus: 0.3, animalic: 0.2 },
     volatility: { peakMinutes: 25, halfLifeMinutes: 180 },
     character: { temperature: 0.4, texture: -0.2, cleanliness: 0.1, proximity: -0.3 },
+    description: {
+      en: 'Honeyed, with something animal underneath — neroli after it warms up.',
+      tr: 'Ballı ve altında hayvansı bir şey olan — ısındıktan sonraki neroli.',
+    },
   },
   {
     id: 'ylang-ylang',
@@ -125,6 +157,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { floral: 1.0, gourmand: 0.2, spicy: 0.2 },
     volatility: { peakMinutes: 25, halfLifeMinutes: 210 },
     character: { temperature: 0.6, texture: -0.3, cleanliness: 0.0, proximity: -0.3 },
+    description: {
+      en: 'Banana, custard and rubber — a flower that smells as if it has been cooked.',
+      tr: 'Muz, muhallebi ve kauçuk — pişirilmiş gibi kokan bir çiçek.',
+    },
   },
   {
     id: 'mimosa',
@@ -132,6 +168,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { floral: 0.9, gourmand: 0.2, green: 0.2 },
     volatility: { peakMinutes: 25, halfLifeMinutes: 180 },
     character: { temperature: 0.2, texture: -0.5, cleanliness: 0.6, proximity: -0.1 },
+    description: {
+      en: 'Powder and honey with dust in it — the softest yellow there is.',
+      tr: 'İçinde toz olan pudra ve bal — var olan en yumuşak sarı.',
+    },
   },
   {
     id: 'tuberose',
@@ -150,6 +190,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { floral: 1.0, animalic: 0.3, fruity: 0.2 },
     volatility: { peakMinutes: 30, halfLifeMinutes: 240 },
     character: { temperature: 0.5, texture: -0.1, cleanliness: -0.2, proximity: -0.4 },
+    description: {
+      en: 'Hot, dirty and impossible to ignore — the flower that behaves like skin.',
+      tr: 'Sıcak, kirli ve görmezden gelinmesi imkânsız — tene benzeyen çiçek.',
+    },
   },
   {
     id: 'gardenia',
@@ -157,6 +201,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { floral: 1.0, gourmand: 0.3, green: 0.2 },
     volatility: { peakMinutes: 30, halfLifeMinutes: 240 },
     character: { temperature: 0.4, texture: -0.4, cleanliness: 0.1, proximity: -0.3 },
+    description: {
+      en: 'Cream with a mushroom underneath — a white flower that never smells quite fresh.',
+      tr: 'Altında mantar olan bir krema — asla tam taze kokmayan beyaz bir çiçek.',
+    },
   },
   {
     id: 'osmanthus',
@@ -164,6 +212,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { floral: 0.9, fruity: 0.6, leather: 0.2 },
     volatility: { peakMinutes: 30, halfLifeMinutes: 220 },
     character: { temperature: 0.3, texture: -0.2, cleanliness: 0.3, proximity: -0.2 },
+    description: {
+      en: 'Apricot skin and old leather — a flower pretending to be fruit.',
+      tr: 'Kayısı kabuğu ve eski deri — meyve taklidi yapan bir çiçek.',
+    },
   },
   {
     id: 'violet',
@@ -171,6 +223,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { floral: 0.9, gourmand: 0.2, woody: 0.2 },
     volatility: { peakMinutes: 35, halfLifeMinutes: 240 },
     character: { temperature: -0.4, texture: -0.6, cleanliness: 0.5, proximity: 0.1 },
+    description: {
+      en: 'Powder that keeps vanishing — the molecule numbs your nose while you smell it.',
+      tr: 'Sürekli kaybolan bir pudra — molekülü, sen koklarken burnunu uyuşturuyor.',
+    },
   },
   {
     id: 'narcissus',
@@ -178,6 +234,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { floral: 0.9, green: 0.5, animalic: 0.3, mossy: 0.2 },
     volatility: { peakMinutes: 40, halfLifeMinutes: 300 },
     character: { temperature: 0.1, texture: 0.4, cleanliness: -0.3, proximity: -0.1 },
+    description: {
+      en: 'Hay, manure, and a flower somewhere in the middle — beautiful and slightly farmyard.',
+      tr: 'Kuru ot, gübre ve ortalarda bir yerde bir çiçek — güzel ve hafifçe ahır.',
+    },
   },
   {
     id: 'iris',
@@ -198,6 +258,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { fruity: 1.0, gourmand: 0.3 },
     volatility: { peakMinutes: 15, halfLifeMinutes: 120 },
     character: { temperature: 0.4, texture: -0.4, cleanliness: 0.3, proximity: -0.2 },
+    description: {
+      en: 'The fuzz more than the flesh — warm, milky, and faintly like skin.',
+      tr: 'Etinden çok tüyü — sıcak, sütsü ve hafifçe ten gibi.',
+    },
   },
   {
     id: 'apricot',
@@ -205,6 +269,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { fruity: 1.0, gourmand: 0.3 },
     volatility: { peakMinutes: 15, halfLifeMinutes: 130 },
     character: { temperature: 0.5, texture: -0.4, cleanliness: 0.3, proximity: -0.1 },
+    description: {
+      en: 'Jam left out in the sun — denser and drier than peach.',
+      tr: 'Güneşte unutulmuş reçel — şeftaliden daha yoğun ve daha kuru.',
+    },
   },
   {
     id: 'mango',
@@ -212,6 +280,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { fruity: 1.0, gourmand: 0.2 },
     volatility: { peakMinutes: 18, halfLifeMinutes: 140 },
     character: { temperature: 0.5, texture: -0.2, cleanliness: 0.1, proximity: -0.3 },
+    description: {
+      en: 'Sweet resin and turpentine — the tropical fruit with a solvent inside it.',
+      tr: 'Tatlı reçine ve terebentin — içinde çözücü olan tropik meyve.',
+    },
   },
   {
     id: 'fig',
@@ -230,6 +302,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { fruity: 1.0, gourmand: 0.4 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 160 },
     character: { temperature: 0.4, texture: -0.4, cleanliness: 0.1, proximity: -0.1 },
+    description: {
+      en: 'Almond and cough syrup — a fruit that always smells slightly medicinal.',
+      tr: 'Badem ve öksürük şurubu — hep biraz tıbbi kokan bir meyve.',
+    },
   },
   {
     id: 'plum',
@@ -237,6 +313,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { fruity: 1.0, gourmand: 0.3, animalic: 0.2 },
     volatility: { peakMinutes: 25, halfLifeMinutes: 200 },
     character: { temperature: 0.5, texture: -0.3, cleanliness: -0.1, proximity: 0.0 },
+    description: {
+      en: 'Dark, wine-soaked fruit — sweetness on the edge of fermenting.',
+      tr: 'Koyu, şaraba batmış meyve — mayalanmanın eşiğindeki tatlılık.',
+    },
   },
   {
     id: 'wine',
@@ -244,6 +324,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { fruity: 0.8, gourmand: 0.3, animalic: 0.2 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 150 },
     character: { temperature: 0.4, texture: 0.2, cleanliness: -0.2, proximity: -0.2 },
+    description: {
+      en: 'Fruit that has turned — sour, tannic, and warmer than the grape ever was.',
+      tr: 'Dönmüş meyve — ekşi, tanenli ve üzümün hiç olmadığı kadar sıcak.',
+    },
   },
 
   // ——— Gurme ———
@@ -253,6 +337,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { gourmand: 0.7, fruity: 0.3, resinous: 0.2 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 180 },
     character: { temperature: 0.8, texture: 0.1, cleanliness: -0.1, proximity: 0.0 },
+    description: {
+      en: 'Molasses and alcohol — sugar with a burn behind it.',
+      tr: 'Pekmez ve alkol — arkasında bir yanma olan şeker.',
+    },
   },
   {
     id: 'whiskey',
@@ -260,6 +348,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { gourmand: 0.6, woody: 0.4, leather: 0.3 },
     volatility: { peakMinutes: 25, halfLifeMinutes: 210 },
     character: { temperature: 0.8, texture: 0.4, cleanliness: -0.3, proximity: 0.1 },
+    description: {
+      en: 'Smoke, oak and grain — the barrel more than the drink.',
+      tr: 'Duman, meşe ve tahıl — içkiden çok fıçısı.',
+    },
   },
   {
     id: 'sugar',
@@ -267,6 +359,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { gourmand: 1.0, fruity: 0.2 },
     volatility: { peakMinutes: 30, halfLifeMinutes: 240 },
     character: { temperature: 0.4, texture: -0.2, cleanliness: 0.3, proximity: 0.1 },
+    description: {
+      en: 'Cotton candy and nothing else — the most literal sweetness in the palette.',
+      tr: 'Pamuk şeker ve başka hiçbir şey — paletteki en birebir tatlılık.',
+    },
   },
   {
     id: 'dorayaki',
@@ -296,6 +392,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { gourmand: 0.8, woody: 0.3, spicy: 0.2 },
     volatility: { peakMinutes: 30, halfLifeMinutes: 240 },
     character: { temperature: 0.7, texture: 0.6, cleanliness: -0.2, proximity: 0.2 },
+    description: {
+      en: 'Bitter roast, never the drink — closer to burnt earth than to a morning.',
+      tr: 'Acı kavrulmuşluk, asla içeceğin kendisi — sabahtan çok yanmış toprağa yakın.',
+    },
   },
   {
     id: 'coconut',
@@ -314,6 +414,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { gourmand: 0.9, resinous: 0.2 },
     volatility: { peakMinutes: 40, halfLifeMinutes: 300 },
     character: { temperature: 0.5, texture: -0.6, cleanliness: 0.4, proximity: 0.3 },
+    description: {
+      en: 'Marzipan with a bitter core — the same molecule that makes cherries smell medicinal.',
+      tr: 'Acı çekirdekli badem ezmesi — kirazı tıbbi kokutan molekülün aynısı.',
+    },
   },
   {
     id: 'milk',
@@ -321,6 +425,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { gourmand: 0.8, musk: 0.3 },
     volatility: { peakMinutes: 40, halfLifeMinutes: 300 },
     character: { temperature: 0.4, texture: -0.9, cleanliness: 0.5, proximity: 0.5 },
+    description: {
+      en: 'Warm and slightly sour — a comfort that turns uneasy if you stay with it.',
+      tr: 'Sıcak ve hafif ekşi — uzun kalınca huzursuzlaşan bir rahatlık.',
+    },
   },
   {
     id: 'hazelnut',
@@ -328,6 +436,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { gourmand: 0.9, woody: 0.2 },
     volatility: { peakMinutes: 45, halfLifeMinutes: 330 },
     character: { temperature: 0.6, texture: -0.3, cleanliness: 0.1, proximity: 0.3 },
+    description: {
+      en: 'Roasted and oily — nuttiness with no sweetness of its own.',
+      tr: 'Kavrulmuş ve yağlı — kendine ait hiç tatlısı olmayan bir fındıklık.',
+    },
   },
   {
     id: 'cocoa',
@@ -335,6 +447,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { gourmand: 0.9, woody: 0.3, mossy: 0.2 },
     volatility: { peakMinutes: 45, halfLifeMinutes: 330 },
     character: { temperature: 0.5, texture: 0.3, cleanliness: -0.2, proximity: 0.3 },
+    description: {
+      en: 'Bitter powder, not chocolate — dusty, dry, and faintly like earth.',
+      tr: 'Çikolata değil acı toz — tozlu, kuru ve hafifçe toprak gibi.',
+    },
   },
   {
     id: 'caramel',
@@ -342,6 +458,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { gourmand: 1.0 },
     volatility: { peakMinutes: 50, halfLifeMinutes: 360 },
     character: { temperature: 0.8, texture: -0.5, cleanliness: 0.1, proximity: 0.4 },
+    description: {
+      en: 'Sugar taken one second past done — sweetness with a burnt edge.',
+      tr: 'Bir saniye fazla pişmiş şeker — yanık kenarı olan bir tatlılık.',
+    },
   },
   {
     id: 'honey',
@@ -349,6 +469,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { gourmand: 0.7, animalic: 0.5, floral: 0.3 },
     volatility: { peakMinutes: 50, halfLifeMinutes: 400 },
     character: { temperature: 0.8, texture: -0.2, cleanliness: -0.4, proximity: 0.4 },
+    description: {
+      en: 'Sweet, waxy and unmistakably animal — the point where gourmand turns feral.',
+      tr: 'Tatlı, mumsu ve apaçık hayvansı — gurmenin vahşileştiği yer.',
+    },
   },
   {
     id: 'immortelle',
@@ -380,6 +504,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { aromatic: 1.0, floral: 0.3, green: 0.2 },
     volatility: { peakMinutes: 15, halfLifeMinutes: 110 },
     character: { temperature: -0.3, texture: 0.2, cleanliness: 0.7, proximity: -0.4 },
+    description: {
+      en: 'Clean and camphorous — the smell of a barbershop, and of trying to fall asleep.',
+      tr: 'Temiz ve kâfurlu — berber dükkânının ve uyumaya çalışmanın kokusu.',
+    },
   },
   {
     id: 'camphor',
@@ -387,6 +515,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { aromatic: 1.0, mineral: 0.3 },
     volatility: { peakMinutes: 15, halfLifeMinutes: 90 },
     character: { temperature: -1.0, texture: 0.7, cleanliness: 0.6, proximity: -0.6 },
+    description: {
+      en: 'Cold enough to sting — a medicine cabinet, not a perfume, until it settles.',
+      tr: 'Yakacak kadar soğuk — yatışana dek parfüm değil ilaç dolabı.',
+    },
   },
   {
     id: 'nutmeg',
@@ -394,6 +526,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { spicy: 0.9, woody: 0.3 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 170 },
     character: { temperature: 0.6, texture: 0.4, cleanliness: 0.2, proximity: -0.1 },
+    description: {
+      en: 'Dusty warmth with a narcotic edge — the quietest of the warm spices.',
+      tr: 'Uyuşturucu bir kenarı olan tozlu sıcaklık — sıcak baharatların en sessizi.',
+    },
   },
   {
     id: 'cinnamon',
@@ -401,6 +537,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { spicy: 1.0, gourmand: 0.3 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 170 },
     character: { temperature: 0.9, texture: 0.5, cleanliness: 0.1, proximity: 0.0 },
+    description: {
+      en: 'Dry heat that bites — sweet only because we expect it to be.',
+      tr: 'Isıran kuru bir sıcaklık — tatlı, yalnızca öyle beklediğimiz için.',
+    },
   },
   {
     id: 'clove',
@@ -408,6 +548,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { spicy: 1.0, woody: 0.2 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 180 },
     character: { temperature: 0.8, texture: 0.6, cleanliness: 0.0, proximity: 0.0 },
+    description: {
+      en: 'The dentist and the kitchen at once — hot, numbing, and hard to hide.',
+      tr: 'Aynı anda dişçi ve mutfak — sıcak, uyuşturucu ve saklanması zor.',
+    },
   },
   {
     id: 'cumin',
@@ -415,6 +559,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { spicy: 0.9, animalic: 0.6 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 180 },
     character: { temperature: 0.6, texture: 0.5, cleanliness: -0.8, proximity: 0.4 },
+    description: {
+      en: 'Sweat, plainly — the spice people either forgive or never do.',
+      tr: 'Açıkça ter — insanların ya affettiği ya da hiç affetmediği baharat.',
+    },
   },
   {
     id: 'hay',
@@ -422,6 +570,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { aromatic: 0.6, gourmand: 0.3, green: 0.3, mossy: 0.2 },
     volatility: { peakMinutes: 40, halfLifeMinutes: 300 },
     character: { temperature: 0.4, texture: 0.5, cleanliness: 0.0, proximity: 0.1 },
+    description: {
+      en: 'Cut grass after it dries — sweet, dusty, and already halfway to tobacco.',
+      tr: 'Kuruduktan sonraki biçilmiş ot — tatlı, tozlu ve yarı yolu tütüne varmış.',
+    },
   },
   {
     id: 'clover',
@@ -429,6 +581,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { green: 0.8, floral: 0.3, gourmand: 0.2 },
     volatility: { peakMinutes: 25, halfLifeMinutes: 190 },
     character: { temperature: -0.1, texture: 0.2, cleanliness: 0.5, proximity: -0.2 },
+    description: {
+      en: 'Hay while it is still green — softer, wetter, and not yet nostalgic.',
+      tr: 'Henüz yeşilken kuru ot — daha yumuşak, daha ıslak ve henüz nostaljik değil.',
+    },
   },
   {
     id: 'carrot',
@@ -436,6 +592,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { green: 0.6, gourmand: 0.4, floral: 0.2 },
     volatility: { peakMinutes: 30, halfLifeMinutes: 220 },
     character: { temperature: 0.0, texture: -0.3, cleanliness: 0.3, proximity: 0.1 },
+    description: {
+      en: 'Sweet dirt and something almost floral — iris without the money.',
+      tr: 'Tatlı toprak ve neredeyse çiçeksi bir şey — parası olmayan iris.',
+    },
   },
 
   // ——— Reçineler ———
@@ -445,6 +605,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { resinous: 0.8, citrus: 0.4, aromatic: 0.3 },
     volatility: { peakMinutes: 25, halfLifeMinutes: 200 },
     character: { temperature: 0.0, texture: 0.3, cleanliness: 0.6, proximity: -0.3 },
+    description: {
+      en: 'Lemon peel fused with pine resin — incense that has not gone dark yet.',
+      tr: 'Çam reçinesiyle kaynaşmış limon kabuğu — henüz kararmamış bir tütsü.',
+    },
   },
   {
     id: 'frankincense',
@@ -452,6 +616,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { resinous: 1.0, aromatic: 0.3, citrus: 0.2 },
     volatility: { peakMinutes: 45, halfLifeMinutes: 360 },
     character: { temperature: 0.1, texture: 0.3, cleanliness: 0.6, proximity: -0.1 },
+    description: {
+      en: 'Cold smoke and old stone — the smell of a room built for silence.',
+      tr: 'Soğuk duman ve eski taş — sessizlik için yapılmış bir odanın kokusu.',
+    },
   },
   {
     id: 'myrrh',
@@ -459,6 +627,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { resinous: 1.0, gourmand: 0.2, animalic: 0.2 },
     volatility: { peakMinutes: 60, halfLifeMinutes: 420 },
     character: { temperature: 0.5, texture: 0.2, cleanliness: 0.0, proximity: 0.3 },
+    description: {
+      en: 'Bitter resin with a mushroom underneath — frankincense that has aged badly.',
+      tr: 'Altında mantar olan acı reçine — kötü yaşlanmış tütsü.',
+    },
   },
 
   // ——— Odun, deri, hayvansal ———
@@ -468,6 +640,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { woody: 0.7, aromatic: 0.6, resinous: 0.3 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 160 },
     character: { temperature: -0.4, texture: 0.6, cleanliness: 0.6, proximity: -0.4 },
+    description: {
+      en: 'Needles crushed underfoot — resin, and the cold air that comes with it.',
+      tr: 'Ayak altında ezilmiş iğneler — reçine ve beraberinde gelen soğuk hava.',
+    },
   },
   {
     id: 'cypress',
@@ -475,6 +651,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { woody: 0.7, aromatic: 0.5, green: 0.3 },
     volatility: { peakMinutes: 30, halfLifeMinutes: 240 },
     character: { temperature: -0.4, texture: 0.5, cleanliness: 0.6, proximity: -0.2 },
+    description: {
+      en: 'Drier and more upright than pine — a conifer with no sweetness left in it.',
+      tr: 'Çamdan daha kuru ve daha dik — içinde hiç tatlı kalmamış bir kozalaklı.',
+    },
   },
   {
     id: 'rubber',
@@ -482,6 +662,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { leather: 0.6, mineral: 0.3, animalic: 0.2 },
     volatility: { peakMinutes: 30, halfLifeMinutes: 200 },
     character: { temperature: 0.2, texture: 0.7, cleanliness: -0.4, proximity: 0.1 },
+    description: {
+      en: 'A new tyre in a hot garage — the least edible note in the palette.',
+      tr: 'Sıcak bir garajda yeni lastik — paletteki en yenmez nota.',
+    },
   },
   {
     id: 'indole',
@@ -489,6 +673,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { animalic: 0.9, floral: 0.4 },
     volatility: { peakMinutes: 35, halfLifeMinutes: 280 },
     character: { temperature: 0.4, texture: 0.1, cleanliness: -0.9, proximity: 0.3 },
+    description: {
+      en: 'The molecule white flowers share with rotting things — lovely in traces, unbearable neat.',
+      tr: 'Beyaz çiçeklerin çürümeyle paylaştığı molekül — eser hâlinde güzel, saf hâlde dayanılmaz.',
+    },
   },
   {
     id: 'ambroxan',
@@ -518,6 +706,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { leather: 0.9, musk: 0.3, woody: 0.2 },
     volatility: { peakMinutes: 60, halfLifeMinutes: 420 },
     character: { temperature: 0.3, texture: -0.5, cleanliness: 0.4, proximity: 0.5 },
+    description: {
+      en: 'Leather with the smoke taken out — powdery, matte, and close to the skin.',
+      tr: 'Dumanı alınmış deri — pudralı, mat ve tene yakın.',
+    },
   },
   {
     id: 'vetiver',
@@ -525,6 +717,10 @@ export const HEART_NOTES: readonly Note[] = [
     families: { woody: 0.8, mossy: 0.5, green: 0.3 },
     volatility: { peakMinutes: 60, halfLifeMinutes: 480 },
     character: { temperature: -0.2, texture: 0.7, cleanliness: 0.2, proximity: 0.2 },
+    description: {
+      en: 'Roots pulled from wet ground — smoky, bitter, and never quite clean.',
+      tr: 'Islak topraktan çekilmiş kökler — dumanlı, acı ve asla tam temiz değil.',
+    },
   },
   {
     id: 'birch-tar',

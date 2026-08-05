@@ -25,6 +25,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { woody: 0.6, resinous: 0.6, green: 0.3 },
     volatility: { peakMinutes: 90, halfLifeMinutes: 480 },
     character: { temperature: -0.2, texture: 0.4, cleanliness: 0.4, proximity: 0.1 },
+    description: {
+      en: 'A cut conifer brought indoors — resin, cold air, and the beginning of winter.',
+      tr: 'İçeri alınmış kesik bir kozalaklı — reçine, soğuk hava ve kışın başlangıcı.',
+    },
   },
   {
     id: 'papyrus',
@@ -32,6 +36,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { woody: 0.8, mossy: 0.3, green: 0.2 },
     volatility: { peakMinutes: 100, halfLifeMinutes: 540 },
     character: { temperature: -0.2, texture: 0.6, cleanliness: 0.3, proximity: 0.2 },
+    description: {
+      en: 'Dry reed and old paper — smoke that has cooled completely.',
+      tr: 'Kuru saz ve eski kâğıt — tamamen soğumuş bir duman.',
+    },
   },
   {
     id: 'sandalwood',
@@ -50,6 +58,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { woody: 1.0, leather: 0.3, resinous: 0.2 },
     volatility: { peakMinutes: 120, halfLifeMinutes: 660 },
     character: { temperature: 0.6, texture: 0.5, cleanliness: -0.2, proximity: 0.3 },
+    description: {
+      en: 'Smoked wood with a rose hidden in it — tar that somehow turned sweet.',
+      tr: 'İçine bir gül saklanmış tütsülü odun — nasıl olduysa tatlanmış bir katran.',
+    },
   },
   {
     id: 'cypriol',
@@ -81,6 +93,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { mossy: 1.0, green: 0.3, mineral: 0.2 },
     volatility: { peakMinutes: 100, halfLifeMinutes: 540 },
     character: { temperature: -0.4, texture: 0.4, cleanliness: 0.0, proximity: 0.2 },
+    description: {
+      en: 'Damp shade and green stone — the forest floor before it dries.',
+      tr: 'Nemli gölge ve yeşil taş — kurumadan önceki orman zemini.',
+    },
   },
   {
     id: 'earth',
@@ -88,6 +104,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { mossy: 0.7, woody: 0.3, animalic: 0.2 },
     volatility: { peakMinutes: 110, halfLifeMinutes: 600 },
     character: { temperature: -0.1, texture: 0.5, cleanliness: -0.5, proximity: 0.3 },
+    description: {
+      en: 'Rain on dry ground — a single molecule the human nose finds before any other.',
+      tr: 'Kuru toprağa yağmur — insan burnunun hepsinden önce bulduğu tek molekül.',
+    },
   },
   {
     id: 'oakmoss',
@@ -130,6 +150,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { resinous: 1.0, gourmand: 0.4 },
     volatility: { peakMinutes: 100, halfLifeMinutes: 540 },
     character: { temperature: 0.8, texture: -0.5, cleanliness: 0.3, proximity: 0.6 },
+    description: {
+      en: 'Resin gone soft and sweet — closer to melted sugar than to a tree.',
+      tr: 'Yumuşayıp tatlanmış reçine — ağaçtan çok erimiş şekere yakın.',
+    },
   },
   {
     id: 'tolu-balsam',
@@ -137,6 +161,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { resinous: 0.9, gourmand: 0.4 },
     volatility: { peakMinutes: 100, halfLifeMinutes: 540 },
     character: { temperature: 0.8, texture: -0.4, cleanliness: 0.2, proximity: 0.5 },
+    description: {
+      en: 'Cinnamon and vanilla held inside a resin — warmth with no smoke in it.',
+      tr: 'Bir reçinenin içinde tutulmuş tarçın ve vanilya — içinde hiç duman olmayan bir sıcaklık.',
+    },
   },
   {
     id: 'labdanum',
@@ -155,6 +183,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { resinous: 0.8, leather: 0.4, animalic: 0.3 },
     volatility: { peakMinutes: 110, halfLifeMinutes: 600 },
     character: { temperature: 0.7, texture: 0.3, cleanliness: -0.3, proximity: 0.4 },
+    description: {
+      en: 'The shrub labdanum is scraped from — greener, sharper, still faintly sunburnt.',
+      tr: 'Labdanumun kazındığı çalı — daha yeşil, daha keskin, hâlâ hafifçe güneş yanığı.',
+    },
   },
   {
     id: 'opoponax',
@@ -162,6 +194,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { resinous: 0.9, gourmand: 0.3, animalic: 0.2 },
     volatility: { peakMinutes: 110, halfLifeMinutes: 600 },
     character: { temperature: 0.8, texture: -0.1, cleanliness: -0.1, proximity: 0.5 },
+    description: {
+      en: 'Myrrh with the bitterness removed — balsamic, warm, and a little sleepy.',
+      tr: 'Acılığı alınmış mür — balsamik, sıcak ve biraz uykulu.',
+    },
   },
   {
     id: 'styrax',
@@ -169,6 +205,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { resinous: 0.8, leather: 0.5, animalic: 0.2 },
     volatility: { peakMinutes: 110, halfLifeMinutes: 600 },
     character: { temperature: 0.7, texture: 0.4, cleanliness: -0.3, proximity: 0.4 },
+    description: {
+      en: 'Burnt cinnamon and leather — resin at its most animal.',
+      tr: 'Yanmış tarçın ve deri — reçinenin en hayvansı hâli.',
+    },
   },
   {
     id: 'amber-accord',
@@ -176,6 +216,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { resinous: 0.8, gourmand: 0.4, musk: 0.3 },
     volatility: { peakMinutes: 120, halfLifeMinutes: 660 },
     character: { temperature: 0.9, texture: -0.5, cleanliness: 0.2, proximity: 0.6 },
+    description: {
+      en: 'Not a material but a recipe — labdanum and vanilla agreeing to be one thing.',
+      tr: 'Bir malzeme değil bir tarif — labdanum ile vanilyanın tek şey olmakta anlaşması.',
+    },
   },
   {
     id: 'mystikal',
@@ -196,6 +240,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { leather: 0.8, woody: 0.5, resinous: 0.3 },
     volatility: { peakMinutes: 90, halfLifeMinutes: 540 },
     character: { temperature: 0.7, texture: 0.9, cleanliness: -0.6, proximity: 0.3 },
+    description: {
+      en: 'Juniper burnt down to tar — campfire, disinfectant and smoked hide.',
+      tr: 'Katrana kadar yakılmış ardıç — kamp ateşi, dezenfektan ve tütsülenmiş post.',
+    },
   },
   {
     id: 'tobacco',
@@ -203,6 +251,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { leather: 0.5, gourmand: 0.4, resinous: 0.3, animalic: 0.2 },
     volatility: { peakMinutes: 90, halfLifeMinutes: 540 },
     character: { temperature: 0.7, texture: 0.3, cleanliness: -0.2, proximity: 0.4 },
+    description: {
+      en: 'The pouch, not the cigarette — dried leaf, honey and a little hay.',
+      tr: 'Sigara değil kese — kurutulmuş yaprak, bal ve biraz kuru ot.',
+    },
   },
   {
     id: 'leather',
@@ -210,6 +262,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { leather: 1.0, animalic: 0.3, woody: 0.2 },
     volatility: { peakMinutes: 100, halfLifeMinutes: 600 },
     character: { temperature: 0.5, texture: 0.6, cleanliness: -0.4, proximity: 0.4 },
+    description: {
+      en: 'A construction, not a hide — birch tar and smoke standing in for an animal.',
+      tr: 'Post değil bir kurgu — bir hayvanın yerine geçen huş katranı ve duman.',
+    },
   },
 
   // ——— Hayvansal ———
@@ -219,6 +275,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { gourmand: 0.5, animalic: 0.4, musk: 0.3, resinous: 0.2 },
     volatility: { peakMinutes: 100, halfLifeMinutes: 540 },
     character: { temperature: 0.6, texture: -0.3, cleanliness: -0.1, proximity: 0.5 },
+    description: {
+      en: 'Honey with the sugar taken out — warm, waxy, and faintly like a church.',
+      tr: 'Şekeri alınmış bal — sıcak, mumsu ve hafifçe kilise gibi.',
+    },
   },
   {
     id: 'civet',
@@ -226,6 +286,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { animalic: 1.0, musk: 0.4 },
     volatility: { peakMinutes: 150, halfLifeMinutes: 840 },
     character: { temperature: 0.7, texture: 0.2, cleanliness: -1.0, proximity: 0.8 },
+    description: {
+      en: 'Unbearable neat, and the reason old perfumes felt alive — now always synthetic.',
+      tr: 'Saf hâlde dayanılmaz ve eski parfümleri canlı kılan sebep — artık hep sentetik.',
+    },
   },
   {
     id: 'castoreum',
@@ -233,6 +297,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { animalic: 1.0, leather: 0.6 },
     volatility: { peakMinutes: 150, halfLifeMinutes: 840 },
     character: { temperature: 0.7, texture: 0.4, cleanliness: -0.9, proximity: 0.7 },
+    description: {
+      en: 'Leather, smoke and something warm-blooded — the animal note that reads as tanned hide.',
+      tr: 'Deri, duman ve sıcakkanlı bir şey — tabaklanmış post gibi okunan hayvansal nota.',
+    },
   },
   {
     id: 'hyraceum',
@@ -240,6 +308,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { animalic: 1.0, leather: 0.4, mossy: 0.2 },
     volatility: { peakMinutes: 160, halfLifeMinutes: 900 },
     character: { temperature: 0.6, texture: 0.5, cleanliness: -1.0, proximity: 0.7 },
+    description: {
+      en: 'Fossilised animal, mined like a stone — fermented, sweet and deeply dirty.',
+      tr: 'Taş gibi çıkarılan fosilleşmiş hayvan — mayalanmış, tatlı ve derinden kirli.',
+    },
   },
 
   // ——— Misk ———
@@ -249,6 +321,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { musk: 1.0 },
     volatility: { peakMinutes: 90, halfLifeMinutes: 600 },
     character: { temperature: 0.2, texture: -0.8, cleanliness: 0.9, proximity: 0.6 },
+    description: {
+      en: 'Clean laundry with nobody in it — the emptiest smell in the palette, and the most worn.',
+      tr: 'İçinde kimse olmayan temiz çamaşır — paletteki en boş ve en çok taşınan koku.',
+    },
   },
   {
     id: 'ambrette',
@@ -256,6 +332,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { musk: 0.9, floral: 0.3, woody: 0.2 },
     volatility: { peakMinutes: 100, halfLifeMinutes: 540 },
     character: { temperature: 0.1, texture: -0.6, cleanliness: 0.6, proximity: 0.5 },
+    description: {
+      en: 'The only musk that grows — pear skin, warm cloth, and no animal at all.',
+      tr: 'Yetişen tek misk — armut kabuğu, sıcak kumaş ve hiç hayvan yok.',
+    },
   },
   {
     id: 'cashmeran',
@@ -263,6 +343,10 @@ export const BASE_NOTES: readonly Note[] = [
     families: { woody: 0.6, musk: 0.5, gourmand: 0.3 },
     volatility: { peakMinutes: 110, halfLifeMinutes: 660 },
     character: { temperature: 0.5, texture: -0.4, cleanliness: 0.4, proximity: 0.5 },
+    description: {
+      en: 'A wood that never existed — soft, dry and slightly spiced, invented in a lab.',
+      tr: 'Hiç var olmamış bir odun — laboratuvarda icat edilmiş; yumuşak, kuru ve hafif baharatlı.',
+    },
   },
   {
     id: 'ambergris',
@@ -270,5 +354,9 @@ export const BASE_NOTES: readonly Note[] = [
     families: { musk: 0.7, mineral: 0.5, animalic: 0.4 },
     volatility: { peakMinutes: 120, halfLifeMinutes: 780 },
     character: { temperature: 0.4, texture: -0.3, cleanliness: 0.3, proximity: 0.6 },
+    description: {
+      en: 'Whale, sea and skin at once — salt that somehow smells warm.',
+      tr: 'Aynı anda balina, deniz ve ten — nasıl olduysa sıcak kokan bir tuz.',
+    },
   },
 ] as const;
