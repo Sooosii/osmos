@@ -20,6 +20,33 @@
 const EPSILON = 1e-10;
 
 /**
+ * Karakterin dört ekseni, `Character`teki sırayla: sıcaklık, doku, temizlik,
+ * yakınlık. İlk ikisi ekranda hep açık, diğer ikisi "…" ile geliyor.
+ */
+export const FEEL_AXES = 4;
+
+/**
+ * Kaydıraçların tarif ettiği yer — eksen başına 0…1, ya da `null`.
+ *
+ * ⚠️ `null` "nötr istiyorum" DEĞİL, **"bu ekseni sormuyorum"** demek ve ayrım
+ * kritik. Topuzlar ortada doğuyor; ortayı bir tarif saysaydık uzay daha varış
+ * anında, kimse bir şey sormadan sönerdi.
+ *
+ * Ayrım eksen BAŞINA tutuluyor, tarif başına değil. Gizli iki eksen açıldığında
+ * ama dokunulmadığında hesaba girmemeleri gerekiyor: ortada duran bir "doku"
+ * kaydıracı, kullanıcı ona hiç dokunmadan sonucu sessizce daraltırdı.
+ */
+export type FeelTarget = readonly (number | null)[];
+
+/** Hiçbir eksene dokunulmamış hâli. */
+export const NO_FEEL: FeelTarget = [null, null, null, null];
+
+/** Tarifte sorulmuş en az bir eksen var mı? */
+export function hasFeel(target: FeelTarget): boolean {
+  return target.some((value) => value !== null);
+}
+
+/**
  * Cevabın genişliği — en yakın noktadan bu kadar geride kalan sönüyor.
  *
  * ⚠️ Ölçü **mutlak uzaklık değil, en iyi eşleşmeye olan fark.** Aradaki ayrım
@@ -32,56 +59,38 @@ const EPSILON = 1e-10;
  * uzay cevap vermek yerine tümden sönüyordu. Tarayıcıda görüldü.
  *
  * Farka göre ölçünce en iyi eşleşme nerede olursa olsun tam parlaklıkta:
- * uzay her tarife bir cevap veriyor, hiçbir soruda boş kalmıyor. Değer artık
- * veriye de kaydıracın konumuna da bağlı değil, yalnızca "cevap ne kadar geniş
- * bir bölge olsun" sorusuna bakıyor.
- *
- * Yükseltmek bölgeyi genişletir; aşırıya kaçarsa kaydıraç hiçbir şey elemez.
- * Düşürmek keskinleştirir; aşırıya kaçarsa ekranda üç nokta kalır ve harita
- * "neredeyim" sorusunu cevaplayamaz olur. Tek noktadan değişir.
- *
- * 1.0, birim karenin bir kenarı kadar: 44 parfümün neredeyse hiçbiri tam dibe
- * inmiyor, uzak olanlar yalnızca sessizleşiyor. Ölçüldü — aşağıdaki tabloya bak.
+ * uzay her tarife bir cevap veriyor, hiçbir soruda boş kalmıyor.
  */
-export const FEEL_REACH = 1.0;
+export const FEEL_REACH = 0.7;
 
 /**
  * Sönümün eğrisi. 1 doğrusal; büyüdükçe cevap merkeze toplanıyor.
  *
  * ⚠️ `FEEL_REACH` ile birlikte okunmalı; ikisi tek bir gerilimi çözüyor.
  *
- * Gerilim şu: kaydıraç bir KÖŞEYE sürüldüğünde (örn. "sıcak ve kirli") veri
- * uzakta kalıyor, ORTAYA sürüldüğünde ise herkes yakın. Dar bir erişim köşeyi
- * bomboş bırakıyor, geniş bir erişim ortayı tümden aydınlatıyordu. Erişimi
- * genişletip eğriyi sertleştirmek ikisini ayırıyor: köşede kimse tümden
- * kaybolmuyor, ortada yalnızca gerçekten merkezdekiler öne çıkıyor.
+ * Gerilim şu: kaydıraç bir UCA sürüldüğünde (örn. "sıcak ve kirli") veri uzakta
+ * kalıyor, ORTAYA sürüldüğünde ise herkes yakın. Dar bir erişim ucu bomboş
+ * bırakıyor, geniş bir erişim ortayı tümden aydınlatıyordu. Erişimi genişletip
+ * eğriyi sertleştirmek ikisini ayırıyor: uçta kimse tümden kaybolmuyor, ortada
+ * yalnızca gerçekten merkezdekiler öne çıkıyor.
  *
  * 44 parfümle ölçülen dağılım (parlak = yakınlık > 0.5, dip = tam 0):
  *
- *   tarif          parlak   kademeli   dip
- *   sıcak+kirli       3         6       6
- *   soğuk+temiz       8        11       1
- *   sıcak+temiz      16        17       0
- *   orta              8        30       0
+ *   tarif                             parlak   kademeli   dip
+ *   sıcak + kirli                        3         6       7
+ *   soğuk + temiz                        8        11       1
+ *   orta                                 8        30       0
+ *   sıcak+kirli+tırtıklı+yakın (4 eksen) 8         8       0
  *
- * Denenip elenenler: 0.42/1.6 köşede 36 noktayı dibe indiriyordu (ekran tümden
- * sönüyordu); 0.90/1.0 ortada 38 noktayı parlatıyordu (kaydıraç hiçbir şey
- * elemiyordu).
+ * Son satır `distanceTo`daki ortalamanın işini gösteriyor: "…" ile iki eksen
+ * daha açmak cevabı daraltmıyor, dağılım iki eksenlininkiyle aynı ölçekte
+ * kalıyor.
+ *
+ * Denenip elenenler: dar erişim (uçta 36 noktayı dibe indiriyordu, ekran tümden
+ * sönüyordu) ve doğrusal eğri (ortada 38 noktayı parlatıyordu, kaydıraç hiçbir
+ * şey elemiyordu).
  */
 export const FEEL_CURVE = 3.2;
-
-/**
- * Kaydıraçların tarif ettiği yer — iki eksen de 0…1.
- *
- * `null` "nötr istiyorum" DEĞİL, **"sormuyorum"** demek ve ayrım kritik.
- * Kaydıraçlar ortada doğuyor; ortayı bir tarif saysaydık uzay daha varış anında,
- * kimse bir şey sormadan sönerdi. Ayrımı yoruma bırakmamak için tipin kendisi
- * taşıyor.
- */
-export type FeelTarget = readonly [number, number] | null;
-
-/** Dokunulmamış kaydıraç. */
-export const NO_FEEL: FeelTarget = null;
 
 /**
  * Bir ekseni gözlenen aralığına yayar — en küçük 0, en büyük 1.
@@ -92,9 +101,6 @@ export const NO_FEEL: FeelTarget = null;
  * bantta kümeleniyor. O bandı teorik aralığa oturtsaydık kaydıracın yolunun
  * büyük kısmı ölü olurdu: kullanıcı topuzu uca sürer, hiçbir şey değişmez,
  * kaydıracın bozuk olduğunu düşünürdü.
- *
- * Gözlenene yayınca kaydıracın iki ucu da gerçekten ulaşılabilir oluyor ve her
- * piksellik hareket bir şeyi değiştiriyor.
  */
 export function normalizeAxis(values: readonly number[]): number[] {
   if (values.length === 0) return [];
@@ -115,9 +121,28 @@ export function normalizeAxis(values: readonly number[]): number[] {
   return values.map((value) => (value - min) / span);
 }
 
-/** Tarif ile nokta arasındaki düz uzaklık. */
-function distanceTo(feel: readonly [number, number], target: readonly [number, number]): number {
-  return Math.hypot(feel[0] - target[0], feel[1] - target[1]);
+/**
+ * Tarif ile nokta arasındaki uzaklık — yalnızca SORULMUŞ eksenler üzerinden.
+ *
+ * Karekökün içi ortalama alınıyor, toplam değil. Sebebi ölçek: iki eksenle
+ * sorulan bir tarifle dört eksenle sorulan tarifin uzaklıkları aynı aralıkta
+ * kalmalı, yoksa "…" ile iki eksen daha açmak cevabı bir anda daraltır ve
+ * `FEEL_REACH` yeniden ayarlanmak zorunda kalırdı.
+ */
+function distanceTo(feel: readonly number[], target: FeelTarget): number {
+  let total = 0;
+  let asked = 0;
+
+  for (let axis = 0; axis < target.length; axis += 1) {
+    const wanted = target[axis];
+    if (wanted === null) continue;
+
+    const delta = feel[axis] - wanted;
+    total += delta * delta;
+    asked += 1;
+  }
+
+  return asked === 0 ? 0 : Math.sqrt(total / asked);
 }
 
 /**
@@ -126,14 +151,9 @@ function distanceTo(feel: readonly [number, number], target: readonly [number, n
  * Kare başına bir kez, bütün havuz üzerinden hesaplanıyor; `feelMatch` bunu
  * alarak her noktayı en iyi eşleşmeye göre derecelendiriyor. Çapa olmadan
  * kaydıracın uçlarında ekran tümden sönüyordu — gerekçesi `FEEL_REACH`te.
- *
- * Sorulmadıysa 0: `feelMatch` zaten erken dönüyor, değerin bir hükmü yok.
  */
-export function feelAnchor(
-  feels: Iterable<readonly [number, number]>,
-  target: FeelTarget,
-): number {
-  if (target === null) return 0;
+export function feelAnchor(feels: Iterable<readonly number[]>, target: FeelTarget): number {
+  if (!hasFeel(target)) return 0;
 
   let nearest = Infinity;
   for (const feel of feels) {
@@ -157,12 +177,12 @@ export function feelAnchor(
  * sürülürse sürülsün uzayın verecek bir cevabı var.
  */
 export function feelMatch(
-  feel: readonly [number, number],
+  feel: readonly number[],
   target: FeelTarget,
   anchor: number,
 ): number {
-  // Sorulmadıysa cevap yok: her nokta tam yakınlıkta, yani uzay olduğu gibi kalıyor.
-  if (target === null) return 1;
+  // Hiçbir eksen sorulmadıysa cevap yok: her nokta tam yakınlıkta, uzay olduğu gibi.
+  if (!hasFeel(target)) return 1;
 
   const behind = distanceTo(feel, target) - anchor;
   if (behind >= FEEL_REACH) return 0;

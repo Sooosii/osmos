@@ -21,13 +21,13 @@ import { normalizeAxis } from './space-feel';
 const NEIGHBOR_COUNT = 3;
 
 /**
- * `characterVector`ün eksen sırasındaki yerleri — `similarity.ts:99`'daki dizilim.
+ * `characterVector`ün eksen sayısı — `similarity.ts:99`'daki dizilim:
+ * sıcaklık, doku, temizlik, yakınlık.
  *
- * Sinestezi kaydıraçları dördün ikisini kullanıyor. Doku ve yakınlık atlanıyor
- * ama veride duruyor: benzerlik hesabına girmeye devam ediyorlar.
+ * Dördü de noktaya biniyor. Ekranda ikisi açık duruyor, ikisi "…" ile geliyor;
+ * hangisinin görüneceği arayüzün kararı, verinin değil.
  */
-const TEMPERATURE = 0;
-const CLEANLINESS = 2;
+const AXIS_COUNT = 4;
 
 export function buildMarks(perfumes: readonly Perfume[]): readonly SpaceMark[] {
   const points = projectToSpace(perfumes);
@@ -39,8 +39,9 @@ export function buildMarks(perfumes: readonly Perfume[]): readonly SpaceMark[] {
    * Gerekçenin tamamı `space-feel.ts`in `normalizeAxis`inde.
    */
   const characters = perfumes.map((perfume) => characterVector(perfume));
-  const warmth = normalizeAxis(characters.map((character) => character[TEMPERATURE]));
-  const clean = normalizeAxis(characters.map((character) => character[CLEANLINESS]));
+  const axes = Array.from({ length: AXIS_COUNT }, (_, axis) =>
+    normalizeAxis(characters.map((character) => character[axis])),
+  );
 
   return perfumes.map((perfume, index) => {
     const point = pointById.get(perfume.id);
@@ -58,7 +59,7 @@ export function buildMarks(perfumes: readonly Perfume[]): readonly SpaceMark[] {
       y: point.y,
       depth: point.depth,
       neighborIds: nearestNeighbors(perfume, perfumes, NEIGHBOR_COUNT).map((n) => n.perfume.id),
-      feel: [warmth[index], clean[index]] as const,
+      feel: [axes[0][index], axes[1][index], axes[2][index], axes[3][index]] as const,
     };
   });
 }

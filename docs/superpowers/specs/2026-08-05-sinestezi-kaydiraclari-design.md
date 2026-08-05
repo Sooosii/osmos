@@ -32,18 +32,33 @@ ama "ikincisi neydi?" sorusunu cevapsız bırakır ve haritayı bir cevap kutusu
 indirger. Ayrı bir `/ara` rotası — en net olanı, ama ikinci bir gezinme modeli
 demek ve uzay merkez olmaktan çıkar.
 
-### ② İki eksen
+### ② İki eksen açık, iki eksen "…" ile
 
-Soğuk↔sıcak (`temperature`) ve kirli↔temiz (`cleanliness`). Şemanın kendi örnek
-cümlesindeki ikisi.
+Soğuk↔sıcak (`temperature`) ve kirli↔temiz (`cleanliness`) hep açık — şemanın
+kendi örnek cümlesindeki ikisi. Altlarındaki "…" düğmesi pürüzsüz↔tırtıklı
+(`texture`) ve uzak↔yakın (`proximity`) eksenlerini getiriyor.
 
-*Reddedilen:* dördü de — tuvalin üstünde dört satır kontrol, boşluk üzerine
-kurulmuş bir ekran için fazla; ayrıca dört ekseni birden ayarlamak iş gibi
-hissettiriyor. Kademeli açılım (ikisi görünür, ikisi istenirse) — henüz kimsenin
-istemediği bir esneklik için iki ayrı durum, geçiş ve hatırlama maliyeti (YAGNI).
+**Bu karar iki eksenle başladı ve ekranda görüldükten sonra değişti.** İlk hâli
+yalnızca iki eksendi; kademeli açılım "henüz kimsenin istemediği bir esneklik"
+diye elenmişti (YAGNI). Çalışan hâli görünce sahip detayı istedi ve gerekçe
+haklıydı: dördü de veride zaten hazır duruyordu, saklamak bilgi saklamaktı.
 
-Doku ve yakınlık eksenleri veride duruyor ve benzerlik hesabını beslemeye devam
-ediyor (`similarity.ts:152`); yalnızca kaydıraç olmuyorlar.
+*Reddedilen:* dördünü birden açmak — boşluk üzerine kurulmuş bir ekranda dört
+satır kontrol fazla ve dört ekseni birden ayarlamak iş gibi hissettiriyor.
+
+**Açılım tek yönlü: açılıyor, kapanmıyor.** Kapanabilseydi iki seçenek olurdu ve
+ikisi de kötü. Açılmış eksenler kapanınca tarifte kalsaydı, ekranda görünmeyen
+iki koşul cevabı sürüklerdi — kullanıcı neden o sonucu aldığını göremezdi.
+Sıfırlansaydı kazara kapatmak sessizce ayarı silerdi.
+
+⚠️ Gizli eksenler yüzünden "dokunulmamışlık" **eksen başına** tutulmak zorunda
+kaldı. "…" ile gelen doku kaydıracı ortada duruyor; ortayı bir tarif saysaydık
+kullanıcı ona hiç dokunmadan cevabı iki koşulla daraltmış olurdu — üstelik neden
+daraldığını göremeden. `FeelTarget` bu yüzden eksen başına `number | null`.
+
+Ölçünün karekök içi de bu yüzden **ortalama**, toplam değil: "…" açmak
+uzaklıkları büyütüp cevabı daraltmasın. Ölçüldü — iki eksenli ve dört eksenli
+tarifler aynı ölçekte cevap veriyor (aşağıdaki tablo).
 
 ### ③ Sol üstte, giriş metninin altında
 
@@ -150,17 +165,36 @@ Ardından iki sabit 44 parfümün gerçek dağılımına karşı tarandı. Geril
 köşe tariflerde veri uzak (az parlak), orta tarifte herkes yakın (hepsi parlak).
 Erişimi genişletip eğriyi sertleştirmek ikisini ayırıyor.
 
-Seçilen `FEEL_REACH = 1.0`, `FEEL_CURVE = 3.2` ile ölçülen dağılım:
+Seçilen `FEEL_REACH = 0.7`, `FEEL_CURVE = 3.2` ile ölçülen dağılım:
 
 | tarif | parlak (>0.5) | kademeli | dip (=0) |
 |---|---|---|---|
-| sıcak + kirli | 3 | 6 | 6 |
+| sıcak + kirli | 3 | 6 | 7 |
 | soğuk + temiz | 8 | 11 | 1 |
-| sıcak + temiz | 16 | 17 | 0 |
 | orta | 8 | 30 | 0 |
+| sıcak + kirli + tırtıklı + yakın (4 eksen) | 8 | 8 | 0 |
 
-Elenenler: `0.42/1.6` köşede 36 noktayı dibe indiriyordu (ekran tümden sönüyordu);
-`0.90/1.0` ortada 38 noktayı parlatıyordu (kaydıraç hiçbir şey elemiyordu).
+Son satır ortalamanın işini gösteriyor: "…" ile iki eksen daha açmak cevabı
+daraltmıyor, dağılım iki eksenlininkiyle aynı ölçekte kalıyor.
+
+Elenenler: dar erişim uçta 36 noktayı dibe indiriyordu (ekran tümden sönüyordu);
+doğrusal eğri ortada 38 noktayı parlatıyordu (kaydıraç hiçbir şey elemiyordu).
+
+## Kaydıraç geometrisi — ikinci ekranda bulunan hata
+
+İlk sürümde ikinci kaydıraç "çalışmıyor" göründü. Sebebi mekanizma değil,
+geometriydi: `appearance:none` bir range input'ta 1 px'lik
+`::-webkit-slider-runnable-track` kutunun dikey **ortasına değil üstüne**
+oturuyor. Topuzu o rayın üstünde ortalamak için verilen negatif üst boşluk da
+topuzun yarısını kutunun dışına taşırıyordu — gördüğün topuzun üst yarısı
+tıklanamıyordu. İki kaydıraç alt alta olduğunda ıska aradaki 10 px'lik boşluğa
+düşüyor ve kaydıraç ölü hissettiriyordu; birincide ıska tuvale gittiği için
+sorun daha az fark ediliyordu.
+
+Çözüm: ray tam yükseklikte ve saydam, hairline ise arkadaki kardeş bir çizgi.
+Topuz kutunun tam ortasında duruyor, görünen yer ile tutulabilen yer birebir
+örtüşüyor. Gerçek fareyle ölçüldü: her iki kaydıraç da satırın üstünden,
+ortasından ve altından tutulabiliyor.
 
 ## Doğrulama
 
@@ -182,7 +216,7 @@ Elenenler: `0.42/1.6` köşede 36 noktayı dibe indiriyordu (ekran tümden sön�
 
 ## Kapsam dışı
 
-- Doku ve yakınlık eksenleri (karar ②).
+- "…" açılımının geri alınabilmesi (karar ②).
 - Kaydıraç durumunun adrese yazılması — `?mark=` ile parfüm paylaşılabiliyor ama
   tarif paylaşımı istenmedi. İstenirse ayrı iş.
 - Metin yolunun kaydıraça karşılık vermesi (karar ⑤).

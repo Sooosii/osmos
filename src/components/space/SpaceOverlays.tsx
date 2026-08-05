@@ -87,7 +87,7 @@ export function SpaceOverlays({
         */}
         <div
           ref={feelRef}
-          className="pointer-events-auto w-[15rem] max-w-full opacity-0 transition-opacity duration-700"
+          className="pointer-events-auto w-[19rem] max-w-[calc(100vw-3rem)] opacity-0 transition-opacity duration-700"
         >
           <SpaceFeelSliders targetRef={feelTargetRef} requestDraw={requestDraw} />
         </div>

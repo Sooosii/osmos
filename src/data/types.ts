@@ -171,17 +171,17 @@ export interface SpaceMark {
   /** En yakın komşular, benzerlikten güçlüye göre sıralı. */
   readonly neighborIds: readonly string[];
   /**
-   * Sinestezi kaydıraçlarının okuduğu iki eksen: `[sıcaklık, temizlik]`,
-   * ikisi de 0–1.
+   * Sinestezi kaydıraçlarının okuduğu dört eksen — `Character` ile aynı sırada
+   * (sıcaklık, doku, temizlik, yakınlık), her biri 0–1.
    *
-   * Adı bilerek `character` değil. `Character` dört eksenli ham veri ve nota
-   * başına duruyor; bu, onun parfüm düzeyinde ortalanıp **iki eksene indirgenmiş
-   * ve gözlenen aralığa yayılmış** hâli. Aynı adı vermek, aynı sayılar sanılmasına
-   * yol açardı — oysa buradaki 0.5 "nötr" değil, "44 parfümün ortası" demek.
+   * Adı bilerek `character` değil. `Character` ham veri ve nota başına duruyor;
+   * bu, onun parfüm düzeyinde ortalanıp **gözlenen aralığa yayılmış** hâli. Aynı
+   * adı vermek aynı sayılar sanılmasına yol açardı — buradaki 0.5 "nötr" değil,
+   * "44 parfümün ortası" demek.
    *
-   * Doku ve yakınlık eksenleri bilerek yok: kaydıraç olmuyorlar ama veride
-   * kalıp benzerlik hesabını beslemeye devam ediyorlar (`similarity.ts:152`).
-   * Buraya konsalardı istemciye hiç kullanılmayan iki sayı inerdi.
+   * Dördü de iniyor ama ekranda ikisi açık duruyor; doku ve yakınlık "…" ile
+   * geliyor. Dördü de veride kalmaya ve benzerlik hesabını beslemeye devam
+   * ediyor (`similarity.ts:152`).
    */
-  readonly feel: readonly [number, number];
+  readonly feel: readonly [number, number, number, number];
 }

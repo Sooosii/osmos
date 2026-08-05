@@ -1,6 +1,6 @@
 import type { SpaceMark } from '@/data/types';
 import { type Camera, type Viewport, markRadius, worldToScreen } from './space-camera';
-import { type FeelTarget, feelAnchor, feelMatch } from './space-feel';
+import { type FeelTarget, feelAnchor, feelMatch, hasFeel } from './space-feel';
 
 /**
  * Koku Uzayı'nın çizimi — tuval, veri ve kamera girer, resim çıkar.
@@ -298,8 +298,12 @@ export function drawSpace(ctx: CanvasRenderingContext2D, scene: SpaceScene) {
    * Kaydıraca dokunulmadıysa hiç hesaplanmıyor — dizi bile kurulmuyor. Sık olan
    * durum bu ve uzayın açılış karesi de buraya düşüyor.
    */
-  const anchor =
-    scene.feel === null ? 0 : feelAnchor(scene.marks.map((mark) => mark.feel), scene.feel);
+  const anchor = hasFeel(scene.feel)
+    ? feelAnchor(
+        scene.marks.map((mark) => mark.feel),
+        scene.feel,
+      )
+    : 0;
 
   for (const mark of scene.marks) {
     const dimmed = highlighted !== null && !highlighted.has(mark.id);
