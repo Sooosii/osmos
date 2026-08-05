@@ -23,7 +23,8 @@ import type { Perfume, ScentFamily, Volatility } from '@/data/types';
  * notanın o andaki yüzdesi. Aynı sayılar, iki biçim — "aa, o aslında veriymiş".
  *
  * Neden tuval değil SVG: nota adları ve yüzdeler gerçek `<text>` kalmalı.
- * `ScentSpaceCanvas.tsx:216` aynı kararı bir kez zaten vermiş.
+ * `ScentSpaceCanvas.tsx`'in başlık yorumu aynı kararı bir kez zaten
+ * vermiş — orada gerekçe nokta sayısı, burada nota adları.
  *
  * Neden kare başına `setState` yok: `EvolutionChart.tsx:26`'nın ölçerek koyduğu
  * kural. Burada React yalnızca iskeleti bir kez kuruyor; her kare `d`, `opacity`
@@ -304,7 +305,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
       frame = requestAnimationFrame(step);
     });
 
-    // Sökülürken kareyi iptal et. `ScentSpaceCanvas.tsx:634` aynı tuzağı
+    // Sökülürken kareyi iptal et. `ScentSpaceCanvas.tsx`'in temizleme etkisi aynı tuzağı
     // anlatıyor: iptal edilmeyen kare, bileşen geri geldiğinde "zaten kare
     // bekliyor" sanılıp döngüyü kilitliyor.
     return () => cancelAnimationFrame(frame);
