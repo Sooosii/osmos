@@ -33,6 +33,13 @@ const STEPS = 100;
 const MIDDLE = STEPS / 2;
 
 /**
+ * "…" ile gelen eksenler — `Character` sırasındaki yerleri: doku ve yakınlık.
+ *
+ * Kapanışta bu ikisi tariften düşürülüyor, o yüzden tek yerde duruyorlar.
+ */
+const DETAIL_AXES = [1, 3] as const;
+
+/**
  * Kaydıracın kendisi: görünmez ray, görünür topuz.
  *
  * ⚠️ Ray burada boyanmıyor, arkadaki kardeş çizgi boyuyor. Sebebi ölçülerek
@@ -120,7 +127,7 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
    */
   const valuesRef = useRef<(number | null)[]>([...NO_FEEL]);
 
-  /** "…" açıldı mı? Tek yön — aşağıdaki düğmenin yorumuna bak. */
+  /** "…" açık mı? */
   const [detailed, setDetailed] = useState(false);
 
   /**
@@ -145,6 +152,27 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
     [targetRef, requestDraw],
   );
 
+  /**
+   * "…" düğmesi — açar, kapatır.
+   *
+   * ⚠️ Kapanırken doku ve yakınlık tariften **düşürülüyor.** Görünmeyen bir
+   * koşulun cevabı sürüklemesi, kaydıraçların en baştan kaçındığı şeyin ta
+   * kendisi olurdu: kullanıcı ekranda göremediği bir sebeple daralmış bir cevaba
+   * bakardı. Kapatmanın tek dürüst anlamı "artık bunları sormuyorum".
+   *
+   * Kaydıraçların kendisini sıfırlamaya gerek yok: eksenler DOM'dan kalkıyor,
+   * tekrar açıldıklarında `defaultValue` ile ortada doğuyorlar. Yani gördüğün
+   * topuz ile tarifteki değer hep aynı şeyi söylüyor.
+   */
+  const toggleDetail = useCallback(() => {
+    if (detailed) {
+      for (const axis of DETAIL_AXES) valuesRef.current[axis] = null;
+      targetRef.current = [...valuesRef.current];
+      requestDraw();
+    }
+    setDetailed(!detailed);
+  }, [detailed, targetRef, requestDraw]);
+
   return (
     <div className="flex flex-col gap-2.5">
       <Axis axis={0} label="Sıcaklık — soğuktan sıcağa" low="SOĞUK" high="SICAK" onPick={update} />
@@ -153,39 +181,43 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
       {detailed ? (
         <>
           <Axis
-            axis={1}
+            axis={DETAIL_AXES[0]}
             label="Doku — pürüzsüzden tırtıklıya"
             low="PÜRÜZSÜZ"
             high="TIRTIKLI"
             onPick={update}
           />
           <Axis
-            axis={3}
+            axis={DETAIL_AXES[1]}
             label="Yakınlık — havada dağılandan tene yapışana"
             low="UZAK"
             high="YAKIN"
             onPick={update}
           />
         </>
-      ) : (
-        /*
-         * Tek yön: açılıyor, kapanmıyor.
-         *
-         * Kapanabilseydi iki seçenek olurdu ve ikisi de kötü. Açılmış eksenler
-         * kapanınca tarifte kalsaydı, ekranda görünmeyen iki koşul cevabı
-         * sürüklerdi — kullanıcı neden o sonucu aldığını göremezdi. Sıfırlansaydı
-         * kazara kapatmak sessizce ayarı silerdi. Açmak küçük bir karar; geri
-         * alınabilir olması, karşılığındaki iki tuzağa değmiyor.
-         */
-        <button
-          type="button"
-          onClick={() => setDetailed(true)}
-          aria-label="İki eksen daha: doku ve yakınlık"
-          className="ml-[5.1rem] w-fit rounded-full px-2 py-1 text-[13px] leading-none tracking-[0.3em] text-white/25 transition-colors hover:text-white/60 focus-visible:text-white/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
-        >
-          …
-        </button>
-      )}
+      ) : null}
+
+      {/*
+        Üç nokta hep duruyor: aynı düğme hem açıyor hem kapatıyor.
+
+        Kapanışta eksenler tariften DÜŞÜYOR (`toggleDetail`). Kapanıp da tarifte
+        kalsalardı ekranda görünmeyen iki koşul cevabı sürüklerdi ve kullanıcı
+        neden o sonucu aldığını göremezdi — kapatmanın tek dürüst anlamı "artık
+        bunları sormuyorum".
+      */}
+      <button
+        type="button"
+        onClick={toggleDetail}
+        aria-expanded={detailed}
+        aria-label={
+          detailed ? 'Doku ve yakınlık eksenlerini kapat' : 'İki eksen daha: doku ve yakınlık'
+        }
+        className={`ml-[5.1rem] w-fit rounded-full px-2 py-1 text-[13px] leading-none tracking-[0.3em] transition-colors hover:text-white/60 focus-visible:text-white/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 ${
+          detailed ? 'text-white/45' : 'text-white/25'
+        }`}
+      >
+        …
+      </button>
     </div>
   );
 }
