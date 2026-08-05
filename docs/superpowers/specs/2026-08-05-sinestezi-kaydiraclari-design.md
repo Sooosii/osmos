@@ -35,8 +35,15 @@ demek ve uzay merkez olmaktan çıkar.
 ### ② İki eksen açık, iki eksen "…" ile
 
 Soğuk↔sıcak (`temperature`) ve kirli↔temiz (`cleanliness`) hep açık — şemanın
-kendi örnek cümlesindeki ikisi. Altlarındaki "…" düğmesi pürüzsüz↔tırtıklı
-(`texture`) ve uzak↔yakın (`proximity`) eksenlerini getiriyor.
+kendi örnek cümlesindeki ikisi. Altlarındaki "…" düğmesi YUMUŞAK↔SERT
+(`texture`) ve HAVADA↔TENDE (`proximity`) eksenlerini getiriyor.
+
+Bu iki etiket de ekranda konuşularak seçildi; ilk adları anlaşılmıyordu.
+PÜRÜZSÜZ↔TIRTIKLI yerine YUMUŞAK↔SERT geldi — bilinen riskiyle birlikte, çünkü
+"sert parfüm" Türkçede genelde "ağır, keskin" demek ve doku değil şiddet
+sanılabilir. UZAK↔YAKIN ise büsbütün yanlış okunuyordu: mesafeden bahsettiği
+sanılıyordu, oysa eksen kokunun NEREDE durduğunu söylüyor. HAVADA↔TENDE yeri
+doğrudan adlandırıyor ve `types.ts:71`'in kendi sözleriyle aynı.
 
 **Bu karar iki eksenle başladı ve ekranda görüldükten sonra değişti.** İlk hâli
 yalnızca iki eksendi; kademeli açılım "henüz kimsenin istemediği bir esneklik"
@@ -194,7 +201,7 @@ Seçilen `FEEL_REACH = 0.7`, `FEEL_CURVE = 3.2` ile ölçülen dağılım:
 | sıcak + kirli | 3 | 6 | 7 |
 | soğuk + temiz | 8 | 11 | 1 |
 | orta | 8 | 30 | 0 |
-| sıcak + kirli + tırtıklı + yakın (4 eksen) | 8 | 8 | 0 |
+| sıcak + kirli + sert + tende (4 eksen) | 8 | 8 | 0 |
 
 Son satır ortalamanın işini gösteriyor: "…" ile iki eksen daha açmak cevabı
 daraltmıyor, dağılım iki eksenlininkiyle aynı ölçekte kalıyor.
