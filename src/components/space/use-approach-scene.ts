@@ -16,11 +16,14 @@ import {
 /**
  * Yaklaşma sahnesinin ömrü — uzaya uzaktan gelme eşiği.
  *
- * Uzay tuvalinden çıkarıldı çünkü sahne dört ref'i tamamen kendi sahipleniyor
- * (`approachRef`, `approachActiveRef`, `cueRef`, `introRef`) ve dışarıya yalnızca
- * dört soruyla konuşuyor: sürüyor mu, tekerleği ister misin, biter misin, ve
- * hangi katmanlara tutunuyorsun. Bileşenin sahnenin iç durumunu bilmesine gerek
- * kalmıyor.
+ * Uzay tuvalinden çıkarıldı çünkü sahnenin bütün durumu iki ref'ten ibaret
+ * (`approachRef`, `approachActiveRef`) ve ikisi de yalnızca burada okunuyor.
+ * Dışarıya üç soruyla konuşuyor: sürüyor mu, tekerleği ister misin, biter misin.
+ * Bileşenin sahnenin iç durumunu bilmesine gerek kalmıyor.
+ *
+ * Çizdiği DOM katmanlarını (`cueRef`, `introRef`) kurmuyor, parametre olarak
+ * alıyor — `useCanvasSize` ile aynı sözleşme. Sebebi ilkesel: ref'i kim
+ * render ediyorsa o bildirir; kanca yalnızca yazar.
  *
  * Sahne sürerken **kameranın sahibi bu kanca.** `cameraRef`'e yazıyor ve bu
  * doğru: o sırada kamerayı başka hiçbir yol süremiyor, hepsi `isActive()`
@@ -31,21 +34,6 @@ import {
  */
 
 export interface ApproachScene {
-  /**
-   * İpucu ve giriş metni katmanlarının ref'leri — JSX'e veriliyor.
-   *
-   * Opaklıkları React'te DEĞİL, doğrudan DOM'da. Kare başına değişiyorlar ve her
-   * adımda `setState` demek her adımda bir React ağacı demek.
-   *
-   * İkinci ve daha sinsi sebep: sahnenin çalışıp çalışmayacağı ancak tarayıcıda
-   * belli oluyor (`sessionStorage`, `matchMedia`, adres parametresi), yani
-   * sunucuda çizilen çıktıda cevap yok. Durumla yapılsaydı hangi varsayılanı
-   * verirsek verelim biri yanardı — sahneyi görecek olan giriş metnini bir kare
-   * görüp kaybeder, atlayan ipucunu. İkisi de baştan opaklık 0 doğuyor; karar ilk
-   * boyanmadan önceki etkide veriliyor ve doğru olan açılıyor.
-   */
-  readonly cueRef: RefObject<HTMLDivElement | null>;
-  readonly introRef: RefObject<HTMLDivElement | null>;
   /**
    * Sahne sürüyor mu — işaretçi yollarının erken dönüş kapısı.
    *
@@ -85,20 +73,36 @@ export interface ApproachScene {
 interface ApproachSceneOptions {
   readonly canvasRef: RefObject<HTMLCanvasElement | null>;
   readonly cameraRef: RefObject<Camera>;
+  /**
+   * İpucu ve giriş metni katmanları. Kanca **kurmuyor, alıyor** — `useCanvasSize`
+   * ile aynı sözleşme: sahne kendi durumunu sahipleniyor, DOM'u ise onu çizen.
+   *
+   * Opaklıkları React'te DEĞİL, doğrudan burada. Kare başına değişiyorlar ve her
+   * adımda `setState` demek her adımda bir React ağacı demek.
+   *
+   * İkinci ve daha sinsi sebep: sahnenin çalışıp çalışmayacağı ancak tarayıcıda
+   * belli oluyor (`sessionStorage`, `matchMedia`, adres parametresi), yani
+   * sunucuda çizilen çıktıda cevap yok. Durumla yapılsaydı hangi varsayılanı
+   * verirsek verelim biri yanardı — sahneyi görecek olan giriş metnini bir kare
+   * görüp kaybeder, atlayan ipucunu. İkisi de baştan opaklık 0 doğuyor; karar ilk
+   * boyanmadan önceki etkide veriliyor ve doğru olan açılıyor.
+   */
+  readonly cueRef: RefObject<HTMLDivElement | null>;
+  readonly introRef: RefObject<HTMLDivElement | null>;
   readonly requestDraw: () => void;
 }
 
 export function useApproachScene({
   canvasRef,
   cameraRef,
+  cueRef,
+  introRef,
   requestDraw,
 }: ApproachSceneOptions): ApproachScene {
   const searchParams = useSearchParams();
 
   const approachRef = useRef<ApproachState>(APPROACH_START);
   const approachActiveRef = useRef(true);
-  const cueRef = useRef<HTMLDivElement>(null);
-  const introRef = useRef<HTMLDivElement>(null);
 
   /**
    * Sahnenin ekrandaki izlerini tazeler: ipucu, giriş metni, imleç.
@@ -126,7 +130,7 @@ export function useApproachScene({
     if (canvasRef.current) {
       canvasRef.current.style.cursor = active ? 'default' : '';
     }
-  }, [canvasRef]);
+  }, [canvasRef, cueRef, introRef]);
 
   const finish = useCallback(() => {
     if (!approachActiveRef.current) return;
@@ -193,5 +197,5 @@ export function useApproachScene({
     [cameraRef, finish, paintScene, requestDraw],
   );
 
-  return { cueRef, introRef, isActive, consumeWheel, finish };
+  return { isActive, consumeWheel, finish };
 }

@@ -104,6 +104,10 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const labelRef = useRef<HTMLDivElement>(null);
+  // Yaklaşma sahnesinin tutunduğu iki katman. Sahnenin durumu `useApproachScene`
+  // içinde, DOM'u burada: opaklıklarını o kanca doğrudan yazıyor.
+  const cueRef = useRef<HTMLDivElement>(null);
+  const introRef = useRef<HTMLDivElement>(null);
 
   /*
    * Kamera yaklaşmanın başladığı yerde doğuyor, `INITIAL_CAMERA`'da değil.
@@ -330,7 +334,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
    *
    * Yani bu çağrı aşağı kaydırılamaz. Gerekçenin tamamı `use-approach-scene.ts`te.
    */
-  const approach = useApproachScene({ canvasRef, cameraRef, requestDraw });
+  const approach = useApproachScene({ canvasRef, cameraRef, cueRef, introRef, requestDraw });
 
   /**
    * `/?mark=<id>` ile dönüş — parfüm sayfasından geri gelen göz.
@@ -670,7 +674,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
         görünmezken verilmiş bir söz olurdu. Varışta yerine yerleşiyor.
       */}
       <div
-        ref={approach.introRef}
+        ref={introRef}
         className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700"
       >
         {children}
@@ -692,7 +696,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
         yalnızca gürültü olurdu.
       */}
       <div
-        ref={approach.cueRef}
+        ref={cueRef}
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-[18%] flex justify-center opacity-0 transition-opacity duration-300"
       >
