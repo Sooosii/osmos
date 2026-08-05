@@ -66,8 +66,13 @@ const SLIDER_CLASS = [
   '[&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-white/70',
 ].join(' ');
 
-/** Uç etiketi — giriş ipucuyla aynı tipografi. */
-const EDGE_CLASS = 'w-[4.6rem] shrink-0 text-[10px] tracking-[0.15em] text-white/30';
+/**
+ * Uç etiketi — giriş ipucuyla aynı tipografi.
+ *
+ * Genişlik en uzun etikete göre: "YUMUŞAK". Sabit olması şart, yoksa dört
+ * kaydıracın rayları farklı yerlerden başlar ve sütun eğrilirdi.
+ */
+const EDGE_CLASS = 'w-[4.2rem] shrink-0 text-[10px] tracking-[0.15em] text-white/30';
 
 interface AxisProps {
   /** `Character` sırasındaki yeri: 0 sıcaklık, 1 doku, 2 temizlik, 3 yakınlık. */
@@ -180,18 +185,31 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
 
       {detailed ? (
         <>
+          {/*
+            Etiketler ekranda seçildi.
+
+            "Doku" için önce PÜRÜZSÜZ↔TIRTIKLI vardı ve anlaşılmadı. SERT'in
+            bilinen riski var — Türkçede parfüm için genelde "ağır, keskin"
+            demek, yani doku değil şiddet sanılabilir; sahip bunu bilerek seçti,
+            karşılığında en kısa ve en tanıdık çift geldi.
+
+            "Yakınlık" için UZAK↔YAKIN büsbütün yanlış okunuyordu: mesafeden
+            bahsettiği sanılıyordu, oysa eksen kokunun NEREDE durduğunu söylüyor.
+            HAVADA↔TENDE doğrudan yeri adlandırıyor ve `types.ts:71`'in kendi
+            sözleriyle aynı: "havada dağılan" ↔ "tene yapışan".
+          */}
           <Axis
             axis={DETAIL_AXES[0]}
-            label="Doku — pürüzsüzden tırtıklıya"
-            low="PÜRÜZSÜZ"
-            high="TIRTIKLI"
+            label="Doku — yumuşaktan serte"
+            low="YUMUŞAK"
+            high="SERT"
             onPick={update}
           />
           <Axis
             axis={DETAIL_AXES[1]}
             label="Yakınlık — havada dağılandan tene yapışana"
-            low="UZAK"
-            high="YAKIN"
+            low="HAVADA"
+            high="TENDE"
             onPick={update}
           />
         </>
@@ -205,19 +223,31 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
         neden o sonucu aldığını göremezdi — kapatmanın tek dürüst anlamı "artık
         bunları sormuyorum".
       */}
-      <button
-        type="button"
-        onClick={toggleDetail}
-        aria-expanded={detailed}
-        aria-label={
-          detailed ? 'Doku ve yakınlık eksenlerini kapat' : 'İki eksen daha: doku ve yakınlık'
-        }
-        className={`ml-[5.1rem] w-fit rounded-full px-2 py-1 text-[13px] leading-none tracking-[0.3em] transition-colors hover:text-white/60 focus-visible:text-white/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 ${
-          detailed ? 'text-white/45' : 'text-white/25'
-        }`}
-      >
-        …
-      </button>
+      {/*
+        Hiza sihirli sayıdan değil, kaydıraçlarla AYNI iskeletten geliyor: boş
+        bir etiket sütunu, sonra düğme. Böylece üç nokta rayların tam başladığı
+        yerde duruyor ve `EDGE_CLASS` değişince kendiliğinden takip ediyor.
+
+        Önce `ml-[…rem]` ile hizalanmıştı ve iki kez ısırdı: hem etiket
+        genişliğiyle elle eşlenmesi gereken ikinci bir sayıydı, hem de Tailwind
+        yeni bir keyfi değer için sınıfı üretmeyince hiza sessizce kayıyordu.
+      */}
+      <div className="flex items-center gap-2">
+        <span className={EDGE_CLASS} aria-hidden="true" />
+        <button
+          type="button"
+          onClick={toggleDetail}
+          aria-expanded={detailed}
+          aria-label={
+            detailed ? 'Doku ve yakınlık eksenlerini kapat' : 'İki eksen daha: doku ve yakınlık'
+          }
+          className={`w-fit rounded-full px-2 py-1 text-[13px] leading-none tracking-[0.3em] transition-colors hover:text-white/60 focus-visible:text-white/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 ${
+            detailed ? 'text-white/45' : 'text-white/25'
+          }`}
+        >
+          …
+        </button>
+      </div>
     </div>
   );
 }
