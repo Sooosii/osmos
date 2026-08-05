@@ -117,16 +117,27 @@ arası boşluk iki katına çıkıyor, doku bir tram olmaktan çıkıp serpişti
 beneğe dönüşüyordu. Artık geometri ekran pikseline ölçekleniyor, **ızgara ekranda
 sabit kalıyor** — tuval ne kadar büyürse büyüsün doku aynı sıklıkta.
 
-**② Aynı anda on bir ad birden yazılıyordu.** Eşik (`LABEL_FADE_MIN`) yığılmayı
-önlemek için konmuştu ama işi yapamıyordu. Yığılmayı önleyen şey artık çizimdeki
-**"yalnızca en öndeki konuşur"** kuralı; eşiğin tek işi o tek adı sahnenin
-kenarında yumuşakça açıp kapatmak.
+**② Adlar iç içe geçiyordu.** Bu üç turda çözüldü ve iki ara çözüm de yanlıştı.
 
-İkisi karıştırıldığı için eşik önce 0.82'ye çekilmişti ve bu ters yönde bozdu:
-ad yalnızca dar bir yayda görünüyor, parfüm arkaya geçince uzun süre isimsiz
-kalıyordu ("arkaya gittikten sonra gelene kadar çok vakit geçiyor"). Tek
-konuşmacı varken eşik düşük olmalı — 0.35'te kalabalık notalarda **hep bir ad
-duruyor** ve sıra birinden diğerine yumuşakça devrediyor.
+Önce eşiğe (`LABEL_FADE_MIN`) yığılmayı önletmeye çalışıldı; beceremedi, sandal
+gibi 26 parfümlü bir notada on bir ad üst üste bindi. Sonra **yalnızca en öndeki
+konuşsun** kuralı kondu: yığılma bitti ama bu sefer sahne fakirleşti — ad yalnızca
+dar bir yayda görünüyor, bir parfüm arkaya geçince uzun süre isimsiz kalıyordu
+("arkaya gittikten sonra gelene kadar çok vakit geçiyor"). Sahip son biçimi
+söyledi: **hepsi görünsün ama dağınık olmasın.**
+
+Çözüm **çakışma denetimi**: adlar ayrı bir geçişte, **öne çıkma sırasına göre**
+yazılıyor. Her adın kutusu ölçülüyor (`measureText`) ve daha önce yazılmış bir
+kutuya değiyorsa o ad atlanıyor. Merkezdeki nota diski baştan rezerve — sahnenin
+öznesinin üstüne yazı düşmüyor.
+
+Sonuç ikisini birden veriyor: yer varsa herkes konuşuyor (sandalda aynı anda ~14
+ad), yer yoksa öndeki kazanıyor ve dönüş sırayı zaten devrediyor. Eşik böylece
+serbest kaldı (0.12) ve tek işi en arkaya dönmüş bir noktanın adını sönerken
+kapatmak.
+
+Ayrı geçiş şart: diskler derinlik sırasına göre çiziliyor ama bir adın arkadaki
+bir diskin altında kalması gerekmiyor — yazı her zaman en üstte.
 
 **③ Dönüş fazla yavaştı.** Komşu takımyıldızının 30 saniyesi üç nokta için doğru,
 26 nokta için değil: bir parfümün öne gelme sırası dakikada bire düşüyordu. 18

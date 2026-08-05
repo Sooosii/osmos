@@ -181,52 +181,31 @@ export function NoteOrbit({ carriers, noteName, noteColor }: NoteOrbitProps) {
       behind.sort((a, b) => b.node.z - a.node.z);
       front.sort((a, b) => b.node.z - a.node.z);
 
-      /*
-       * Adı yalnızca EN ÖNDEKİ parfüm söylüyor.
-       *
-       * İlk sürümde eşiği geçen herkes adını yazıyordu ve sandal gibi 26 parfümlü
-       * bir notada aynı anda on bir ad üst üste biniyordu. Tek ada inince yörünge
-       * yavaş bir sıraya dönüşüyor: her parfüm öne geldiğinde adını söyleyip
-       * susuyor. Kalabalık hâlâ görünüyor — kaç parfüm olduğu diskleri saymakla
-       * okunuyor — ama okunmayan bir yığın değil.
-       */
-      const speaker = nodes.reduce<(typeof nodes)[number] | null>(
-        (best, entry) => (best === null || entry.node.fade > best.node.fade ? entry : best),
-        null,
-      );
-
-      const paint = (entry: (typeof nodes)[number]) => {
+      const discRadius = (entry: (typeof nodes)[number]) => {
         const carrier = byId.get(entry.seat.id);
-        if (!carrier) return;
-
-        const { node } = entry;
-        const alpha = 0.34 + node.fade * 0.56;
-
         /*
          * Boy ağırlığı İKİNCİ kez anlatıyor ve bu bilerek: yarıçap zaten ağırlıktan
          * geliyor, ama dönen bir sahnede "hangisi merkeze yakın" tek başına zor
          * okunuyor. Baskın nota daha büyük bir disk olunca hiyerarşi ada bakmadan
          * görülüyor.
          */
-        const radius = (7 + carrier.weight * 9) * node.scale * k;
-
-        ditherDisc(
-          node.x * k,
-          node.y * k,
-          radius,
-          withAlpha(carrier.color, alpha),
-          0.55 + node.fade * 0.45,
-        );
-
-        if (entry !== speaker || node.fade < LABEL_FADE_MIN) return;
-        const labelAlpha = (node.fade - LABEL_FADE_MIN) / (1 - LABEL_FADE_MIN);
-        ctx.font = `${Math.round(13 * k)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
-        ctx.textAlign = 'center';
-        ctx.fillStyle = `rgba(255,255,255,${(labelAlpha * 0.9).toFixed(3)})`;
-        ctx.fillText(carrier.name, node.x * k, node.y * k - radius - LABEL_RISE * k);
+        return (7 + (carrier?.weight ?? 0) * 9) * entry.node.scale * k;
       };
 
-      behind.forEach(paint);
+      const paintDisc = (entry: (typeof nodes)[number]) => {
+        const carrier = byId.get(entry.seat.id);
+        if (!carrier) return;
+
+        ditherDisc(
+          entry.node.x * k,
+          entry.node.y * k,
+          discRadius(entry),
+          withAlpha(carrier.color, 0.34 + entry.node.fade * 0.56),
+          0.55 + entry.node.fade * 0.45,
+        );
+      };
+
+      behind.forEach(paintDisc);
       ditherDisc(
         CENTER_X * k,
         CENTER_Y * k,
@@ -234,7 +213,73 @@ export function NoteOrbit({ carriers, noteName, noteColor }: NoteOrbitProps) {
         withAlpha(noteColor, 0.95),
         1.05,
       );
-      front.forEach(paint);
+      front.forEach(paintDisc);
+
+      /*
+       * Adlar AYRI bir geçişte ve çakışma denetimiyle yazılıyor.
+       *
+       * Sıralama derinlik değil **öne çıkma** sırası: en öndeki adını ilk yazıyor,
+       * arkadakiler ancak yer kalırsa. Bir ad daha önce yazılmış birinin kutusuna
+       * değiyorsa atlanıyor — böylece hiçbir yazı üst üste binmiyor.
+       *
+       * Bu, iki başarısız denemenin ardından geldi. Önce eşiği geçen herkes
+       * yazıyordu ve sandal gibi 26 parfümlü bir notada on bir ad iç içe geçiyordu.
+       * Sonra yalnızca en öndeki konuşturuldu; yığılma bitti ama sahip haklı olarak
+       * "diğerinin gelmesini beklemeye gerek yok, hepsi görünsün" dedi. Çakışma
+       * denetimi ikisini birden veriyor: yer varsa herkes konuşuyor, yer yoksa
+       * öndeki kazanıyor ve dönüş sırayı zaten devrediyor.
+       *
+       * Ayrı geçiş şart: diskler derinlik sırasına göre çiziliyor ve bir adın
+       * arkadaki bir diskin altında kalması gerekmiyor — yazı her zaman en üstte.
+       */
+      const fontSize = Math.max(10, Math.round(11 * k));
+      ctx.font = `${fontSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+      ctx.textAlign = 'center';
+
+      /*
+       * Merkezdeki nota diski baştan rezerve: adların üstüne yazılmaması gereken
+       * tek şey o. Diğer disklerin üstüne düşmesi sorun değil — arkadakiler zaten
+       * sönük ve yazı her zaman en üstte — ama merkez sahnenin öznesi.
+       */
+      const placed: { x0: number; y0: number; x1: number; y1: number }[] = [
+        {
+          x0: CENTER_X * k - NOTE_RADIUS * k,
+          y0: CENTER_Y * k - NOTE_RADIUS * k,
+          x1: CENTER_X * k + NOTE_RADIUS * k,
+          y1: CENTER_Y * k + NOTE_RADIUS * k,
+        },
+      ];
+      const spoken = [...nodes].sort((a, b) => b.node.fade - a.node.fade);
+
+      for (const entry of spoken) {
+        const carrier = byId.get(entry.seat.id);
+        if (!carrier || entry.node.fade < LABEL_FADE_MIN) continue;
+
+        const cx = entry.node.x * k;
+        const cy = entry.node.y * k - discRadius(entry) - LABEL_RISE * k;
+        const half = ctx.measureText(carrier.name).width / 2;
+
+        // Kutulara nefes payı: harfler değmese de iki ad bitişikken tek kelime
+        // gibi okunuyor.
+        const box = {
+          x0: cx - half - 5,
+          y0: cy - fontSize,
+          x1: cx + half + 5,
+          y1: cy + fontSize * 0.35,
+        };
+
+        const collides = placed.some(
+          (other) => box.x0 < other.x1 && box.x1 > other.x0 && box.y0 < other.y1 && box.y1 > other.y0,
+        );
+        if (collides) continue;
+
+        placed.push(box);
+
+        // Arkadaki ad sönük ama okunur; ön-arka ayrımı yazıda da sürüyor.
+        const strength = (entry.node.fade - LABEL_FADE_MIN) / (1 - LABEL_FADE_MIN);
+        ctx.fillStyle = `rgba(255,255,255,${(0.34 + strength * 0.56).toFixed(3)})`;
+        ctx.fillText(carrier.name, cx, cy);
+      }
 
       raf = requestAnimationFrame(draw);
     };

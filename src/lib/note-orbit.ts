@@ -135,20 +135,21 @@ export const LABEL_RISE = 13;
 /**
  * Adın yazılması için gereken en düşük sönümleme.
  *
- * ⚠️ Bu eşik yığılmayı ÖNLEMİYOR — onu çizimdeki "yalnızca en öndeki konuşur"
- * kuralı yapıyor (`NoteOrbit.tsx`). Buranın tek işi, tek konuşmacının adını
- * sahnenin kenarında yumuşakça açıp kapatmak.
+ * ⚠️ Bu eşik yığılmayı ÖNLEMİYOR — onu çizimdeki **çakışma denetimi** yapıyor
+ * (`NoteOrbit.tsx`): adlar öne çıkma sırasına göre yazılıyor ve daha önce
+ * yazılmış bir kutuya değen atlanıyor. Buranın tek işi, arkaya tamamen dönmüş
+ * bir noktanın adını sönerken kapatmak.
  *
- * İlk sürümde ikisi karıştırıldı: eşik yığılmaya karşı 0.82'ye çekilmişti ve
- * sonuç ters yönde bozuldu — ad yalnızca dar bir yayda görünüyor, parfüm arkaya
- * geçince uzun süre isimsiz kalıyordu. Sahip ekranda gördü: "arkaya gittikten
- * sonra adı kayboluyor, gelene kadar çok vakit geçiyor."
+ * Değer üç turda buraya indi. Önce 0.55: eşiğe yığılmayı önletmeye çalışıldı,
+ * beceremedi, sandal gibi 26 parfümlü bir notada on bir ad iç içe geçti. Sonra
+ * 0.82 + "yalnızca en öndeki konuşur": yığılma bitti ama bu sefer ad yalnızca dar
+ * bir yayda göründü ("arkaya gittikten sonra gelene kadar çok vakit geçiyor").
+ * Sahip son biçimi söyledi: hepsi görünsün ama dağınık olmasın.
  *
- * Düşük eşikle kalabalık notalarda **hep bir ad duruyor** ve sıra birinden
- * diğerine yumuşakça devrediyor. Tek parfümlü notada (dorayaki) ad arkaya
- * geçerken sönüyor; orada devredecek kimse yok ve bu doğru.
+ * Çakışma denetimi ikisini birden veriyor, dolayısıyla eşik artık serbest kalıp
+ * yalnızca en arkadakini eleyebiliyor.
  */
-export const LABEL_FADE_MIN = 0.35;
+export const LABEL_FADE_MIN = 0.12;
 
 /** Notayı içeren bir parfüm — yörüngeye oturacak ham veri. */
 export interface NoteCarrier {
