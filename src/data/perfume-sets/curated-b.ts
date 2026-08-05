@@ -43,6 +43,8 @@ export const CURATED_B: readonly Perfume[] = [
     id: 'maison-tahite-sel-vanille',
     name: 'Sel-Vanille',
     brand: 'Maison Tahité',
+    year: 2020,
+    perfumer: 'David Maruitte',
     curated: true,
     line: {
       en: 'Salt scattered over the sweetness — it does not soften the vanilla, it sharpens it.',
@@ -61,9 +63,13 @@ export const CURATED_B: readonly Perfume[] = [
     ],
   },
   {
+    // `perfumer` YOK ve bu eksik veri değil, bir olgu: marka bu kokunun burnunu
+    // hiç açıklamadı. Aranıp bulunamadı diye boş bırakılmış sanılıp bir gün
+    // tahminle doldurulmasın. Ajyal ile birlikte 44'ün açıklanmamış iki adı.
     id: 'comptoir-sud-pacifique-vanille-abricot',
     name: 'Vanille Abricot',
     brand: 'Comptoir Sud Pacifique',
+    year: 1994,
     curated: true,
     line: {
       en: 'An apricot left in the sun, warm cream underneath.',
@@ -86,6 +92,8 @@ export const CURATED_B: readonly Perfume[] = [
     id: 'giardini-di-toscana-bianco-oro',
     name: 'Bianco Oro',
     brand: 'Giardini di Toscana',
+    year: 2023,
+    perfumer: 'Silvia Martinelli',
     curated: true,
     line: {
       en: 'Sanded wood with something sweet resting on it.',
@@ -111,6 +119,8 @@ export const CURATED_B: readonly Perfume[] = [
     id: 'house-of-oud-bonbon-pop',
     name: 'Bonbon Pop',
     brand: 'The House of Oud',
+    year: 2022,
+    perfumer: 'Douglas Morel',
     curated: true,
     line: {
       en: 'Candy straight out of the wrapper — sweet without apology.',
@@ -132,6 +142,8 @@ export const CURATED_B: readonly Perfume[] = [
     id: 'lorenzo-pazzaglia-summer-hammer',
     name: 'Summer Hammer',
     brand: 'Lorenzo Pazzaglia',
+    year: 2023,
+    perfumer: 'Lorenzo Pazzaglia',
     curated: true,
     line: {
       en: 'Pineapple on ice and burnt sugar — not the holiday, its first night.',
@@ -155,6 +167,8 @@ export const CURATED_B: readonly Perfume[] = [
     id: 'city-rhythm-miami-tropical-confessions',
     name: 'Miami Tropical Confessions',
     brand: 'City Rhythm',
+    year: 2023,
+    perfumer: 'Niles Ramadhin',
     curated: true,
     line: {
       en: 'A piña colada in a glass you did not order, and flowers on the table.',

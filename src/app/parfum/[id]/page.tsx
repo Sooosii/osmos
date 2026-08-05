@@ -1,21 +1,35 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PERFUMES } from '@/data/perfumes';
-import { getFamily } from '@/data/families';
+import { dominantFamily, getFamily } from '@/data/families';
 import { familyVector } from '@/lib/similarity';
-import { dominantFamily } from '@/lib/space-marks';
-import { EvolutionChart } from '@/components/EvolutionChart';
+import { EvolutionSignature } from '@/components/EvolutionSignature';
+import { Neighbors } from '@/components/Neighbors';
 
 /**
- * Parfüm sayfası — yol haritasının ① ve ③ bölümleri.
+ * Parfüm sayfası — yol haritasının ①, ②, ③ ve ④'ü. Tamamı.
  *
- *   ①  isim + marka + küratör cümlesi        ← yalnızca duygu
+ *   ①  isim + marka + künye + küratör cümlesi ← yalnızca duygu (bir de kimlik)
  *          ↓
- *   ③  evrim çizelgesi                        ← altındaki veri
+ *   ②③ evrim imzası                          ← altındaki veri, kendi kendine dönen
+ *          ↓
+ *   ④  uzaydaki komşular                     ← "peki buna benzeyen ne var?"
  *
- * ② (imzanın grafiğe dönüşmesi — morph) Aşama 2'ye ait. ④ (künye + uzaydaki
- * komşular) kullanıcı kararıyla ertelendi: 44 parfümün 23'ünde parfümör,
- * 18'inde yıl bilgisi yok; yarısı boş bir künye bölümü sayfayı eksik gösterirdi.
+ * ② ile ③ tek bir şeyde birleşti: imza, çizelgenin başka bir hâli. Kaydıraç yok —
+ * biçim ve zaman 12 saniyelik bir turda hiç durmadan dönüyor (`EvolutionSignature`).
+ * Kaydıraçlı çizelge `/evrim` doğrulama ekranında duruyor; orası iki parfümü aynı
+ * dakikada karşılaştırmak için var.
+ *
+ * ④ ikiye ayrıldı. Komşular geldi: hiç durmadan dönen üç boyutlu bir takımyıldız.
+ * Yarıçap benzerlik, yükseklik `depth` — uzayın iki boyuta sığdıramadığı üçüncü
+ * bileşen. Konumlar uzaydaki gerçek yerler DEĞİL; "en benzeyen en yakında dursun"
+ * garantisiyle gerçek konumlar aynı anda mümkün olmuyordu (ölçüldü: örtüşme
+ * 3.16/5) ve kullanıcı garantiyi seçti. Karar geçmişi `lib/neighbor-orbit.ts`te.
+ *
+ * ④'ün öbür yarısı **künye** de geldi. Bir kez ertelenmişti: 44 parfümün 23'ünde
+ * parfümör, 18'inde yıl yoktu. Veri elle tamamlandı; yıl artık 44/44 dolu ve
+ * `types.ts` bunu zorunlu kılarak koruyor. Parfümör 42/44 — kalan ikisini marka
+ * hiç açıklamadı, o sayfalarda satır tek başına yıla düşüyor.
  *
  * Renk uzaydaki noktanın renginden **türetilmiyor, aynı zincirden geliyor**:
  * `familyVector → dominantFamily → getFamily().color`. İkinci bir kaynak
@@ -105,6 +119,21 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
           <h1 className="mt-3 text-4xl font-light leading-[1.05] tracking-tight sm:text-6xl">
             {perfume.name}
           </h1>
+          {/*
+            Künye — kim, ne zaman. Yeri ve biçimi ekranda üç seçenek yan yana
+            çizilip seçildi; gerekçeler `specs/2026-08-05-kunye-design.md`te.
+
+            İsmin hemen altında duruyor çünkü künye kimliğin parçası: adı okuyan
+            göz burnu ve yılı da alıp sonra cümleye geçiyor.
+
+            `perfumer` yoksa satır tek başına yıla düşüyor ve bu bilinçli. 44'ün
+            ikisinde (Vanille Abricot, Ajyal) marka burnu hiç açıklamadı —
+            "bilinmiyor" yazmak da uydurmak da reddedildi, `types.ts:117`.
+          */}
+          <p className="mt-4 text-sm font-light text-white/35">
+            {perfume.perfumer ? `${perfume.perfumer}, ` : ''}
+            {perfume.year}
+          </p>
           {perfume.line ? (
             <p className="mt-5 max-w-xl text-base font-light leading-relaxed text-white/70 sm:text-lg">
               {perfume.line.tr}
@@ -115,7 +144,13 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
         {/* ③ — "aa, o aslında veriymiş" */}
         <section className="pt-14">
           <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">EVRİM</h2>
-          <EvolutionChart perfume={perfume} />
+          <EvolutionSignature perfume={perfume} />
+        </section>
+
+        {/* ④ — "peki buna benzeyen ne var?" */}
+        <section className="pt-20">
+          <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">KOMŞULAR</h2>
+          <Neighbors perfume={perfume} />
         </section>
 
         <div className="mt-24">

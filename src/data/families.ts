@@ -46,3 +46,22 @@ export function getFamily(id: ScentFamily): Family {
   }
   return family;
 }
+
+/**
+ * Vektörün en ağır bastığı aile — uzaydaki noktanın da imzadaki notanın da
+ * rengi bundan geliyor.
+ *
+ * Eşitlikte ilk sıradaki kazanıyor; `FAMILY_ORDER` sabit olduğu için bu seçim
+ * de her çalıştırmada aynı.
+ *
+ * Burada duruyor çünkü tek bağımlılığı `FAMILY_ORDER` ve hem sunucudaki uzay
+ * hesabı hem tarayıcıdaki imza bileşeni çağırıyor. `space-marks.ts`'te kalsaydı
+ * imza, 44×44'lük benzerlik matrisini istemci paketine sürüklerdi.
+ */
+export function dominantFamily(vector: readonly number[]): ScentFamily {
+  let best = 0;
+  for (let i = 1; i < vector.length; i += 1) {
+    if (vector[i] > vector[best]) best = i;
+  }
+  return FAMILY_ORDER[best];
+}

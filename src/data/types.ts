@@ -114,7 +114,23 @@ export interface Perfume {
   readonly id: string;
   readonly name: string;
   readonly brand: string;
-  readonly year?: number;
+  /**
+   * Çıkış yılı — zorunlu, 44'ün 44'ünde dolu.
+   *
+   * `?` bilerek yok: künye ancak bütün veri tamken yayınlanır kararı verildi ve
+   * bunu derleme zamanında garanti eden tek yer burası. Sınamayla da olurdu ama
+   * tip, künyede `year ? ... : null` gibi hiç çalışmayacak dalların doğmasını da
+   * engelliyor.
+   */
+  readonly year: number;
+  /**
+   * Parfümör — isteğe bağlı, ve bu bir veri eksikliği değil.
+   *
+   * 44'ün 42'sinde dolu. Kalan ikisinde (`comptoir-sud-pacifique-vanille-abricot`,
+   * `spirit-of-dubai-ajyal`) marka burnu hiç açıklamadı; aranıp bulunamadığı için
+   * değil, açıklanmadığı için boş. Künye o iki sayfada yalnızca yılı yazıyor —
+   * uydurma da yok, "bilinmiyor" yazısı da yok.
+   */
   readonly perfumer?: string;
   readonly notes: readonly PerfumeNote[];
   /** true = küratörlü "mücevher"; false = uzaya yoğunluk katan katalog noktası. */

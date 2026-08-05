@@ -20,6 +20,8 @@ export const CURATED_E: readonly Perfume[] = [
     id: 'argos-pour-femme',
     name: 'Pour Femme',
     brand: 'Argos',
+    year: 2017,
+    perfumer: 'Christian Petrovich',
     curated: true,
     line: {
       en: 'Citrus with ginger under it, and powder settling over both.',
@@ -51,6 +53,8 @@ export const CURATED_E: readonly Perfume[] = [
     id: 'royal-crown-nocturna',
     name: 'Nocturna',
     brand: 'Royal Crown',
+    year: 2022,
+    perfumer: 'Antonio Martino Visconti',
     curated: true,
     line: {
       en: 'Fruit all the way through, and the vanilla only arrives at the end.',
@@ -79,6 +83,8 @@ export const CURATED_E: readonly Perfume[] = [
     id: 'memo-argentina',
     name: 'Argentina',
     brand: 'Memo Paris',
+    year: 2021,
+    perfumer: 'Aliénor Massenet',
     curated: true,
     line: {
       en: 'More than one rose, and a wood standing behind all of them.',
@@ -109,6 +115,8 @@ export const CURATED_E: readonly Perfume[] = [
     id: 'floraiku-ao',
     name: 'AO',
     brand: 'Floraïku',
+    year: 2019,
+    perfumer: 'Christian Provenzano',
     curated: true,
     line: {
       en: 'The fig, and something sweet resting underneath it.',
@@ -134,6 +142,8 @@ export const CURATED_E: readonly Perfume[] = [
     id: 'parfums-delmar-yaringa',
     name: 'Yaringa',
     brand: "Parfums d'Elmar",
+    year: 2022,
+    perfumer: 'Christian Carbonnel',
     curated: true,
     line: {
       en: 'Salt water, and a coconut left on the sand.',
@@ -161,6 +171,8 @@ export const CURATED_E: readonly Perfume[] = [
     id: 'jusbox-good-morning',
     name: 'Good Morning',
     brand: 'Jusbox',
+    year: 2017,
+    perfumer: 'Dominique Ropion',
     curated: true,
     line: {
       en: 'Salt and mandarin — the first hour of a summer day.',

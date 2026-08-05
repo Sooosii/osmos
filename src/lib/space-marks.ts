@@ -1,5 +1,5 @@
-import type { Perfume, ScentFamily, SpaceMark } from '@/data/types';
-import { FAMILY_ORDER, getFamily } from '@/data/families';
+import type { Perfume, SpaceMark } from '@/data/types';
+import { dominantFamily, getFamily } from '@/data/families';
 import { familyVector, nearestNeighbors, projectToSpace } from './similarity';
 
 /**
@@ -18,20 +18,6 @@ import { familyVector, nearestNeighbors, projectToSpace } from './similarity';
 
 /** Uzayda her noktaya çizilen komşu bağlantısı sayısı. */
 const NEIGHBOR_COUNT = 3;
-
-/**
- * Vektörün en ağır bastığı aile — noktanın rengi bundan geliyor.
- *
- * Eşitlikte ilk sıradaki kazanıyor; `FAMILY_ORDER` sabit olduğu için bu seçim
- * de her çalıştırmada aynı.
- */
-export function dominantFamily(vector: readonly number[]): ScentFamily {
-  let best = 0;
-  for (let i = 1; i < vector.length; i += 1) {
-    if (vector[i] > vector[best]) best = i;
-  }
-  return FAMILY_ORDER[best];
-}
 
 export function buildMarks(perfumes: readonly Perfume[]): readonly SpaceMark[] {
   const points = projectToSpace(perfumes);

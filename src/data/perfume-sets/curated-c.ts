@@ -64,6 +64,8 @@ export const CURATED_C: readonly Perfume[] = [
     id: 'essential-parfums-velvet-iris',
     name: 'Velvet Iris',
     brand: 'Essential Parfums',
+    year: 2025,
+    perfumer: 'Dominique Ropion',
     curated: true,
     line: {
       en: 'Iris without its cold — a root warmed in the hand.',
@@ -112,6 +114,7 @@ export const CURATED_C: readonly Perfume[] = [
     name: 'Lavs',
     brand: 'Filippo Sorcinelli',
     year: 2014,
+    perfumer: 'Filippo Sorcinelli',
     curated: true,
     line: {
       en: 'Cold stone, high ceilings, and smoke that has not left in centuries.',
@@ -137,6 +140,7 @@ export const CURATED_C: readonly Perfume[] = [
     name: 'EGE ΑΙΓΑΙΟ',
     brand: 'Nishane',
     year: 2019,
+    perfumer: 'Ilias Ermenidis',
     curated: true,
     line: {
       en: 'Not the sea itself — the dry scrub on the hill above it.',
@@ -186,7 +190,8 @@ export const CURATED_C: readonly Perfume[] = [
     id: 'van-cleef-moonlight-patchouli',
     name: 'Moonlight Patchouli',
     brand: 'Van Cleef & Arpels',
-    year: 2015,
+    year: 2016,
+    perfumer: 'Sonia Constant',
     curated: true,
     line: {
       en: 'Patchouli with the soil brushed off — polished, and still dark.',
