@@ -40,10 +40,27 @@ ansiklopedi sitenin geri kalanından kopuk bir ada olurdu.
 
 İkisi birlikte siteyi **çift yönlü** yapıyor: parfüm → nota → parfüm.
 
-⚠️ Etiketleri link yapmak evrim imzasına dokunmak demek ve o bileşen 12 saniyelik
-bir turda hiç durmadan dönüyor. Etiketler gerçek SVG `<text>` (bileşenin kendi
-yorumu bunu şart koşuyor, `EvolutionSignature.tsx:25`), dolayısıyla SVG `<a>` ile
-sarılabiliyorlar. Dönen hareketin bozulmaması uygulamada ölçülecek.
+⚠️ **Uygulamada birinci kapı değişti: etiketler link olmadı.**
+
+Karar "evrim imzasındaki etiketler tıklansın" diyordu ve teknik olarak mümkündü —
+etiketler gerçek SVG `<text>`, `<a>` ile sarılabiliyorlar. Sorun mekanikti:
+`EvolutionSignature.tsx`teki `labelOpacity`, adları `morph` değerine göre
+**tamamen sıfırlıyor**. 12 saniyelik turun bir bölümünde bütün nota adları
+görünmez oluyor. Etiket bir link olsaydı yarı zamanlı bir link doğardı: görünmezken
+hâlâ tıklanabilir, sekmeyle hâlâ odaklanılabilir — ve kullanıcı tıklamaya
+giderken hedef ortadan kaybolurdu.
+
+Depo bu tuzağı iki kez yazmış: kaydıraçlarda `inert` tam bu yüzden var (opaklığı 0
+olan bir `<input>` hâlâ odaklanılabiliyordu) ve `SpaceOverlays.tsx:115`
+"denenmediği sürece görünmez bir hareket" diyor.
+
+Yerine **parfüm sayfasına duran bir nota listesi** kondu (`PerfumeNotes.tsx`),
+piramit katmanına göre gruplu. Bu kararın niyetini koruyor (parfüm → nota geçişi
+var, her zaman görünür, sekmeyle sıralı) ve bir eksiği de kapatıyor: parfüm
+sayfası bugüne kadar notalarını **hiç listelemiyordu**.
+
+Aynı ilke nota sayfasında da geçerli ve orada baştan uygulandı: yörünge bir tuval,
+tuvale link konmaz; gerçek yol yörüngenin altındaki listede.
 
 ### ③ Nota sayfasının merkezi: yörünge, grafik değil
 
@@ -87,9 +104,39 @@ geçiyor, `dorayaki` bir tanesinde. Yoğunluğun kendisi bilgi — `oud` yoğun 
 sürü, `dorayaki` yalnız bir nokta.
 
 Bu yüzden yörünge **hepsini gösteriyor, ilk N'i değil.** Kalabalık bir kusur
-değil, o notanın paletteki ağırlığının ta kendisi. Okunurluk etiketlerden
-çözülüyor: yalnızca öne dönen birkaç parfümün adı yazılıyor, arkadakiler
-sönerken adları da sönüyor.
+değil, o notanın paletteki ağırlığının ta kendisi.
+
+## Ekranda bulunan üç hata
+
+İlk sürüm tarayıcıda okunmaz çıktı — sahibin sözleriyle "hiçbir şey anlaşılmıyor,
+her şey birbirine girmiş". Üç ayrı sebebi vardı ve üçü de düzeltildi.
+
+**① Tram iç koordinatta çiziliyordu.** Her şey 560 birimlik tuvale çizilip
+`width:100%` ile ~1000 px'e geriliyordu; nokta ızgarası da gerilince noktalar
+arası boşluk iki katına çıkıyor, doku bir tram olmaktan çıkıp serpiştirilmiş
+beneğe dönüşüyordu. Artık geometri ekran pikseline ölçekleniyor, **ızgara ekranda
+sabit kalıyor** — tuval ne kadar büyürse büyüsün doku aynı sıklıkta.
+
+**② Aynı anda on bir ad birden yazılıyordu.** Eşik (`LABEL_FADE_MIN`) yığılmayı
+önlemek için konmuştu ama işi yapamıyordu. Yığılmayı önleyen şey artık çizimdeki
+**"yalnızca en öndeki konuşur"** kuralı; eşiğin tek işi o tek adı sahnenin
+kenarında yumuşakça açıp kapatmak.
+
+İkisi karıştırıldığı için eşik önce 0.82'ye çekilmişti ve bu ters yönde bozdu:
+ad yalnızca dar bir yayda görünüyor, parfüm arkaya geçince uzun süre isimsiz
+kalıyordu ("arkaya gittikten sonra gelene kadar çok vakit geçiyor"). Tek
+konuşmacı varken eşik düşük olmalı — 0.35'te kalabalık notalarda **hep bir ad
+duruyor** ve sıra birinden diğerine yumuşakça devrediyor.
+
+**③ Dönüş fazla yavaştı.** Komşu takımyıldızının 30 saniyesi üç nokta için doğru,
+26 nokta için değil: bir parfümün öne gelme sırası dakikada bire düşüyordu. 18
+saniyeye indirildi. Daha da hızlandırmak denenmedi ve denenmemeli — tram
+noktaları hızlı dönerken kayan bir desene dönüşüyor.
+
+Bir de hiyerarşi eklendi: **disk boyu ağırlığı ikinci kez anlatıyor.** Yarıçap
+zaten ağırlıktan geliyordu ama dönen bir sahnede "hangisi merkeze yakın" tek
+başına zor okunuyor. Baskın nota daha büyük bir disk olunca sıralama ada bakmadan
+görülüyor.
 
 ### ④ Uçuculuk eğrisi ve karakter eksenleri sayfada yok
 

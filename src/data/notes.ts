@@ -24,6 +24,47 @@ for (const note of NOTES) {
   NOTE_BY_ID.set(note.id, note);
 }
 
+/**
+ * Uçuculuk bandı — notanın hangi dosyada durduğu.
+ *
+ * Ansiklopedi dizini notaları banda göre grupluyor ve nota sayfası bandı
+ * yazıyor. Bilgi zaten dosya bölünmesinde vardı ama `NOTES` düzleştiği anda
+ * kayboluyordu; burada geri veriliyor.
+ *
+ * `volatility`den yeniden türetilmiyor ve bu bilinçli: eşik (`peakMinutes < 15`)
+ * bir yorum, dosya ayrımı ise verilmiş bir karar. İkisi bir gün ayrışırsa dizin
+ * dosyalarla çelişen bir gruplama gösterirdi.
+ */
+export type NoteBand = 'top' | 'heart' | 'base';
+
+const BAND_BY_ID = new Map<string, NoteBand>([
+  ...TOP_NOTES.map((note) => [note.id, 'top'] as const),
+  ...HEART_NOTES.map((note) => [note.id, 'heart'] as const),
+  ...BASE_NOTES.map((note) => [note.id, 'base'] as const),
+]);
+
+export function noteBand(id: string): NoteBand {
+  const band = BAND_BY_ID.get(id);
+  if (!band) {
+    throw new Error(`Bilinmeyen nota: ${id}`);
+  }
+  return band;
+}
+
+/** Bandın ekranda görünen adı. */
+export const BAND_LABEL: Readonly<Record<NoteBand, string>> = {
+  top: 'ÜST',
+  heart: 'KALP',
+  base: 'DİP',
+};
+
+/** Bandlar, dizinde göründükleri sırayla. */
+export const BANDS: readonly { readonly band: NoteBand; readonly notes: readonly Note[] }[] = [
+  { band: 'top', notes: TOP_NOTES },
+  { band: 'heart', notes: HEART_NOTES },
+  { band: 'base', notes: BASE_NOTES },
+];
+
 export function getNote(id: string): Note {
   const note = NOTE_BY_ID.get(id);
   if (!note) {

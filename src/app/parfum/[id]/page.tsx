@@ -5,6 +5,7 @@ import { dominantFamily, getFamily } from '@/data/families';
 import { familyVector } from '@/lib/similarity';
 import { EvolutionSignature } from '@/components/EvolutionSignature';
 import { Neighbors } from '@/components/Neighbors';
+import { PerfumeNotes } from '@/components/PerfumeNotes';
 
 /**
  * Parfüm sayfası — yol haritasının ①, ②, ③ ve ④'ü. Tamamı.
@@ -145,6 +146,22 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
         <section className="pt-14">
           <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">EVRİM</h2>
           <EvolutionSignature perfume={perfume} />
+        </section>
+
+        {/*
+          ⑤ — "peki bunun içinde ne var?"
+
+          Aşama 3'te geldi. Eskiden bu sayfa notalarını hiç listelemiyordu:
+          notalar siteye yalnızca imzadaki etiketler olarak giriyordu ve
+          tıklanmıyorlardı. Ansiklopedinin birinci kapısı burası.
+
+          Neden imzadaki etiketler değil de duran bir liste — gerekçe
+          `PerfumeNotes.tsx`te; kısası, imzanın etiketleri turun bir bölümünde
+          tamamen görünmez oluyor ve görünmez bir link yarı zamanlı bir tuzak.
+        */}
+        <section className="pt-20">
+          <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">NOTALAR</h2>
+          <PerfumeNotes perfume={perfume} />
         </section>
 
         {/* ④ — "peki buna benzeyen ne var?" */}
