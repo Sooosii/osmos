@@ -40,16 +40,22 @@ import {
  * üstünde ve altında yüz pikselden fazla boşluk kalıyordu — ekranda başlıkla
  * yörünge arasında bir kopukluk gibi okundu.
  *
- * 306 daha aşağı inmiyor ve sınırı sınama buldu: derinliği uçlarda duran iki
- * parfüm en dış yarıçapta dönerken 298'e kadar çıkıyor. Tek bir notada ekranın
- * bir kısmı boş görünebilir (sandalın 26 parfümü derinlik aralığının tamamını
- * kullanmıyor) — ama o boşluk fazlalık değil, kullanan notalar için ayrılmış yer.
+ * ⚠️ **Kamera dikeyde ORTADA DEĞİL** ve bu bilinçli. Eğik bir halkanın izdüşümü
+ * simetrik değil: yakın yarısı hem aşağı düşüyor hem perspektifle büyüyor, uzak
+ * yarısı yukarı çıkarken küçülüyor. Kamerayı kutunun ortasına koyunca üstte 42
+ * piksel ölü alan kalıyor, alttan ise taşıyordu — 306'da en alttaki adlar
+ * kırpılıyordu (mutlak en kötü hâl ölçüldü: y ∈ 41.6 – 319.6).
+ *
+ * Bu yüzden `CENTER_Y` yüksekliğin yarısı değil, içeriği kutuya oturtan değer.
+ * Kalan pay üstte ve altta ~9 piksel; ikisini de taşma sınaması denetliyor.
+ * Kamera açısı, yarıçaplar ve `HEIGHT_SCALE` değişirse bu iki sayı yeniden
+ * ölçülmeli — tahminle konmadılar.
  */
 export const VIEW_WIDTH = 560;
-export const VIEW_HEIGHT = 306;
+export const VIEW_HEIGHT = 296;
 
 export const CENTER_X = VIEW_WIDTH / 2;
-export const CENTER_Y = VIEW_HEIGHT / 2;
+export const CENTER_Y = 120;
 
 /**
  * Notanın baskın olduğu parfümün yarıçapı.

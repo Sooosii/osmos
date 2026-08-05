@@ -115,12 +115,22 @@ describe('projectSeat', () => {
     expect(front.scale / back.scale).toBeGreaterThan(1.2);
   });
 
+  /**
+   * Mutlak en kötü hâl — tahmini bir küme değil, geometrinin iki ucu birden:
+   * `WEAKEST_WEIGHT`in altındaki ağırlık en dış yarıçapa yapışıyor, derinliğin
+   * 0 ve 1'i de yüksekliğin iki ucunu veriyor. Başka hiçbir veri bundan dışarı
+   * çıkamaz, dolayısıyla bu sınama geçtiğinde 136 notanın hepsi kutuda.
+   *
+   * Önceki hâli 0.15 ağırlık kullanıyordu ve o değer sınırın **içinde** kalıyor;
+   * sınama bu yüzden gerçek sınırı hiç denemiyordu.
+   */
   test('en dıştaki parfüm etiketiyle birlikte tuvale sığıyor', () => {
-    const crowded = noteSeats([carrier('a', 0.15, 1), carrier('b', 0.15, 0)]);
+    const crowded = noteSeats([carrier('a', 0.05, 1), carrier('b', 0.05, 0)]);
 
     for (const s of crowded) {
-      for (let i = 0; i < 96; i += 1) {
-        const node = projectSeat(s, (i / 96) * Math.PI * 2);
+      // 96 örnek uçları ıskalayabiliyordu; sınırı arayan sınama sık örneklemeli.
+      for (let i = 0; i < 720; i += 1) {
+        const node = projectSeat(s, (i / 720) * Math.PI * 2);
         expect(node.x - LABEL_HALF_WIDTH).toBeGreaterThanOrEqual(0);
         expect(node.x + LABEL_HALF_WIDTH).toBeLessThanOrEqual(VIEW_WIDTH);
         expect(node.y - LABEL_RISE).toBeGreaterThanOrEqual(0);
