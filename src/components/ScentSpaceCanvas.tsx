@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { SpaceMark } from '@/data/types';
 import {
-  INITIAL_CAMERA,
   type Camera,
   type Viewport,
   centerOn,
@@ -28,18 +27,8 @@ import {
   holdEnabledFor,
   holdTargetHit,
 } from '@/lib/space-entry';
-import {
-  APPROACH_CUE,
-  APPROACH_DONE,
-  APPROACH_ONCE,
-  APPROACH_SEEN_KEY,
-  APPROACH_START,
-  type ApproachState,
-  START_SCALE,
-  advance as advanceApproach,
-  isComplete,
-  scaleAt,
-} from '@/lib/space-approach';
+import { APPROACH_CUE, START_SCALE } from '@/lib/space-approach';
+import { useApproachScene } from '@/components/space/use-approach-scene';
 
 /**
  * Koku Uzayı — sitenin ana ekranı.
@@ -122,8 +111,8 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
    * Sahnenin çalışmayacağı durumlar (adres `?mark=` taşıyor, hareket azaltılmış,
    * sahne bu oturumda görülmüş) ancak tarayıcıda anlaşılıyor — `sessionStorage`
    * ve `matchMedia` sunucuda yok. O yüzden varsayılan "sahne var"; iptal kararı
-   * aşağıdaki etkide veriliyor. İlk boyanma etkilerden sonra olduğu için
-   * atlayanlar uzak kareyi hiç görmüyor, sıçrama olmuyor.
+   * `useApproachScene` içindeki etkide veriliyor. İlk boyanma etkilerden sonra
+   * olduğu için atlayanlar uzak kareyi hiç görmüyor, sıçrama olmuyor.
    */
   const cameraRef = useRef<Camera>({ x: 0, y: 0, scale: START_SCALE });
   // Bulut sınırları `marks` değişmedikçe sabit; ölçüyü yeniden boyutlandırma
@@ -152,33 +141,6 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
    * Durumda tutulan yalnızca "ipucu görünsün mü" ve ilerlemenin kabaca nerede
    * olduğu — ikisi de saniyede birkaç kez değişiyor, kare başına değil.
    */
-  /*
-   * Yaklaşma — birikim ref'te, ipucu için gereken kadarı durumda.
-   *
-   * `approachActiveRef` bir bayrak değil kapı: sahne sürerken tekerlek, sürükleme
-   * ve tıklama yollarının hepsi buradan erken dönüyor. Ref, çünkü olay
-   * işleyicilerinin en güncel değeri React render'ını beklemeden görmesi gerek —
-   * sahnenin bittiği kare ile ilk gezinme hareketi aynı ana düşebilir.
-   */
-  const approachRef = useRef<ApproachState>(APPROACH_START);
-  const approachActiveRef = useRef(true);
-
-  /**
-   * İpucu ve giriş metni — opaklıkları React'te DEĞİL, doğrudan DOM'da.
-   *
-   * Etiket katmanıyla aynı gerekçe: ikisi de kaydırma boyunca kare başına
-   * değişiyor ve her adımda `setState` demek her adımda bir React ağacı demek.
-   *
-   * İkinci ve daha sinsi sebep: sahnenin çalışıp çalışmayacağı ancak tarayıcıda
-   * belli oluyor (`sessionStorage`, `matchMedia`, adres parametresi), yani
-   * sunucuda çizilen çıktıda cevap yok. Durumla yapılsaydı hangi varsayılanı
-   * verirsek verelim biri yanardı — sahneyi görecek olan giriş metnini bir kare
-   * görüp kaybeder, atlayan ipucunu. İkisi de baştan opaklık 0 doğuyor; karar ilk
-   * boyanmadan önceki etkide veriliyor ve doğru olan açılıyor.
-   */
-  const cueRef = useRef<HTMLDivElement>(null);
-  const introRef = useRef<HTMLDivElement>(null);
-
   const entryRef = useRef<EntryState>(NO_ENTRY);
   /** Süren basılı tutma. Saat çizim döngüsünde okunuyor — ayrı bir zamanlayıcı yok. */
   const holdRef = useRef<{ markId: string; startedAt: number } | null>(null);
@@ -212,34 +174,6 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
       frameRef.current = null;
       drawRef.current();
     });
-  }, []);
-
-  /**
-   * Sahnenin ekrandaki izlerini tazeler: ipucu, giriş metni, imleç.
-   *
-   * Çizim döngüsünden ayrı duruyor çünkü bunlar tuvale değil DOM'a ait ve kare
-   * başına değil, kaydırma başına değişiyor. Tek yerde toplanmasının sebebi üç
-   * ayrı çağıran olması — açılış kararı, tekerlek ve sahnenin bitişi.
-   */
-  const paintScene = useCallback(() => {
-    const active = approachActiveRef.current;
-    const { progress } = approachRef.current;
-
-    if (cueRef.current) {
-      // İlerlemenin ilk üçte ikisinde sönüp bitiyor: kullanıcı kaydırmaya
-      // başladığı an ipucunun işi bitmiştir, kalan yolda durması gürültü olurdu.
-      cueRef.current.style.opacity = active ? String(Math.max(0, 1 - progress * 1.6)) : '0';
-    }
-
-    if (introRef.current) {
-      introRef.current.style.opacity = active ? '0' : '1';
-    }
-
-    // Sahne sürerken tutulacak bir şey yok; "yakala" imleci gösterip sürüklemeye
-    // izin vermemek yalan söylemek olurdu.
-    if (canvasRef.current) {
-      canvasRef.current.style.cursor = active ? 'default' : '';
-    }
   }, []);
 
   /**
@@ -386,51 +320,17 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     [requestDraw, router],
   );
 
-  /**
-   * Yaklaşmayı bitirir — kamerayı uzayın açılış konumuna oturtur.
-   *
-   * Tek yerde toplanmasının sebebi iki ayrı yoldan çağrılması: tekerlek ilerlemeyi
-   * 1'e taşıdığında, ve klavyeyle bir parfüme odaklanıldığında. İkincisi şart —
-   * tekerleği olmayan biri için sahneyi bitirecek başka bir hareket yok, kapı
-   * onun yüzüne kapanmış olurdu.
-   */
-  const finishApproach = useCallback(() => {
-    if (!approachActiveRef.current) return;
-
-    approachActiveRef.current = false;
-    approachRef.current = APPROACH_DONE;
-    cameraRef.current = INITIAL_CAMERA;
-    paintScene();
-
-    if (APPROACH_ONCE) sessionStorage.setItem(APPROACH_SEEN_KEY, '1');
-    requestDraw();
-  }, [paintScene, requestDraw]);
-
   /*
-   * Sahne çalışsın mı?
+   * ⚠️ Yaklaşma sahnesi burada, `?mark=` etkisinin ÜSTÜNDE kuruluyor ve sıra
+   * kritik. Kancanın "sahne çalışsın mı?" etkisi iptal kararında kamerayı
+   * `INITIAL_CAMERA`'ya (ölçek 1) alıyor; hemen aşağıdaki `?mark=` etkisi ise
+   * `centerOn` ile ölçeği koruyarak ortalıyor. React etkileri bildirim sırasına
+   * göre çalıştığı için ters sırada ortalama, yaklaşmanın 0.14'lük ölçeğiyle
+   * yapılır ve parfüm sayfasından dönen göz uzayı minicik görürdü.
    *
-   * ⚠️ Bu etki `?mark=` etkisinden ÖNCE duruyor ve sırası kritik. İptal kararı
-   * kamerayı `INITIAL_CAMERA`'ya (ölçek 1) alıyor; `?mark=` etkisi ise `centerOn`
-   * ile ölçeği koruyarak ortalıyor. Ters sırada olsaydı ortalama, yaklaşmanın
-   * 0.14'lük ölçeğiyle yapılır ve parfüm sayfasından dönen göz uzayı minicik
-   * görürdü.
-   *
-   * Üç iptal sebebi var, üçü de aynı cümlenin parçası: sahne bir eşik, ama
-   * tanıdık bir yere dönen için eşik yoktur.
+   * Yani bu çağrı aşağı kaydırılamaz. Gerekçenin tamamı `use-approach-scene.ts`te.
    */
-  useEffect(() => {
-    const returning = searchParams.get('mark') !== null;
-    const seen = APPROACH_ONCE && sessionStorage.getItem(APPROACH_SEEN_KEY) === '1';
-
-    if (returning || seen || prefersReducedMotion()) {
-      approachActiveRef.current = false;
-      approachRef.current = APPROACH_DONE;
-      cameraRef.current = INITIAL_CAMERA;
-    }
-
-    paintScene();
-    requestDraw();
-  }, [paintScene, requestDraw, searchParams]);
+  const approach = useApproachScene({ canvasRef, cameraRef, requestDraw });
 
   /**
    * `/?mark=<id>` ile dönüş — parfüm sayfasından geri gelen göz.
@@ -514,34 +414,9 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
 
       const delta = event.deltaMode === 1 ? event.deltaY * LINE_HEIGHT : event.deltaY;
 
-      /*
-       * Yaklaşma sürerken tekerlek yalnızca sahneye ait — `zoomAt` da giriş
-       * `advance`'ı da hiç çalışmıyor.
-       *
-       * Bu erken dönüş, `space-entry.ts`'in anlattığı tuzağa düşmemenin tek yolu:
-       * orada iki anlam AYNI ANDA canlıydı ve kullanıcı hangisini tetiklediğini
-       * bilemiyordu. Burada iki anlam arka arkaya — sahne bitene kadar tekerlek
-       * sahneyi sürüyor, bittiği andan itibaren uzayı. Belirsiz tek bir kare yok.
-       *
-       * Çapa yok: sahne boyunca kamera ekranın ortasında duruyor. `zoomAt` imleci
-       * çapa alıyor ama uzaktan yaklaşırken imlecin altında henüz bir şey yok;
-       * çapalamak bulutu kenara kaydırmaktan başka işe yaramazdı.
-       */
-      if (approachActiveRef.current) {
-        const next = advanceApproach(approachRef.current, delta);
-        approachRef.current = next;
-        cameraRef.current = { x: 0, y: 0, scale: scaleAt(next.progress) };
-
-        // `finishApproach` kamerayı `INITIAL_CAMERA`'ya alıyor; `scaleAt(1)` zaten
-        // tam olarak orası, dolayısıyla devir teslimde tek bir piksel oynamıyor.
-        if (isComplete(next)) {
-          finishApproach();
-        } else {
-          paintScene();
-          requestDraw();
-        }
-        return;
-      }
+      // Yaklaşma sürerken tekerlek yalnızca sahneye ait — `zoomAt` da giriş
+      // `advance`'ı da hiç çalışmıyor. Gerekçesi `consumeWheel`'in üstünde.
+      if (approach.consumeWheel(delta)) return;
 
       const { sx, sy } = localPoint(event.clientX, event.clientY);
       cameraRef.current = zoomAt(
@@ -583,7 +458,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
 
     canvas.addEventListener('wheel', onWheel, { passive: false });
     return () => canvas.removeEventListener('wheel', onWheel);
-  }, [enterPerfume, finishApproach, localPoint, markById, paintScene, requestDraw]);
+  }, [approach, enterPerfume, localPoint, markById, requestDraw]);
 
   useEffect(
     () => () => {
@@ -611,7 +486,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
    * Eşiğin eşik olmasının da tek yolu bu: sahnede yalnızca ileri gidilebiliyor.
    */
   const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    if (approachActiveRef.current) return;
+    if (approach.isActive()) return;
     animationRef.current = null;
     event.currentTarget.setPointerCapture(event.pointerId);
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
@@ -666,7 +541,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    if (approachActiveRef.current) return;
+    if (approach.isActive()) return;
     const pointers = pointersRef.current;
     const { sx, sy } = localPoint(event.clientX, event.clientY);
 
@@ -707,7 +582,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
   };
 
   const handlePointerUp = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    if (approachActiveRef.current) return;
+    if (approach.isActive()) return;
     const pointers = pointersRef.current;
     pointers.delete(event.pointerId);
     if (pointers.size < 2) pinchRef.current = null;
@@ -761,7 +636,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     // Klavye sahneyi bitiriyor. Yaklaşma tekerleğe bağlı; tekerleği olmayan biri
     // için sahneyi geçecek bir hareket yok ve kapı yüzüne kapanırdı. Sekme ile
     // bir parfüme uzanmak zaten "içeri girdim" demek.
-    finishApproach();
+    approach.finish();
 
     // Burada hover'a dokunulmuyor. Dokunulsaydı fare olmayan bir yolla ayarlanmış
     // olurdu ve onu temizleyecek bir `pointermove` hiç gelmezdi: etiket, sonraki
@@ -795,7 +670,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
         görünmezken verilmiş bir söz olurdu. Varışta yerine yerleşiyor.
       */}
       <div
-        ref={introRef}
+        ref={approach.introRef}
         className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700"
       >
         {children}
@@ -817,7 +692,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
         yalnızca gürültü olurdu.
       */}
       <div
-        ref={cueRef}
+        ref={approach.cueRef}
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-[18%] flex justify-center opacity-0 transition-opacity duration-300"
       >
