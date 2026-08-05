@@ -1,7 +1,5 @@
 import { describe, expect, test } from 'vitest';
 import {
-  CENTER_X,
-  CENTER_Y,
   LABEL_HALF_WIDTH,
   LABEL_RISE,
   VIEW_HEIGHT,
@@ -128,7 +126,10 @@ describe('projectSeat', () => {
     // Eskiden ad ekrandaki x'e göre sağa ya da sola yaslanıyordu ve komşu merkezin
     // öbür yanına geçtiği anda bir taraftan diğerine sıçrıyordu. Artık ortalı;
     // bu sınama `anchor`ın geri gelmesini engelliyor.
-    const node = projectSeat(seats[0], 0) as Record<string, unknown>;
+    // `as unknown as` şart: `OrbitNode`ta dizin imzası yok, dolayısıyla TypeScript
+    // doğrudan dönüşümü "iki tip yeterince örtüşmüyor" diye reddediyor. Sınamanın
+    // istediği şey zaten tipin dışına çıkmak — `anchor` orada OLMADIĞINI görmek.
+    const node = projectSeat(seats[0], 0) as unknown as Record<string, unknown>;
     expect('anchor' in node).toBe(false);
   });
 });
