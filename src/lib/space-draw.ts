@@ -1,5 +1,6 @@
 import type { SpaceMark } from '@/data/types';
 import { type Camera, type Viewport, markRadius, worldToScreen } from './space-camera';
+import { type FeelTarget, feelAnchor, feelMatch } from './space-feel';
 
 /**
  * Koku Uzayı'nın çizimi — tuval, veri ve kamera girer, resim çıkar.
@@ -63,6 +64,8 @@ export interface SpaceScene {
   readonly hoveredId: string | null;
   /** Kaydırarak giriş birikimi; yokken `{ markId: null, progress: 0 }`. */
   readonly entry: { readonly markId: string | null; readonly progress: number };
+  /** Sinestezi kaydıraçlarının tarifi; dokunulmamışken `NO_FEEL`. */
+  readonly feel: FeelTarget;
 }
 
 /**
@@ -102,7 +105,48 @@ function drawBackground(ctx: CanvasRenderingContext2D, viewport: { width: number
   ctx.fillRect(0, 0, viewport.width, viewport.height);
 }
 
-function drawMark(ctx: CanvasRenderingContext2D, mark: SpaceMark, scene: SpaceScene, dimmed: boolean) {
+/**
+ * Noktanın kenar sönümü uygulanmamış opaklığı.
+ *
+ * Üç şey aynı kanalı paylaşıyor — derinlik, seçim ve kaydıraçlar — ve sıraları
+ * burada tek yerde kuruluyor. Ayrı ayrı çarpılsalardı hem seçilmemiş hem tarife
+ * uzak bir nokta iki kez sönüp çamura dönerdi.
+ */
+function markAlpha(mark: SpaceMark, scene: SpaceScene, dimmed: boolean, anchor: number): number {
+  if (dimmed) return DIM_ALPHA;
+
+  const full = ALPHA_BASE + mark.depth * ALPHA_RANGE;
+
+  /*
+   * ⚠️ Seçim kazanır: kaydıraç sönmesi yalnızca seçim YOKKEN uygulanıyor.
+   *
+   * İki soru farklı ölçekte. Kaydıraç geniş bir soru ("şuna benzer bir şey"),
+   * seçim dar bir soru ("bu neye benziyor"). Bir noktaya basmak dar soruya
+   * geçmek demek ve cevabı seçili + komşuları; kaydıraç tarifi o cevabın üstüne
+   * binseydi komşulardan bazıları tarife uzak diye sönerdi — yani harita "bu
+   * ona benziyor" derken aynı anda "ama bak sönük" derdi. Boşluğa basıp seçim
+   * kalkınca geniş soru geri geliyor.
+   */
+  if (scene.selectedId !== null) return full;
+
+  /*
+   * Yakınlık tam parlaklıkla sönüğün arasında geziniyor. Çarpma DEĞİL ara değer:
+   * çarpsaydık taban da ölçekleneceği için kaydıraçla sönen nokta, seçimle sönen
+   * noktadan daha karanlık olurdu ve uzayda iki ayrı "sönük" seviyesi doğardı.
+   *
+   * Dokunulmamış kaydıraçta yakınlık 1, yani sonuç tam olarak `full` — uzay
+   * kimse bir şey sormadan olduğu gibi kalıyor.
+   */
+  return DIM_ALPHA + (full - DIM_ALPHA) * feelMatch(mark.feel, scene.feel, anchor);
+}
+
+function drawMark(
+  ctx: CanvasRenderingContext2D,
+  mark: SpaceMark,
+  scene: SpaceScene,
+  dimmed: boolean,
+  anchor: number,
+) {
   const { sx, sy } = worldToScreen(mark, scene.camera, scene.viewport);
   const active = mark.id === scene.hoveredId || mark.id === scene.selectedId;
   const radius = markRadius(mark.depth, scene.camera.scale) + (active ? ACTIVE_GROWTH : 0);
@@ -112,7 +156,7 @@ function drawMark(ctx: CanvasRenderingContext2D, mark: SpaceMark, scene: SpaceSc
   const fade = exempt ? 1 : edgeFade(sx, sy, scene.viewport);
   if (fade === 0) return;
 
-  const alpha = (dimmed ? DIM_ALPHA : ALPHA_BASE + mark.depth * ALPHA_RANGE) * fade;
+  const alpha = markAlpha(mark, scene, dimmed, anchor) * fade;
 
   // Leke önce, çekirdek sonra: sıralama ters olsaydı halo çekirdeği yıkardı.
   const halo = ctx.createRadialGradient(sx, sy, radius, sx, sy, radius * HALO_SCALE);
@@ -248,10 +292,19 @@ export function drawSpace(ctx: CanvasRenderingContext2D, scene: SpaceScene) {
    */
   const skipDimmed = scene.entry.progress > 0.5;
 
+  /*
+   * Cevabın çapası kare başına bir kez: en yakın noktanın uzaklığı.
+   *
+   * Kaydıraca dokunulmadıysa hiç hesaplanmıyor — dizi bile kurulmuyor. Sık olan
+   * durum bu ve uzayın açılış karesi de buraya düşüyor.
+   */
+  const anchor =
+    scene.feel === null ? 0 : feelAnchor(scene.marks.map((mark) => mark.feel), scene.feel);
+
   for (const mark of scene.marks) {
     const dimmed = highlighted !== null && !highlighted.has(mark.id);
     if (dimmed && skipDimmed) continue;
-    drawMark(ctx, mark, scene, dimmed);
+    drawMark(ctx, mark, scene, dimmed, anchor);
   }
 
   // Giriş lekesi en son: noktaların da bağlantıların da ÜSTÜNÜ örtüyor.

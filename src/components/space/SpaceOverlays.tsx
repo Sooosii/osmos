@@ -1,6 +1,8 @@
 import type { ReactNode, RefObject } from 'react';
 import type { SpaceMark } from '@/data/types';
 import { APPROACH_CUE } from '@/lib/space-approach';
+import type { FeelTarget } from '@/lib/space-feel';
+import { SpaceFeelSliders } from './SpaceFeelSliders';
 
 /**
  * Uzayın üstüne binen katmanlar — giriş metni, yaklaşma ipucu, nokta etiketi,
@@ -21,6 +23,11 @@ interface SpaceOverlaysProps {
   readonly introRef: RefObject<HTMLDivElement | null>;
   readonly cueRef: RefObject<HTMLDivElement | null>;
   readonly labelRef: RefObject<HTMLDivElement | null>;
+  /** Kaydıraç katmanı — görünürlüğünü yaklaşma sahnesi yazıyor. */
+  readonly feelRef: RefObject<HTMLDivElement | null>;
+  /** Kaydıraçların yazdığı tarif; çizim döngüsü okuyor. */
+  readonly feelTargetRef: RefObject<FeelTarget>;
+  readonly requestDraw: () => void;
   /** Etikette yazan parfüm: üstüne gelinen, yoksa seçili. */
   readonly labelled: SpaceMark | null;
   /** Küratör cümlesi — yalnızca seçimde dolu, üstüne gelmede değil. */
@@ -35,6 +42,9 @@ export function SpaceOverlays({
   introRef,
   cueRef,
   labelRef,
+  feelRef,
+  feelTargetRef,
+  requestDraw,
   labelled,
   selectedLine,
   entryHint,
@@ -44,16 +54,43 @@ export function SpaceOverlays({
   return (
     <>
       {/*
-        Giriş metni — sunucuda üretiliyor, görünürlüğü burada.
+        Sol üst — sitenin tek "meta" köşesi.
 
-        Sahne boyunca yok: uzaktayken ekranda "44 parfüm" yazması, henüz 44 nokta
-        görünmezken verilmiş bir söz olurdu. Varışta yerine yerleşiyor.
+        Giriş metni ve kaydıraçlar aynı sütunda duruyor çünkü aynı cümlenin iki
+        yarısı: metin "ne yapabilirsin" diyor, kaydıraçlar onu uzatıyor. Alt
+        ortaya konsalardı küratör cümlesi ve giriş şeridiyle aynı dar banda
+        yığılırlardı.
+
+        Konumlandırma burada, içerikte değil: kaydıraçların metnin altında
+        durması bir piksel ofsetiyle değil, akışla sağlanıyor. Giriş metni bu
+        yüzden `page.tsx`te konumlandırmasını bırakıp sade içerik oldu.
       */}
-      <div
-        ref={introRef}
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700"
-      >
-        {children}
+      <div className="pointer-events-none absolute left-6 top-6 flex flex-col gap-7 sm:left-10 sm:top-10">
+        {/*
+          Giriş metni — sunucuda üretiliyor, görünürlüğü burada.
+
+          Sahne boyunca yok: uzaktayken ekranda "44 parfüm" yazması, henüz 44 nokta
+          görünmezken verilmiş bir söz olurdu. Varışta yerine yerleşiyor.
+        */}
+        <div ref={introRef} className="opacity-0 transition-opacity duration-700">
+          {children}
+        </div>
+
+        {/*
+          Kaydıraçlar da sahne boyunca yok — uzaktayken sorulacak bir şey henüz
+          ortada değil.
+
+          ⚠️ Görünürlüğü opaklık tek başına halledemiyor: opaklığı 0 olan bir
+          `<input>` hâlâ sekmeyle odaklanılabilir ve sahnenin ortasında klavye
+          kullanıcısını görünmez bir kontrole düşürürdü. `inert`i de yaklaşma
+          sahnesi yazıyor; ikisi tek yerden, `use-approach-scene`in `paintScene`i.
+        */}
+        <div
+          ref={feelRef}
+          className="pointer-events-auto w-[15rem] max-w-full opacity-0 transition-opacity duration-700"
+        >
+          <SpaceFeelSliders targetRef={feelTargetRef} requestDraw={requestDraw} />
+        </div>
       </div>
 
       {/*
