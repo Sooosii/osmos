@@ -74,17 +74,24 @@ export const FEEL_REACH = 0.7;
  * eğriyi sertleştirmek ikisini ayırıyor: uçta kimse tümden kaybolmuyor, ortada
  * yalnızca gerçekten merkezdekiler öne çıkıyor.
  *
- * 44 parfümle ölçülen dağılım (parlak = yakınlık > 0.5, dip = tam 0):
+ * 52 parfümle ölçülen dağılım. Kovalar tüketici: parlak > 0.5, kademeli
+ * 0 < x ≤ 0.5, dip = tam 0 — üçünün toplamı havuzun kendisi.
  *
  *   tarif                             parlak   kademeli   dip
- *   sıcak + kirli                        3         6       7
- *   soğuk + temiz                        8        11       1
- *   orta                                 8        30       0
- *   sıcak+kirli+tırtıklı+yakın (4 eksen) 8         8       0
+ *   sıcak + kirli                        3        41       8
+ *   soğuk + temiz                        9        41       2
+ *   orta                                 9        43       0
+ *   sıcak+kirli+sert+tende (4 eksen)     8        44       0
  *
  * Son satır `distanceTo`daki ortalamanın işini gösteriyor: "…" ile iki eksen
  * daha açmak cevabı daraltmıyor, dağılım iki eksenlininkiyle aynı ölçekte
  * kalıyor.
+ *
+ * Tablo sekiz parfüm eklenince yeniden ölçüldü ve **iki sabit de değişmedi.**
+ * Denenen komşular daha kötüydü: 0.75 uçtaki dibi 3'e düşürüp ayrımı köreltiyor,
+ * 0.65 uçta 10 noktayı dibe indiriyor, eğri 2.8 ortada 14 noktayı parlatıp
+ * kaydıracın eleme işini bırakmasına yol açıyor, 3.6 ise uçta 2 parlak nokta
+ * bırakıyor.
  *
  * Denenip elenenler: dar erişim (uçta 36 noktayı dibe indiriyordu, ekran tümden
  * sönüyordu) ve doğrusal eğri (ortada 38 noktayı parlatıyordu, kaydıraç hiçbir
@@ -97,10 +104,17 @@ export const FEEL_CURVE = 3.2;
  *
  * Teorik aralığa (−1…+1) bölmek yanlış olurdu ve sebebi `similarity.ts:88`'de
  * yazılı: `characterVector` ağırlıklı **ortalama** döndürüyor, toplam değil.
- * Ortalama olduğu için 44 parfümün değerleri uçlara hiç yaklaşmıyor, dar bir
+ * Ortalama olduğu için parfümlerin değerleri uçlara hiç yaklaşmıyor, dar bir
  * bantta kümeleniyor. O bandı teorik aralığa oturtsaydık kaydıracın yolunun
  * büyük kısmı ölü olurdu: kullanıcı topuzu uca sürer, hiçbir şey değişmez,
  * kaydıracın bozuk olduğunu düşünürdü.
+ *
+ * ⚠️ Ölçek havuza bağlı: bir eksenin ucunu yeniden tanımlayan bir parfüm
+ * eklenirse **var olan bütün noktaların değerleri kayar.** Sekiz parfüm
+ * eklendiğinde bu ölçüldü ve kayma dört eksende de tam sıfır çıktı — sekizinin
+ * hiçbiri hiçbir eksende uca oturmadı, uçlar eski sahiplerinde kaldı (sıcaklık
+ * Viride ↔ Vanille Planifolia, temizlik Muscs Koublaï Khân ↔ Good Morning).
+ * Bir dahaki eklemede yeniden ölçülmeli; garanti değil, gözlem.
  */
 export function normalizeAxis(values: readonly number[]): number[] {
   if (values.length === 0) return [];

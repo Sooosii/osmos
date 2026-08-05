@@ -194,14 +194,16 @@ Ardından iki sabit 44 parfümün gerçek dağılımına karşı tarandı. Geril
 köşe tariflerde veri uzak (az parlak), orta tarifte herkes yakın (hepsi parlak).
 Erişimi genişletip eğriyi sertleştirmek ikisini ayırıyor.
 
-Seçilen `FEEL_REACH = 0.7`, `FEEL_CURVE = 3.2` ile ölçülen dağılım:
+Seçilen `FEEL_REACH = 0.7`, `FEEL_CURVE = 3.2` ile ölçülen dağılım (aşağıdaki
+tablo sekiz parfüm eklendikten sonra **52 parfümle** yeniden ölçüldü; kovalar
+tüketici, üçünün toplamı havuz):
 
 | tarif | parlak (>0.5) | kademeli | dip (=0) |
 |---|---|---|---|
-| sıcak + kirli | 3 | 6 | 7 |
-| soğuk + temiz | 8 | 11 | 1 |
-| orta | 8 | 30 | 0 |
-| sıcak + kirli + sert + tende (4 eksen) | 8 | 8 | 0 |
+| sıcak + kirli | 3 | 41 | 8 |
+| soğuk + temiz | 9 | 41 | 2 |
+| orta | 9 | 43 | 0 |
+| sıcak + kirli + sert + tende (4 eksen) | 8 | 44 | 0 |
 
 Son satır ortalamanın işini gösteriyor: "…" ile iki eksen daha açmak cevabı
 daraltmıyor, dağılım iki eksenlininkiyle aynı ölçekte kalıyor.
