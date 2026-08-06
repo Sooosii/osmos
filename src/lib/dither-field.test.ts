@@ -1,7 +1,67 @@
 import { describe, expect, test } from 'vitest';
-import { BAYER_4X4, ditherThreshold, fieldValue, tuneField } from './dither-field';
+import { FAMILIES } from '../data/families';
+import {
+  BAYER_4X4,
+  LUMA_CEILING,
+  LUMA_FLOOR,
+  backdropChannels,
+  ditherThreshold,
+  fieldValue,
+  luma,
+  tuneField,
+} from './dither-field';
 
 const MID: ReturnType<typeof tuneField> = tuneField(25, 200);
+
+/** Bir rengin doygunluğu — en yüksek ve en düşük kanalın farkı. */
+function chroma([red, green, blue]: readonly [number, number, number]): number {
+  return Math.max(red, green, blue) - Math.min(red, green, blue);
+}
+
+describe('backdropChannels', () => {
+  test('doygun sarı belirgin biçimde soluyor', () => {
+    // Narenciye #F2C14E ekranı kaplayıp hareket edince göz yoruyordu; sahibin
+    // ölçüsü buydu. Ham rengin doygunluğu 164; alanın rengi onun çok altında.
+    const raw = [0xf2, 0xc1, 0x4e] as const;
+    expect(chroma(backdropChannels('#F2C14E'))).toBeLessThan(chroma(raw) / 2);
+  });
+
+  test('kimlik duruyor — sıcak aile sıcak, soğuk aile soğuk kalıyor', () => {
+    // Narenciye kırmızıya, mineral maviye yatık olmaya devam ediyor. Bu
+    // kaybolursa 136 sayfanın arka planı tek bir griye düşer.
+    const [warmR, , warmB] = backdropChannels('#F2C14E');
+    expect(warmR).toBeGreaterThan(warmB);
+
+    const [coolR, , coolB] = backdropChannels('#7FA8B8');
+    expect(coolR).toBeLessThan(coolB);
+  });
+
+  test('parlak aile iniyor, koyu aile çıkıyor', () => {
+    // Aldehitli #D8E4F0 neredeyse beyaz, deri #6B4423 neredeyse görünmez.
+    // İkisi de aynı okunur banda çekiliyor.
+    expect(luma(backdropChannels('#D8E4F0'))).toBeLessThan(luma([0xd8, 0xe4, 0xf0]));
+    expect(luma(backdropChannels('#6B4423'))).toBeGreaterThan(luma([0x6b, 0x44, 0x23]));
+  });
+
+  test('on beş ailenin hepsi bantta ve geçerli kanallarda', () => {
+    for (const family of FAMILIES) {
+      const channels = backdropChannels(family.color);
+
+      for (const channel of channels) {
+        expect(channel, family.id).toBeGreaterThanOrEqual(0);
+        expect(channel, family.id).toBeLessThanOrEqual(255);
+        expect(Number.isInteger(channel), family.id).toBe(true);
+      }
+
+      expect(luma(channels), family.id).toBeGreaterThanOrEqual(LUMA_FLOOR - 1);
+      expect(luma(channels), family.id).toBeLessThanOrEqual(LUMA_CEILING + 1);
+    }
+  });
+
+  test('üç haneli kısa yazım da çözülüyor', () => {
+    expect(backdropChannels('#fc0')).toEqual(backdropChannels('#ffcc00'));
+  });
+});
 
 describe('BAYER_4X4', () => {
   test('0–15 arası her değer tam bir kez geçiyor', () => {

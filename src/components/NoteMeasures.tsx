@@ -87,7 +87,12 @@ function LifeStrip({ volatility, color }: { readonly volatility: Volatility; rea
         <path d={path} fill="currentColor" opacity={FILLED_OPACITY} />
       </svg>
 
-      <div className="mt-2 flex justify-between text-[9px] uppercase tracking-[0.2em] text-white/25">
+      {/*
+        Kontrast sitenin alışıldık `text-white/25`inden yüksek ve bu bilerek:
+        o değer düz zemine göre seçilmişti, burada arkada hareketli bir tram
+        alanı var ve ince etiketler noktaların içinde kayboluyordu.
+      */}
+      <div className="mt-2 flex justify-between text-[9px] uppercase tracking-[0.2em] text-white/45">
         <span>{formatDuration(STRIP_FIRST_MINUTE)}</span>
         <span>{formatDuration(SIGNATURE_MAX_MINUTES)}</span>
       </div>
@@ -97,7 +102,7 @@ function LifeStrip({ volatility, color }: { readonly volatility: Volatility; rea
         tuval `aria-hidden`. Sayılar `evolution-loop.ts`in biçimlendiricisinden
         geçiyor, ikinci bir biçim açılmıyor.
       */}
-      <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-2 text-[10px] tracking-[0.18em] text-white/30">
+      <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-2 text-[10px] tracking-[0.18em] text-white/45">
         <div className="flex items-baseline gap-2">
           <dt>TEPE</dt>
           <dd className="tabular-nums text-white/60">{formatDuration(volatility.peakMinutes)}</dd>
@@ -135,10 +140,13 @@ function CharacterAxes({ character, color }: { readonly character: Character; re
             key={axis.id}
             className="grid grid-cols-[4.5rem_1fr_4.5rem] items-center gap-3 sm:grid-cols-[6rem_1fr_6rem] sm:gap-5"
           >
-            <span
-              aria-hidden="true"
-              className="text-right text-[9px] tracking-[0.16em] text-white/30"
-            >
+            {/*
+              Sola dayalı, sağa değil. Sağa dayalıyken dört etiket dört ayrı
+              yerden başlıyordu (SOĞUK / PÜRÜZSÜZ / KİRLİ / UZAK) ve blok
+              ekranda kaymış görünüyordu. Sol kenar artık sayfanın öbür bütün
+              öğeleriyle — başlık, tarif, bölüm adları — aynı hizada.
+            */}
+            <span aria-hidden="true" className="text-[9px] tracking-[0.16em] text-white/45">
               {axis.low}
             </span>
 
@@ -162,7 +170,7 @@ function CharacterAxes({ character, color }: { readonly character: Character; re
               })}
             </span>
 
-            <span aria-hidden="true" className="text-[9px] tracking-[0.16em] text-white/30">
+            <span aria-hidden="true" className="text-[9px] tracking-[0.16em] text-white/45">
               {axis.high}
             </span>
 
@@ -178,12 +186,12 @@ export function NoteMeasures({ volatility, character, color }: NoteMeasuresProps
   return (
     <>
       <section className="pt-16">
-        <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">UÇUCULUK</h2>
+        <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">UÇUCULUK</h2>
         <LifeStrip volatility={volatility} color={color} />
       </section>
 
       <section className="pt-16">
-        <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">KARAKTER</h2>
+        <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">KARAKTER</h2>
         <CharacterAxes character={character} color={color} />
       </section>
     </>

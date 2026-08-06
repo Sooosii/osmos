@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { ditherThreshold, fieldValue, tuneField } from '@/lib/dither-field';
+import { backdropChannels, ditherThreshold, fieldValue, tuneField } from '@/lib/dither-field';
 
 /**
  * Nota sayfasının arkasındaki hareketli tram alanı.
@@ -45,32 +45,18 @@ const MAX_CELLS = 44_000;
  * arasında bir oran yanıyor — ölçüldü. Opaklık o dokunun ne kadar öne çıktığını
  * belirliyor ve **ekranda ayarlanacak tek sayı burası**.
  *
- * ⚠️ İlk değer 170'ti (255'in %67'si) ve ekranda görüldüğünde **sayfanın bütün
- * yazısını yutuyordu** — başlık, tarif, ölçümler, hepsi okunmaz hâldeydi. Alan
- * arka plan; ön plana çıktığı anda işini yapmıyor demektir. Yükseltirken
- * `/nota/bergamot`ta tarif cümlesine bakın, tuvale değil.
+ * ⚠️ İki kez ekranda düşürüldü ve **ikisi de okunurluk yüzündendi.** 170'te
+ * (255'in %67'si) sayfanın bütün yazısı gidiyordu; 46'da gövde metni okunuyordu
+ * ama sitenin ince etiketleri (`text-white/25` gibi) noktaların içinde
+ * kayboluyordu. Alan arka plan; ön plana çıktığı anda işini yapmıyor demektir.
+ *
+ * Yükseltirken gövde metnine değil, **en ince etikete** bakın —
+ * `/nota/bergamot`ta şeridin altındaki "İLK SANİYELER".
  */
-const DOT_ALPHA = 46;
+const DOT_ALPHA = 30;
 
 /** Tuvalin çözünürlük çarpanı. 2'nin üstünde gözle fark edilmiyor. */
 const MAX_DPR = 2;
-
-function parseColor(hex: string): readonly [number, number, number] {
-  const value = hex.replace('#', '');
-  const full =
-    value.length === 3
-      ? value
-          .split('')
-          .map((c) => c + c)
-          .join('')
-      : value;
-
-  return [
-    parseInt(full.slice(0, 2), 16),
-    parseInt(full.slice(2, 4), 16),
-    parseInt(full.slice(4, 6), 16),
-  ];
-}
 
 export function DitherBackdrop({ color, peakMinutes, halfLifeMinutes }: DitherBackdropProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -87,7 +73,8 @@ export function DitherBackdrop({ color, peakMinutes, halfLifeMinutes }: DitherBa
     if (!bufferCtx) return;
 
     const tuning = tuneField(peakMinutes, halfLifeMinutes);
-    const [red, green, blue] = parseColor(color);
+    // Ham aile rengi değil, solmuş hâli — gerekçe `dither-field.ts`te.
+    const [red, green, blue] = backdropChannels(color);
 
     let image: ImageData | null = null;
     let cellSize = CELL;

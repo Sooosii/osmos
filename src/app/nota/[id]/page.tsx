@@ -15,18 +15,20 @@ import { NoteMeasures } from '@/components/NoteMeasures';
  * ansiklopedisiyle birlikte dolacaktı. Dört spec boyunca "kapsam dışı" satırında
  * bekledi; 136 notanın 136'sı artık açıklamalı ve burası onların göründüğü yer.
  *
- * Sayfa üç şeyden ibaret ve dördüncüsü bilerek yok:
+ * Sayfa dört şeyden ibaret:
  *
  *   ① ad + bant + tarif        ← notanın ne olduğu
+ *   ③ ölçümler                 ← "peki nasıl bir şey?"
  *   ② yörünge                  ← "peki bu hangi parfümlerde var?"
- *   ③ geri yollar
+ *     geri yollar
  *
- * **Uçuculuk eğrisi ve dört karakter ekseni yok.** İkisi de veride hazırdı ve
- * çizmesi kolaydı, ama ikisi de çubuk-ve-eğri; sahip bunu açıkça reddetti. Eksenler
- * ayrıca ikinci bir tuzak taşıyordu: uzaydaki kaydıraç bir ARAMA aracı, buradaki
- * eksen durgun bir ÖLÇÜM olurdu ve aynı görünselerdi kullanıcı nota sayfasında da
- * arama yaptığını sanırdı. Gerekçenin tamamı
- * `docs/superpowers/specs/2026-08-05-nota-ansiklopedisi-design.md` ④'te.
+ * ③ sonradan geldi ve ansiklopedi spec'inin ④. kararını devirdi: uçuculuk ile
+ * karakter eksenleri oradan bilerek çıkarılmıştı (çubuk-ve-eğri reddedilmişti,
+ * eksenler de uzaydaki ARAMA kaydıraçlarına benzeyip yanıltabilirdi) ama karar
+ * "istenirse ayrı iş" diye bitiyordu. Sahip istedi; iki gerekçe de tasarımla
+ * aşıldı, yok sayılarak değil — **şerit doku yoğunluğu, eksenler ortadan iki yana
+ * açılan durgun basamaklar.** Tamamı
+ * `docs/superpowers/specs/2026-08-06-nota-olcumleri-design.md`te.
  *
  * Renk parfüm sayfasındakiyle aynı zincirden geliyor (`note-marks.ts`), ikinci bir
  * kaynak açılmadı — harita, parfüm ve nota aynı rengi göstermek zorunda.
@@ -67,8 +69,8 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
   /*
     Çerçevedeki her sayı gerçek veri; uydurma sayaç yok (`ScreenFrame.tsx`).
     Üçü de notanın kendi fiziği: hangi bantta, ne zaman tepe yapıyor, ne kadar
-    sürüyor. Uçuculuk eğrisi hâlâ çizilmiyor — sahip çubuk-ve-eğriyi reddetti —
-    ama aynı veri iki sayı olarak burada duruyor.
+    sürüyor. Aynı iki sayı ③'te uzun biçimde de yazılıyor; burada çerçevenin dar
+    alanına sığan kısaltma var (`minutesLabel`).
   */
   const readouts: readonly FrameReadout[] = [
     { label: 'BANT', value: band },
@@ -146,7 +148,7 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
 
           {/* ② — "peki bu hangi parfümlerde var?" */}
           <section className="pt-16">
-            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">
+            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">
               {page.carriers.length > 0
                 ? `${page.carriers.length} PARFÜMDE`
                 : 'HENÜZ HİÇBİR PARFÜMDE'}
