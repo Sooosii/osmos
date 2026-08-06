@@ -68,6 +68,31 @@ function noteColor(note: Note): string {
 }
 
 /**
+ * Paletin kaç notasının seçkide gerçekten geçtiği.
+ *
+ * Nota dizininin çerçevesinde duran sayı. Sayfanın zaten savunduğu şeyi rakama
+ * çeviriyor: palet 136 malzeme, seçki 52 parfüm ve ikisi aynı şey değil.
+ *
+ * **Kesişim sayılıyor, `Set` boyutu değil.** Parfüm verisi palette olmayan bir
+ * `noteId`ye işaret etseydi kimlikleri saymak ekrana 136'yı aşan bir sayı
+ * yazdırırdı — çerçevede uydurma sayı olmaz (`ScreenFrame.tsx`).
+ */
+export function countUsedNotes(notes: readonly Note[], perfumes: readonly Perfume[]): number {
+  const used = new Set<string>();
+  for (const perfume of perfumes) {
+    for (const entry of perfume.notes) {
+      used.add(entry.noteId);
+    }
+  }
+
+  let count = 0;
+  for (const note of notes) {
+    if (used.has(note.id)) count += 1;
+  }
+  return count;
+}
+
+/**
  * Nota sayfasını kurar.
  *
  * Bir notayı hiçbir parfümün içermemesi **hata değil**: nota veritabanı 136

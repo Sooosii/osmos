@@ -6,6 +6,7 @@ import { familyVector } from '@/lib/similarity';
 import { EvolutionSignature } from '@/components/EvolutionSignature';
 import { Neighbors } from '@/components/Neighbors';
 import { PerfumeNotes } from '@/components/PerfumeNotes';
+import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
 
 /**
  * Parfüm sayfası — yol haritasının ①, ②, ③ ve ④'ü. Tamamı.
@@ -58,7 +59,26 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
   const perfume = PERFUMES.find((entry) => entry.id === id);
   if (!perfume) notFound();
 
-  const color = getFamily(dominantFamily(familyVector(perfume))).color;
+  const family = getFamily(dominantFamily(familyVector(perfume)));
+  const color = family.color;
+
+  /*
+    Çerçevedeki üçü de parfümün künyesi (`ScreenFrame.tsx`: uydurma sayı yok).
+    Aile aynı zamanda sayfanın rengini açıklıyor — tepedeki ışığın neden o renk
+    olduğu başka hiçbir yerde yazmıyor.
+
+    ⚠️ `toLocaleUpperCase('tr')`, `toUpperCase()` değil: ikincisi 'Çiçeksi'yi
+    'ÇIÇEKSI' yapıyor ve 15 ailenin dokuzunda yazı bozuluyor. Marka bilerek
+    Türkçe kuralına sokulmuyor — 'Diptyque' orada 'DİPTYQUE' olurdu.
+  */
+  const readouts: readonly FrameReadout[] = [
+    { label: 'AİLE', value: family.name.tr.toLocaleUpperCase('tr') },
+    { label: 'YIL', value: String(perfume.year) },
+    { label: 'NOTA', value: String(perfume.notes.length) },
+  ];
+
+  const index = PERFUMES.findIndex((entry) => entry.id === id) + 1;
+  const position = `PARFÜM ${String(index).padStart(3, '0')}/${PERFUMES.length}`;
 
   return (
     <main className="min-h-dvh bg-[#050507] text-white">
@@ -91,94 +111,104 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
         }}
       />
 
-      <div className="relative mx-auto max-w-3xl px-6 pb-32 sm:px-10">
-        <nav className="pt-10">
+      <ScreenFrame
+        nav={
+          <nav className="flex items-center gap-3 text-[10px] tracking-[0.3em] text-white/40">
+            {/*
+              `?mark=` uzayın o parfümü seçili açması için. Tarayıcının geri tuşu
+              da aynı yere düşüyor; iki yol tek davranışta buluşuyor.
+            */}
+            <Link href={`/?mark=${perfume.id}`} className="transition-colors hover:text-white">
+              OSMOS
+            </Link>
+            <span aria-hidden="true" className="text-white/20">
+              ·
+            </span>
+            <Link href="/notalar" className="transition-colors hover:text-white">
+              NOTALAR
+            </Link>
+          </nav>
+        }
+        readouts={readouts}
+        status={position}
+        tail={perfume.brand.toUpperCase()}
+      >
+        <div className="relative mx-auto max-w-3xl px-6 sm:px-10">
           {/*
-            `?mark=` uzayın o parfümü seçili açması için. Tarayıcının geri tuşu
-            da aynı yere düşüyor; iki yol tek davranışta buluşuyor.
+            ① — sadece duygu.
+
+            Eskiden `min-h-[60vh]` ile ekranın tamamını yiyordu ve notaları
+            görmek için kaydırmak gerekiyordu: basılı tutup geçen biri boş bir
+            ekrana düşüyordu. Artık isim, cümle ve çizelge aynı ekranda —
+            geçişin bittiği yerde aradığın şey duruyor.
           */}
-          <Link
-            href={`/?mark=${perfume.id}`}
-            className="text-xs tracking-[0.3em] text-white/30 transition-colors hover:text-white/60"
-          >
-            OSMOS
-          </Link>
-        </nav>
-
-        {/*
-          ① — sadece duygu.
-
-          Eskiden `min-h-[60vh]` ile ekranın tamamını yiyordu ve notaları
-          görmek için kaydırmak gerekiyordu: basılı tutup geçen biri boş bir
-          ekrana düşüyordu. Artık isim, cümle ve çizelge aynı ekranda —
-          geçişin bittiği yerde aradığın şey duruyor.
-        */}
-        <header className="pt-14 sm:pt-20">
-          <p className="text-sm tracking-[0.2em] text-white/40">
-            {perfume.brand.toUpperCase()}
-          </p>
-          <h1 className="mt-3 text-4xl font-light leading-[1.05] tracking-tight sm:text-6xl">
-            {perfume.name}
-          </h1>
-          {/*
-            Künye — kim, ne zaman. Yeri ve biçimi ekranda üç seçenek yan yana
-            çizilip seçildi; gerekçeler `specs/2026-08-05-kunye-design.md`te.
-
-            İsmin hemen altında duruyor çünkü künye kimliğin parçası: adı okuyan
-            göz burnu ve yılı da alıp sonra cümleye geçiyor.
-
-            `perfumer` yoksa satır tek başına yıla düşüyor ve bu bilinçli. 44'ün
-            ikisinde (Vanille Abricot, Ajyal) marka burnu hiç açıklamadı —
-            "bilinmiyor" yazmak da uydurmak da reddedildi, `types.ts:117`.
-          */}
-          <p className="mt-4 text-sm font-light text-white/35">
-            {perfume.perfumer ? `${perfume.perfumer}, ` : ''}
-            {perfume.year}
-          </p>
-          {perfume.line ? (
-            <p className="mt-5 max-w-xl text-base font-light leading-relaxed text-white/70 sm:text-lg">
-              {perfume.line.tr}
+          <header className="pt-8 sm:pt-14">
+            <p className="text-sm tracking-[0.2em] text-white/40">
+              {perfume.brand.toUpperCase()}
             </p>
-          ) : null}
-        </header>
+            <h1 className="mt-3 text-4xl font-light leading-[1.05] tracking-tight sm:text-6xl">
+              {perfume.name}
+            </h1>
+            {/*
+              Künye — kim, ne zaman. Yeri ve biçimi ekranda üç seçenek yan yana
+              çizilip seçildi; gerekçeler `specs/2026-08-05-kunye-design.md`te.
 
-        {/* ③ — "aa, o aslında veriymiş" */}
-        <section className="pt-14">
-          <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">EVRİM</h2>
-          <EvolutionSignature perfume={perfume} />
-        </section>
+              İsmin hemen altında duruyor çünkü künye kimliğin parçası: adı okuyan
+              göz burnu ve yılı da alıp sonra cümleye geçiyor.
 
-        {/*
-          ⑤ — "peki bunun içinde ne var?"
+              `perfumer` yoksa satır tek başına yıla düşüyor ve bu bilinçli. 44'ün
+              ikisinde (Vanille Abricot, Ajyal) marka burnu hiç açıklamadı —
+              "bilinmiyor" yazmak da uydurmak da reddedildi, `types.ts:117`.
+            */}
+            <p className="mt-4 text-sm font-light text-white/35">
+              {perfume.perfumer ? `${perfume.perfumer}, ` : ''}
+              {perfume.year}
+            </p>
+            {perfume.line ? (
+              <p className="mt-5 max-w-xl text-base font-light leading-relaxed text-white/70 sm:text-lg">
+                {perfume.line.tr}
+              </p>
+            ) : null}
+          </header>
 
-          Aşama 3'te geldi. Eskiden bu sayfa notalarını hiç listelemiyordu:
-          notalar siteye yalnızca imzadaki etiketler olarak giriyordu ve
-          tıklanmıyorlardı. Ansiklopedinin birinci kapısı burası.
+          {/* ③ — "aa, o aslında veriymiş" */}
+          <section className="pt-14">
+            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">EVRİM</h2>
+            <EvolutionSignature perfume={perfume} />
+          </section>
 
-          Neden imzadaki etiketler değil de duran bir liste — gerekçe
-          `PerfumeNotes.tsx`te; kısası, imzanın etiketleri turun bir bölümünde
-          tamamen görünmez oluyor ve görünmez bir link yarı zamanlı bir tuzak.
-        */}
-        <section className="pt-20">
-          <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">NOTALAR</h2>
-          <PerfumeNotes perfume={perfume} />
-        </section>
+          {/*
+            ⑤ — "peki bunun içinde ne var?"
 
-        {/* ④ — "peki buna benzeyen ne var?" */}
-        <section className="pt-20">
-          <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">KOMŞULAR</h2>
-          <Neighbors perfume={perfume} />
-        </section>
+            Aşama 3'te geldi. Eskiden bu sayfa notalarını hiç listelemiyordu:
+            notalar siteye yalnızca imzadaki etiketler olarak giriyordu ve
+            tıklanmıyorlardı. Ansiklopedinin birinci kapısı burası.
 
-        <div className="mt-24">
-          <Link
-            href={`/?mark=${perfume.id}`}
-            className="text-sm font-light text-white/40 transition-colors hover:text-white/80"
-          >
-            ← uzaya dön
-          </Link>
+            Neden imzadaki etiketler değil de duran bir liste — gerekçe
+            `PerfumeNotes.tsx`te; kısası, imzanın etiketleri turun bir bölümünde
+            tamamen görünmez oluyor ve görünmez bir link yarı zamanlı bir tuzak.
+          */}
+          <section className="pt-20">
+            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">NOTALAR</h2>
+            <PerfumeNotes perfume={perfume} />
+          </section>
+
+          {/* ④ — "peki buna benzeyen ne var?" */}
+          <section className="pt-20">
+            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">KOMŞULAR</h2>
+            <Neighbors perfume={perfume} />
+          </section>
+
+          <div className="mt-24">
+            <Link
+              href={`/?mark=${perfume.id}`}
+              className="text-sm font-light text-white/40 transition-colors hover:text-white/80"
+            >
+              ← uzaya dön
+            </Link>
+          </div>
         </div>
-      </div>
+      </ScreenFrame>
     </main>
   );
 }

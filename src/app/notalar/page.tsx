@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { BANDS, BAND_LABEL, NOTES } from '@/data/notes';
+import { PERFUMES } from '@/data/perfumes';
 import { getFamily } from '@/data/families';
+import { countUsedNotes } from '@/lib/note-marks';
+import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
 import type { Note } from '@/data/types';
 
 /**
@@ -39,57 +42,76 @@ function noteColor(note: Note): string {
 }
 
 export default function NotesIndex() {
+  /*
+    Çerçevedeki her sayı gerçek (`ScreenFrame.tsx`). Üst şeritte paletin kendi
+    yapısı — bant başına kaç malzeme; alt şeritte paletin büyüklüğü ve ne
+    kadarının seçkide gerçekten geçtiği.
+
+    Sağ alttaki sayı sayfanın başka hiçbir yerinde yazmıyor ve sayfanın aşağıda
+    savunduğu şeyi rakama çeviriyor: palet ile kullanım listesi aynı şey değil.
+  */
+  const readouts: readonly FrameReadout[] = BANDS.map(({ band, notes }) => ({
+    label: BAND_LABEL[band],
+    value: String(notes.length),
+  }));
+
+  const used = countUsedNotes(NOTES, PERFUMES);
+
   return (
     <main className="min-h-dvh bg-[#050507] text-white">
-      <div className="relative mx-auto max-w-3xl px-6 pb-32 sm:px-10">
-        <nav className="pt-10">
-          <Link
-            href="/"
-            className="text-xs tracking-[0.3em] text-white/30 transition-colors hover:text-white/60"
-          >
-            OSMOS
-          </Link>
-        </nav>
+      <ScreenFrame
+        nav={
+          <nav className="flex items-center gap-3 text-[10px] tracking-[0.3em] text-white/40">
+            <Link href="/" className="transition-colors hover:text-white">
+              OSMOS
+            </Link>
+          </nav>
+        }
+        readouts={readouts}
+        status={`PALET ${NOTES.length}`}
+        tail={`${used} KULLANIMDA`}
+      >
+        <div className="relative mx-auto max-w-3xl px-6 sm:px-10">
+          <header className="pt-8 sm:pt-14">
+            <h1 className="text-4xl font-light leading-[1.05] tracking-tight sm:text-6xl">
+              Notalar
+            </h1>
+            <p className="mt-5 max-w-xl text-base font-light leading-relaxed text-white/50">
+              {NOTES.length} malzeme, uçuculuk bandına göre. Renk baskın koku ailesi —
+              uzaydaki noktalarla aynı palet.
+            </p>
+          </header>
 
-        <header className="pt-14 sm:pt-20">
-          <h1 className="text-4xl font-light leading-[1.05] tracking-tight sm:text-6xl">
-            Notalar
-          </h1>
-          <p className="mt-5 max-w-xl text-base font-light leading-relaxed text-white/50">
-            {NOTES.length} malzeme, uçuculuk bandına göre. Renk baskın koku ailesi —
-            uzaydaki noktalarla aynı palet.
-          </p>
-        </header>
+          {BANDS.map(({ band, notes }) => (
+            <section key={band} className="pt-16">
+              <h2 className="mb-6 text-xs tracking-[0.3em] text-white/30">
+                {BAND_LABEL[band]}
+                <span className="ml-3 text-white/20">{notes.length}</span>
+              </h2>
 
-        {BANDS.map(({ band, notes }) => (
-          <section key={band} className="pt-16">
-            <h2 className="mb-6 text-xs tracking-[0.3em] text-white/30">
-              {BAND_LABEL[band]}
-              <span className="ml-3 text-white/20">{notes.length}</span>
-            </h2>
-
-            <ul className="grid grid-cols-1 gap-x-8 gap-y-px sm:grid-cols-2">
-              {notes.map((note) => (
-                <li key={note.id}>
-                  <Link
-                    href={`/nota/${note.id}`}
-                    className="group flex items-baseline gap-3 py-2 transition-colors"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="size-1.5 shrink-0 translate-y-[-2px] rounded-full opacity-60 transition-opacity group-hover:opacity-100"
-                      style={{ backgroundColor: noteColor(note) }}
-                    />
-                    <span className="text-sm font-light text-white/60 transition-colors group-hover:text-white">
-                      {note.name.tr}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
-      </div>
+              <ul className="grid grid-cols-1 gap-x-8 gap-y-px sm:grid-cols-2">
+                {notes.map((note) => (
+                  <li key={note.id}>
+                    <Link
+                      href={`/nota/${note.id}`}
+                      className="group flex items-baseline gap-3 py-2 transition-colors"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="size-1.5 shrink-0 translate-y-[-2px] rounded-full opacity-60 transition-opacity group-hover:opacity-100"
+                        style={{ backgroundColor: noteColor(note) }}
+                      />
+                      <span className="text-sm font-light text-white/60 transition-colors group-hover:text-white">
+                        {note.name.tr}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      </ScreenFrame>
     </main>
   );
 }
