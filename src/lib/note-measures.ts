@@ -128,11 +128,20 @@ export const AXES: readonly Axis[] = [
     highWord: 'sıcak',
   },
   {
+    /*
+      PÜRÜZSÜZ↔TIRTIKLI'ydı ve ekranda anlaşılmadı — kaydıraçlarda da aynı çift
+      aynı sebeple düşmüştü (`SpaceFeelSliders.tsx`). Sahip ekrana bakıp seçti:
+      KESKİN ucu doğru anlatıyor, karşısına dokunulabilir bir yüzey geldi.
+
+      YUMUŞAK reddedildi (şiddet gibi okunuyor), YUVARLAK ve İPEKSİ de elendi.
+      `kadifemsi` sıfat hâli: ekran okuyucu "hafif kadife" değil "hafif
+      kadifemsi" diyor — `axisWord` sıfat bekliyor, isim değil.
+    */
     id: 'texture',
-    low: 'PÜRÜZSÜZ',
-    high: 'TIRTIKLI',
-    lowWord: 'pürüzsüz',
-    highWord: 'tırtıklı',
+    low: 'KADİFE',
+    high: 'KESKİN',
+    lowWord: 'kadifemsi',
+    highWord: 'keskin',
   },
   {
     id: 'cleanliness',
@@ -142,8 +151,14 @@ export const AXES: readonly Axis[] = [
     highWord: 'temiz',
   },
   {
+    /*
+      UZAK değil HAVADA. "Uzak" mesafeden bahsettiği sanılıyordu; oysa eksen
+      kokunun NEREDE durduğunu söylüyor. İki uç da artık yeri adlandırıyor ve
+      `types.ts:71`in kendi sözleriyle aynı. Aynı düzeltme kaydıraçlarda daha
+      önce yapılmıştı; nota sayfası eski sözcükte kalmıştı.
+    */
     id: 'proximity',
-    low: 'UZAK',
+    low: 'HAVADA',
     high: 'TENDE',
     lowWord: 'havada dağılan',
     highWord: 'tene yapışan',
