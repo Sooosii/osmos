@@ -135,8 +135,26 @@ export const NOTE_RADIUS = 46;
  */
 export const LABEL_HALF_WIDTH = 62;
 
-/** Adın noktanın ne kadar üstüne yazıldığı. */
+/** Adın noktanın ne kadar üstüne (ya da altına) yazıldığı. */
 export const LABEL_RISE = 13;
+
+/**
+ * Parfüm diskinin yarıçapı — boy, ağırlığı İKİNCİ kez anlatıyor.
+ *
+ * Yarıçap zaten ağırlıktan geliyor (`radiusFor`), ama dönen bir sahnede "hangisi
+ * merkeze yakın" tek başına zor okunuyor. Baskın nota daha büyük bir disk olunca
+ * hiyerarşi ada bakmadan görülüyor.
+ *
+ * Burada duruyor çünkü ETİKETİN yeri de buna bağlı: ad diskin üstünden veya
+ * altından `LABEL_RISE` kadar uzağa yazılıyor. Bileşende kalsaydı yerleştirme
+ * sınaması aynı formülü ikinci kez yazmak zorunda kalır, ikisi sessizce ayrışırdı.
+ */
+const DISC_BASE = 7;
+const DISC_WEIGHT_GAIN = 9;
+
+export function discRadius(weight: number, scale: number): number {
+  return (DISC_BASE + weight * DISC_WEIGHT_GAIN) * scale;
+}
 
 /**
  * Adın yazılması için gereken en düşük sönümleme.

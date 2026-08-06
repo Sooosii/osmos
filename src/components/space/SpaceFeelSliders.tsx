@@ -188,10 +188,15 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
           {/*
             Etiketler ekranda seçildi.
 
-            "Doku" için önce PÜRÜZSÜZ↔TIRTIKLI vardı ve anlaşılmadı. SERT'in
-            bilinen riski var — Türkçede parfüm için genelde "ağır, keskin"
-            demek, yani doku değil şiddet sanılabilir; sahip bunu bilerek seçti,
-            karşılığında en kısa ve en tanıdık çift geldi.
+            "Doku" için önce PÜRÜZSÜZ↔TIRTIKLI vardı ve anlaşılmadı. Sonra
+            YUMUŞAK↔SERT denendi; SERT'in bilinen riski göze alınmıştı — Türkçede
+            parfüm için genelde "ağır, keskin" demek, yani doku değil şiddet
+            sanılabilir. Ekranda o risk gerçekleşti ve YUMUŞAK da tutmadı.
+
+            KADİFE↔KESKİN sahibin nota sayfasına bakarken seçtiği çift. Sözcükler
+            burada da aynı olmak zorunda: kaydıraç ile nota ölçümü **aynı veriyi**
+            gösteriyor (`Character.texture`) ve tek bir eksene iki ad takmak
+            kullanıcıya iki ayrı şey varmış gibi geliyor.
 
             "Yakınlık" için UZAK↔YAKIN büsbütün yanlış okunuyordu: mesafeden
             bahsettiği sanılıyordu, oysa eksen kokunun NEREDE durduğunu söylüyor.
@@ -200,9 +205,9 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
           */}
           <Axis
             axis={DETAIL_AXES[0]}
-            label="Doku — yumuşaktan serte"
-            low="YUMUŞAK"
-            high="SERT"
+            label="Doku — kadifemsiden keskine"
+            low="KADİFE"
+            high="KESKİN"
             onPick={update}
           />
           <Axis
