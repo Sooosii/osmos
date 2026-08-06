@@ -1,7 +1,9 @@
 import { Suspense } from 'react';
 import { PERFUMES } from '@/data/perfumes';
 import { buildMarks } from '@/lib/space-marks';
+import { introPoints } from '@/lib/intro-points';
 import { ScentSpaceCanvas } from '@/components/ScentSpaceCanvas';
+import { IntroOverlay } from '@/components/IntroOverlay';
 
 /**
  * Koku Uzayı — sitenin kapısı.
@@ -9,7 +11,9 @@ import { ScentSpaceCanvas } from '@/components/ScentSpaceCanvas';
  * Hesap burada, sunucuda: benzerlik matrisi ve izdüşüm istemciye hiç inmiyor,
  * tarayıcıya yalnızca 44 nokta gidiyor.
  *
- * Açılış sahnesi (hero-scrub) Aşama 2'ye ait; şimdilik uzay doğrudan açılıyor.
+ * Uzay doğrudan açılmıyor: önce yaklaşma sahnesi geliyor (`space-approach.ts`),
+ * kaydırdıkça kamera 0.14'ten 1'e yaklaşıyor. Şu an onun da önünde bir deneme
+ * duruyor — `IntroOverlay`, aşağıda.
  */
 export default function Home() {
   const marks = buildMarks(PERFUMES);
@@ -67,6 +71,14 @@ export default function Home() {
           </div>
         </ScentSpaceCanvas>
       </Suspense>
+
+      {/*
+        Açılış perdesi — deneme, sahibin getirdiği `intro.js`.
+
+        Suspense'in dışında: adres parametresiyle işi yok. Nereye konduğu
+        görüntüyü etkilemiyor, perde kendini `document.body`ye ekliyor.
+      */}
+      <IntroOverlay points={introPoints(marks)} />
     </main>
   );
 }
