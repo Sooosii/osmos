@@ -42,9 +42,14 @@ next-env.d.ts
 
 # yerel ayıklama çıktıları — tarayıcı aracının kaydettikleri ve elle alınan
 # ekran görüntüleri. İşin kaydı değiller, depoda yerleri yok.
+#
+# Kalıp KÖKE bağlı (baştaki `/`): `public/` altındaki gerçek görseller etkilenmiyor.
+# Tek tek ad yazmak bırakıldı — köke düşen her görsel geçici oluyor ve her yeni
+# adlandırma (Screenshot_…, Item Not Found…) listeye bir satır daha ekletiyordu.
 /.playwright-mcp/
-/OSMOS*.png
-/approach-*.png
+/*.png
+/*.jpeg
+/*.jpg
 
 # beyin fırtınası görsel sekmesinin mockup'ları — tartışmanın izi, işin kaydı değil
 /.superpowers/

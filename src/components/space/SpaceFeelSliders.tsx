@@ -1,5 +1,6 @@
-import { useCallback, useRef, useState, type RefObject } from 'react';
-import { type FeelTarget, NO_FEEL } from '@/lib/space-feel';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import { type FeelTarget, NO_FEEL, hasFeel } from '@/lib/space-feel';
+import { formatFeel, parseFeel } from '@/lib/space-feel-url';
 
 /**
  * Sinestezi kaydıraçları — uzaya nota adıyla değil hisle sorma yolu.
@@ -69,8 +70,8 @@ const SLIDER_CLASS = [
 /**
  * Uç etiketi — giriş ipucuyla aynı tipografi.
  *
- * Genişlik en uzun etikete göre: "YUMUŞAK". Sabit olması şart, yoksa dört
- * kaydıracın rayları farklı yerlerden başlar ve sütun eğrilirdi.
+ * Genişlik en uzun etikete göre: altı harfli KADİFE/KESKİN/HAVADA. Sabit olması
+ * şart, yoksa dört kaydıracın rayları farklı yerlerden başlar, sütun eğrilirdi.
  */
 const EDGE_CLASS = 'w-[4.2rem] shrink-0 text-[10px] tracking-[0.15em] text-white/30';
 
@@ -82,9 +83,13 @@ interface AxisProps {
   readonly low: string;
   readonly high: string;
   readonly onPick: (axis: number, value: number) => void;
+  /** Topuğun doğduğu yer, 0…STEPS. Adresten gelen tarif buradan giriyor. */
+  readonly start: number;
+  /** Topuk bırakıldı — adres çubuğu burada tazeleniyor. */
+  readonly onCommit: () => void;
 }
 
-function Axis({ axis, label, low, high, onPick }: AxisProps) {
+function Axis({ axis, label, low, high, onPick, start, onCommit }: AxisProps) {
   return (
     <div className="flex items-center gap-2">
       <span className={`${EDGE_CLASS} text-right`}>{low}</span>
@@ -95,10 +100,18 @@ function Axis({ axis, label, low, high, onPick }: AxisProps) {
           min={0}
           max={STEPS}
           step={1}
-          defaultValue={MIDDLE}
+          defaultValue={start}
           autoComplete="off"
           aria-label={label}
           onChange={(event) => onPick(axis, Number(event.target.value) / STEPS)}
+          /*
+            Adres çubuğu sürüklerken değil BIRAKINCA yazılıyor. Her karede
+            yazsaydık tek bir sürükleme yüzlerce adrese bölünürdü; geri tuşu da
+            onların arasında dolaşırdı. Klavyeyle gelen için `onKeyUp` şart:
+            ok tuşuyla sürülen topuk hiç `pointerup` üretmiyor.
+          */
+          onPointerUp={onCommit}
+          onKeyUp={onCommit}
           className={SLIDER_CLASS}
         />
         {/* Saç teli ray — sitenin kendi dili. Odakta parlıyor ki klavyeyle
@@ -130,9 +143,26 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
    * Eksenlerin ham değeri. Durumda değil ref'te, çünkü ekranda değişen şey
    * tuval; React'in yeniden çizeceği bir metin yok.
    */
+  /**
+   * Adresten gelen tarif — ilk çizimde DEĞİL, bağlandıktan sonra.
+   *
+   * ⚠️ Bir kere render sırasında okundu ve hata verdi: `typeof window`e bakan bir
+   * dal sunucu ile istemcinin farklı çizmesine yol açıyor ve React "Hydration
+   * failed" diyor. Sunucuda çizilmediğini varsaymıştım; çizilmiyor sanılan ağaç
+   * geliştirmede çiziliyor. Doğrusu ikisinin de boş tarifle doğması, adresin
+   * sonradan uygulanması.
+   */
+  const [initial, setInitial] = useState<FeelTarget>(NO_FEEL);
+
   const valuesRef = useRef<(number | null)[]>([...NO_FEEL]);
 
-  /** "…" açık mı? */
+  /**
+   * "…" açık mı?
+   *
+   * Adreste doku veya yakınlık sorulmuşsa aşağıdaki etki bunu **açıyor**. Kapalı
+   * kalsaydı paylaşılan link, kullanıcının göremediği iki koşulla daralmış bir
+   * uzay gösterirdi — `toggleDetail`in kaçındığı şeyin ta kendisi.
+   */
   const [detailed, setDetailed] = useState(false);
 
   /**
@@ -157,6 +187,63 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
     [targetRef, requestDraw],
   );
 
+  /*
+   * Adres bağlandıktan sonra okunuyor ve tarif yürürlüğe giriyor.
+   *
+   * `useSearchParams` DEĞİL, doğrudan `window.location`: adres çubuğunu aşağıda
+   * kendimiz yazıyoruz ve Next'in kancasıyla okusaydık her yazma bu ağacı
+   * yeniden çizerdi — tuval kendini kurar, sahne başa dönerdi.
+   *
+   * Bir karelik gecikme görünmüyor: kaydıraçlar yaklaşma sahnesi boyunca zaten
+   * ekranda değil.
+   *
+   * ⚠️ `react-hooks/set-state-in-effect` burada bilerek kapalı. Kuralın kaçındığı
+   * şey türetilebilir durumu etkiyle senkronlamak; buradaki durum türetilemiyor,
+   * çünkü kaynağı DIŞARIDA (adres çubuğu) ve render sırasında okumak sunucu ile
+   * istemciyi ayırıp hidrasyonu kırıyor — bir kez öyle yazıldı ve React
+   * "Hydration failed" verdi. Etki bir kez çalışıyor, adres sonradan kendiliğinden
+   * değişmiyor: yazan da biziz (`commit`) ve o `replaceState` kimseyi uyandırmıyor.
+   */
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    const fromUrl = parseFeel(new URLSearchParams(window.location.search).get('feel'));
+    if (!hasFeel(fromUrl)) return;
+
+    valuesRef.current = [...fromUrl];
+    targetRef.current = fromUrl;
+    setInitial(fromUrl);
+    setDetailed(DETAIL_AXES.some((axis) => fromUrl[axis] !== null));
+    requestDraw();
+  }, [targetRef, requestDraw]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  /**
+   * Tarifi adres çubuğuna yazar.
+   *
+   * `replaceState`, `push` değil ve Next'in yönlendiricisi hiç karışmıyor:
+   *
+   *   · `push` olsaydı her topuk bırakışı geçmişe bir adım eklerdi ve geri tuşu
+   *     uzaydan çıkmak yerine kaydıraç geçmişinde gezerdi.
+   *   · `router.replace` bu ağacı yeniden çizer, tuval kendini yeniden kurardı.
+   *
+   * `?mark=` korunuyor: adresteki öbür parametreler olduğu gibi kalıyor, yalnızca
+   * `feel` tazeleniyor. Sorulmuş eksen kalmadıysa parametre tamamen siliniyor.
+   */
+  const commit = useCallback(() => {
+    const url = new URL(window.location.href);
+    const param = formatFeel(valuesRef.current);
+    if (param === null) url.searchParams.delete('feel');
+    else url.searchParams.set('feel', param);
+
+    /*
+      Virgüller okunur kalıyor. `searchParams` onları `%2C` diye kodluyor ve
+      `?feel=0.75%2C0.3%2C%2C0.8` gidip dönerken çalışıyor ama paylaşılan bir
+      linkte okunmuyor — oysa adreste taşımanın bütün sebebi o link. Virgül
+      sorgu dizesinde zaten yasal (RFC 3986 sub-delims), kodlanması şart değil.
+    */
+    window.history.replaceState(null, '', url.href.replace(/%2C/g, ','));
+  }, []);
+
   /**
    * "…" düğmesi — açar, kapatır.
    *
@@ -174,14 +261,50 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
       for (const axis of DETAIL_AXES) valuesRef.current[axis] = null;
       targetRef.current = [...valuesRef.current];
       requestDraw();
+      // Kapanış da bir karar: adres, ekranda görünmeyen iki koşulu taşımasın.
+      commit();
     }
     setDetailed(!detailed);
-  }, [detailed, targetRef, requestDraw]);
+  }, [detailed, targetRef, requestDraw, commit]);
+
+  /**
+   * Topuğun doğacağı yer.
+   *
+   * Sorulmamış eksen ortada doğuyor — `MIDDLE` bir tarif değil, yalnızca
+   * topuğun durduğu yer (`update`in yorumu). Adresten değer geldiyse topuk
+   * oraya oturuyor ve gördüğün yer ile tarif aynı şeyi söylüyor.
+   */
+  const startOf = (axis: number) => {
+    const value = initial[axis];
+    return value === null || value === undefined ? MIDDLE : Math.round(value * STEPS);
+  };
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <Axis axis={0} label="Sıcaklık — soğuktan sıcağa" low="SOĞUK" high="SICAK" onPick={update} />
-      <Axis axis={2} label="Temizlik — kirliden temize" low="KİRLİ" high="TEMİZ" onPick={update} />
+    /*
+      `key` süs değil: kaydıraçlar kontrolsüz, yani `defaultValue` yalnızca
+      doğdukları anda okunuyor. Adres sonradan geldiği için topuklar bir kez
+      yeniden doğmak zorunda, yoksa tarif yürürlükte olur ama topuklar ortada
+      durur — gördüğün yer ile tarif farklı şeyler söylerdi.
+    */
+    <div key={hasFeel(initial) ? 'adresten' : 'bos'} className="flex flex-col gap-2.5">
+      <Axis
+        axis={0}
+        label="Sıcaklık — soğuktan sıcağa"
+        low="SOĞUK"
+        high="SICAK"
+        onPick={update}
+        start={startOf(0)}
+        onCommit={commit}
+      />
+      <Axis
+        axis={2}
+        label="Temizlik — kirliden temize"
+        low="KİRLİ"
+        high="TEMİZ"
+        onPick={update}
+        start={startOf(2)}
+        onCommit={commit}
+      />
 
       {detailed ? (
         <>
@@ -209,6 +332,8 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
             low="KADİFE"
             high="KESKİN"
             onPick={update}
+            start={startOf(DETAIL_AXES[0])}
+            onCommit={commit}
           />
           <Axis
             axis={DETAIL_AXES[1]}
@@ -216,6 +341,8 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
             low="HAVADA"
             high="TENDE"
             onPick={update}
+            start={startOf(DETAIL_AXES[1])}
+            onCommit={commit}
           />
         </>
       ) : null}
