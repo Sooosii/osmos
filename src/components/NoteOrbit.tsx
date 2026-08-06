@@ -11,10 +11,12 @@ import {
   NOTE_RADIUS,
   VIEW_HEIGHT,
   VIEW_WIDTH,
+  discRadius,
   horizonRing,
   noteSeats,
   projectSeat,
 } from '@/lib/note-orbit';
+import { placeLabels } from '@/lib/note-labels';
 import type { NoteMark } from '@/lib/note-marks';
 
 /**
@@ -181,16 +183,10 @@ export function NoteOrbit({ carriers, noteName, noteColor }: NoteOrbitProps) {
       behind.sort((a, b) => b.node.z - a.node.z);
       front.sort((a, b) => b.node.z - a.node.z);
 
-      const discRadius = (entry: (typeof nodes)[number]) => {
-        const carrier = byId.get(entry.seat.id);
-        /*
-         * Boy ağırlığı İKİNCİ kez anlatıyor ve bu bilerek: yarıçap zaten ağırlıktan
-         * geliyor, ama dönen bir sahnede "hangisi merkeze yakın" tek başına zor
-         * okunuyor. Baskın nota daha büyük bir disk olunca hiyerarşi ada bakmadan
-         * görülüyor.
-         */
-        return (7 + (carrier?.weight ?? 0) * 9) * entry.node.scale * k;
-      };
+      // Formül `note-orbit.ts`te: etiketin yeri de buna bağlı ve iki yerde
+      // durursa sessizce ayrışırlar.
+      const radiusOf = (entry: (typeof nodes)[number]) =>
+        discRadius(byId.get(entry.seat.id)?.weight ?? 0, entry.node.scale) * k;
 
       const paintDisc = (entry: (typeof nodes)[number]) => {
         const carrier = byId.get(entry.seat.id);
@@ -199,7 +195,7 @@ export function NoteOrbit({ carriers, noteName, noteColor }: NoteOrbitProps) {
         ditherDisc(
           entry.node.x * k,
           entry.node.y * k,
-          discRadius(entry),
+          radiusOf(entry),
           withAlpha(carrier.color, 0.34 + entry.node.fade * 0.56),
           0.55 + entry.node.fade * 0.45,
         );
@@ -219,15 +215,9 @@ export function NoteOrbit({ carriers, noteName, noteColor }: NoteOrbitProps) {
        * Adlar AYRI bir geçişte ve çakışma denetimiyle yazılıyor.
        *
        * Sıralama derinlik değil **öne çıkma** sırası: en öndeki adını ilk yazıyor,
-       * arkadakiler ancak yer kalırsa. Bir ad daha önce yazılmış birinin kutusuna
-       * değiyorsa atlanıyor — böylece hiçbir yazı üst üste binmiyor.
-       *
-       * Bu, iki başarısız denemenin ardından geldi. Önce eşiği geçen herkes
-       * yazıyordu ve sandal gibi 26 parfümlü bir notada on bir ad iç içe geçiyordu.
-       * Sonra yalnızca en öndeki konuşturuldu; yığılma bitti ama sahip haklı olarak
-       * "diğerinin gelmesini beklemeye gerek yok, hepsi görünsün" dedi. Çakışma
-       * denetimi ikisini birden veriyor: yer varsa herkes konuşuyor, yer yoksa
-       * öndeki kazanıyor ve dönüş sırayı zaten devrediyor.
+       * arkadakiler ancak yer kalırsa. Yerleştirmenin kendisi `note-labels.ts`te
+       * ve orada sınanıyor — bileşende dururken sınanamıyordu ve öndeki parfümün
+       * adı turun yarısında kayboluyordu.
        *
        * Ayrı geçiş şart: diskler derinlik sırasına göre çiziliyor ve bir adın
        * arkadaki bir diskin altında kalması gerekmiyor — yazı her zaman en üstte.
@@ -236,49 +226,43 @@ export function NoteOrbit({ carriers, noteName, noteColor }: NoteOrbitProps) {
       ctx.font = `${fontSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
       ctx.textAlign = 'center';
 
-      /*
-       * Merkezdeki nota diski baştan rezerve: adların üstüne yazılmaması gereken
-       * tek şey o. Diğer disklerin üstüne düşmesi sorun değil — arkadakiler zaten
-       * sönük ve yazı her zaman en üstte — ama merkez sahnenin öznesi.
-       */
-      const placed: { x0: number; y0: number; x1: number; y1: number }[] = [
+      const fadeById = new Map(nodes.map((entry) => [entry.seat.id, entry.node.fade]));
+
+      const labels = placeLabels(
+        nodes
+          .filter((entry) => byId.has(entry.seat.id) && entry.node.fade >= LABEL_FADE_MIN)
+          .map((entry) => ({
+            id: entry.seat.id,
+            text: byId.get(entry.seat.id)!.name,
+            cx: entry.node.x * k,
+            cy: entry.node.y * k,
+            discRadius: radiusOf(entry),
+            fade: entry.node.fade,
+          })),
         {
-          x0: CENTER_X * k - NOTE_RADIUS * k,
-          y0: CENTER_Y * k - NOTE_RADIUS * k,
-          x1: CENTER_X * k + NOTE_RADIUS * k,
-          y1: CENTER_Y * k + NOTE_RADIUS * k,
+          fontSize,
+          rise: LABEL_RISE * k,
+          padding: 5,
+          bottom: (width / VIEW_WIDTH) * VIEW_HEIGHT,
+          // Merkezdeki nota diski: adlar elden geldiğince oraya yazılmıyor.
+          reserved: [
+            {
+              x0: (CENTER_X - NOTE_RADIUS) * k,
+              y0: (CENTER_Y - NOTE_RADIUS) * k,
+              x1: (CENTER_X + NOTE_RADIUS) * k,
+              y1: (CENTER_Y + NOTE_RADIUS) * k,
+            },
+          ],
+          measure: (text) => ctx.measureText(text).width,
         },
-      ];
-      const spoken = [...nodes].sort((a, b) => b.node.fade - a.node.fade);
+      );
 
-      for (const entry of spoken) {
-        const carrier = byId.get(entry.seat.id);
-        if (!carrier || entry.node.fade < LABEL_FADE_MIN) continue;
-
-        const cx = entry.node.x * k;
-        const cy = entry.node.y * k - discRadius(entry) - LABEL_RISE * k;
-        const half = ctx.measureText(carrier.name).width / 2;
-
-        // Kutulara nefes payı: harfler değmese de iki ad bitişikken tek kelime
-        // gibi okunuyor.
-        const box = {
-          x0: cx - half - 5,
-          y0: cy - fontSize,
-          x1: cx + half + 5,
-          y1: cy + fontSize * 0.35,
-        };
-
-        const collides = placed.some(
-          (other) => box.x0 < other.x1 && box.x1 > other.x0 && box.y0 < other.y1 && box.y1 > other.y0,
-        );
-        if (collides) continue;
-
-        placed.push(box);
-
+      for (const label of labels) {
         // Arkadaki ad sönük ama okunur; ön-arka ayrımı yazıda da sürüyor.
-        const strength = (entry.node.fade - LABEL_FADE_MIN) / (1 - LABEL_FADE_MIN);
+        const fade = fadeById.get(label.id) ?? 0;
+        const strength = (fade - LABEL_FADE_MIN) / (1 - LABEL_FADE_MIN);
         ctx.fillStyle = `rgba(255,255,255,${(0.34 + strength * 0.56).toFixed(3)})`;
-        ctx.fillText(carrier.name, cx, cy);
+        ctx.fillText(label.text, label.x, label.y);
       }
 
       raf = requestAnimationFrame(draw);
