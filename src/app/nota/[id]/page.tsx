@@ -5,6 +5,8 @@ import { PERFUMES } from '@/data/perfumes';
 import { buildNotePage } from '@/lib/note-marks';
 import { NoteOrbit } from '@/components/NoteOrbit';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
+import { DitherBackdrop } from '@/components/DitherBackdrop';
+import { NoteMeasures } from '@/components/NoteMeasures';
 
 /**
  * Nota sayfası — Aşama 3, ansiklopedinin yaprağı.
@@ -81,6 +83,17 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
   return (
     <main className="min-h-dvh bg-[#050507] text-white">
       {/*
+        Arka plan: notanın kendi fiziğinden beslenen hareketli tram alanı.
+        Uçuculuk dalganın hızını, ömür yayılmasını sürüyor — her nota sayfası
+        farklı görünüyor. Gerekçe ve reddedilen kaynak `dither-field.ts`te.
+      */}
+      <DitherBackdrop
+        color={page.color}
+        peakMinutes={note.volatility.peakMinutes}
+        halfLifeMinutes={note.volatility.halfLifeMinutes}
+      />
+
+      {/*
         Aile rengi tepede ince bir ışık olarak duruyor — parfüm sayfasının deseni.
         Fotoğraf yok; rengin kendisi notanın tek görsel imzası.
       */}
@@ -119,6 +132,17 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
               {page.description}
             </p>
           </header>
+
+          {/*
+            ③ — "peki bu nasıl bir şey?"
+            Tarif ile taşıyıcı listesinin arasında duruyor: ne → nasıl → nerede.
+            Ansiklopedi spec'inin ④. kararını deviriyor; gerekçe `note-measures.ts`te.
+          */}
+          <NoteMeasures
+            volatility={note.volatility}
+            character={note.character}
+            color={page.color}
+          />
 
           {/* ② — "peki bu hangi parfümlerde var?" */}
           <section className="pt-16">
