@@ -17,7 +17,7 @@ import { NoteMeasures } from '@/components/NoteMeasures';
  *
  * Sayfa dört şeyden ibaret:
  *
- *   ① ad + bant + tarif        ← notanın ne olduğu
+ *   ① ad + bant                ← notanın ne olduğu
  *   ③ ölçümler                 ← "peki nasıl bir şey?"
  *   ② yörünge                  ← "peki bu hangi parfümlerde var?"
  *     geri yollar
@@ -130,9 +130,11 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
             <h1 className="mt-3 text-4xl font-light leading-[1.05] tracking-tight sm:text-6xl">
               {page.name}
             </h1>
-            <p className="mt-5 max-w-xl text-base font-light leading-relaxed text-white/70 sm:text-lg">
-              {page.description}
-            </p>
+            {/*
+              Tarif cümlesi ekrandan kaldırıldı — sahip istedi. Veri duruyor:
+              `description` 136 notanın 136'sında dolu ve `generateMetadata`
+              arama sonucunda hâlâ onu yazıyor. Geri gelmesi tek satır.
+            */}
           </header>
 
           {/*
