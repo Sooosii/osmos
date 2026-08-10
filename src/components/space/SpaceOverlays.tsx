@@ -142,7 +142,7 @@ export function SpaceOverlays({
         {APPROACH_CUE === 'mark' ? (
           <span className="block h-10 w-px animate-[osmos-breathe_2.8s_ease-in-out_infinite] bg-white/60" />
         ) : (
-          <span className="text-[11px] tracking-[0.45em] text-white/35">{t.site.name}</span>
+          <span className="text-[11px] tracking-[0.45em] text-white/50">{t.site.name}</span>
         )}
       </div>
 
@@ -157,7 +157,7 @@ export function SpaceOverlays({
           <p className="whitespace-nowrap text-[13px] leading-tight text-white/90">
             {labelled?.name ?? ''}
           </p>
-          <p className="whitespace-nowrap text-[11px] leading-tight text-white/40">
+          <p className="whitespace-nowrap text-[11px] leading-tight text-white/50">
             {labelled?.brand ?? ''}
           </p>
         </div>
@@ -186,7 +186,7 @@ export function SpaceOverlays({
           }`}
           aria-hidden="true"
         >
-          <span className="text-[11px] tracking-[0.25em] text-white/40">
+          <span className="text-[11px] tracking-[0.25em] text-white/50">
             {/* Cihaza göre iki kelime; gerekçe `AstronotIntro`da. */}
             <span className="pointer-coarse:hidden">{t.space.entryHint}</span>
             <span className="hidden pointer-coarse:inline">{t.space.entryHintTouch}</span>

@@ -64,7 +64,7 @@ export default async function NotesIndex({ params }: { params: Promise<{ lang: s
     <main className="min-h-dvh bg-[#050507] text-white">
       <ScreenFrame
         nav={
-          <nav className="flex items-center gap-3 text-[10px] tracking-[0.3em] text-white/40">
+          <nav className="flex items-center gap-3 text-[10px] tracking-[0.3em] text-white/50">
             <Link href={withLocale(locale, '/')} className="transition-colors hover:text-white">
               {t.site.name}
             </Link>
@@ -86,9 +86,9 @@ export default async function NotesIndex({ params }: { params: Promise<{ lang: s
 
           {BANDS.map(({ band, notes }) => (
             <section key={band} className="pt-16">
-              <h2 className="mb-6 text-xs tracking-[0.3em] text-white/30">
+              <h2 className="mb-6 text-xs tracking-[0.3em] text-white/50">
                 {t.bands[band]}
-                <span className="ml-3 text-white/20">{notes.length}</span>
+                <span className="ml-3 text-white/50">{notes.length}</span>
               </h2>
 
               <ul className="grid grid-cols-1 gap-x-8 gap-y-px sm:grid-cols-2">
@@ -96,6 +96,21 @@ export default async function NotesIndex({ params }: { params: Promise<{ lang: s
                   <li key={note.id}>
                     <Link
                       href={withLocale(locale, `/note/${note.id}`)}
+                      /*
+                        ⚠️ **Önden getirme burada kapalı, ölçülerek.** Next
+                        görüş alanına giren her bağlantıyı önden getiriyor ve
+                        bu dizinde 136 bağlantı var: sayfa açılışında **131
+                        istek / 165 KB** fazladan iniyordu. Ölçüm (üretim
+                        derlemesi): 421 KB / 154 istek → **269 KB / 32 istek**.
+                        Ziyaretçi buradan bir
+                        ya da iki notaya giriyor; kalan 134'ün verisi boşuna
+                        indiriliyordu.
+
+                        Bedeli: ilk tıklamada sayfa artık hazır beklemiyor,
+                        o an getiriliyor. Nota sayfaları durağan HTML olduğu
+                        için bu tek bir istek. Geri istenirse tek prop.
+                      */
+                      prefetch={false}
                       className="group flex items-baseline gap-3 py-2 transition-colors"
                     >
                       <span

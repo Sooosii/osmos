@@ -298,11 +298,11 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
       // gerçekten değiştiğinde yazılıyor — aynı gerekçe: gereksiz yazım, gereksiz
       // layout kirliliği, hissedilir takılma.
       if (phaseRef.current) {
-        const phaseText = phaseLabel(minutes);
+        const phaseText = phaseLabel(minutes, t.phases);
         if (phaseRef.current.textContent !== phaseText) phaseRef.current.textContent = phaseText;
       }
       if (durationRef.current) {
-        const durationText = formatDuration(minutes);
+        const durationText = formatDuration(minutes, t.duration);
         if (durationRef.current.textContent !== durationText) {
           durationRef.current.textContent = durationText;
         }
@@ -315,7 +315,15 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
     // anlatıyor: iptal edilmeyen kare, bileşen geri geldiğinde "zaten kare
     // bekliyor" sanılıp döngüyü kilitliyor.
     return () => cancelAnimationFrame(frame);
-  }, [rows, curves, geometry]);
+    /*
+      ⚠️ `t` bağımlılıkta ve bu şart. Sözlüksüz çağrıldıklarında `phaseLabel` ve
+      `formatDuration` **varsayılan İngilizceye** düşüyor: Türkçe sayfada ilk
+      kare "Açılış · ilk saniyeler" yazıyor, döngünün ikinci karesi üstüne
+      "Opening · 4 minutes" yazıyordu. Kaçak Türkçe avcısı bunu göremez —
+      kaynakta Türkçe metin yok, çalışma anında İngilizce metin var. Ekranda
+      görülerek bulundu (erişilebilirlik turu, 2026-08-10).
+    */
+  }, [rows, curves, geometry, t]);
 
   return (
     <div className="w-full">
@@ -396,7 +404,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
       */}
       <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2">
         {families.map((family) => (
-          <span key={family.id} className="flex items-center gap-2 text-xs text-white/35">
+          <span key={family.id} className="flex items-center gap-2 text-xs text-white/50">
             <span
               aria-hidden="true"
               className="h-1.5 w-1.5 rounded-full"
@@ -407,7 +415,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
         ))}
       </div>
 
-      <p className="mt-10 max-w-lg text-xs leading-relaxed text-white/25">
+      <p className="mt-10 max-w-lg text-xs leading-relaxed text-white/50">
         {t.chart.disclaimer}
       </p>
     </div>

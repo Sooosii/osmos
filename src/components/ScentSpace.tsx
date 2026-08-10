@@ -117,7 +117,7 @@ export function ScentSpace({ marks }: { readonly marks: readonly SpaceMark[] }) 
           <p className="whitespace-nowrap text-[13px] leading-tight text-white/90">
             {labelled.name}
           </p>
-          <p className="whitespace-nowrap text-[11px] leading-tight text-white/40">
+          <p className="whitespace-nowrap text-[11px] leading-tight text-white/50">
             {labelled.brand}
           </p>
         </div>
@@ -127,7 +127,7 @@ export function ScentSpace({ marks }: { readonly marks: readonly SpaceMark[] }) 
           fare gezdirirken alt metin sürekli değişip huzursuz etmesin. */}
       <div className="absolute inset-x-0 bottom-0 p-5">
         <p
-          className={`text-sm italic leading-relaxed text-white/45 transition-opacity duration-300 ${
+          className={`text-sm italic leading-relaxed text-white/50 transition-opacity duration-300 ${
             selected?.line ? 'opacity-100' : 'opacity-0'
           }`}
         >

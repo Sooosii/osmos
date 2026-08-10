@@ -75,7 +75,7 @@ const SLIDER_CLASS = [
  * dört kaydıracın rayları farklı yerlerden başlar, sütun eğrilirdi. Aynı sınır
  * `i18n/en.ts`teki uç damgalarına da geçerli — 'ON SKIN' bu yüzden elendi.
  */
-const EDGE_CLASS = 'w-[4.2rem] shrink-0 text-[10px] tracking-[0.15em] text-white/30';
+const EDGE_CLASS = 'w-[4.2rem] shrink-0 text-[10px] tracking-[0.15em] text-white/50';
 
 interface AxisProps {
   /** `Character` sırasındaki yeri: 0 sıcaklık, 1 doku, 2 temizlik, 3 yakınlık. */
@@ -382,7 +382,7 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
           aria-expanded={detailed}
           aria-label={detailed ? WORDS.closeDetail : WORDS.openDetail}
           className={`w-fit rounded-full px-2 py-1 text-[13px] leading-none tracking-[0.3em] transition-colors hover:text-white/60 focus-visible:text-white/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 ${
-            detailed ? 'text-white/45' : 'text-white/25'
+            detailed ? 'text-white/50' : 'text-white/50'
           }`}
         >
           …

@@ -69,7 +69,7 @@ export function PerfumeNotes({ perfume, lang }: PerfumeNotesProps) {
 
         return (
           <section key={tier}>
-            <h3 className="mb-3 text-[0.65rem] tracking-[0.3em] text-white/25">
+            <h3 className="mb-3 text-[0.65rem] tracking-[0.3em] text-white/50">
               {t.bands[tier]}
             </h3>
             <ul className="flex flex-wrap gap-x-5 gap-y-1">

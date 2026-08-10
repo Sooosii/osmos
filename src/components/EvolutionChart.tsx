@@ -193,7 +193,7 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
                   }}
                 />
               </span>
-              <span className="w-9 shrink-0 text-right text-xs font-light tabular-nums text-white/35 sm:w-11">
+              <span className="w-9 shrink-0 text-right text-xs font-light tabular-nums text-white/50 sm:w-11">
                 {percent}%
               </span>
             </li>
@@ -204,7 +204,7 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
       {/* Katman göstergesi */}
       <div className="mt-8 flex gap-5">
         {(Object.keys(TIER_COLOR) as PyramidTier[]).map((tier) => (
-          <span key={tier} className="flex items-center gap-2 text-xs text-white/35">
+          <span key={tier} className="flex items-center gap-2 text-xs text-white/50">
             <span
               className="h-1.5 w-1.5 rounded-full"
               style={{ backgroundColor: TIER_COLOR[tier] }}
@@ -214,7 +214,7 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
         ))}
       </div>
 
-      <p className="mt-10 max-w-lg text-xs leading-relaxed text-white/25">
+      <p className="mt-10 max-w-lg text-xs leading-relaxed text-white/50">
         {t.chart.disclaimer}
       </p>
     </div>

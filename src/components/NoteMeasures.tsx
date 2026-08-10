@@ -106,11 +106,11 @@ function LifeStrip({
       </svg>
 
       {/*
-        Kontrast sitenin alışıldık `text-white/25`inden yüksek ve bu bilerek:
+        Kontrast sitenin alışıldık `text-white/50`inden yüksek ve bu bilerek:
         o değer düz zemine göre seçilmişti, burada arkada hareketli bir tram
         alanı var ve ince etiketler noktaların içinde kayboluyordu.
       */}
-      <div className="mt-2 flex justify-between text-[9px] tracking-[0.2em] text-white/45">
+      <div className="mt-2 flex justify-between text-[9px] tracking-[0.2em] text-white/50">
         {/* Büyütme JS'te: CSS dönüşümü `lang="tr"` altında noktalı İ üretiyor. */}
         <span>{formatDuration(STRIP_FIRST_MINUTE, t.duration).toUpperCase()}</span>
         <span>{formatDuration(SIGNATURE_MAX_MINUTES, t.duration).toUpperCase()}</span>
@@ -121,7 +121,7 @@ function LifeStrip({
         tuval `aria-hidden`. Sayılar `evolution-loop.ts`in biçimlendiricisinden
         geçiyor, ikinci bir biçim açılmıyor.
       */}
-      <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-2 text-[10px] tracking-[0.18em] text-white/45">
+      <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-2 text-[10px] tracking-[0.18em] text-white/50">
         <div className="flex items-baseline gap-2">
           <dt>{t.note.measures.peak}</dt>
           <dd className="tabular-nums text-white/60">
@@ -177,7 +177,7 @@ function CharacterAxes({
               ekranda kaymış görünüyordu. Sol kenar artık sayfanın öbür bütün
               öğeleriyle — başlık, tarif, bölüm adları — aynı hizada.
             */}
-            <span aria-hidden="true" className="text-[9px] tracking-[0.16em] text-white/45">
+            <span aria-hidden="true" className="text-[9px] tracking-[0.16em] text-white/50">
               {axis.low}
             </span>
 
@@ -201,7 +201,7 @@ function CharacterAxes({
               })}
             </span>
 
-            <span aria-hidden="true" className="text-[9px] tracking-[0.16em] text-white/45">
+            <span aria-hidden="true" className="text-[9px] tracking-[0.16em] text-white/50">
               {axis.high}
             </span>
 
@@ -219,14 +219,14 @@ export function NoteMeasures({ volatility, character, color, lang }: NoteMeasure
   return (
     <>
       <section className="pt-16">
-        <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">
+        <h2 className="mb-8 text-xs tracking-[0.3em] text-white/50">
           {t.note.measures.volatility}
         </h2>
         <LifeStrip volatility={volatility} color={color} t={t} />
       </section>
 
       <section className="pt-16">
-        <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">
+        <h2 className="mb-8 text-xs tracking-[0.3em] text-white/50">
           {t.note.measures.character}
         </h2>
         <CharacterAxes character={character} color={color} t={t} />

@@ -47,7 +47,7 @@ const MAX_CELLS = 44_000;
  *
  * ⚠️ İki kez ekranda düşürüldü ve **ikisi de okunurluk yüzündendi.** 170'te
  * (255'in %67'si) sayfanın bütün yazısı gidiyordu; 46'da gövde metni okunuyordu
- * ama sitenin ince etiketleri (`text-white/25` gibi) noktaların içinde
+ * ama sitenin ince etiketleri (`text-white/50` gibi) noktaların içinde
  * kayboluyordu. Alan arka plan; ön plana çıktığı anda işini yapmıyor demektir.
  *
  * Yükseltirken gövde metnine değil, **en ince etikete** bakın —
