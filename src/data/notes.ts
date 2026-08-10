@@ -51,12 +51,14 @@ export function noteBand(id: string): NoteBand {
   return band;
 }
 
-/** Bandın ekranda görünen adı. */
-export const BAND_LABEL: Readonly<Record<NoteBand, string>> = {
-  top: 'ÜST',
-  heart: 'KALP',
-  base: 'DIP',
-};
+/*
+  Bandın ekranda görünen adı burada DEĞİL, `i18n/en.ts`teki `bands` içinde.
+
+  Bir zamanlar burada duruyordu ve yanlış yerdeydi: bu klasör iki dilli veri
+  tutuyor, o ise tek dilli ekran metniydi. Fark önemli çünkü kaçak Türkçe
+  avcısı `src/data/**`ı muaf tutuyor — orada kalsaydı taramadan görünmeden
+  geçerdi. Kural: ekran metni veri klasöründe durmaz.
+*/
 
 /** Bandlar, dizinde göründükleri sırayla. */
 export const BANDS: readonly { readonly band: NoteBand; readonly notes: readonly Note[] }[] = [

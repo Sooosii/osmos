@@ -1,10 +1,11 @@
 import Link from 'next/link';
-import { BANDS, BAND_LABEL, NOTES } from '@/data/notes';
+import { BANDS, NOTES } from '@/data/notes';
 import { PERFUMES } from '@/data/perfumes';
 import { getFamily } from '@/data/families';
 import { countUsedNotes } from '@/lib/note-marks';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
 import type { Note } from '@/data/types';
+import { EN } from '@/i18n/en';
 
 /**
  * Nota dizini — ansiklopedinin ikinci kapısı.
@@ -23,8 +24,8 @@ import type { Note } from '@/data/types';
  */
 
 export const metadata = {
-  title: `Notalar — ${NOTES.length} malzeme · OSMOS`,
-  description: 'Koku uzayını besleyen nota veritabanı, uçuculuk bandına göre.',
+  title: EN.notesIndex.title(NOTES.length),
+  description: EN.notesIndex.description,
 };
 
 /** Notanın baskın ailesi — `note-marks.ts`teki `noteColor` ile aynı mantık. */
@@ -51,7 +52,7 @@ export default function NotesIndex() {
     savunduğu şeyi rakama çeviriyor: palet ile kullanım listesi aynı şey değil.
   */
   const readouts: readonly FrameReadout[] = BANDS.map(({ band, notes }) => ({
-    label: BAND_LABEL[band],
+    label: EN.bands[band],
     value: String(notes.length),
   }));
 
@@ -63,29 +64,28 @@ export default function NotesIndex() {
         nav={
           <nav className="flex items-center gap-3 text-[10px] tracking-[0.3em] text-white/40">
             <Link href="/" className="transition-colors hover:text-white">
-              OSMOS
+              {EN.site.name}
             </Link>
           </nav>
         }
         readouts={readouts}
-        status={`PALET ${NOTES.length}`}
-        tail={`${used} KULLANIMDA`}
+        status={EN.notesIndex.status(NOTES.length)}
+        tail={EN.notesIndex.tail(used)}
       >
         <div className="relative mx-auto max-w-3xl px-6 sm:px-10">
           <header className="pt-8 sm:pt-14">
             <h1 className="text-4xl font-light leading-[1.05] tracking-tight sm:text-6xl">
-              Notalar
+              {EN.notesIndex.heading}
             </h1>
             <p className="mt-5 max-w-xl text-base font-light leading-relaxed text-white/50">
-              {NOTES.length} malzeme, uçuculuk bandına göre. Renk baskın koku ailesi —
-              uzaydaki noktalarla aynı palet.
+              {EN.notesIndex.lede(NOTES.length)}
             </p>
           </header>
 
           {BANDS.map(({ band, notes }) => (
             <section key={band} className="pt-16">
               <h2 className="mb-6 text-xs tracking-[0.3em] text-white/30">
-                {BAND_LABEL[band]}
+                {EN.bands[band]}
                 <span className="ml-3 text-white/20">{notes.length}</span>
               </h2>
 

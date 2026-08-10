@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { NOTES, BAND_LABEL, hasNote, getNote, noteBand } from '@/data/notes';
+import { NOTES, hasNote, getNote, noteBand } from '@/data/notes';
 import { PERFUMES } from '@/data/perfumes';
 import { buildNotePage } from '@/lib/note-marks';
 import { NoteOrbit } from '@/components/NoteOrbit';
@@ -65,7 +65,7 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
 
   const note = getNote(id);
   const page = buildNotePage(note, PERFUMES);
-  const band = BAND_LABEL[noteBand(id)];
+  const band = EN.bands[noteBand(id)];
 
   /*
     Çerçevedeki her sayı gerçek veri; uydurma sayaç yok (`ScreenFrame.tsx`).
