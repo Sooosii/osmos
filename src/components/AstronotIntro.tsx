@@ -18,7 +18,7 @@ import {
   rowsFor,
 } from '@/lib/astronot-tram';
 import { prefersReducedMotion } from '@/lib/motion';
-import { EN } from '@/i18n/en';
+import { useDict } from '@/i18n/LocaleProvider';
 
 /**
  * Açılışın ilk yüzü — karakterlerle taranmış tek astronot, arkasında süzülen
@@ -143,6 +143,11 @@ interface AstronotIntroProps {
 }
 
 export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
+  /*
+    Büyütme burada, CSS'te değil: `lang="tr"` altında `text-transform:
+    uppercase` küçük i'yi noktalı İ'ye çeviriyor (Chromium'da ölçüldü).
+  */
+  const hint = useDict().intro.hint.toUpperCase();
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const bgRef = useRef<HTMLCanvasElement | null>(null);
   const figRef = useRef<HTMLCanvasElement | null>(null);
@@ -420,7 +425,7 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
         ref={hintRef}
         className="absolute -translate-x-1/2 text-[0.6875rem] tracking-[0.3em] whitespace-nowrap text-white/20 [text-indent:0.3em]"
       >
-        {EN.intro.hint.toUpperCase()}
+        {hint}
       </p>
     </div>
   );

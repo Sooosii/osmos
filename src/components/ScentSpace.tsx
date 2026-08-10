@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { SpaceMark } from '@/data/types';
-import { EN } from '@/i18n/en';
+import { useDict } from '@/i18n/LocaleProvider';
 
 /**
  * Koku Uzayı — haritanın kendisi.
@@ -33,6 +33,7 @@ function toPercent(value: number, flip: boolean): string {
 }
 
 export function ScentSpace({ marks }: { readonly marks: readonly SpaceMark[] }) {
+  const t = useDict();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
@@ -52,7 +53,7 @@ export function ScentSpace({ marks }: { readonly marks: readonly SpaceMark[] }) 
         viewBox={`${-VIEW} ${-VIEW} ${VIEW * 2} ${VIEW * 2}`}
         className="h-full w-full rounded-lg border border-white/10 bg-black/40"
         role="img"
-        aria-label={EN.draft.spaceLabel}
+        aria-label={t.draft.spaceLabel}
         onClick={() => setSelectedId(null)}
       >
         {/* Bağlantılar seçimden önce çiziliyor ki noktaların altında kalsınlar. */}

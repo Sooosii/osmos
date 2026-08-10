@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useRef } from 'react';
+import { useLocale } from '@/i18n/LocaleProvider';
+import { withLocale } from '@/i18n/locale';
 import {
   CENTER_X,
   CENTER_Y,
@@ -54,6 +56,7 @@ export function NeighborOrbit({
   centerColor,
   label,
 }: NeighborOrbitProps) {
+  const locale = useLocale();
   const groupRefs = useRef<(SVGGElement | null)[]>([]);
   const haloRefs = useRef<(SVGCircleElement | null)[]>([]);
   const dotRefs = useRef<(SVGCircleElement | null)[]>([]);
@@ -165,7 +168,7 @@ export function NeighborOrbit({
                 groupRefs.current[index] = element;
               }}
             >
-              <Link href={`/perfume/${neighbor.id}`} className="group">
+              <Link href={withLocale(locale, `/perfume/${neighbor.id}`)} className="group">
                 <circle
                   ref={(element) => {
                     haloRefs.current[index] = element;

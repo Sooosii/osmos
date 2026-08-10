@@ -11,7 +11,8 @@ import {
   phaseLabel,
 } from '@/lib/evolution-loop';
 import type { Perfume, PyramidTier } from '@/data/types';
-import { EN } from '@/i18n/en';
+import { useDict, useLocale } from '@/i18n/LocaleProvider';
+import { say } from '@/i18n/dict';
 
 /**
  * Evrim çizelgesi — bir parfümün notaları zaman içinde yükselip düşüyor.
@@ -58,6 +59,9 @@ interface EvolutionChartProps {
 }
 
 export function EvolutionChart({ perfume }: EvolutionChartProps) {
+  const t = useDict();
+  const locale = useLocale();
+
   const [step, setStep] = useState(INITIAL_STEP);
 
   // Kaydıraçtan gelen ham değer ve bekleyen kare — render dışında tutuluyor.
@@ -113,15 +117,15 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
     [],
   );
 
-  /** Sabit satır bilgisi — parfüm değişmedikçe yeniden hesaplanmıyor. */
+  /** Sabit satır bilgisi — parfüm ve dil değişmedikçe yeniden hesaplanmıyor. */
   const rows = useMemo(
     () =>
       perfume.notes.map((entry) => ({
         noteId: entry.noteId,
-        label: getNote(entry.noteId).name.en,
+        label: say(getNote(entry.noteId).name, locale),
         color: TIER_COLOR[entry.tier],
       })),
-    [perfume],
+    [perfume, locale],
   );
 
   // 12 saat, imzanın 8 saatiyle bilerek farklı: burası modeli sınayan ekran, yarı
@@ -137,9 +141,13 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
       {/* Zaman kaydıracı */}
       <div className="mb-12">
         <div className="mb-3 flex items-baseline gap-2">
-          <span className="text-sm tracking-wide text-white/80">{phaseLabel(minutes)}</span>
+          <span className="text-sm tracking-wide text-white/80">
+            {phaseLabel(minutes, t.phases)}
+          </span>
           <span className="text-white/25">·</span>
-          <span className="text-sm tabular-nums text-white/50">{formatDuration(minutes)}</span>
+          <span className="text-sm tabular-nums text-white/50">
+            {formatDuration(minutes, t.duration)}
+          </span>
         </div>
         <input
           ref={inputRef}
@@ -150,7 +158,7 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
           defaultValue={INITIAL_STEP}
           autoComplete="off"
           onChange={handleSliderInput}
-          aria-label={EN.chart.timeLabel}
+          aria-label={t.chart.timeLabel}
           className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/15 accent-white outline-none"
         />
       </div>
@@ -201,13 +209,13 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
               className="h-1.5 w-1.5 rounded-full"
               style={{ backgroundColor: TIER_COLOR[tier] }}
             />
-            {EN.chart.tiers[tier]}
+            {t.chart.tiers[tier]}
           </span>
         ))}
       </div>
 
       <p className="mt-10 max-w-lg text-xs leading-relaxed text-white/25">
-        {EN.chart.disclaimer}
+        {t.chart.disclaimer}
       </p>
     </div>
   );

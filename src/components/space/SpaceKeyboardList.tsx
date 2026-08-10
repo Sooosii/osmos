@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { SpaceMark } from '@/data/types';
-import { EN } from '@/i18n/en';
+import { useDict, useLocale } from '@/i18n/LocaleProvider';
+import { withLocale } from '@/i18n/locale';
 
 /**
  * Uzayın klavye ve ekran okuyucu karşılığı.
@@ -20,8 +21,11 @@ interface SpaceKeyboardListProps {
 }
 
 export function SpaceKeyboardList({ marks, onFocusMark }: SpaceKeyboardListProps) {
+  const t = useDict();
+  const locale = useLocale();
+
   return (
-    <ul className="sr-only" aria-label={EN.space.keyboardList}>
+    <ul className="sr-only" aria-label={t.space.keyboardList}>
       {marks.map((mark) => (
         <li key={mark.id}>
           <button type="button" onFocus={() => onFocusMark(mark)} onClick={() => onFocusMark(mark)}>
@@ -33,7 +37,9 @@ export function SpaceKeyboardList({ marks, onFocusMark }: SpaceKeyboardListProps
             diye bir şey yok. Gerçek bir bağlantı: yeni sekmede açılabiliyor,
             ekran okuyucu "bağlantı" diye duyuruyor, düğme taklidi değil.
           */}
-          <Link href={`/perfume/${mark.id}`}>{EN.space.perfumeLink(mark.name)}</Link>
+          <Link href={withLocale(locale, `/perfume/${mark.id}`)}>
+            {t.space.perfumeLink(mark.name)}
+          </Link>
         </li>
       ))}
     </ul>

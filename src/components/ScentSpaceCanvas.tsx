@@ -2,6 +2,8 @@
 
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useLocale } from '@/i18n/LocaleProvider';
+import { withLocale } from '@/i18n/locale';
 import type { SpaceMark } from '@/data/types';
 import {
   type Camera,
@@ -82,6 +84,9 @@ function lerpCamera(from: Camera, to: Camera, t: number): Camera {
 export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  // Bir yıldıza tıklayınca gidilen yer sayfanın dilinde kalmalı; öneksiz
+  // yazılsaydı Türkçe uzaydan İngilizce parfüm sayfasına düşülürdü.
+  const locale = useLocale();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const labelRef = useRef<HTMLDivElement>(null);
@@ -229,10 +234,15 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
    */
   const enterPerfume = useCallback(
     (id: string) => {
-      window.history.replaceState(null, '', `/?mark=${id}`);
-      router.push(`/perfume/${id}`);
+      /*
+        ⚠️ Alttaki kayıt da dile bağlı. Öneksiz `/?mark=` yazılsaydı Türkçe
+        uzayda bir noktaya girip geri dönen kişi sessizce İngilizce uzayda
+        bulurdu kendini — geri tuşu dili değiştirmemeli.
+      */
+      window.history.replaceState(null, '', `${withLocale(locale, '/')}?mark=${id}`);
+      router.push(withLocale(locale, `/perfume/${id}`));
     },
-    [router],
+    [router, locale],
   );
 
 
@@ -257,11 +267,11 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
        * her zaman önce geliyor — hazırlık için doğru an burası. Kullanıcı
        * tutmaya karar verdiğinde sayfa çoktan gelmiş oluyor.
        */
-      if (id) router.prefetch(`/perfume/${id}`);
+      if (id) router.prefetch(withLocale(locale, `/perfume/${id}`));
 
       requestDraw();
     },
-    [requestDraw, router],
+    [requestDraw, router, locale],
   );
 
   /*
