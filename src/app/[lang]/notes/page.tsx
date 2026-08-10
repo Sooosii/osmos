@@ -96,6 +96,21 @@ export default async function NotesIndex({ params }: { params: Promise<{ lang: s
                   <li key={note.id}>
                     <Link
                       href={withLocale(locale, `/note/${note.id}`)}
+                      /*
+                        ⚠️ **Önden getirme burada kapalı, ölçülerek.** Next
+                        görüş alanına giren her bağlantıyı önden getiriyor ve
+                        bu dizinde 136 bağlantı var: sayfa açılışında **131
+                        istek / 165 KB** fazladan iniyordu. Ölçüm (üretim
+                        derlemesi): 421 KB / 154 istek → **269 KB / 32 istek**.
+                        Ziyaretçi buradan bir
+                        ya da iki notaya giriyor; kalan 134'ün verisi boşuna
+                        indiriliyordu.
+
+                        Bedeli: ilk tıklamada sayfa artık hazır beklemiyor,
+                        o an getiriliyor. Nota sayfaları durağan HTML olduğu
+                        için bu tek bir istek. Geri istenirse tek prop.
+                      */
+                      prefetch={false}
                       className="group flex items-baseline gap-3 py-2 transition-colors"
                     >
                       <span
