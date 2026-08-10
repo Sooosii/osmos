@@ -1,59 +1,74 @@
 # OSMOS
 
-Kokuyu okunur bir şey yapma denemesi. 52 parfüm ve 136 nota; hiçbir yerde
-fotoğraf yok, her şey veriden çiziliyor.
+An attempt to make scent readable. 52 perfumes and 136 notes; there are no
+photographs anywhere — everything on screen is drawn from data.
 
 ```bash
 npm install
 npm run dev     # http://localhost:3000
-npm run build   # 195 sayfa, tamamı statik
+npm run build   # 389 pages, all static
 npm test        # vitest
 npm run lint
 ```
 
-## Sayfalar
+## Pages
 
-| adres | ne |
+The site is bilingual: English lives at the root, Turkish under `/tr`. Every
+route below exists in both.
+
+| path | what |
 |---|---|
-| `/` | **Koku uzayı** — sitenin kapısı. 52 parfüm, yerleri nota akrabalığından hesaplanmış bir düzlemde. Sürükle, yakınlaş, bir noktaya dokun. Kaydıraçlarla hisle de arayabilirsin ve tarif adreste taşınıyor: `?feel=0.9,,0.2` |
-| `/parfum/[id]` | Parfümün kendi sayfası: künye, dönen evrim imzası, notaları, uzaydaki komşuları |
-| `/notalar` | 136 malzemenin dizini, uçuculuk bandına göre |
-| `/nota/[id]` | Notanın sayfası: ölçümleri ve onu içeren parfümlerin dönen takımyıldızı |
-| `/evrim`, `/uzay` | Doğrulama ekranları — iç araç, siteye ait sayfa değil |
+| `/` | **The scent space** — the door. 52 perfumes on a plane where position comes from shared notes. Drag, zoom, touch a point. Sliders let you search by feel instead of by name, and the query travels in the address: `?feel=0.9,,0.2` |
+| `/perfume/[id]` | A perfume: house and year, a turning evolution signature, its notes, its neighbours in the space |
+| `/notes` | The index of 136 materials, grouped by volatility band |
+| `/note/[id]` | A note: its own measurements, and the turning constellation of perfumes that carry it |
+| `/evolution`, `/space` | Verification screens — internal tools, not part of the site proper |
 
-## Veri
+## The data
 
-Üç dosya kümesi, hepsi `src/data/` altında elle yazılmış:
+Three sets, all written by hand under `src/data/`:
 
-- **`perfume-sets/`** — 52 parfüm. Her birinin notaları katman (üst/kalp/dip) ve
-  ağırlıkla birlikte; ayrıca marka, yıl, parfümör.
-- **`note-sets/`** — 136 nota, uçuculuk bandına göre üç dosyada. Her notanın
-  aile ağırlıkları, uçuculuğu (tepe dakikası + yarı ömür) ve dört karakter ekseni
-  var: sıcaklık, doku, temizlik, yakınlık.
-- **`families.ts`** — 15 koku ailesi ve renkleri. **Renk = aile**, sitenin her
-  yerinde; kullanıcı birkaç sayfa gezdikten sonra kodu çözebiliyor.
+- **`perfume-sets/`** — 52 perfumes. Each with its notes by tier (top / heart /
+  base) and weight, plus house, year and perfumer.
+- **`note-sets/`** — 136 notes, split across three files by volatility band.
+  Each carries family weights, volatility (peak minute + half-life) and four
+  character axes: temperature, texture, cleanliness, proximity.
+- **`families.ts`** — 15 scent families and their colours. **Colour means
+  family**, everywhere on the site; after a few pages you can read the code.
 
-`types.ts` şemanın tamamını ve her alanın hangi gösterimi sürdüğünü anlatıyor.
+`types.ts` describes the whole schema and which display each field drives.
 
-## İki kural
+## Two rules the code keeps
 
-**① Hesap sunucuda kalıyor.** Benzerlik matrisi, izdüşüm ve nota veritabanı
-tarayıcıya hiç inmiyor; istemciye giden şey yalnızca sonuç — ad, renk, ağırlık,
-derinlik. `space-marks.ts` ve `note-marks.ts` bu sözleşmenin iki ucu.
+**① The computation stays on the server.** The similarity matrix, the
+projection and the note database never reach the browser; the client receives
+results only — name, colour, weight, depth. `space-marks.ts` and
+`note-marks.ts` are the two ends of that contract.
 
-**② Elle ölçülmüş her sayıyı bir sınama koruyor.** Yörünge geometrisi, tram
-eşikleri ve etiket yerleşimi tarayıcıda tek tek ayarlandı; kamera açısı veya
-yarıçaplar değişirse sınamalar kırılıyor. Saf modüller (`src/lib/`) React, DOM ve
-canvas tanımıyor, yanlarında kendi sınamalarıyla duruyorlar.
+**② Every hand-measured number is held by a test.** Orbit geometry, dither
+thresholds and label placement were tuned in a browser; if the camera angle or
+the radii change, tests break. The pure modules under `src/lib/` know nothing
+about React, the DOM or canvas, and each sits beside its own tests.
 
-## Kararların yeri
+## Where the decisions live
 
-Her özelliğin niçin öyle olduğu `docs/superpowers/specs/` altında, ve reddedilen
-seçenekler de orada yazılı. Kodun içindeki yorumlar da aynı işi yapıyor: ne
-yaptığını değil, **neden öyle olduğunu** ve nelerin denenip elendiğini anlatıyorlar.
+Why each feature is the way it is — including the options that were rejected —
+is written under `docs/superpowers/specs/`. The comments in the code do the
+same job: they explain **why it is this way** and what was tried and dropped,
+not what the code does.
 
-## Yığın
+## Stack
 
 Next.js 16 (App Router, Turbopack) · React 19 · Tailwind 4 · TypeScript ·
-Vitest. Çizimler canvas ve SVG; harici bir grafik kütüphanesi yok. Site tamamen
-statik üretiliyor ve çalışma anında dışarıya hiçbir istek atmıyor.
+Vitest. Drawing is canvas and SVG; there is no charting library. The site is
+generated statically and makes no outbound request at runtime.
+
+## Configuration
+
+One optional environment variable:
+
+| variable | what |
+|---|---|
+| `NEXT_PUBLIC_SITE_URL` | Absolute base for the sitemap, `hreflang` links and share images. Falls back to the host's own production URL, then to `http://localhost:3000`. Set it once a custom domain is in place. |
+
+See `.env.example`.
