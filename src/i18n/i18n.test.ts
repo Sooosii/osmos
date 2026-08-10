@@ -149,6 +149,16 @@ function stripComments(lines: readonly string[]): string[] {
  * (URL gibi) o satırın kalanını gizleyebilir. Bu yön güvenli — eksik yakalar,
  * yanlış yakalamaz.
  */
+test('getDict her dil icin dogru sozlugu veriyor', async () => {
+  const { getDict, dictFor } = await import('./dict');
+
+  expect(getDict('en')).toBe(EN);
+  expect(getDict('tr')).toBe(TR);
+  // Bilinmeyen dil varsayilana düşüyor: adres elle yazılabilir.
+  expect(dictFor('de')).toBe(EN);
+  expect(dictFor('tr')).toBe(TR);
+});
+
 /**
  * CSS `uppercase` yasağı.
  *
