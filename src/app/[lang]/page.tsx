@@ -5,6 +5,7 @@ import { introPoints } from '@/lib/intro-points';
 import { ScentSpaceCanvas } from '@/components/ScentSpaceCanvas';
 import { Acilis } from '@/components/Acilis';
 import { getDict, localeFor } from '@/i18n/dict';
+import { languageAlternates } from '@/lib/site-url';
 
 /**
  * Koku Uzayı — sitenin kapısı.
@@ -16,6 +17,15 @@ import { getDict, localeFor } from '@/i18n/dict';
  * astronot (kaydırmayla uğurlanıyor) → perde (kendiliğinden, 2.6 sn) →
  * yaklaşma sahnesi (`space-approach.ts`, kamera 0.14'ten 1'e).
  */
+/*
+  Başlık ve tarif kök düzenden geliyor; buradaki tek iş hreflang. Sitemap aynı
+  bilgiyi ayrıca veriyor ve bu bir tekrar değil — arama motoru ikisini birden
+  okuyor, sitemap tek başına yeterli sayılmıyor.
+*/
+export function generateMetadata() {
+  return { alternates: { languages: languageAlternates('/') } };
+}
+
 export default async function Home({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
   const locale = localeFor(lang);

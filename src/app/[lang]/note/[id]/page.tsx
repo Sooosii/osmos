@@ -10,6 +10,7 @@ import { NoteMeasures } from '@/components/NoteMeasures';
 import type { Dict } from '@/i18n/en';
 import { getDict, localeFor, say } from '@/i18n/dict';
 import { LOCALES, withLocale } from '@/i18n/locale';
+import { languageAlternates } from '@/lib/site-url';
 
 /**
  * Nota sayfası — Aşama 3, ansiklopedinin yaprağı.
@@ -59,6 +60,7 @@ export async function generateMetadata({
   return {
     title: getDict(locale).note.title(say(note.name, locale)),
     description: say(note.description, locale),
+    alternates: { languages: languageAlternates(`/note/${id}`) },
   };
 }
 
