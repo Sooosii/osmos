@@ -73,6 +73,23 @@
 }
 
 /*
+ * Klavyeyle gezenin nerede olduğu.
+ *
+ * ⚠️ Site kapkara ve tarayıcının varsayılan odak halkası bazı denetimlerde
+ * (özellikle kaydıraçta) hiç görünmüyordu — `EvolutionChart`teki kaydıraç
+ * `outline-none` ile onu büsbütün siliyordu, yani klavyeyle gelen kişi
+ * odağın nerede olduğunu göremiyordu.
+ *
+ * `:focus-visible`, `:focus` DEĞİL: fareyle tıklayana halka çıkmıyor, yalnızca
+ * klavyeyle gezene çıkıyor. Kural bu yüzden tek yerde ve genel — yeni bir
+ * düğme eklendiğinde kimsenin bir şey hatırlaması gerekmiyor.
+ */
+:focus-visible {
+  outline: 2px solid rgb(255 255 255 / 0.6);
+  outline-offset: 2px;
+}
+
+/*
  * Sitenin yazısı Geist.
  *
  * ⚠️ Burada uzun süre `Arial, Helvetica, sans-serif` yazıyordu — create-next-app'ten

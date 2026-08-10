@@ -5,9 +5,15 @@ import { languageAlternates } from '@/lib/site-url';
 /**
  * Evrim çizelgesi — zaman kaydıracıyla notaların yükselip düşüşü.
  *
- * Kök adres Koku Uzayı'na devredildiği için çizelge buraya taşındı. Kendi
- * başına bir sayfa olarak kalması geçici: Blok D/9'da parfüm sayfasının ③
- * bölümü olacak, burası da doğrulama ekranı olarak kalacak.
+ * Kök adres Koku Uzayı'na devredildiği için çizelge buraya taşındı. O günkü not
+ * "burada kalması geçici" diyordu; **iş bitti ve karar tersine döndü**: çizelge
+ * parfüm sayfasının ③ bölümü olarak zaten duruyor (`EvolutionSignature`), bu
+ * ekran da **kalıcı olarak** doğrulama ekranı — sahip karar verdi, bir daha
+ * sorulmayacak. Buranın parfüm sayfasından farkı kaydıraç: iki parfümü **aynı
+ * dakikada** karşılaştırmak yalnızca burada mümkün.
+ *
+ * Çizelgenin kendisi ortak (`EvolutionChart`); iki kopya olsaydı biri düzeltilip
+ * öbürü unutulduğunda sayfa ile doğrulama ekranı farklı şeyler gösterirdi.
  */
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
   const t = dictFor((await params).lang);
