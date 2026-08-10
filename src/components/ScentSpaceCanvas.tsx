@@ -95,6 +95,8 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
   const cueRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
   const feelRef = useRef<HTMLDivElement>(null);
+  // Dil değiştiricinin katmanı; kaydıraçlarla aynı ömrü paylaşıyor.
+  const switchRef = useRef<HTMLDivElement>(null);
 
   /**
    * Sinestezi kaydıraçlarının tarifi — kaydıraçlar yazıyor, çizim okuyor.
@@ -290,6 +292,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     cueRef,
     introRef,
     feelRef,
+    switchRef,
     requestDraw,
   });
 
@@ -519,6 +522,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
         cueRef={cueRef}
         labelRef={labelRef}
         feelRef={feelRef}
+        switchRef={switchRef}
         feelTargetRef={feelTargetRef}
         requestDraw={requestDraw}
         labelled={labelled}

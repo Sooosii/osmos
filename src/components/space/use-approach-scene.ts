@@ -98,6 +98,15 @@ interface ApproachSceneOptions {
    * boyanıyorlar.
    */
   readonly feelRef: RefObject<HTMLDivElement | null>;
+  /**
+   * Dil değiştiricinin katmanı.
+   *
+   * ⚠️ Giriş metniyle değil **kaydıraçlarla** aynı muameleyi görüyor: içinde
+   * gerçek bir bağlantı var ve opaklığı 0 olan bir bağlantı hâlâ sekmeyle
+   * odaklanılabilir olurdu. Sahne sürerken klavyeyle gezen biri ekranda hiç
+   * görünmeyen bir bağlantıya düşerdi — depo bu tuzağı iki kez yazmış.
+   */
+  readonly switchRef: RefObject<HTMLDivElement | null>;
   readonly requestDraw: () => void;
 }
 
@@ -107,6 +116,7 @@ export function useApproachScene({
   cueRef,
   introRef,
   feelRef,
+  switchRef,
   requestDraw,
 }: ApproachSceneOptions): ApproachScene {
   const searchParams = useSearchParams();
@@ -144,12 +154,19 @@ export function useApproachScene({
       feelRef.current.toggleAttribute('inert', active);
     }
 
+    // Dil değiştirici aynı muameleyi görüyor ve aynı sebeple: içinde gerçek
+    // bir bağlantı var, opaklık tek başına onu sekmeden gizlemiyor.
+    if (switchRef.current) {
+      switchRef.current.style.opacity = active ? '0' : '1';
+      switchRef.current.toggleAttribute('inert', active);
+    }
+
     // Sahne sürerken tutulacak bir şey yok; "yakala" imleci gösterip sürüklemeye
     // izin vermemek yalan söylemek olurdu.
     if (canvasRef.current) {
       canvasRef.current.style.cursor = active ? 'default' : '';
     }
-  }, [canvasRef, cueRef, introRef, feelRef]);
+  }, [canvasRef, cueRef, introRef, feelRef, switchRef]);
 
   const finish = useCallback(() => {
     if (!approachActiveRef.current) return;

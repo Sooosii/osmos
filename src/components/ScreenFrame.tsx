@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
+import { LangSwitch } from './LangSwitch';
 
 /**
  * Ekran çerçevesi — sayfanın etrafına geçen ince HUD.
@@ -85,18 +86,27 @@ export function ScreenFrame({ children, nav, readouts, status, tail }: ScreenFra
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-2.5 sm:px-10">
           {nav}
 
-          <dl className="flex items-center gap-3 text-[9px] tracking-[0.18em] text-white/35 sm:gap-5">
-            {readouts.map((readout, index) => (
-              <div
-                key={readout.label}
-                // Dar ekranda ikiden fazlası sığmıyor; kalanlar sırayla düşüyor.
-                className={`flex items-baseline gap-1.5 ${index >= 2 ? 'hidden sm:flex' : ''}`}
-              >
-                <dt className="text-white/25">{readout.label}</dt>
-                <dd className="tabular-nums text-white/55">{readout.value}</dd>
-              </div>
-            ))}
-          </dl>
+          <div className="flex items-center gap-3 sm:gap-5">
+            <dl className="flex items-center gap-3 text-[9px] tracking-[0.18em] text-white/35 sm:gap-5">
+              {readouts.map((readout, index) => (
+                <div
+                  key={readout.label}
+                  // Dar ekranda ikiden fazlası sığmıyor; kalanlar sırayla düşüyor.
+                  className={`flex items-baseline gap-1.5 ${index >= 2 ? 'hidden sm:flex' : ''}`}
+                >
+                  <dt className="text-white/25">{readout.label}</dt>
+                  <dd className="tabular-nums text-white/55">{readout.value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            {/*
+              Dil değiştirici ölçümlerin sağında. `ScreenFrame` sunucu bileşeni
+              ve öyle kalıyor: `LangSwitch` kendi `'use client'` sınırını
+              taşıyor, sarmalayanı istemciye düşürmüyor.
+            */}
+            <LangSwitch />
+          </div>
         </div>
       </div>
 

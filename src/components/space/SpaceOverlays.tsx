@@ -3,6 +3,7 @@ import type { SpaceMark } from '@/data/types';
 import { APPROACH_CUE } from '@/lib/space-approach';
 import type { FeelTarget } from '@/lib/space-feel';
 import { useDict } from '@/i18n/LocaleProvider';
+import { LangSwitch } from '@/components/LangSwitch';
 import { SpaceFeelSliders } from './SpaceFeelSliders';
 
 /**
@@ -26,6 +27,13 @@ interface SpaceOverlaysProps {
   readonly labelRef: RefObject<HTMLDivElement | null>;
   /** Kaydıraç katmanı — görünürlüğünü yaklaşma sahnesi yazıyor. */
   readonly feelRef: RefObject<HTMLDivElement | null>;
+  /**
+   * Dil değiştiricinin katmanı — görünürlüğünü yaklaşma sahnesi yazıyor.
+   *
+   * Kaydıraçlarla aynı muameleyi görüyor, giriş metniyle değil: içinde
+   * odaklanılabilir bir bağlantı var, yani opaklık tek başına yetmiyor.
+   */
+  readonly switchRef: RefObject<HTMLDivElement | null>;
   /** Kaydıraçların yazdığı tarif; çizim döngüsü okuyor. */
   readonly feelTargetRef: RefObject<FeelTarget>;
   readonly requestDraw: () => void;
@@ -44,6 +52,7 @@ export function SpaceOverlays({
   cueRef,
   labelRef,
   feelRef,
+  switchRef,
   feelTargetRef,
   requestDraw,
   labelled,
@@ -94,6 +103,20 @@ export function SpaceOverlays({
         >
           <SpaceFeelSliders targetRef={feelTargetRef} requestDraw={requestDraw} />
         </div>
+      </div>
+
+      {/*
+        Dil değiştirici — sağ üst.
+
+        Yaklaşma sahnesi boyunca yok, varışta beliriyor: "sahne boyunca ekranda
+        kontrol olmaz" kuralı kaydıraçlarda yazılı ve burada da geçerli.
+        Görünürlüğü ve `inert`i yaklaşma sahnesi yazıyor.
+      */}
+      <div
+        ref={switchRef}
+        className="pointer-events-auto absolute right-6 top-6 opacity-0 transition-opacity duration-700 sm:right-10 sm:top-10"
+      >
+        <LangSwitch />
       </div>
 
       {/*
