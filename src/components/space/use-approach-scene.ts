@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, type RefObject } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { INITIAL_CAMERA, type Camera } from '@/lib/space-camera';
-import { acilistanGecildi, oturumDeposu } from '@/lib/acilis-oturum';
+import { acilistanGecildi, oturumDeposu, oturumOku, oturumYaz } from '@/lib/acilis-oturum';
 import { prefersReducedMotion } from '@/lib/motion';
 import {
   APPROACH_DONE,
@@ -176,7 +176,7 @@ export function useApproachScene({
     cameraRef.current = INITIAL_CAMERA;
     paintScene();
 
-    if (APPROACH_ONCE) sessionStorage.setItem(APPROACH_SEEN_KEY, '1');
+    if (APPROACH_ONCE) oturumYaz(oturumDeposu(), APPROACH_SEEN_KEY, '1');
     requestDraw();
   }, [cameraRef, paintScene, requestDraw]);
 
@@ -205,7 +205,7 @@ export function useApproachScene({
   useEffect(() => {
     const returning =
       searchParams.get('mark') !== null || acilistanGecildi(oturumDeposu());
-    const seen = APPROACH_ONCE && sessionStorage.getItem(APPROACH_SEEN_KEY) === '1';
+    const seen = APPROACH_ONCE && oturumOku(oturumDeposu(), APPROACH_SEEN_KEY) === '1';
 
     if (returning || seen || prefersReducedMotion()) {
       approachActiveRef.current = false;
