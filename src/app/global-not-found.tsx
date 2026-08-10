@@ -1,8 +1,9 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist } from 'next/font/google';
 import { NotFoundBody } from '@/components/NotFoundBody';
 import { getDict } from '@/i18n/dict';
 import { requestLocale } from '@/i18n/request-locale';
+import { SITE_BACKGROUND } from '@/lib/site-color';
 import './globals.css';
 
 /**
@@ -37,6 +38,11 @@ const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
 });
+
+/* Düzen atlandığı için çubuk rengi burada ayrıca yazılıyor. */
+export const viewport: Viewport = {
+  themeColor: SITE_BACKGROUND,
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getDict(await requestLocale());

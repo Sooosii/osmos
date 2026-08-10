@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { notFound } from "next/navigation";
 import { LOCALES, isLocale } from "@/i18n/locale";
 import { dictFor } from "@/i18n/dict";
 import { LocaleProvider } from "@/i18n/LocaleProvider";
+import { SITE_BACKGROUND } from "@/lib/site-color";
 import { siteUrl } from "@/lib/site-url";
 import "../globals.css";
 
@@ -11,6 +12,17 @@ const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
+
+/**
+ * Telefon tarayıcısının çubuğu da siteyle aynı siyah.
+ *
+ * ⚠️ Bu satır olmadan çubuk cihazın varsayılanında kalıyor: koyu sayfanın
+ * üstünde açık renkli bir şerit. Masaüstünde hiç görünmüyor, telefonda her
+ * sayfada görünüyor.
+ */
+export const viewport: Viewport = {
+  themeColor: SITE_BACKGROUND,
+};
 
 export function generateStaticParams() {
   return LOCALES.map((lang) => ({ lang }));

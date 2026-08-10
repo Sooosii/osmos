@@ -37,6 +37,12 @@ export const TR: Dict = {
     line: 'Böyle bir sayfa yok. Adres yanlış yazılmış olabilir, ya da seçkiye hiç girmemiş bir parfüm olabilir.',
   },
 
+  error: {
+    mark: 'BIR SEY KIRILDI',
+    line: 'Sayfa çizilemedi. Tekrar denemek çoğu zaman yetiyor; yetmezse aşağıdaki yol seni geri götürür.',
+    retry: 'tekrar dene',
+  },
+
   space: {
     intro: (count) =>
       `${count} parfüm, konumları nota akrabalığından hesaplandı. Sürükle, yakınlaş, bir noktaya dokun.`,
@@ -157,6 +163,8 @@ export const TR: Dict = {
   },
 
   draft: {
+    spaceTitle: 'Uzay taslağı · OSMOS',
+    evolutionTitle: 'Evrim taslağı · OSMOS',
     spaceHeading: 'Uzay taslağı',
     spaceLede: (count) =>
       `Benzerlik motorunun doğrulama ekranı. ${count} parfüm; her biri üç kanaldan okunuyor — koku ailesi, karakter (sıcaklık, doku, temizlik, yakınlık) ve paylaşılan notalar. Üçünün birleşiminden çıkan kosinüs uzaklığı klasik MDS ile iki boyuta indirildi. Renk baskın aileyi, nokta boyutu üçüncü bileşeni (derinlik) gösteriyor.`,
