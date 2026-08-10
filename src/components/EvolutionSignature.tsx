@@ -13,6 +13,7 @@ import {
   phaseLabel,
 } from '@/lib/evolution-loop';
 import type { Perfume, ScentFamily, Volatility } from '@/data/types';
+import { EN } from '@/i18n/en';
 
 /**
  * Evrim imzası — parfümün 8 saatlik ömrü, kendiliğinden ve hiç durmadan.
@@ -315,12 +316,18 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
     <div className="w-full">
       {/* Saat yazısı — hareketin neyi anlattığını söyleyen tek satır. */}
       <div className="mb-6 flex items-baseline gap-2">
+        {/*
+          Bu ikisi yalnızca ilk kare; sonrasını çizim döngüsü `phaseRef` ve
+          `durationRef` üzerinden `phaseLabel` / `formatDuration`tan yazıyor.
+          Üçü aynı sözlükten okumak zorunda, yoksa ilk kare bir dil, ikinci kare
+          başka dil olur.
+        */}
         <span ref={phaseRef} className="text-sm tracking-wide text-white/80">
-          Açılış
+          {EN.phases.opening}
         </span>
         <span className="text-white/25">·</span>
         <span ref={durationRef} className="text-sm tabular-nums text-white/50">
-          ilk saniyeler
+          {EN.duration.firstSeconds}
         </span>
       </div>
 
@@ -328,9 +335,10 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
         viewBox={`0 0 ${VIEW_WIDTH} ${geometry.viewHeight}`}
         className="block w-full"
         role="img"
-        aria-label={`${perfume.name} evrim imzası: ${rows
-          .map((row) => row.label)
-          .join(', ')} notalarının 8 saat boyunca yükselip düşüşü.`}
+        aria-label={EN.chart.signatureLabel(
+          perfume.name,
+          rows.map((row) => row.label).join(', '),
+        )}
       >
         {rows.map((row, index) => (
           <g key={row.noteId}>
