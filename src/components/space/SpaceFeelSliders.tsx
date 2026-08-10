@@ -70,7 +70,7 @@ const SLIDER_CLASS = [
 /**
  * Uç etiketi — giriş ipucuyla aynı tipografi.
  *
- * Genişlik en uzun etikete göre: altı harfli KADİFE/KESKİN/HAVADA. Sabit olması
+ * Genişlik en uzun etikete göre: altı harfli KADIFE/KESKIN/HAVADA. Sabit olması
  * şart, yoksa dört kaydıracın rayları farklı yerlerden başlar, sütun eğrilirdi.
  */
 const EDGE_CLASS = 'w-[4.2rem] shrink-0 text-[10px] tracking-[0.15em] text-white/30';
@@ -299,8 +299,8 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
       <Axis
         axis={2}
         label="Temizlik — kirliden temize"
-        low="KİRLİ"
-        high="TEMİZ"
+        low="KIRLI"
+        high="TEMIZ"
         onPick={update}
         start={startOf(2)}
         onCommit={commit}
@@ -316,7 +316,7 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
             parfüm için genelde "ağır, keskin" demek, yani doku değil şiddet
             sanılabilir. Ekranda o risk gerçekleşti ve YUMUŞAK da tutmadı.
 
-            KADİFE↔KESKİN sahibin nota sayfasına bakarken seçtiği çift. Sözcükler
+            KADIFE↔KESKIN sahibin nota sayfasına bakarken seçtiği çift. Sözcükler
             burada da aynı olmak zorunda: kaydıraç ile nota ölçümü **aynı veriyi**
             gösteriyor (`Character.texture`) ve tek bir eksene iki ad takmak
             kullanıcıya iki ayrı şey varmış gibi geliyor.
@@ -329,8 +329,8 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
           <Axis
             axis={DETAIL_AXES[0]}
             label="Doku — kadifemsiden keskine"
-            low="KADİFE"
-            high="KESKİN"
+            low="KADIFE"
+            high="KESKIN"
             onPick={update}
             start={startOf(DETAIL_AXES[0])}
             onCommit={commit}
@@ -371,7 +371,7 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
           onClick={toggleDetail}
           aria-expanded={detailed}
           aria-label={
-            detailed ? 'Doku ve yakınlık eksenlerini kapat' : 'İki eksen daha: doku ve yakınlık'
+            detailed ? 'Doku ve yakınlık eksenlerini kapat' : 'Iki eksen daha: doku ve yakınlık'
           }
           className={`w-fit rounded-full px-2 py-1 text-[13px] leading-none tracking-[0.3em] transition-colors hover:text-white/60 focus-visible:text-white/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 ${
             detailed ? 'text-white/45' : 'text-white/25'

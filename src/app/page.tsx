@@ -1,15 +1,19 @@
 import { Suspense } from 'react';
 import { PERFUMES } from '@/data/perfumes';
 import { buildMarks } from '@/lib/space-marks';
+import { introPoints } from '@/lib/intro-points';
 import { ScentSpaceCanvas } from '@/components/ScentSpaceCanvas';
+import { Acilis } from '@/components/Acilis';
 
 /**
  * Koku Uzayı — sitenin kapısı.
  *
  * Hesap burada, sunucuda: benzerlik matrisi ve izdüşüm istemciye hiç inmiyor,
- * tarayıcıya yalnızca 44 nokta gidiyor.
+ * tarayıcıya yalnızca 52 nokta gidiyor.
  *
- * Açılış sahnesi (hero-scrub) Aşama 2'ye ait; şimdilik uzay doğrudan açılıyor.
+ * Uzay doğrudan açılmıyor; kapının üç adımı var (`Acilis`):
+ * astronot (kaydırmayla uğurlanıyor) → perde (kendiliğinden, 2.6 sn) →
+ * yaklaşma sahnesi (`space-approach.ts`, kamera 0.14'ten 1'e).
  */
 export default function Home() {
   const marks = buildMarks(PERFUMES);
@@ -27,7 +31,7 @@ export default function Home() {
      * Zemin rengi tuvalin kenar rengiyle aynı: tuval boyanana kadar geçen anda
      * renk sıçraması olmasın.
      */
-    <main className="fixed inset-0 overflow-hidden bg-[#050507] text-white">
+    <main className="fixed inset-0 overflow-hidden bg-black text-white">
       {/*
         Suspense şart, süs değil. Uzay `?mark=` parametresini okuyor
         (`useSearchParams`) ve o kanca, sınır olmadan bütün sayfayı istemci
@@ -67,6 +71,13 @@ export default function Home() {
           </div>
         </ScentSpaceCanvas>
       </Suspense>
+
+      {/*
+        Açılış — astronot + perde, sırayla (sahibin seçimi, 2026-08-10).
+
+        Suspense'in dışında: adres parametresiyle işi yok.
+      */}
+      <Acilis points={introPoints(marks)} />
     </main>
   );
 }

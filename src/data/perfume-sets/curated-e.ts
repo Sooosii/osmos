@@ -120,7 +120,7 @@ export const CURATED_E: readonly Perfume[] = [
     curated: true,
     line: {
       en: 'The fig, and something sweet resting underneath it.',
-      tr: 'İncir, ve altında dinlenen tatlı bir şey.',
+      tr: 'Incir, ve altında dinlenen tatlı bir şey.',
     },
     notes: [
       { noteId: 'fig-leaf', tier: 'top', weight: 0.7 },

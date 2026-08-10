@@ -131,22 +131,22 @@ export const AXES: readonly Axis[] = [
     /*
       PÜRÜZSÜZ↔TIRTIKLI'ydı ve ekranda anlaşılmadı — kaydıraçlarda da aynı çift
       aynı sebeple düşmüştü (`SpaceFeelSliders.tsx`). Sahip ekrana bakıp seçti:
-      KESKİN ucu doğru anlatıyor, karşısına dokunulabilir bir yüzey geldi.
+      KESKIN ucu doğru anlatıyor, karşısına dokunulabilir bir yüzey geldi.
 
       YUMUŞAK reddedildi (şiddet gibi okunuyor), YUVARLAK ve İPEKSİ de elendi.
       `kadifemsi` sıfat hâli: ekran okuyucu "hafif kadife" değil "hafif
       kadifemsi" diyor — `axisWord` sıfat bekliyor, isim değil.
     */
     id: 'texture',
-    low: 'KADİFE',
-    high: 'KESKİN',
+    low: 'KADIFE',
+    high: 'KESKIN',
     lowWord: 'kadifemsi',
     highWord: 'keskin',
   },
   {
     id: 'cleanliness',
-    low: 'KİRLİ',
-    high: 'TEMİZ',
+    low: 'KIRLI',
+    high: 'TEMIZ',
     lowWord: 'kirli',
     highWord: 'temiz',
   },

@@ -21,13 +21,14 @@ const HALO_SCALE = 3.2;
 const HALO_ALPHA = 0.3;
 
 /**
- * Zemin — merkezde daha az koyu, kenarda neredeyse siyah.
+ * Zemin — mat siyah (sahip denemesi, 2026-08-10).
  *
- * Haritayı kare bir tuval değil, yuvarlak bir alan gibi okutan şey bu: köşeler
- * karanlığa gömülüyor, göz ortadaki kütleye toplanıyor.
+ * Eskisi bir vinyetti: merkez `#14141B`, kenar `#050507` — haritayı yuvarlak
+ * bir alan gibi okutuyordu. Sahip düz mat siyah istedi; iki sabit aynı değere
+ * çekildi ama ayrı duruyorlar ki vinyet tek satırla geri gelebilsin.
  */
-const BACKGROUND_CENTER = '#14141B';
-const BACKGROUND_EDGE = '#050507';
+const BACKGROUND_CENTER = '#000000';
+const BACKGROUND_EDGE = '#000000';
 
 /**
  * Kenara doğru sönüm — noktalar uzaklaştıkça kayboluyor.

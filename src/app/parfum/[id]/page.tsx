@@ -67,12 +67,15 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
     Aile aynı zamanda sayfanın rengini açıklıyor — tepedeki ışığın neden o renk
     olduğu başka hiçbir yerde yazmıyor.
 
-    ⚠️ `toLocaleUpperCase('tr')`, `toUpperCase()` değil: ikincisi 'Çiçeksi'yi
-    'ÇIÇEKSI' yapıyor ve 15 ailenin dokuzunda yazı bozuluyor. Marka bilerek
-    Türkçe kuralına sokulmuyor — 'Diptyque' orada 'DİPTYQUE' olurdu.
+    ⚠️ `toUpperCase()`, `toLocaleUpperCase('tr')` DEĞİL — ve bu bir devrilme.
+    İlk karar 'tr' idi ("ÇIÇEKSI bozuk görünüyor" diye); sahip 2026-08-10'da
+    tersini koydu: noktalı büyük İ sitede HİÇ görünmeyecek ("İ bunu görmiyim,
+    her yerden düzelt"). İngiliz kuralı i'yi I yapar — istenen tam bu.
+    Aynı kural bütün `uppercase` sınıflarında kendiliğinden işliyor, çünkü
+    belge `lang="en"`.
   */
   const readouts: readonly FrameReadout[] = [
-    { label: 'AİLE', value: family.name.tr.toLocaleUpperCase('tr') },
+    { label: 'AILE', value: family.name.tr.toUpperCase() },
     { label: 'YIL', value: String(perfume.year) },
     { label: 'NOTA', value: String(perfume.notes.length) },
   ];
@@ -173,7 +176,7 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
 
           {/* ③ — "aa, o aslında veriymiş" */}
           <section className="pt-14">
-            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">EVRİM</h2>
+            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">EVRIM</h2>
             <EvolutionSignature perfume={perfume} />
           </section>
 
