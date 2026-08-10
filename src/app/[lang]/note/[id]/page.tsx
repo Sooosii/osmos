@@ -39,6 +39,22 @@ import { languageAlternates } from '@/lib/site-url';
  */
 
 /*
+  ⚠️ **Bilinmeyen kimlik rotaya hiç girmiyor.** `dynamicParams = false`, listede
+  olmayan bir kimliği eşleşmeyen adres hâline getiriyor: iş `app/global-not-found.tsx`e
+  geçiyor, yani sitenin kendi 404'ü, doğru dilde, gerçek 404 durum koduyla.
+
+  Ölçüldü: bu satır olmadan da ekranda **doğru sayfa** çıkıyor — `notFound()` da
+  aynı yere düşüyor. Fark maliyette: satır yokken `/note/yok` gibi her uydurma
+  adres için sunucu sayfayı baştan çizip sonra atıyor. Satır varken çizim hiç
+  başlamıyor.
+
+  Bedeli yok: notaların tamamı derleme anında biliniyor, sonradan nota
+  eklenmesi zaten yeni bir derleme demek. Aşağıdaki `notFound()` kalıyor:
+  tipi daraltan şey o (`find` `undefined` da dönebiliyor).
+*/
+export const dynamicParams = false;
+
+/*
   Tam bileşim döndürülüyor (`{ lang, id }`), yalnızca `{ id }` değil. İç içe
   biçim de çalışıyor ama bu hâli tek başına okunabilir ve derlemede sayı
   doğrulanabilir: 136 × 2.

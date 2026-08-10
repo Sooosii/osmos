@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { DEFAULT_LOCALE, isLocale } from '@/i18n/locale';
+import { DEFAULT_LOCALE, PATH_HEADER, isLocale } from '@/i18n/locale';
 
 /**
  * Dil öneki katmanı.
@@ -17,9 +17,47 @@ import { DEFAULT_LOCALE, isLocale } from '@/i18n/locale';
  * Next 16'da bu dosyanın adı `proxy.ts` — eskiden `middleware.ts`'ti
  * (`node_modules/next/dist/docs/01-app/01-getting-started/16-proxy.md`).
  */
+/**
+ * Kökte gerçekten duran adresler — yeniden yazılmayacak olanlar.
+ *
+ * ⚠️ **Uzantıya bakan bir kural değil, ada bakan bir liste. Bu bir delik
+ * kapattı:** eskiden "nokta içeren her yol" proxy'nin dışındaydı ve
+ * `/wp-login.php`, `/foo.js`, `/random.txt` gibi uydurma adresler `[lang]`
+ * segmentine düşüyordu. Orada kök düzen `notFound()` atıyor ve o çağrıyı
+ * hiçbir sınır saramıyor — kök düzenin kendisi kırıldığı için. Ziyaretçi
+ * Next'in çıplak hata belgesini görüyordu (ölçüldü: `<html id="__next_error__">`).
+ * Şimdi o adresler de buradan geçiyor, eşleşmiyorlar ve
+ * `app/global-not-found.tsx`e düşüyorlar: sitenin kendi 404'ü.
+ *
+ * Liste kısa kalmalı; `public/` bir dosya, geri kalanı üstveri rotası. Yeni bir
+ * kök varlık eklendiğinde buraya da yazılmazsa o adres 404 döner.
+ */
+const ROOT_ASSETS: ReadonlySet<string> = new Set([
+  '/intro.js',
+  '/robots.txt',
+  '/sitemap.xml',
+  /*
+    ⚠️ `icon` ve `apple-icon` `app/` KÖKÜNDE duruyor, `[lang]` altında değil,
+    çünkü simge dile bağlı değil. Yeniden yazılsalardı `/en/icon`a giderlerdi ve
+    orada rota yok: sayfanın head'inde bağlantı görünür, tıklanan yerde 404
+    çıkardı. Sekme simgesinin gelmemesi sessizce olur — ölçülerek bulundu.
+  */
+  '/icon',
+  '/apple-icon',
+]);
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const first = pathname.split('/')[1] ?? '';
+
+  if (ROOT_ASSETS.has(pathname)) return NextResponse.next();
+
+  /*
+    Gelen yol başlığa yazılıyor: haritada olmayan adresin sayfası dilini
+    buradan çözüyor. Gerekçe `locale.ts`te `PATH_HEADER`ın başında.
+  */
+  const headers = new Headers(request.headers);
+  headers.set(PATH_HEADER, pathname);
 
   /*
     ⚠️ Üstveri rotaları kanonik yönlendirmenin dışında.
@@ -40,28 +78,25 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (isLocale(first)) return NextResponse.next();
+  if (isLocale(first)) return NextResponse.next({ request: { headers } });
 
   const url = request.nextUrl.clone();
   url.pathname = `/${DEFAULT_LOCALE}${pathname}`;
-  return NextResponse.rewrite(url);
+  return NextResponse.rewrite(url, { request: { headers } });
 }
 
 /*
-  Yeniden yazmanın dışında kalması gerekenler:
+  Eşleyicinin dışında yalnızca `_next` var — çatının kendi varlıkları, her
+  istekte geliyorlar ve proxy'ye uğramalarının hiçbir faydası yok.
 
-  · `_next` — çatının kendi varlıkları.
-  · Uzantılı dosyalar — `public/intro.js`, `sitemap.xml`, `robots.txt`.
-    `/en/intro.js` diye bir şey yok, 404 dönerlerdi.
-  · `icon` ve `apple-icon` — ⚠️ bunlar `app/` KÖKÜNDE duruyor, `[lang]` altında
-    değil, çünkü simge dile bağlı değil. Yeniden yazılsalardı `/en/icon`a
-    giderlerdi ve orada rota yok: sayfanın head'inde bağlantı görünür, tıklanan
-    yerde 404 çıkardı. Sekme simgesinin gelmemesi sessizce olur — ölçülerek
-    bulundu.
+  ⚠️ Geri kalan her şey bilerek içeride. Eşleyiciye uzantı istisnası eklemek
+  cazip ama tam da o, yukarıdaki deliği açan şeydi: proxy'ye uğramayan adres
+  `[lang]`e düşer ve çıplak hata belgesi gösterir. Kökte duran gerçek varlıklar
+  `ROOT_ASSETS`te ada ada sayılıyor.
 
-  `opengraph-image` bilerek bu listede DEĞİL: o `[lang]` altında ve yeniden
-  yazılması gerekiyor. Onun kanonik yönlendirme istisnası yukarıda ayrı duruyor.
+  `opengraph-image` de bilerek içeride: o `[lang]` altında ve yeniden yazılması
+  gerekiyor. Onun kanonik yönlendirme istisnası yukarıda ayrı duruyor.
 */
 export const config = {
-  matcher: ['/((?!_next|icon|apple-icon|.*\\..*).*)'],
+  matcher: ['/((?!_next).*)'],
 };

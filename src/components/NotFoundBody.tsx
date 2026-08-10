@@ -1,24 +1,17 @@
-'use client';
-
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { getDict } from '@/i18n/dict';
-import { stripLocale, withLocale } from '@/i18n/locale';
+import { withLocale, type Locale } from '@/i18n/locale';
 
 /**
  * Haritada olmayan adresin gövdesi.
  *
- * ⚠️ **Dil `params`tan gelmiyor, adresten okunuyor.** Next `not-found`a
- * parametre geçmiyor — sayfa eşleşmediği için geçecek bir parametre de yok.
- * Ama tarayıcıdaki yol duruyor ve `stripLocale` onu zaten çözebiliyor:
- * `/tr/yok` → tr, `/yok` → en. Aynı okuma bağlantıları da doğru dile bağlıyor.
+ * `global-not-found.tsx`ten ayrı duruyor çünkü orası bir Next sözleşmesi
+ * (tam belge, yazı tipleri, üstveri); burası yalnızca ekranda görünen şey.
  *
- * İstemci bileşeni olmasının tek sebebi `usePathname`; başka durumu ya da
- * etkisi yok. Sınır `not-found.tsx`te değil burada, çünkü Next'in sınır
- * dosyasının kendisi sunucu bileşeni olarak duruyor.
+ * Dili prop olarak alıyor: sayfanın kendisi de onu adresten çözüyor, iki
+ * kaynak olmasın.
  */
-export function NotFoundBody() {
-  const { locale } = stripLocale(usePathname());
+export function NotFoundBody({ locale }: { locale: Locale }) {
   const t = getDict(locale);
 
   return (
