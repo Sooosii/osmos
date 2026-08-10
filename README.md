@@ -3,6 +3,8 @@
 An attempt to make scent readable. 52 perfumes and 136 notes; there are no
 photographs anywhere — everything on screen is drawn from data.
 
+**[osmos-three.vercel.app](https://osmos-three.vercel.app)** — the site is live.
+
 ![The scent space](docs/preview/space.png)
 
 <sub>The door: 52 perfumes on a plane where position comes from shared notes.
