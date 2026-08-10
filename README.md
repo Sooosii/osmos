@@ -5,6 +5,8 @@ photographs anywhere — everything on screen is drawn from data.
 
 **[osmos-three.vercel.app](https://osmos-three.vercel.app)** — the site is live.
 
+[![CI](https://github.com/Sooosii/osmos/actions/workflows/ci.yml/badge.svg)](https://github.com/Sooosii/osmos/actions/workflows/ci.yml)
+
 ![The scent space](docs/preview/space.png)
 
 <sub>The door: 52 perfumes on a plane where position comes from shared notes.
