@@ -1,10 +1,8 @@
 import Link from 'next/link';
 import { BANDS, NOTES } from '@/data/notes';
 import { PERFUMES } from '@/data/perfumes';
-import { getFamily } from '@/data/families';
-import { countUsedNotes } from '@/lib/note-marks';
+import { countUsedNotes, noteColor } from '@/lib/note-marks';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
-import type { Note } from '@/data/types';
 import { dictFor, getDict, localeFor, say } from '@/i18n/dict';
 import { withLocale } from '@/i18n/locale';
 
@@ -29,19 +27,14 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   return { title: t.notesIndex.title(NOTES.length), description: t.notesIndex.description };
 }
 
-/** Notanın baskın ailesi — `note-marks.ts`teki `noteColor` ile aynı mantık. */
-function noteColor(note: Note): string {
-  const weights = Object.entries(note.families) as readonly [string, number][];
-  let bestFamily = weights[0][0];
-  let bestWeight = weights[0][1];
-  for (const [family, weight] of weights) {
-    if (weight > bestWeight) {
-      bestFamily = family;
-      bestWeight = weight;
-    }
-  }
-  return getFamily(bestFamily as Parameters<typeof getFamily>[0]).color;
-}
+/*
+  Notanın baskın aile rengi `note-marks.ts`ten geliyor.
+
+  Burada bir kopyası duruyordu ve mantık aynıydı; tek fark aslında ailesiz
+  notaya karşı gürültülü bir hata olması, kopyada olmamasıydı. İki kaynak,
+  eşitlik durumunda bir gün ayrışabilecek iki karar demekti — renk zincirinin
+  tek olması sitenin baştan beri verdiği söz.
+*/
 
 export default async function NotesIndex({ params }: { params: Promise<{ lang: string }> }) {
   const locale = localeFor((await params).lang);

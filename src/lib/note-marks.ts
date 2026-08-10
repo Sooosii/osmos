@@ -49,7 +49,7 @@ export interface NotePage {
  * notaların ağırlıklı ortalamasından kuruyor. Nota tek başınayken ortalanacak
  * bir şey yok: `families` zaten o vektörün ta kendisi.
  */
-function noteColor(note: Note): string {
+export function noteColor(note: Note): string {
   const weights = Object.entries(note.families) as readonly [string, number][];
   if (weights.length === 0) {
     // Ailesiz nota veride yok, ama olsaydı sessizce siyah çizilmesindense
