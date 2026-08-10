@@ -142,10 +142,19 @@ export interface Perfume {
    *
    * İkisinde (`comptoir-sud-pacifique-vanille-abricot`, `spirit-of-dubai-ajyal`)
    * marka burnu hiç açıklamadı; aranıp bulunamadığı için değil, açıklanmadığı
-   * için boş. Üçüncüsü (`min-new-york-long-board`) sekiz parfüm turunda geldi ve
-   * burnu hiç araştırılmadı — "açıklanmamış" diye doğrulanmış değil, yalnızca
-   * bakılmamış. Aradaki fark doldurma iznini belirliyor: ilk ikisinde kaynak
-   * çıksa bile şüpheyle karşılanmalı, üçüncüsünde kaynakla doldurulabilir.
+   * için boş.
+   *
+   * Üçüncüsü (`min-new-york-long-board`) uzun süre "bakılmamış" diye duruyordu;
+   * **2026-08-10'da bakıldı ve bulunamadı.** Üç ayrı arama (marka adı + koleksiyon,
+   * marka + sık çalıştığı burun, nota listesiyle birlikte) hiçbir isim vermedi;
+   * Fragrantica, Parfumo, Basenotes ve markanın kendi sayfası doğrudan okumaya
+   * kapalı (HTTP 403). MiN New York'un kendi metni koleksiyon için yalnızca
+   * "Grasse'ta üretildi" diyor, burun adı vermiyor. Yani üçü de artık aynı
+   * yerde: **arandı, açıklanmamış.**
+   *
+   * ⚠️ Bu alan doldurulacaksa kaynak **markanın kendi yayını** olmalı. Parfüm
+   * veri tabanlarındaki burun bilgisi kullanıcı katkısı ve bu üç parfümde
+   * ortalıkta hiçbir kayıt yokken çıkan bir isim, doğrulanmış değil tahmindir.
    *
    * Künye o üç sayfada yalnızca yılı yazıyor — uydurma da yok, "bilinmiyor"
    * yazısı da yok.
