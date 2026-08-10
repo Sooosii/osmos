@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, type RefObject } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { INITIAL_CAMERA, type Camera } from '@/lib/space-camera';
+import { acilistanGecildi, oturumDeposu } from '@/lib/acilis-oturum';
 import { prefersReducedMotion } from '@/lib/motion';
 import {
   APPROACH_DONE,
@@ -175,11 +176,18 @@ export function useApproachScene({
    * `useApproachScene(...)` çağrısının bileşen gövdesinde `?mark=` etkisinden
    * yukarıda durması. Aşağı kaydırma.
    *
-   * Üç iptal sebebi var, üçü de aynı cümlenin parçası: sahne bir eşik, ama
+   * İptal sebeplerinin hepsi aynı cümlenin parçası: sahne bir eşik, ama
    * tanıdık bir yere dönen için eşik yoktur.
+   *
+   * "Dönen" iki türlü belli oluyor ve ikisi de gerekli: `?mark=` parfüm
+   * sayfasından gelen dönüşü taşıyor, **ama nota sayfası düz `/`'e dönüyor** ve
+   * o yol yıllarca sessizce eşiği yeniden dayatmıştı — sahip ekranda yakaladı.
+   * Kapının oturum bayrağı bu boşluğu kapatıyor: aynı oturumda kapıdan
+   * geçildiyse dönüş nereden gelirse gelsin eşik yok.
    */
   useEffect(() => {
-    const returning = searchParams.get('mark') !== null;
+    const returning =
+      searchParams.get('mark') !== null || acilistanGecildi(oturumDeposu());
     const seen = APPROACH_ONCE && sessionStorage.getItem(APPROACH_SEEN_KEY) === '1';
 
     if (returning || seen || prefersReducedMotion()) {

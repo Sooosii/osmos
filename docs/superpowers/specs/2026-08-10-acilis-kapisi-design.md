@@ -152,10 +152,33 @@ ikisinin de etkisi sıfır.
 Saf modül React, DOM ve canvas tanımıyor; bileşen yalnızca "ne zaman çiz"
 sorusunu yanıtlıyor. 171 sınama yeşil.
 
+### ⑧ Dönenlere kapı yok (ek karar, aynı gün)
+
+Kapı ilk hâlinde her ziyarette oynuyordu. Sahip ekranda yakaladı: *"her notadan
+mesela asıl uzaya geçince giriyormuş; geri dönüşte perdeyi atlayıp doğrudan
+uzaya bıraksın."*
+
+Kural zaten yazılıydı — `use-approach-scene.ts`: *"sahne bir eşik, ama tanıdık
+bir yere dönen için eşik yoktur."* Ama yalnızca `?mark=` ile işliyordu: parfüm
+sayfası dönüş bağlantısında onu taşıyor, **nota sayfası düz `/`'e dönüyor**. Açık
+kalan yol oydu.
+
+Bayrak adresle değil **oturumla** taşınıyor (`acilis-oturum.ts`). *Reddedilen:*
+dönüş bağlantılarına parametre iliştirmek — dönüş yolu üç yerden geliyor (nota,
+parfüm, tarayıcının geri tuşu) ve her yeni bağlantıda unutulacak bir borç olurdu;
+nota sayfasında tam da bu olmuş.
+
+Dönüşte üç adımın üçü de atlanıyor: astronot, perde, yaklaşma. Bayrak astronot
+uğurlanırken yazılıyor — perdenin ortasında ayrılan da baştan izlemiyor. Oturum
+bitince kapı yeniden kapı.
+
+⚠️ Bayrak **render sırasında okunamaz**: oturum deposu sunucuda yok, okumak
+hidrasyonu kırar. Karar bir etkide veriliyor, yani dönüş ziyaretinde kapı bir
+kare duruyor — görünmüyor, çünkü kapının da altındaki uzayın da zemini siyah.
+Depo erişimi fırlarsa (gizli pencere) kapı görünür: sayfanın açılması eşiğin
+atlanmasından önemli.
+
 ## Açık uçlar
 
-- Perde her ziyarette oynuyor (`OSMOS_INTRO_DISABLE` kurulmuyor). Parfümden geri
-  dönünce kapı baştan: ~3.3 sn + beş çentik. `APPROACH_ONCE = false` kararı
-  yalnız yaklaşma için verilmişti; üç adımlı kapıda yeniden tartılabilir.
 - Astronot SVG'si bileşenin içinde gömülü. Başka bir öznenin denenmesi kolay
   ama şu an tek kullanıcısı olduğu için dışarı çıkarılmadı (YAGNI).
