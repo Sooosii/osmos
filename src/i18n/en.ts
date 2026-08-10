@@ -31,6 +31,12 @@ export const EN = {
     allNotes: '← all notes',
   },
 
+  /** Haritada olmayan bir adrese gidildiğinde. */
+  notFound: {
+    mark: 'NOT ON THE MAP',
+    line: 'There is no such page. The address may be mistyped, or it may have been a perfume that never entered the selection.',
+  },
+
   space: {
     intro: (count: number) =>
       `${count} perfumes, placed by what their notes share. Drag, zoom, touch a point.`,

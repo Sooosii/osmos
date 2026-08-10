@@ -16,6 +16,17 @@ export type Locale = (typeof LOCALES)[number];
 /** Öneksiz yolların dili. */
 export const DEFAULT_LOCALE: Locale = 'en';
 
+/**
+ * Adresi sunucuya taşıyan başlık.
+ *
+ * ⚠️ Bunun sebebi 404 sayfası. `global-not-found` eşleşmeyen adreslerde
+ * çalışıyor, yani ortada bir rota yok — Next ona `params` geçemiyor ve
+ * `usePathname` de sunucuda `<html lang>`i kuramaz. `proxy.ts` gelen yolu bu
+ * başlığa yazıyor, sayfa da dilini oradan çözüyor. Başlık düşerse 404 sayfası
+ * sessizce hep İngilizce açılır.
+ */
+export const PATH_HEADER = 'x-osmos-path';
+
 export function isLocale(value: string): value is Locale {
   return (LOCALES as readonly string[]).includes(value);
 }
