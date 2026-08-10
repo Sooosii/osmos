@@ -4,6 +4,7 @@ import {
   APPROACH_START,
   START_SCALE,
   advance,
+  dragDelta,
   isComplete,
   scaleAt,
 } from './space-approach';
@@ -88,5 +89,40 @@ describe('isComplete', () => {
     expect(isComplete({ progress: 0 })).toBe(false);
     expect(isComplete({ progress: 0.999 })).toBe(false);
     expect(isComplete({ progress: 1 })).toBe(true);
+  });
+});
+
+/**
+ * Parmakla kaydırma.
+ *
+ * Sahnenin tek ilerletici işareti tekerlekti ve telefonda tekerlek yok: perde
+ * kalktıktan sonra ekranda uzak bir toz bulutu kalıyor ve hiçbir hareket onu
+ * yaklaştırmıyordu. Gerçek dokunmatik cihazda ölçüldü (2026-08-10).
+ */
+describe('dragDelta', () => {
+  test('parmak yukari = ileri, tekerlekle ayni isaret', () => {
+    // Yukarı kaydırmada `clientY` küçülüyor, yani dy negatif — `advance`ın
+    // ileri yönü de negatif. İkisi aynı işareti konuşuyor.
+    expect(dragDelta(-100)).toBeLessThan(0);
+    expect(dragDelta(100)).toBeGreaterThan(0);
+  });
+
+  test('tek rahat kaydirma sahneyi bitiriyor', () => {
+    // 844 piksellik bir telefon ekranının ~%40'ı. Eşik duvar olmamalı: bir
+    // başparmak hareketiyle geçilebilmeli.
+    expect(isComplete(advance(APPROACH_START, dragDelta(-340)))).toBe(true);
+  });
+
+  test('yarim kaydirma yariyolda birakiyor', () => {
+    const state = advance(APPROACH_START, dragDelta(-160));
+    expect(state.progress).toBeGreaterThan(0.3);
+    expect(state.progress).toBeLessThan(0.8);
+  });
+
+  test('geri kaydirmak geri sariyor — tekerlekteki kural burada da gecerli', () => {
+    const forward = advance(APPROACH_START, dragDelta(-300));
+    const back = advance(forward, dragDelta(150));
+    expect(back.progress).toBeLessThan(forward.progress);
+    expect(back.progress).toBeGreaterThan(0);
   });
 });

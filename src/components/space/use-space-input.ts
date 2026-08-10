@@ -9,6 +9,7 @@ import {
   holdEnabledFor,
   holdTargetHit,
 } from '@/lib/space-entry';
+import { dragDelta } from '@/lib/space-approach';
 import type { ApproachScene } from './use-approach-scene';
 
 /**
@@ -112,6 +113,15 @@ export function useSpaceInput({
   requestDraw,
 }: SpaceInputOptions): SpaceInput {
   const pointersRef = useRef(new Map<number, PointerPosition>());
+
+  /**
+   * Yaklaşma sahnesini süren parmak.
+   *
+   * Sahne sürerken uzayın öbür bütün işaretçi yolları kapalı, o yüzden bu ref
+   * onlarla karışmıyor ve ayrı duruyor. `pointersRef` gibi burada doğuyor:
+   * dışarıdan kimse okumuyor.
+   */
+  const approachDragRef = useRef<{ id: number; lastY: number } | null>(null);
   const dragRef = useRef<DragState | null>(null);
   const pinchRef = useRef<number | null>(null);
 
@@ -220,7 +230,19 @@ export function useSpaceInput({
    * Eşiğin eşik olmasının da tek yolu bu: sahnede yalnızca ileri gidilebiliyor.
    */
   const handlePointerDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    if (approach.isActive()) return;
+    if (approach.isActive()) {
+      /*
+        Sahne sürerken parmağın tek işi var: yaklaştırmak. Seçim, sürükleme ve
+        tutma başlamıyor — eşiğin eşik olmasının yolu bu.
+
+        Öncesinde burada yalnızca `return` vardı ve sonucu ölçüldü: telefondan
+        gelen kimse kapıyı geçemiyordu, çünkü sahneyi ilerleten tek işaret
+        tekerlekti.
+      */
+      event.currentTarget.setPointerCapture(event.pointerId);
+      approachDragRef.current = { id: event.pointerId, lastY: event.clientY };
+      return;
+    }
     animationRef.current = null;
     event.currentTarget.setPointerCapture(event.pointerId);
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
@@ -275,7 +297,18 @@ export function useSpaceInput({
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    if (approach.isActive()) return;
+    if (approach.isActive()) {
+      const drag = approachDragRef.current;
+      if (!drag || drag.id !== event.pointerId) return;
+
+      // Fark adım adım okunuyor, başlangıçtan değil: tekerlek de her olayda
+      // kendi adımını veriyor ve `consumeWheel` birikimi kendisi tutuyor.
+      const dy = event.clientY - drag.lastY;
+      drag.lastY = event.clientY;
+      approach.consumeWheel(dragDelta(dy));
+      return;
+    }
+
     const pointers = pointersRef.current;
     const { sx, sy } = localPoint(event.clientX, event.clientY);
 
@@ -316,7 +349,18 @@ export function useSpaceInput({
   };
 
   const handlePointerUp = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    /*
+      Yaklaşma sürüklemesi elde kaldıysa parmak kalkınca biter — sahne o
+      sürüklemeyle tamamlanmış olsa bile. Yalnızca `isActive()`e bakmak yetmez:
+      sürükleme sahneyi bitirdiği anda bayrak düşüyor ve bu olay uzayın normal
+      yollarına, yarım kalmış bir işaretçi durumuyla düşerdi.
+    */
+    if (approachDragRef.current) {
+      approachDragRef.current = null;
+      return;
+    }
     if (approach.isActive()) return;
+
     const pointers = pointersRef.current;
     pointers.delete(event.pointerId);
     if (pointers.size < 2) pinchRef.current = null;
