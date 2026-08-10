@@ -159,7 +159,7 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
           autoComplete="off"
           onChange={handleSliderInput}
           aria-label={t.chart.timeLabel}
-          className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/15 accent-white outline-none"
+          className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/15 accent-white"
         />
       </div>
 

@@ -129,3 +129,54 @@ describe('bir sey kirildiginda', () => {
     }
   });
 });
+
+/**
+ * Kökte duran varlıklar.
+ *
+ * Hepsi `proxy.ts`teki `ROOT_ASSETS` listesinden geçiyor; listede olmayan bir
+ * kök adres dil önekiyle yeniden yazılır ve 404 döner. Bu **sessizce** olur:
+ * site çalışmaya devam eder, yalnızca o varlık kaybolur.
+ */
+describe('kok varliklari', () => {
+  test('kok rotasi olan her sey listede', () => {
+    const source = read('src/proxy.ts');
+
+    for (const path of [
+      '/intro.js',
+      '/robots.txt',
+      '/sitemap.xml',
+      '/icon',
+      '/apple-icon',
+      '/manifest.webmanifest',
+      '/icon-512',
+    ]) {
+      expect(source, path).toContain(`'${path}'`);
+    }
+  });
+
+  test('manifest simgeleri gercek rotalari gosteriyor', () => {
+    /*
+      ⚠️ Manifest'teki adresler elle yazılıyor; biri yoksa telefon simgeyi
+      indiremez ve bunu kimse görmez. Üçünün de bir dosyası olmalı.
+    */
+    const manifest = read('src/app/manifest.ts');
+
+    expect(manifest).toContain("'/icon'");
+    expect(existsSync('src/app/icon.tsx')).toBe(true);
+    expect(manifest).toContain("'/apple-icon'");
+    expect(existsSync('src/app/apple-icon.tsx')).toBe(true);
+    expect(manifest).toContain("'/icon-512'");
+    expect(existsSync('src/app/icon-512/route.tsx')).toBe(true);
+  });
+
+  test('simge cizimi tek yerde', () => {
+    /*
+      Üç rota da aynı kareyi basıyor. Çizim kopyalanırsa biri düzeltilip
+      öbürleri unutulduğunda site sekmede başka, ana ekranda başka görünür.
+    */
+    for (const path of ['src/app/icon.tsx', 'src/app/apple-icon.tsx', 'src/app/icon-512/route.tsx']) {
+      expect(read(path), path).toContain('logoSquare');
+      expect(read(path), path).not.toContain('LOGO_DOTS');
+    }
+  });
+});

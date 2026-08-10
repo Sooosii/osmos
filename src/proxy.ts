@@ -44,6 +44,14 @@ const ROOT_ASSETS: ReadonlySet<string> = new Set([
   */
   '/icon',
   '/apple-icon',
+  /*
+    ⚠️ Manifest ve büyük simge de burada olmak zorunda. Yazılmazlarsa dil
+    önekiyle yeniden yazılıp 404 dönerler ve bu **sessizce** olur: site
+    çalışmaya devam eder, yalnızca telefonda ana ekrana eklenince site adı,
+    rengi ve simgesi gelmez.
+  */
+  '/manifest.webmanifest',
+  '/icon-512',
 ]);
 
 export function proxy(request: NextRequest) {
