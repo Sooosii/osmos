@@ -1,0 +1,42 @@
+# Her itişte sınamalar, lint ve üretim derlemesi.
+#
+# Bugüne kadar üçü de yalnızca elle çalışıyordu. Depo bir yere konduğunda bu
+# dosya devreye girer; öncesinde zararsız duruyor.
+#
+# ⚠️ `npm ci` bilerek: `npm install` kilidi güncelleyebiliyor ve o zaman CI,
+# geliştiricinin makinesinden başka sürümlerle yeşil olabilir.
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  dogrula:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # LTS. Yerelde 24 çalışıyor ve ikisi de Next 16'yı kaldırıyor;
+          # referans olarak LTS seçildi çünkü barındırma tarafı çoğunlukla onu
+          # koşuyor — "bende çalışıyordu" farkı burada yakalansın.
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npm test
+
+      # Derleme en sona: sınamalar hızlı, derleme yavaş — kırık bir şey varsa
+      # üç dakika beklemeden görünsün.
+      - run: npm run build
+        env:
+          # Yayın adresi CI'da yok; varsayılan localhost yeterli, sitemap'in
+          # doğru olması yalnızca gerçek yayında gerekiyor.
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
