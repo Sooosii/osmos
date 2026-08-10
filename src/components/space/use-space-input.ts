@@ -125,6 +125,26 @@ export function useSpaceInput({
   const dragRef = useRef<DragState | null>(null);
   const pinchRef = useRef<number | null>(null);
 
+  /**
+   * Dokunma olaylarından okunan sıkıştırma — iki parmağın önceki mesafesi.
+   *
+   * ⚠️ **İşaretçi olayları iOS'ta iki parmağı bize vermiyor.** `pinchRef` ile
+   * yürüyen işaretçi yolu Chromium'da gerçek çift dokunuşla ölçüldü ve
+   * çalışıyor; iPhone'da ise sahip "büyütmeye çalışıyorum, sağ sol oluyor"
+   * dedi. Safari ikinci parmak inince kendi hareket tanıyıcısını devreye
+   * sokuyor ve işaretçi akışı bölünüyor — `touch-action: none` da,
+   * `gesture*` olaylarının varsayılanını kesmek de bunu düzeltmedi (ikisi de
+   * denendi, ikincisi telefonda sınandı).
+   *
+   * Bu yüzden iki parmak **dokunma olaylarından** okunuyor: `touchmove` bütün
+   * parmakları tek olayda veriyor, yakalama ve iptal karmaşası hiç yok. Harita
+   * kütüphanelerinin iOS için yaptığı da bu.
+   *
+   * Doluyken işaretçi yolu tamamen susuyor (`handlePointerMove`in başındaki
+   * erken dönüş), yoksa aynı hareket iki kez yakınlaştırırdı.
+   */
+  const touchPinchRef = useRef<number | null>(null);
+
 
   /** Tuvalin sol üst köşesine göre imleç konumu. */
   const localPoint = useCallback((clientX: number, clientY: number) => {
@@ -201,13 +221,104 @@ export function useSpaceInput({
       requestDraw();
     };
 
+    /*
+     * ⚠️ **iOS'ta iki parmak haritaya değil SAYFAYA gidiyordu** — sahip
+     * telefonda yakaladı: "büyütmeye çalışıyorum, sağ sol oluyor".
+     *
+     * Sebebi `touch-action: none` DEĞİL; o zaten tuvalde duruyor ve kaydırmayı
+     * durduruyor. Safari'nin sayfa yakınlaştırması ondan bağımsız çalışıyor ve
+     * `touch-action` ile durdurulamıyor: WebKit iki parmağı kendi standart dışı
+     * `gesture*` olaylarına veriyor ve varsayılanı sayfayı yakınlaştırmak. Ekranda
+     * görünen "sağa sola kayma" haritanın değil, yakınlaşmış sayfanın kaymasıydı.
+     *
+     * Bu yüzden yalnızca **tuval üstünde** varsayılan iptal ediliyor. Sayfanın
+     * geri kalanında parmakla yakınlaştırma çalışmaya devam ediyor — bir
+     * erişilebilirlik aracı, tamamen kapatmak (`user-scalable=no`) doğru olmazdı.
+     *
+     * İşaretçi olayları zaten kendi sıkıştırmasını çiziyor (`applyPinch`);
+     * buradaki tek iş Safari'nin araya girmesini engellemek.
+     */
+    const stopSafariGesture = (event: Event) => event.preventDefault();
+    const SAFARI_GESTURES = ['gesturestart', 'gesturechange', 'gestureend'];
+
+    /* İki parmağın arasındaki mesafe — sıkıştırmanın tek ölçüsü. */
+    const touchGap = (touches: TouchList) =>
+      Math.hypot(
+        touches[0].clientX - touches[1].clientX,
+        touches[0].clientY - touches[1].clientY,
+      );
+
+    const onTouchStart = (event: TouchEvent) => {
+      if (approach.isActive() || event.touches.length < 2) return;
+
+      touchPinchRef.current = touchGap(event.touches);
+      animationRef.current = null;
+
+      /*
+        İki parmak "gezinme" değil "yakınlaş" demek: hem sürükleme hem de basılı
+        tutma niyeti burada bitiyor. Bitmeseydi sıkıştırmadan sonra parmak
+        kalkışı bir seçim ya da parfüm girişi açardı.
+      */
+      dragRef.current = null;
+      if (holdRef.current) {
+        holdRef.current = null;
+        entryRef.current = NO_ENTRY;
+      }
+      event.preventDefault();
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      const previous = touchPinchRef.current;
+      if (previous === null || event.touches.length < 2) return;
+
+      event.preventDefault();
+
+      const gap = touchGap(event.touches);
+      touchPinchRef.current = gap;
+      if (previous === 0) return;
+
+      const { sx, sy } = localPoint(
+        (event.touches[0].clientX + event.touches[1].clientX) / 2,
+        (event.touches[0].clientY + event.touches[1].clientY) / 2,
+      );
+      cameraRef.current = zoomAt(cameraRef.current, sx, sy, gap / previous, viewportRef.current);
+      requestDraw();
+    };
+
+    /*
+      Parmak sayısı ikinin altına düşünce sıkıştırma biter. Kalan parmağın
+      sürüklemeyi devralması `handlePointerUp`ta zaten yazılı — orası işaretçi
+      olaylarıyla çalışıyor ve dokunuşlar onları da üretiyor.
+    */
+    const onTouchEnd = (event: TouchEvent) => {
+      if (event.touches.length < 2) touchPinchRef.current = null;
+    };
+
     canvas.addEventListener('wheel', onWheel, { passive: false });
-    return () => canvas.removeEventListener('wheel', onWheel);
+    for (const name of SAFARI_GESTURES) {
+      canvas.addEventListener(name, stopSafariGesture, { passive: false });
+    }
+    canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+    canvas.addEventListener('touchend', onTouchEnd);
+    canvas.addEventListener('touchcancel', onTouchEnd);
+
+    return () => {
+      canvas.removeEventListener('wheel', onWheel);
+      for (const name of SAFARI_GESTURES) {
+        canvas.removeEventListener(name, stopSafariGesture);
+      }
+      canvas.removeEventListener('touchstart', onTouchStart);
+      canvas.removeEventListener('touchmove', onTouchMove);
+      canvas.removeEventListener('touchend', onTouchEnd);
+      canvas.removeEventListener('touchcancel', onTouchEnd);
+    };
   }, [
     animationRef,
     approach,
     cameraRef,
     canvasRef,
+    holdRef,
     enterPerfume,
     entryRef,
     localPoint,
@@ -308,6 +419,9 @@ export function useSpaceInput({
       approach.consumeWheel(dragDelta(dy));
       return;
     }
+
+    // Dokunma yolu sıkıştırmayı yürütüyorsa işaretçi yolu hiç karışmıyor.
+    if (touchPinchRef.current !== null) return;
 
     const pointers = pointersRef.current;
     const { sx, sy } = localPoint(event.clientX, event.clientY);
