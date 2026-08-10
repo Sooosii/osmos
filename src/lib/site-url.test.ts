@@ -13,9 +13,25 @@ afterEach(() => {
 });
 
 describe('siteUrl', () => {
-  test('cevre degiskeni yoksa localhost', () => {
+  test('hicbir cevre degiskeni yoksa localhost', () => {
     vi.stubEnv('NEXT_PUBLIC_SITE_URL', '');
+    vi.stubEnv('VERCEL_PROJECT_PRODUCTION_URL', '');
     expect(siteUrl()).toBe('http://localhost:3000');
+  });
+
+  test('Vercel kendi adresini veriyorsa o kullaniliyor', () => {
+    // Vercel bu degiskeni derleme aninda kendisi doldurup basina protokol
+    // koymuyor; ilk yayinda sitemap dogru olsun diye https eklenip okunuyor.
+    vi.stubEnv('NEXT_PUBLIC_SITE_URL', '');
+    vi.stubEnv('VERCEL_PROJECT_PRODUCTION_URL', 'osmos.vercel.app');
+    expect(siteUrl()).toBe('https://osmos.vercel.app');
+  });
+
+  test('acikca yazilan adres Vercelin verdigini geciyor', () => {
+    // Kendi alan adi alindigi gun tek yapilacak sey bu degiskeni koymak.
+    vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://osmos.example');
+    vi.stubEnv('VERCEL_PROJECT_PRODUCTION_URL', 'osmos.vercel.app');
+    expect(siteUrl()).toBe('https://osmos.example');
   });
 
   test('cevre degiskeni dinleniyor', () => {

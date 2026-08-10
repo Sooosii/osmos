@@ -13,10 +13,30 @@ import { LOCALES, withLocale, type Locale } from '@/i18n/locale';
 
 const FALLBACK = 'http://localhost:3000';
 
+/**
+ * Adres üç kaynaktan, bu sırayla:
+ *
+ *   1. `NEXT_PUBLIC_SITE_URL` — açıkça yazılan. Kendi alan adı alındığı gün
+ *      tek yapılacak şey bu.
+ *   2. `VERCEL_PROJECT_PRODUCTION_URL` — barındırıcının derleme anında kendi
+ *      doldurduğu adres, protokolsüz (`osmos.vercel.app`). Bunu okumak ilk
+ *      yayında sitemap'in doğru çıkmasını sağlıyor; yoksa site canlıya
+ *      `localhost` yazan bir sitemap'le çıkardı ve bunu kimse fark etmezdi.
+ *   3. `localhost` — geliştirme.
+ *
+ * ⚠️ İkinci kaynak barındırıcıya özel ve bu bilinçli bir bağ: **yedek**, kural
+ * değil. Başka bir yere taşınırsa birincisi yazılır ve hiçbir şey değişmez.
+ * Bu modül yalnızca sunucuda çalışıyor (sitemap, robots, metadata), o yüzden
+ * `NEXT_PUBLIC_` öneki olmayan bir değişkeni okumak güvenli.
+ */
 export function siteUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL;
-  const base = raw && raw.trim() !== '' ? raw.trim() : FALLBACK;
-  return base.replace(/\/+$/, '');
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (explicit) return explicit.replace(/\/+$/, '');
+
+  const hosted = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (hosted) return `https://${hosted.replace(/\/+$/, '')}`;
+
+  return FALLBACK;
 }
 
 /** Öneksiz bir yolu mutlak adrese çevirir. */
