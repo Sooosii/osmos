@@ -8,6 +8,7 @@ import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
 import { DitherBackdrop } from '@/components/DitherBackdrop';
 import { NoteMeasures } from '@/components/NoteMeasures';
 import { EN } from '@/i18n/en';
+import { LOCALES } from '@/i18n/locale';
 
 /**
  * Nota sayfası — Aşama 3, ansiklopedinin yaprağı.
@@ -35,11 +36,20 @@ import { EN } from '@/i18n/en';
  * kaynak açılmadı — harita, parfüm ve nota aynı rengi göstermek zorunda.
  */
 
+/*
+  Tam bileşim döndürülüyor (`{ lang, id }`), yalnızca `{ id }` değil. İç içe
+  biçim de çalışıyor ama bu hâli tek başına okunabilir ve derlemede sayı
+  doğrulanabilir: 136 × 2.
+*/
 export function generateStaticParams() {
-  return NOTES.map((note) => ({ id: note.id }));
+  return LOCALES.flatMap((lang) => NOTES.map((note) => ({ lang, id: note.id })));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string; id: string }>;
+}) {
   const { id } = await params;
   if (!hasNote(id)) return {};
 
@@ -59,7 +69,11 @@ function minutesLabel(minutes: number): string {
   return rest === 0 ? EN.note.shortHours(hours) : EN.note.shortHoursMinutes(hours, rest);
 }
 
-export default async function NotePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function NotePage({
+  params,
+}: {
+  params: Promise<{ lang: string; id: string }>;
+}) {
   const { id } = await params;
   if (!hasNote(id)) notFound();
 

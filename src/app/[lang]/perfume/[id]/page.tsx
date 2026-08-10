@@ -8,6 +8,7 @@ import { Neighbors } from '@/components/Neighbors';
 import { PerfumeNotes } from '@/components/PerfumeNotes';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
 import { EN } from '@/i18n/en';
+import { LOCALES } from '@/i18n/locale';
 
 /**
  * Parfüm sayfası — yol haritasının ①, ②, ③ ve ④'ü. Tamamı.
@@ -40,11 +41,20 @@ import { EN } from '@/i18n/en';
  * uzaydaki noktayla aynı renkte olması haritanın kendini doğrulaması demek.
  */
 
+/*
+  Tam bileşim döndürülüyor (`{ lang, id }`), yalnızca `{ id }` değil. İç içe
+  biçim de çalışıyor ama bu hâli tek başına okunabilir ve derlemede sayı
+  doğrulanabilir: 52 × 2.
+*/
 export function generateStaticParams() {
-  return PERFUMES.map((perfume) => ({ id: perfume.id }));
+  return LOCALES.flatMap((lang) => PERFUMES.map((perfume) => ({ lang, id: perfume.id })));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string; id: string }>;
+}) {
   const { id } = await params;
   const perfume = PERFUMES.find((entry) => entry.id === id);
   if (!perfume) return {};
@@ -56,7 +66,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function PerfumePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PerfumePage({
+  params,
+}: {
+  params: Promise<{ lang: string; id: string }>;
+}) {
   const { id } = await params;
   const perfume = PERFUMES.find((entry) => entry.id === id);
   if (!perfume) notFound();
