@@ -3,10 +3,27 @@
 An attempt to make scent readable. 52 perfumes and 136 notes; there are no
 photographs anywhere — everything on screen is drawn from data.
 
+![The scent space](docs/preview/space.png)
+
+<sub>The door: 52 perfumes on a plane where position comes from shared notes.
+Colour is the dominant family, size the third component. Drag, zoom, touch a
+point.</sub>
+
+![A perfume page](docs/preview/perfume.png)
+
+<sub>A perfume: the evolution signature turns on its own for eight hours, drawn
+on canvas from the volatility of each note. No charting library is used
+anywhere in this project.</sub>
+
+![A note page](docs/preview/note.png)
+
+<sub>A note: volatility as a dithered field, four character axes, and the
+perfumes that carry it in a rotating constellation.</sub>
+
 ```bash
 npm install
 npm run dev     # http://localhost:3000
-npm run build   # 389 pages, all static
+npm run build   # 392 pages, all static
 npm test        # vitest
 npm run lint
 ```
