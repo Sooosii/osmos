@@ -1,5 +1,7 @@
 import type { Perfume, SpaceMark } from '@/data/types';
 import { dominantFamily, getFamily } from '@/data/families';
+import { say } from '@/i18n/dict';
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/locale';
 import { characterVector, familyVector, nearestNeighbors, projectToSpace } from './similarity';
 import { normalizeAxis } from './space-feel';
 
@@ -29,7 +31,10 @@ const NEIGHBOR_COUNT = 3;
  */
 const AXIS_COUNT = 4;
 
-export function buildMarks(perfumes: readonly Perfume[]): readonly SpaceMark[] {
+export function buildMarks(
+  perfumes: readonly Perfume[],
+  locale: Locale = DEFAULT_LOCALE,
+): readonly SpaceMark[] {
   const points = projectToSpace(perfumes);
   const pointById = new Map(points.map((point) => [point.perfumeId, point]));
 
@@ -53,7 +58,7 @@ export function buildMarks(perfumes: readonly Perfume[]): readonly SpaceMark[] {
       id: perfume.id,
       name: perfume.name,
       brand: perfume.brand,
-      line: perfume.line?.en ?? null,
+      line: perfume.line ? say(perfume.line, locale) : null,
       color: getFamily(dominantFamily(familyVector(perfume))).color,
       x: point.x,
       y: point.y,

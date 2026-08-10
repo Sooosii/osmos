@@ -1,5 +1,5 @@
 import type { Character, Volatility } from '@/data/types';
-import { EN } from '@/i18n/en';
+import { EN, type Dict } from '@/i18n/en';
 import { intensityAt } from './evolution';
 import { SIGNATURE_MAX_MINUTES } from './evolution-loop';
 import { ditherThreshold } from './dither-field';
@@ -141,8 +141,14 @@ const AXIS_ORDER = ['temperature', 'texture', 'cleanliness', 'proximity'] as con
  *
  * `lowWord`/`highWord` sıfat hâli, isim değil: `axisWord` "faintly velvety"
  * kuruyor, "faintly velvet" değil.
+ *
+ * ⚠️ Faz 1'de bu bir **sabitti** (`export const AXES`). İki dilde sabit olamaz:
+ * aynı eksenin uç adları sayfanın diline göre değişiyor. Çağıran sözlüğü
+ * veriyor; kimlik ve sıra yine burada kalıyor.
  */
-export const AXES: readonly Axis[] = AXIS_ORDER.map((id) => ({ id, ...EN.axes[id] }));
+export function axesFor(dict: Dict): readonly Axis[] {
+  return AXIS_ORDER.map((id) => ({ id, ...dict.axes[id] }));
+}
 
 /**
  * Eksen değerinin basamağı, 0–`AXIS_STEPS`.

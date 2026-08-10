@@ -1,12 +1,13 @@
 import type { Character, Volatility } from '@/data/types';
-import { EN } from '@/i18n/en';
+import type { Dict } from '@/i18n/en';
+import { dictFor } from '@/i18n/dict';
 import { formatDuration, SIGNATURE_MAX_MINUTES } from '@/lib/evolution-loop';
 import {
-  AXES,
   AXIS_STEPS,
   STRIP_COLUMNS,
   STRIP_FIRST_MINUTE,
   STRIP_ROWS,
+  axesFor,
   axisSpan,
   axisWord,
   lifeStripCells,
@@ -30,6 +31,14 @@ interface NoteMeasuresProps {
   readonly character: Character;
   /** Notanın baskın aile rengi — sayfadaki öbür renklerle aynı zincirden. */
   readonly color: string;
+  /**
+   * Sayfanın dili.
+   *
+   * ⚠️ Prop olarak **dil geçiyor, sözlük değil**: bu bileşen bugün sunucuda
+   * çalışıyor ama bir gün `'use client'` alırsa sözlük prop'u işlev taşıdığı
+   * için serileştirilemez ve patlardı. Dize her iki durumda da geçerli.
+   */
+  readonly lang: string;
 }
 
 /** Dolu basamağın opaklığı — aile rengi metnin önüne geçmesin. */
@@ -73,7 +82,15 @@ function stripPath(cells: readonly boolean[]): string {
  * yok — iki uç damgası ve iki ölçüm var, o kadar. Buraya bir ızgara ya da
  * yükseklik kodlaması girerse ③'te reddedilen şeye dönüşür.
  */
-function LifeStrip({ volatility, color }: { readonly volatility: Volatility; readonly color: string }) {
+function LifeStrip({
+  volatility,
+  color,
+  t,
+}: {
+  readonly volatility: Volatility;
+  readonly color: string;
+  readonly t: Dict;
+}) {
   const path = stripPath(lifeStripCells(volatility));
 
   return (
@@ -95,8 +112,8 @@ function LifeStrip({ volatility, color }: { readonly volatility: Volatility; rea
       */}
       <div className="mt-2 flex justify-between text-[9px] tracking-[0.2em] text-white/45">
         {/* Büyütme JS'te: CSS dönüşümü `lang="tr"` altında noktalı İ üretiyor. */}
-        <span>{formatDuration(STRIP_FIRST_MINUTE).toUpperCase()}</span>
-        <span>{formatDuration(SIGNATURE_MAX_MINUTES).toUpperCase()}</span>
+        <span>{formatDuration(STRIP_FIRST_MINUTE, t.duration).toUpperCase()}</span>
+        <span>{formatDuration(SIGNATURE_MAX_MINUTES, t.duration).toUpperCase()}</span>
       </div>
 
       {/*
@@ -106,12 +123,16 @@ function LifeStrip({ volatility, color }: { readonly volatility: Volatility; rea
       */}
       <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-2 text-[10px] tracking-[0.18em] text-white/45">
         <div className="flex items-baseline gap-2">
-          <dt>{EN.note.measures.peak}</dt>
-          <dd className="tabular-nums text-white/60">{formatDuration(volatility.peakMinutes)}</dd>
+          <dt>{t.note.measures.peak}</dt>
+          <dd className="tabular-nums text-white/60">
+            {formatDuration(volatility.peakMinutes, t.duration)}
+          </dd>
         </div>
         <div className="flex items-baseline gap-2">
-          <dt>{EN.note.measures.halfLife}</dt>
-          <dd className="tabular-nums text-white/60">{formatDuration(volatility.halfLifeMinutes)}</dd>
+          <dt>{t.note.measures.halfLife}</dt>
+          <dd className="tabular-nums text-white/60">
+            {formatDuration(volatility.halfLifeMinutes, t.duration)}
+          </dd>
         </div>
       </dl>
     </div>
@@ -130,10 +151,18 @@ function LifeStrip({ volatility, color }: { readonly volatility: Volatility; rea
  * Basamaklar `aria-hidden`; ekran okuyucuya giden şey `axisWord`ün cümlesi.
  * Basamağı "12/16" diye okutmak ölçüyü olduğundan kesin gösterirdi.
  */
-function CharacterAxes({ character, color }: { readonly character: Character; readonly color: string }) {
+function CharacterAxes({
+  character,
+  color,
+  t,
+}: {
+  readonly character: Character;
+  readonly color: string;
+  readonly t: Dict;
+}) {
   return (
     <ul className="flex flex-col gap-2.5">
-      {AXES.map((axis) => {
+      {axesFor(t).map((axis) => {
         const value = character[axis.id];
         const span = axisSpan(value);
 
@@ -176,7 +205,7 @@ function CharacterAxes({ character, color }: { readonly character: Character; re
               {axis.high}
             </span>
 
-            <span className="sr-only">{axisWord(axis, value)}</span>
+            <span className="sr-only">{axisWord(axis, value, t.axisWords)}</span>
           </li>
         );
       })}
@@ -184,21 +213,23 @@ function CharacterAxes({ character, color }: { readonly character: Character; re
   );
 }
 
-export function NoteMeasures({ volatility, character, color }: NoteMeasuresProps) {
+export function NoteMeasures({ volatility, character, color, lang }: NoteMeasuresProps) {
+  const t = dictFor(lang);
+
   return (
     <>
       <section className="pt-16">
         <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">
-          {EN.note.measures.volatility}
+          {t.note.measures.volatility}
         </h2>
-        <LifeStrip volatility={volatility} color={color} />
+        <LifeStrip volatility={volatility} color={color} t={t} />
       </section>
 
       <section className="pt-16">
         <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">
-          {EN.note.measures.character}
+          {t.note.measures.character}
         </h2>
-        <CharacterAxes character={character} color={color} />
+        <CharacterAxes character={character} color={color} t={t} />
       </section>
     </>
   );

@@ -4,7 +4,7 @@ import { buildMarks } from '@/lib/space-marks';
 import { introPoints } from '@/lib/intro-points';
 import { ScentSpaceCanvas } from '@/components/ScentSpaceCanvas';
 import { Acilis } from '@/components/Acilis';
-import { EN } from '@/i18n/en';
+import { getDict, localeFor } from '@/i18n/dict';
 
 /**
  * Koku Uzayı — sitenin kapısı.
@@ -16,8 +16,14 @@ import { EN } from '@/i18n/en';
  * astronot (kaydırmayla uğurlanıyor) → perde (kendiliğinden, 2.6 sn) →
  * yaklaşma sahnesi (`space-approach.ts`, kamera 0.14'ten 1'e).
  */
-export default function Home() {
-  const marks = buildMarks(PERFUMES);
+export default async function Home({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  const locale = localeFor(lang);
+  const t = getDict(locale);
+
+  // Küratör cümleleri sayfanın dilinde hesaplanıyor: nokta listesi sunucuda
+  // kuruluyor ve istemciye hazır metin olarak iniyor.
+  const marks = buildMarks(PERFUMES, locale);
 
   return (
     /*
@@ -64,9 +70,9 @@ export default function Home() {
             üstüne binerdi. İkisi artık tek bir sütunda, akışla diziliyor.
           */}
           <div>
-            <p className="text-xs tracking-[0.3em] text-white/30">{EN.site.name}</p>
+            <p className="text-xs tracking-[0.3em] text-white/30">{t.site.name}</p>
             <p className="mt-3 max-w-[15rem] text-xs leading-relaxed text-white/25">
-              {EN.space.intro(PERFUMES.length)}
+              {t.space.intro(PERFUMES.length)}
             </p>
           </div>
         </ScentSpaceCanvas>
