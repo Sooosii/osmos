@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { EN } from "@/i18n/en";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OSMOS",
-  description: "Koku evreni — niche parfümlerin haritası.",
+  title: EN.site.title,
+  description: EN.site.description,
 };
 
 export default function RootLayout({

@@ -4,6 +4,7 @@ import { buildMarks } from '@/lib/space-marks';
 import { introPoints } from '@/lib/intro-points';
 import { ScentSpaceCanvas } from '@/components/ScentSpaceCanvas';
 import { Acilis } from '@/components/Acilis';
+import { EN } from '@/i18n/en';
 
 /**
  * Koku Uzayı — sitenin kapısı.
@@ -63,10 +64,9 @@ export default function Home() {
             üstüne binerdi. İkisi artık tek bir sütunda, akışla diziliyor.
           */}
           <div>
-            <p className="text-xs tracking-[0.3em] text-white/30">OSMOS</p>
+            <p className="text-xs tracking-[0.3em] text-white/30">{EN.site.name}</p>
             <p className="mt-3 max-w-[15rem] text-xs leading-relaxed text-white/25">
-              {PERFUMES.length} parfüm, konumları nota akrabalığından hesaplandı.
-              Sürükle, yakınlaş, bir noktaya dokun.
+              {EN.space.intro(PERFUMES.length)}
             </p>
           </div>
         </ScentSpaceCanvas>

@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { type FeelTarget, NO_FEEL, hasFeel } from '@/lib/space-feel';
 import { formatFeel, parseFeel } from '@/lib/space-feel-url';
+import { EN } from '@/i18n/en';
+
+/** Dört eksenin sözcükleri; nota sayfasındaki ölçümle aynı kaynaktan. */
+const WORDS = EN.space.sliders;
 
 /**
  * Sinestezi kaydıraçları — uzaya nota adıyla değil hisle sorma yolu.
@@ -70,8 +74,9 @@ const SLIDER_CLASS = [
 /**
  * Uç etiketi — giriş ipucuyla aynı tipografi.
  *
- * Genişlik en uzun etikete göre: altı harfli KADIFE/KESKIN/HAVADA. Sabit olması
- * şart, yoksa dört kaydıracın rayları farklı yerlerden başlar, sütun eğrilirdi.
+ * Genişlik en uzun etikete göre: altı harfli VELVET. Sabit olması şart, yoksa
+ * dört kaydıracın rayları farklı yerlerden başlar, sütun eğrilirdi. Aynı sınır
+ * `i18n/en.ts`teki uç damgalarına da geçerli — 'ON SKIN' bu yüzden elendi.
  */
 const EDGE_CLASS = 'w-[4.2rem] shrink-0 text-[10px] tracking-[0.15em] text-white/30';
 
@@ -289,18 +294,18 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
     <div key={hasFeel(initial) ? 'adresten' : 'bos'} className="flex flex-col gap-2.5">
       <Axis
         axis={0}
-        label="Sıcaklık — soğuktan sıcağa"
-        low="SOĞUK"
-        high="SICAK"
+        label={WORDS.temperature.label}
+        low={WORDS.temperature.low}
+        high={WORDS.temperature.high}
         onPick={update}
         start={startOf(0)}
         onCommit={commit}
       />
       <Axis
         axis={2}
-        label="Temizlik — kirliden temize"
-        low="KIRLI"
-        high="TEMIZ"
+        label={WORDS.cleanliness.label}
+        low={WORDS.cleanliness.low}
+        high={WORDS.cleanliness.high}
         onPick={update}
         start={startOf(2)}
         onCommit={commit}
@@ -328,18 +333,18 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
           */}
           <Axis
             axis={DETAIL_AXES[0]}
-            label="Doku — kadifemsiden keskine"
-            low="KADIFE"
-            high="KESKIN"
+            label={WORDS.texture.label}
+            low={WORDS.texture.low}
+            high={WORDS.texture.high}
             onPick={update}
             start={startOf(DETAIL_AXES[0])}
             onCommit={commit}
           />
           <Axis
             axis={DETAIL_AXES[1]}
-            label="Yakınlık — havada dağılandan tene yapışana"
-            low="HAVADA"
-            high="TENDE"
+            label={WORDS.proximity.label}
+            low={WORDS.proximity.low}
+            high={WORDS.proximity.high}
             onPick={update}
             start={startOf(DETAIL_AXES[1])}
             onCommit={commit}
@@ -370,9 +375,7 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
           type="button"
           onClick={toggleDetail}
           aria-expanded={detailed}
-          aria-label={
-            detailed ? 'Doku ve yakınlık eksenlerini kapat' : 'Iki eksen daha: doku ve yakınlık'
-          }
+          aria-label={detailed ? WORDS.closeDetail : WORDS.openDetail}
           className={`w-fit rounded-full px-2 py-1 text-[13px] leading-none tracking-[0.3em] transition-colors hover:text-white/60 focus-visible:text-white/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 ${
             detailed ? 'text-white/45' : 'text-white/25'
           }`}
