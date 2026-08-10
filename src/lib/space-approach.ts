@@ -96,6 +96,30 @@ export function advance(state: ApproachState, deltaY: number): ApproachState {
 }
 
 /**
+ * Parmak yolunun tekerlek karşılığı — kazanç, ham piksel değil.
+ *
+ * ⚠️ Bu fonksiyon bir eksikliği kapatıyor: sahneyi ilerleten tek işaret
+ * tekerlekti ve telefonda tekerlek yok. Gerçek dokunmatik cihazda ölçüldü
+ * (2026-08-10): perde kalktıktan sonra ekranda uzak bir toz bulutu kalıyor,
+ * dokunmak da sürüklemek de hiçbir şey yapmıyordu. Telefondan gelen kimse
+ * içeri giremiyordu.
+ *
+ * İşaret tekerlekle aynı: yukarı kaydırırken `clientY` küçülüyor, yani dy
+ * negatif — `advance`ın ileri yönü de negatif. Çevirmeye gerek yok, ikisi aynı
+ * dili konuşuyor.
+ *
+ * Kazanç 1.5: `APPROACH_DISTANCE`ı (500) yaklaşık 333 piksellik bir kaydırma
+ * kapatıyor, yani orta boy bir telefon ekranının %40'ı — bir başparmak
+ * hareketi. 1.0 olsaydı ekranın %60'ı gerekirdi ve eşik duvara dönerdi;
+ * 2.0'da tek kazara dokunuş sahneyi bitiriyor, eşik de eşik olmaktan çıkıyor.
+ */
+export const DRAG_GAIN = 1.5;
+
+export function dragDelta(dy: number): number {
+  return dy * DRAG_GAIN;
+}
+
+/**
  * İlerlemeden ölçek — **üstel**, doğrusal değil.
  *
  * Yakınlaşma çarpımsal bir şey: her çentik ölçeği aynı *oranda* büyütüyor.
