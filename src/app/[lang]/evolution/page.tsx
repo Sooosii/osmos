@@ -1,5 +1,6 @@
 import { EvolutionTimeline } from '@/components/EvolutionTimeline';
 import { dictFor } from '@/i18n/dict';
+import { languageAlternates } from '@/lib/site-url';
 
 /**
  * Evrim çizelgesi — zaman kaydıracıyla notaların yükselip düşüşü.
@@ -8,6 +9,11 @@ import { dictFor } from '@/i18n/dict';
  * başına bir sayfa olarak kalması geçici: Blok D/9'da parfüm sayfasının ③
  * bölümü olacak, burası da doğrulama ekranı olarak kalacak.
  */
+/** Başlık kök düzenden; buradaki tek iş hreflang. */
+export function generateMetadata() {
+  return { alternates: { languages: languageAlternates('/evolution') } };
+}
+
 export default async function EvolutionPage({
   params,
 }: {

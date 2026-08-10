@@ -9,6 +9,8 @@
  * çıkıldığı gün kimsenin fark etmeyeceği yanlış bir sitemap üretirdi: yanlış
  * adres sessizce çalışır, eksik adres çalışmaz ve fark edilir.
  */
+import { LOCALES, withLocale, type Locale } from '@/i18n/locale';
+
 const FALLBACK = 'http://localhost:3000';
 
 export function siteUrl(): string {
@@ -20,4 +22,17 @@ export function siteUrl(): string {
 /** Öneksiz bir yolu mutlak adrese çevirir. */
 export function absolute(path: string): string {
   return `${siteUrl()}${path}`;
+}
+
+/**
+ * Bir sayfanın iki dildeki mutlak adresleri — `alternates.languages` için.
+ *
+ * Sitemap aynı bilgiyi ayrıca veriyor ve bu bir tekrar değil: arama motoru
+ * ikisini birden okuyor ve sitemap tek başına yeterli sayılmıyor. Kaynak yine
+ * tek — ikisi de `withLocale` ile bu modülden geçiyor.
+ */
+export function languageAlternates(path: string): Record<Locale, string> {
+  return Object.fromEntries(
+    LOCALES.map((locale) => [locale, absolute(withLocale(locale, path))]),
+  ) as Record<Locale, string>;
 }

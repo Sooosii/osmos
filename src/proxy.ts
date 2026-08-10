@@ -21,7 +21,20 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const first = pathname.split('/')[1] ?? '';
 
-  if (first === DEFAULT_LOCALE) {
+  /*
+    ⚠️ Üstveri rotaları kanonik yönlendirmenin dışında.
+
+    Next, `og:image` adresini iç yoluyla basıyor: `/en/opengraph-image`. Onu da
+    `/opengraph-image`e yönlendirseydik her paylaşım robotu görseli bir atlama
+    sonra alırdı — çoğu takip eder ama katı olanı almaz, ve bir paylaşım
+    kartının çıkmaması sessizce olur. Ölçüldü: yönlendirmeyle 1 atlama,
+    bu istisnayla 0.
+
+    Sayfalar için kanonik kural aynen duruyor: `/en/notes` → `/notes`.
+  */
+  const isMetadataRoute = pathname.includes('/opengraph-image');
+
+  if (first === DEFAULT_LOCALE && !isMetadataRoute) {
     const url = request.nextUrl.clone();
     url.pathname = pathname.slice(DEFAULT_LOCALE.length + 1) || '/';
     return NextResponse.redirect(url);

@@ -5,6 +5,7 @@ import { countUsedNotes, noteColor } from '@/lib/note-marks';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
 import { dictFor, getDict, localeFor, say } from '@/i18n/dict';
 import { withLocale } from '@/i18n/locale';
+import { languageAlternates } from '@/lib/site-url';
 
 /**
  * Nota dizini — ansiklopedinin ikinci kapısı.
@@ -24,7 +25,11 @@ import { withLocale } from '@/i18n/locale';
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
   const t = dictFor((await params).lang);
-  return { title: t.notesIndex.title(NOTES.length), description: t.notesIndex.description };
+  return {
+    title: t.notesIndex.title(NOTES.length),
+    description: t.notesIndex.description,
+    alternates: { languages: languageAlternates('/notes') },
+  };
 }
 
 /*

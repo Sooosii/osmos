@@ -6,6 +6,7 @@ import { ScentSpace } from '@/components/ScentSpace';
 import type { ScentFamily } from '@/data/types';
 import type { Dict } from '@/i18n/en';
 import { getDict, localeFor, say } from '@/i18n/dict';
+import { languageAlternates } from '@/lib/site-url';
 
 /**
  * Uzay taslağı — benzerlik motorunu doğrulamak için.
@@ -45,6 +46,11 @@ function expectationsFor(
     },
     { label: t.draft.expectations.alone, ids: ['juliette-has-a-gun-not-a-perfume'] },
   ];
+}
+
+/** Başlık kök düzenden; buradaki tek iş hreflang. */
+export function generateMetadata() {
+  return { alternates: { languages: languageAlternates('/space') } };
 }
 
 export default async function SpaceDraft({ params }: { params: Promise<{ lang: string }> }) {
