@@ -18,7 +18,6 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 /*
@@ -73,8 +72,21 @@
   }
 }
 
+/*
+ * Sitenin yazısı Geist.
+ *
+ * ⚠️ Burada uzun süre `Arial, Helvetica, sans-serif` yazıyordu — create-next-app'ten
+ * kalma satır. Sonucu şuydu: iki Geist dosyası her sayfada önyükleniyor, gövde
+ * onları hiç kullanmıyordu (tarayıcı konsolu "preloaded but not used" diye
+ * uyarıyordu). Yazı tipi bağlantısı `[lang]/layout.tsx` ile `global-not-found.tsx`teki
+ * `--font-geist-sans` değişkeninden geliyor; o sınıf `<html>`den kalkarsa yazı
+ * sessizce Arial'a düşer.
+ *
+ * Tuvaldeki tek renkli yazılar (astronot dokusu, yörünge etiketleri) bilerek
+ * bunun dışında: onlar kendi sistem monospace yığınlarını çağırıyor.
+ */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
