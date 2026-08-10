@@ -85,7 +85,15 @@ export function IntroOverlay({ points }: IntroOverlayProps) {
     window.OSMOS_INTRO_TEXT = {
       word: t.intro.word,
       tag: t.intro.tag(points.length),
-      hint: t.intro.hint.toUpperCase(),
+      /*
+        Perde metni JSX değil, `intro.js` düz DOM'a yazıyor — CSS varyantı
+        buraya geçmiyor. Seçim `matchMedia` ile, ama sıçrama riski yok: bu
+        zaten bir etki, yani tarayıcıda ve perde kurulmadan önce çalışıyor.
+      */
+      hint: (window.matchMedia('(pointer: coarse)').matches
+        ? t.intro.hintTouch
+        : t.intro.hint
+      ).toUpperCase(),
     };
   }, [points, t]);
 
