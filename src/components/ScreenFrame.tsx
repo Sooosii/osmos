@@ -87,14 +87,14 @@ export function ScreenFrame({ children, nav, readouts, status, tail }: ScreenFra
           {nav}
 
           <div className="flex items-center gap-3 sm:gap-5">
-            <dl className="flex items-center gap-3 text-[9px] tracking-[0.18em] text-white/35 sm:gap-5">
+            <dl className="flex items-center gap-3 text-[9px] tracking-[0.18em] text-white/50 sm:gap-5">
               {readouts.map((readout, index) => (
                 <div
                   key={readout.label}
                   // Dar ekranda ikiden fazlası sığmıyor; kalanlar sırayla düşüyor.
                   className={`flex items-baseline gap-1.5 ${index >= 2 ? 'hidden sm:flex' : ''}`}
                 >
-                  <dt className="text-white/25">{readout.label}</dt>
+                  <dt className="text-white/50">{readout.label}</dt>
                   <dd className="tabular-nums text-white/55">{readout.value}</dd>
                 </div>
               ))}
@@ -119,7 +119,7 @@ export function ScreenFrame({ children, nav, readouts, status, tail }: ScreenFra
 
       {/* Alt şerit */}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/15 bg-[#050507]/70 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-2 text-[9px] tracking-[0.18em] text-white/35 sm:px-10">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-2 text-[9px] tracking-[0.18em] text-white/50 sm:px-10">
           <span className="tabular-nums">{status}</span>
 
           <div className="flex items-center gap-3">

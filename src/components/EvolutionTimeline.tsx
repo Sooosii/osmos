@@ -40,7 +40,7 @@ export function EvolutionTimeline() {
               className={`rounded-full border px-4 py-1.5 text-xs tracking-wide transition-colors ${
                 isActive
                   ? 'border-white/40 bg-white/10 text-white'
-                  : 'border-white/10 text-white/40 hover:border-white/25 hover:text-white/70'
+                  : 'border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
               }`}
             >
               {entry.name}
@@ -53,7 +53,7 @@ export function EvolutionTimeline() {
         <h1 className="text-4xl font-light tracking-tight text-white sm:text-5xl">
           {perfume.name}
         </h1>
-        <p className="mt-2 text-sm tracking-wide text-white/40">
+        <p className="mt-2 text-sm tracking-wide text-white/50">
           {perfume.brand}
           {perfume.year ? ` · ${perfume.year}` : ''}
           {perfume.perfumer ? ` · ${perfume.perfumer}` : ''}

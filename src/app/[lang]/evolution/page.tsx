@@ -33,7 +33,7 @@ export default async function EvolutionPage({
   return (
     <div className="min-h-screen bg-[#0A0A0C] px-6 py-24 sm:px-12">
       <div className="mx-auto flex max-w-3xl flex-col">
-        <p className="mb-16 text-xs tracking-[0.3em] text-white/30">{t.site.name}</p>
+        <p className="mb-16 text-xs tracking-[0.3em] text-white/50">{t.site.name}</p>
         <EvolutionTimeline />
       </div>
     </div>

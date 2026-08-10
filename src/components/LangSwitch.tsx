@@ -55,7 +55,7 @@ export function LangSwitch({ className = '' }: { readonly className?: string }) 
                 event.preventDefault();
                 router.push(switchPath(pathname, window.location.search, locale));
               }}
-              className="text-white/30 transition-colors hover:text-white/70"
+              className="text-white/50 transition-colors hover:text-white/70"
             >
               {locale.toUpperCase()}
             </Link>

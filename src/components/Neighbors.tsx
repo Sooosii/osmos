@@ -78,7 +78,7 @@ export function Neighbors({ perfume, lang }: NeighborsProps) {
         )}
       />
 
-      <p className="mx-auto mt-8 max-w-lg text-xs leading-relaxed text-white/25">
+      <p className="mx-auto mt-8 max-w-lg text-xs leading-relaxed text-white/50">
         {t.perfume.neighbourCaption}
       </p>
     </div>

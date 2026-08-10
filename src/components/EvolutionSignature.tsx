@@ -404,7 +404,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
       */}
       <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2">
         {families.map((family) => (
-          <span key={family.id} className="flex items-center gap-2 text-xs text-white/35">
+          <span key={family.id} className="flex items-center gap-2 text-xs text-white/50">
             <span
               aria-hidden="true"
               className="h-1.5 w-1.5 rounded-full"
@@ -415,7 +415,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
         ))}
       </div>
 
-      <p className="mt-10 max-w-lg text-xs leading-relaxed text-white/25">
+      <p className="mt-10 max-w-lg text-xs leading-relaxed text-white/50">
         {t.chart.disclaimer}
       </p>
     </div>

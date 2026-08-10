@@ -26,13 +26,13 @@ export function ErrorBody({
   return (
     <main className="flex min-h-dvh flex-col justify-center bg-[#050507] px-6 text-white sm:px-10">
       <div className="mx-auto w-full max-w-xl">
-        <p className="text-xs tracking-[0.3em] text-white/30">{t.site.name}</p>
+        <p className="text-xs tracking-[0.3em] text-white/50">{t.site.name}</p>
 
         <h1 className="mt-6 text-3xl font-light leading-tight tracking-tight sm:text-4xl">
           {t.error.mark}
         </h1>
 
-        <p className="mt-5 max-w-md text-sm font-light leading-relaxed text-white/45">
+        <p className="mt-5 max-w-md text-sm font-light leading-relaxed text-white/50">
           {t.error.line}
         </p>
 
@@ -46,7 +46,7 @@ export function ErrorBody({
           </button>
           <Link
             href={withLocale(locale, '/')}
-            className="text-sm font-light text-white/40 transition-colors hover:text-white/80"
+            className="text-sm font-light text-white/50 transition-colors hover:text-white/80"
           >
             {t.nav.backToSpace}
           </Link>

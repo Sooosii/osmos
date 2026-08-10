@@ -149,7 +149,7 @@ export default async function NotePage({
 
       <ScreenFrame
         nav={
-          <nav className="flex items-center gap-3 text-[10px] tracking-[0.3em] text-white/40">
+          <nav className="flex items-center gap-3 text-[10px] tracking-[0.3em] text-white/50">
             <Link href={withLocale(locale, '/')} className="transition-colors hover:text-white">
               {t.site.name}
             </Link>
@@ -168,7 +168,7 @@ export default async function NotePage({
         <div className="relative mx-auto max-w-3xl px-6 sm:px-10">
           {/* ① — notanın ne olduğu */}
           <header className="pt-8 sm:pt-14">
-            <p className="text-sm tracking-[0.2em] text-white/40">{band}</p>
+            <p className="text-sm tracking-[0.2em] text-white/50">{band}</p>
             <h1 className="mt-3 text-4xl font-light leading-[1.05] tracking-tight sm:text-6xl">
               {page.name}
             </h1>
@@ -193,7 +193,7 @@ export default async function NotePage({
 
           {/* ② — "peki bu hangi parfümlerde var?" */}
           <section className="pt-16">
-            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">
+            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/50">
               {t.note.carriersHeading(page.carriers.length)}
             </h2>
 
@@ -221,7 +221,7 @@ export default async function NotePage({
                         <span className="text-sm font-light text-white/70 transition-colors group-hover:text-white">
                           {carrier.name}
                         </span>
-                        <span className="text-xs text-white/25">{carrier.brand}</span>
+                        <span className="text-xs text-white/50">{carrier.brand}</span>
                       </Link>
                     </li>
                   ))}
@@ -233,7 +233,7 @@ export default async function NotePage({
                 parfüm listesi 52 parfümlük bir seçki. Paletteki bir rengin henüz
                 kullanılmamış olması normal — gerekçe `note-marks.ts`te.
               */
-              <p className="max-w-xl text-sm font-light leading-relaxed text-white/40">
+              <p className="max-w-xl text-sm font-light leading-relaxed text-white/50">
                 {t.note.unused(PERFUMES.length)}
               </p>
             )}
@@ -242,13 +242,13 @@ export default async function NotePage({
           <div className="mt-24 flex flex-col gap-3">
             <Link
               href={withLocale(locale, '/notes')}
-              className="text-sm font-light text-white/40 transition-colors hover:text-white/80"
+              className="text-sm font-light text-white/50 transition-colors hover:text-white/80"
             >
               {t.nav.allNotes}
             </Link>
             <Link
               href={withLocale(locale, '/')}
-              className="text-sm font-light text-white/40 transition-colors hover:text-white/80"
+              className="text-sm font-light text-white/50 transition-colors hover:text-white/80"
             >
               {t.nav.backToSpace}
             </Link>

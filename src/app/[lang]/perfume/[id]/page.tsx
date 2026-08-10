@@ -156,7 +156,7 @@ export default async function PerfumePage({
 
       <ScreenFrame
         nav={
-          <nav className="flex items-center gap-3 text-[10px] tracking-[0.3em] text-white/40">
+          <nav className="flex items-center gap-3 text-[10px] tracking-[0.3em] text-white/50">
             {/*
               `?mark=` uzayın o parfümü seçili açması için. Tarayıcının geri tuşu
               da aynı yere düşüyor; iki yol tek davranışta buluşuyor.
@@ -189,7 +189,7 @@ export default async function PerfumePage({
             geçişin bittiği yerde aradığın şey duruyor.
           */}
           <header className="pt-8 sm:pt-14">
-            <p className="text-sm tracking-[0.2em] text-white/40">
+            <p className="text-sm tracking-[0.2em] text-white/50">
               {perfume.brand.toUpperCase()}
             </p>
             <h1 className="mt-3 text-4xl font-light leading-[1.05] tracking-tight sm:text-6xl">
@@ -206,7 +206,7 @@ export default async function PerfumePage({
               üçünde parfümör yok; hangileri ve neden, `types.ts`in `perfumer`
               alanında yazıyor — "bilinmiyor" yazmak da uydurmak da reddedildi.
             */}
-            <p className="mt-4 text-sm font-light text-white/35">
+            <p className="mt-4 text-sm font-light text-white/50">
               {perfume.perfumer ? `${perfume.perfumer}, ` : ''}
               {perfume.year}
             </p>
@@ -219,7 +219,7 @@ export default async function PerfumePage({
 
           {/* ③ — "aa, o aslında veriymiş" */}
           <section className="pt-14">
-            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">
+            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/50">
               {t.perfume.sections.evolution}
             </h2>
             <EvolutionSignature perfume={perfume} />
@@ -237,7 +237,7 @@ export default async function PerfumePage({
             tamamen görünmez oluyor ve görünmez bir link yarı zamanlı bir tuzak.
           */}
           <section className="pt-20">
-            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">
+            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/50">
               {t.perfume.sections.notes}
             </h2>
             <PerfumeNotes perfume={perfume} lang={lang} />
@@ -245,7 +245,7 @@ export default async function PerfumePage({
 
           {/* ④ — "peki buna benzeyen ne var?" */}
           <section className="pt-20">
-            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">
+            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/50">
               {t.perfume.sections.neighbours}
             </h2>
             <Neighbors perfume={perfume} lang={lang} />
@@ -254,7 +254,7 @@ export default async function PerfumePage({
           <div className="mt-24">
             <Link
               href={`${withLocale(locale, '/')}?mark=${perfume.id}`}
-              className="text-sm font-light text-white/40 transition-colors hover:text-white/80"
+              className="text-sm font-light text-white/50 transition-colors hover:text-white/80"
             >
               {t.nav.backToSpace}
             </Link>

@@ -80,8 +80,8 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             üstüne binerdi. İkisi artık tek bir sütunda, akışla diziliyor.
           */}
           <div>
-            <p className="text-xs tracking-[0.3em] text-white/30">{t.site.name}</p>
-            <p className="mt-3 max-w-[15rem] text-xs leading-relaxed text-white/25">
+            <p className="text-xs tracking-[0.3em] text-white/50">{t.site.name}</p>
+            <p className="mt-3 max-w-[15rem] text-xs leading-relaxed text-white/50">
               {t.space.intro(PERFUMES.length)}
             </p>
           </div>
