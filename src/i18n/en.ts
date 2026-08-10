@@ -37,6 +37,13 @@ export const EN = {
     line: 'There is no such page. The address may be mistyped, or it may have been a perfume that never entered the selection.',
   },
 
+  /** Sayfa çizilirken bir şey patladığında. */
+  error: {
+    mark: 'SOMETHING BROKE',
+    line: 'This page could not be drawn. Trying again usually settles it; if it does not, the way back is below.',
+    retry: 'try again',
+  },
+
   space: {
     intro: (count: number) =>
       `${count} perfumes, placed by what their notes share. Drag, zoom, touch a point.`,

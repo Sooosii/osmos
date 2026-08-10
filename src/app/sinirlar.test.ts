@@ -2,13 +2,14 @@ import { readFileSync, existsSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 
 /**
- * Haritada olmayan adresin kurulumu.
+ * Sitenin sınırları — yolun bittiği iki yer.
  *
- * Bu sınama bir modülü değil bir **kurulumu** koruyor: 404 dört ayrı dosyanın
- * birlikte durmasıyla çalışıyor ve biri sessizce düşerse kimse fark etmez —
- * sayfa yine bir şey gösterir, yalnızca yanlışını gösterir (Next'in çıplak hata
- * belgesi, ya da doğru görüntü ama HTTP 200). Hangi hâlin ne verdiği ölçüldü;
- * gerekçeler `global-not-found.tsx` ve `proxy.ts`in başında.
+ * Bu sınama bir modülü değil iki **kurulumu** koruyor: haritada olmayan adres
+ * ve kırılan sayfa. İkisi de birden çok dosyanın birlikte durmasıyla çalışıyor
+ * ve biri sessizce düşerse kimse fark etmez — sayfa yine bir şey gösterir,
+ * yalnızca yanlışını gösterir (Next'in çıplak belgesi, ya da doğru görüntü ama
+ * HTTP 200). Hangi hâlin ne verdiği üretim derlemesinde ölçüldü; gerekçeler
+ * `global-not-found.tsx`, `global-error.tsx` ve `proxy.ts`in başında.
  */
 
 function read(path: string): string {
@@ -74,6 +75,57 @@ describe('haritada olmayan adres', () => {
       'src/app/[lang]/note/[id]/page.tsx',
     ]) {
       expect(read(path), path).toMatch(/export const dynamicParams = false;/);
+    }
+  });
+});
+
+/**
+ * Bir şey kırıldığında.
+ *
+ * 404'ün kardeşi ve aynı sebeple burada: hata ekranı da birden çok dosyanın
+ * birlikte durmasıyla çalışıyor, biri düşerse ziyaretçi sitenin dünyasından
+ * çıkıyor. İkisi de ölçüldü (üretim derlemesi, bilerek patlatılarak).
+ */
+describe('bir sey kirildiginda', () => {
+  test('iki sinir da yerinde', () => {
+    /*
+      ⚠️ İkisi ayrı iki olayı karşılıyor, biri diğerinin yerine geçmiyor:
+      `[lang]/error.tsx` sayfanın (ve altındaki düzenlerin) hatasını, kök
+      düzenin kendi hatasını ise yalnızca `global-error.tsx` yakalıyor.
+    */
+    expect(existsSync('src/app/[lang]/error.tsx')).toBe(true);
+    expect(existsSync('src/app/global-error.tsx')).toBe(true);
+  });
+
+  test('sinirlar istemci bileseni', () => {
+    /* Sınır bileşeni olmanın şartı; `use client` düşerse derleme kırılır. */
+    for (const path of ['src/app/[lang]/error.tsx', 'src/app/global-error.tsx']) {
+      expect(read(path), path).toMatch(/^'use client';/);
+    }
+  });
+
+  test('kok sinir kendi belgesini kuruyor', () => {
+    const source = read('src/app/global-error.tsx');
+
+    /*
+      ⚠️ Kök düzenin yerine geçiyor: `<html>`, `<body>`, yazı tipi ve
+      `globals.css` burada elle duruyor. Üstveri dışa aktarımı istemci
+      bileşeninde çalışmadığı için başlık React'in `<title>`ından geliyor.
+    */
+    expect(source).toContain('<html');
+    expect(source).toContain('<body');
+    expect(source).toContain('globals.css');
+    expect(source).toContain('<title>');
+  });
+
+  test('yeniden deneme unstable_retry ile', () => {
+    /*
+      ⚠️ Next 16'da prop adı `unstable_retry`; `reset` de duruyor ama yalnızca
+      sınırın durumunu temizliyor, içeriği yeniden getirmiyor. Belgenin önerisi
+      `unstable_retry` (error.md).
+    */
+    for (const path of ['src/app/[lang]/error.tsx', 'src/app/global-error.tsx']) {
+      expect(read(path), path).toContain('unstable_retry');
     }
   });
 });

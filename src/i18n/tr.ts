@@ -37,6 +37,12 @@ export const TR: Dict = {
     line: 'Böyle bir sayfa yok. Adres yanlış yazılmış olabilir, ya da seçkiye hiç girmemiş bir parfüm olabilir.',
   },
 
+  error: {
+    mark: 'BIR SEY KIRILDI',
+    line: 'Sayfa çizilemedi. Tekrar denemek çoğu zaman yetiyor; yetmezse aşağıdaki yol seni geri götürür.',
+    retry: 'tekrar dene',
+  },
+
   space: {
     intro: (count) =>
       `${count} parfüm, konumları nota akrabalığından hesaplandı. Sürükle, yakınlaş, bir noktaya dokun.`,
