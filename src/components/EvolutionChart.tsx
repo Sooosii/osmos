@@ -19,7 +19,7 @@ import type { Perfume, PyramidTier } from '@/data/types';
  * bu bileşenin içindeydi ve `PERFUMES`'ı doğrudan import ediyordu; o hâliyle
  * parfüm sayfasına konulamazdı, çünkü sayfa tek bir parfümü gösteriyor ve
  * başlığını kendisi kuruyor. Seçici `EvolutionTimeline`'da kaldı — orası
- * `/evrim` doğrulama ekranı, iki ucu karşılaştırmak için var.
+ * `/evolution` doğrulama ekranı, iki ucu karşılaştırmak için var.
  *
  * Kaydıraç logaritmik: yarısı ilk yarım saati, %62'si ilk saati kaplıyor.
  * Doğrusal olsaydı bütün hareket kaydıracın ilk %2'sinde sıkışırdı — kokunun

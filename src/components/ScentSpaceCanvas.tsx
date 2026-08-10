@@ -230,7 +230,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
   const enterPerfume = useCallback(
     (id: string) => {
       window.history.replaceState(null, '', `/?mark=${id}`);
-      router.push(`/parfum/${id}`);
+      router.push(`/perfume/${id}`);
     },
     [router],
   );
@@ -257,7 +257,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
        * her zaman önce geliyor — hazırlık için doğru an burası. Kullanıcı
        * tutmaya karar verdiğinde sayfa çoktan gelmiş oluyor.
        */
-      if (id) router.prefetch(`/parfum/${id}`);
+      if (id) router.prefetch(`/perfume/${id}`);
 
       requestDraw();
     },

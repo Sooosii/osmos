@@ -12,7 +12,7 @@
  *
  * Eşleme eskiden `EvolutionChart` içindeki kaydıracın eşlemesiydi; buraya taşındı
  * ki imza ile çizelge aynı zamanı göstersin. İki kopya olsaydı biri düzeltilip
- * diğeri unutulduğunda parfüm sayfası ile `/evrim` farklı dakikalar gösterirdi.
+ * diğeri unutulduğunda parfüm sayfası ile `/evolution` farklı dakikalar gösterirdi.
  */
 
 /** Tam bir turun süresi. Doğrudan kullanıcı kararı. */
@@ -30,7 +30,7 @@ export const CYCLE_MS = 12_000;
 export const SIGNATURE_MAX_MINUTES = 480;
 
 /**
- * `/evrim` kaydıracının kapsadığı koku ömrü — 12 saat.
+ * `/evolution` kaydıracının kapsadığı koku ömrü — 12 saat.
  *
  * İmzayla birlikte 8'e **inmedi** ve inmemeli: o ekranın işi eğri modelini sınamak
  * (`EvolutionTimeline.tsx:8`), yarı ömür hatası ise tam da imzadan attığımız o düz

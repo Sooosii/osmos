@@ -114,7 +114,7 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
             <span aria-hidden="true" className="text-white/20">
               ·
             </span>
-            <Link href="/notalar" className="transition-colors hover:text-white">
+            <Link href="/notes" className="transition-colors hover:text-white">
               NOTALAR
             </Link>
           </nav>
@@ -169,7 +169,7 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
                   {page.carriers.map((carrier) => (
                     <li key={carrier.id}>
                       <Link
-                        href={`/parfum/${carrier.id}`}
+                        href={`/perfume/${carrier.id}`}
                         className="group flex items-baseline gap-3 py-2 transition-colors hover:text-white"
                       >
                         <span
@@ -201,7 +201,7 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
 
           <div className="mt-24 flex flex-col gap-3">
             <Link
-              href="/notalar"
+              href="/notes"
               className="text-sm font-light text-white/40 transition-colors hover:text-white/80"
             >
               ← bütün notalar

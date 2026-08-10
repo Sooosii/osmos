@@ -32,7 +32,7 @@ export function SpaceKeyboardList({ marks, onFocusMark }: SpaceKeyboardListProps
             diye bir şey yok. Gerçek bir bağlantı: yeni sekmede açılabiliyor,
             ekran okuyucu "bağlantı" diye duyuruyor, düğme taklidi değil.
           */}
-          <Link href={`/parfum/${mark.id}`}>{mark.name} sayfası</Link>
+          <Link href={`/perfume/${mark.id}`}>{mark.name} sayfası</Link>
         </li>
       ))}
     </ul>

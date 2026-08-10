@@ -71,7 +71,7 @@ export function PerfumeNotes({ perfume }: PerfumeNotesProps) {
                 return (
                   <li key={entry.noteId}>
                     <Link
-                      href={`/nota/${entry.noteId}`}
+                      href={`/note/${entry.noteId}`}
                       className="group flex items-baseline gap-2 py-1"
                     >
                       <span

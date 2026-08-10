@@ -12,7 +12,7 @@ import { normalizeAxis } from './space-feel';
  * komşu kimlikleri. Nota veritabanı ve benzerlik motoru istemci paketine hiç
  * girmiyor.
  *
- * Hem Koku Uzayı hem `/uzay` doğrulama taslağı buradan besleniyor. İki ayrı
+ * Hem Koku Uzayı hem `/space` doğrulama taslağı buradan besleniyor. İki ayrı
  * kopya olsaydı biri düzeltilip diğeri unutulduğunda taslak "doğru" derken
  * harita başka bir şey gösterirdi.
  */

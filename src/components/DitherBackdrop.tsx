@@ -51,7 +51,7 @@ const MAX_CELLS = 44_000;
  * kayboluyordu. Alan arka plan; ön plana çıktığı anda işini yapmıyor demektir.
  *
  * Yükseltirken gövde metnine değil, **en ince etikete** bakın —
- * `/nota/bergamot`ta şeridin altındaki "İLK SANİYELER".
+ * `/note/bergamot`ta şeridin altındaki "İLK SANİYELER".
  */
 const DOT_ALPHA = 30;
 

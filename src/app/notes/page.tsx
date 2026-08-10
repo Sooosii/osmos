@@ -93,7 +93,7 @@ export default function NotesIndex() {
                 {notes.map((note) => (
                   <li key={note.id}>
                     <Link
-                      href={`/nota/${note.id}`}
+                      href={`/note/${note.id}`}
                       className="group flex items-baseline gap-3 py-2 transition-colors"
                     >
                       <span

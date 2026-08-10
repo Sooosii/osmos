@@ -19,7 +19,7 @@ import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
  *
  * ② ile ③ tek bir şeyde birleşti: imza, çizelgenin başka bir hâli. Kaydıraç yok —
  * biçim ve zaman 12 saniyelik bir turda hiç durmadan dönüyor (`EvolutionSignature`).
- * Kaydıraçlı çizelge `/evrim` doğrulama ekranında duruyor; orası iki parfümü aynı
+ * Kaydıraçlı çizelge `/evolution` doğrulama ekranında duruyor; orası iki parfümü aynı
  * dakikada karşılaştırmak için var.
  *
  * ④ ikiye ayrıldı. Komşular geldi: hiç durmadan dönen üç boyutlu bir takımyıldız.
@@ -127,7 +127,7 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
             <span aria-hidden="true" className="text-white/20">
               ·
             </span>
-            <Link href="/notalar" className="transition-colors hover:text-white">
+            <Link href="/notes" className="transition-colors hover:text-white">
               NOTALAR
             </Link>
           </nav>

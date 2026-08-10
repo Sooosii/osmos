@@ -379,7 +379,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
       {/*
         Renk = aile. Katman göstergesi (Üst/Kalp/Dip) burada YOK: imzada renk
         katmanı değil aileyi anlatıyor, o gösterge yanlış bilgi verirdi. Katmanlı
-        hâli kaydıraçlı çizelgede, `/evrim`'de duruyor.
+        hâli kaydıraçlı çizelgede, `/evolution`'da duruyor.
       */}
       <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2">
         {families.map((family) => (
