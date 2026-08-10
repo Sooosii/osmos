@@ -36,6 +36,13 @@ export const TR: Dict = {
     intro: (count) =>
       `${count} parfüm, konumları nota akrabalığından hesaplandı. Sürükle, yakınlaş, bir noktaya dokun.`,
     entryHint: 'KAYDIRMAYA DEVAM ET',
+    /*
+      Türkçede ayrım yok ve olmasına gerek de yok: "kaydırmak" hem tekerleği
+      hem parmağı karşılıyor. İngilizcedeki scroll/swipe ayrımı Türkçede
+      bulunmadığı için iki anahtar aynı cümleyi taşıyor — bu bir kopyala
+      yapıştır değil, dilin kendi cevabı.
+    */
+    entryHintTouch: 'KAYDIRMAYA DEVAM ET',
     keyboardList: 'Koku uzayı — parfüme git',
     perfumeLink: (name) => `${name} sayfası`,
     sliders: {
@@ -56,6 +63,8 @@ export const TR: Dict = {
     word: 'osmos',
     tag: (count) => `${count} parfüm, nota akrabalığından doğan bir harita`,
     hint: 'yaklaşmak için kaydır',
+    /** Türkçede "kaydır" ikisini de karşılıyor; gerekçe `space.entryHintTouch`ta. */
+    hintTouch: 'yaklaşmak için kaydır',
   },
 
   perfume: {

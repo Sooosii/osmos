@@ -187,7 +187,9 @@ export function SpaceOverlays({
           aria-hidden="true"
         >
           <span className="text-[11px] tracking-[0.25em] text-white/40">
-            {t.space.entryHint}
+            {/* Cihaza göre iki kelime; gerekçe `AstronotIntro`da. */}
+            <span className="pointer-coarse:hidden">{t.space.entryHint}</span>
+            <span className="hidden pointer-coarse:inline">{t.space.entryHintTouch}</span>
           </span>
           <span className="h-px w-full overflow-hidden bg-white/10">
             <span

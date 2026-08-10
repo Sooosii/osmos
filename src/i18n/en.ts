@@ -35,6 +35,14 @@ export const EN = {
     intro: (count: number) =>
       `${count} perfumes, placed by what their notes share. Drag, zoom, touch a point.`,
     entryHint: 'KEEP SCROLLING',
+    /**
+     * Dokunmatik cihazın karşılığı.
+     *
+     * İngilizcede "scroll" telefonda da kullanılıyor, yani yanlış değil — ama
+     * parmakla süpüren biri için doğru kelime "swipe". Ayrım cihaza göre
+     * yapılıyor, CSS ile: `pointer: coarse`.
+     */
+    entryHintTouch: 'KEEP SWIPING',
     keyboardList: 'Scent space — go to a perfume',
     perfumeLink: (name: string) => `${name} page`,
     sliders: {
@@ -52,6 +60,8 @@ export const EN = {
     word: 'osmos',
     tag: (count: number) => `${count} perfumes, a map drawn from the kinship of notes`,
     hint: 'scroll to come closer',
+    /** Dokunmatik cihazın karşılığı — gerekçe `space.entryHintTouch`ta. */
+    hintTouch: 'swipe to come closer',
   },
 
   perfume: {

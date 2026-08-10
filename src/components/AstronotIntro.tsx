@@ -147,7 +147,7 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
     Büyütme burada, CSS'te değil: `lang="tr"` altında `text-transform:
     uppercase` küçük i'yi noktalı İ'ye çeviriyor (Chromium'da ölçüldü).
   */
-  const hint = useDict().intro.hint.toUpperCase();
+  const t = useDict();
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const bgRef = useRef<HTMLCanvasElement | null>(null);
   const figRef = useRef<HTMLCanvasElement | null>(null);
@@ -425,7 +425,20 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
         ref={hintRef}
         className="absolute -translate-x-1/2 text-[0.6875rem] tracking-[0.3em] whitespace-nowrap text-white/20 [text-indent:0.3em]"
       >
-        {hint}
+        {/*
+          Cihaza göre iki kelime, seçimi CSS yapıyor.
+
+          ⚠️ JavaScript'le seçilseydi sunucu hangisini çizeceğini bilemezdi:
+          `pointer: coarse` ancak tarayıcıda belli oluyor. Bir varsayılan
+          çizip etkide düzeltmek, telefonda ilk kare "SCROLL" yazıp sonra
+          "SWIPE"a atlaması demekti — ipucu ekranda tek satır, o sıçrama
+          görülürdü. İki dizeyi de basıp birini gizlemek hem sıçramasız hem
+          hidrasyon uyuşmazlığı üretmiyor.
+        */}
+        <span className="pointer-coarse:hidden">{t.intro.hint.toUpperCase()}</span>
+        <span className="hidden pointer-coarse:inline">
+          {t.intro.hintTouch.toUpperCase()}
+        </span>
       </p>
     </div>
   );
