@@ -88,7 +88,9 @@
      * uzay çok uzakta başlıyor ve tekerlekle geliniyor. Sürüklemek işe yarayan
      * bir hamle, ama sıradaki hamle değil.
      */
-    hint.textContent = text.hint || 'scroll to come closer';
+    // Buyuk harfli: stil dosyasindaki text-transform kalkti, cunku CSS donusumu
+    // lang="tr" altinda noktali I uretiyor.
+    hint.textContent = text.hint || 'SCROLL TO COME CLOSER';
     overlay.appendChild(hint);
 
     document.body.appendChild(overlay);

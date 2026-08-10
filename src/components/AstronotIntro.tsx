@@ -410,18 +410,17 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
         Perdedeki ipucuyla aynı söz ve aynı ton. "Başka bir şey olmasın"ın
         istisnası — işaretsiz bir tam ekran, kapı değil duvar olurdu.
 
-        `uppercase` bilerek duruyor. Metin İngilizce olduğu için noktalı İ
-        sorunu bu satırda ortaya çıkmıyor; sınıf yine de kalkmıyor, çünkü
-        sahibin kuralı ("İ bunu görmiyim, her yerden düzelt", 2026-08-10)
-        belge `lang="en"` kaldığı sürece kendiliğinden işliyor. Türkçe geri
-        geldiği gün (Faz 2) kırılacak yer yalnızca burası değil, sitedeki
-        bütün `uppercase` sınıfları.
+        Büyütme CSS'te değil JS'te ve bu ölçülmüş bir karar: `lang="tr"`
+        altında CSS `text-transform: uppercase` küçük i'yi noktalı İ'ye
+        çeviriyor (Chromium'da ölçüldü, 2026-08-10). `toUpperCase()` dilden
+        bağımsız. Aynı karar parfüm künyesinde de yazılı; sitede CSS
+        `uppercase` artık hiç kullanılmıyor ve bunu bir sınama denetliyor.
       */}
       <p
         ref={hintRef}
-        className="absolute -translate-x-1/2 text-[0.6875rem] uppercase tracking-[0.3em] whitespace-nowrap text-white/20 [text-indent:0.3em]"
+        className="absolute -translate-x-1/2 text-[0.6875rem] tracking-[0.3em] whitespace-nowrap text-white/20 [text-indent:0.3em]"
       >
-        {EN.intro.hint}
+        {EN.intro.hint.toUpperCase()}
       </p>
     </div>
   );

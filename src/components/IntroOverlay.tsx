@@ -83,7 +83,7 @@ export function IntroOverlay({ points }: IntroOverlayProps) {
     window.OSMOS_INTRO_TEXT = {
       word: EN.intro.word,
       tag: EN.intro.tag(points.length),
-      hint: EN.intro.hint,
+      hint: EN.intro.hint.toUpperCase(),
     };
   }, [points]);
 

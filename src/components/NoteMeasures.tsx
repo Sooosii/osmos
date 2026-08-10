@@ -93,9 +93,10 @@ function LifeStrip({ volatility, color }: { readonly volatility: Volatility; rea
         o değer düz zemine göre seçilmişti, burada arkada hareketli bir tram
         alanı var ve ince etiketler noktaların içinde kayboluyordu.
       */}
-      <div className="mt-2 flex justify-between text-[9px] uppercase tracking-[0.2em] text-white/45">
-        <span>{formatDuration(STRIP_FIRST_MINUTE)}</span>
-        <span>{formatDuration(SIGNATURE_MAX_MINUTES)}</span>
+      <div className="mt-2 flex justify-between text-[9px] tracking-[0.2em] text-white/45">
+        {/* Büyütme JS'te: CSS dönüşümü `lang="tr"` altında noktalı İ üretiyor. */}
+        <span>{formatDuration(STRIP_FIRST_MINUTE).toUpperCase()}</span>
+        <span>{formatDuration(SIGNATURE_MAX_MINUTES).toUpperCase()}</span>
       </div>
 
       {/*
