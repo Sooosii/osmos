@@ -128,8 +128,8 @@ export function buildNotePage(note: Note, perfumes: readonly Perfume[]): NotePag
 
   return {
     id: note.id,
-    name: note.name.tr,
-    description: note.description.tr,
+    name: note.name.en,
+    description: note.description.en,
     color: noteColor(note),
     carriers,
   };

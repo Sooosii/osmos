@@ -57,7 +57,7 @@ export function EvolutionTimeline() {
         </p>
         {perfume.line ? (
           <p className="mt-6 max-w-xl text-lg font-light leading-relaxed text-white/70">
-            {perfume.line.tr}
+            {perfume.line.en}
           </p>
         ) : null}
       </header>

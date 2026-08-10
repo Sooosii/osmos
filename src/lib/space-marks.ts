@@ -53,7 +53,7 @@ export function buildMarks(perfumes: readonly Perfume[]): readonly SpaceMark[] {
       id: perfume.id,
       name: perfume.name,
       brand: perfume.brand,
-      line: perfume.line?.tr ?? null,
+      line: perfume.line?.en ?? null,
       color: getFamily(dominantFamily(familyVector(perfume))).color,
       x: point.x,
       y: point.y,

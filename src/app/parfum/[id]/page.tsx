@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   return {
     title: `${perfume.name} — ${perfume.brand} · OSMOS`,
-    description: perfume.line?.tr ?? `${perfume.name}, ${perfume.brand}.`,
+    description: perfume.line?.en ?? `${perfume.name}, ${perfume.brand}.`,
   };
 }
 
@@ -75,7 +75,7 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
     belge `lang="en"`.
   */
   const readouts: readonly FrameReadout[] = [
-    { label: 'AILE', value: family.name.tr.toUpperCase() },
+    { label: 'AILE', value: family.name.en.toUpperCase() },
     { label: 'YIL', value: String(perfume.year) },
     { label: 'NOTA', value: String(perfume.notes.length) },
   ];
@@ -169,7 +169,7 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
             </p>
             {perfume.line ? (
               <p className="mt-5 max-w-xl text-base font-light leading-relaxed text-white/70 sm:text-lg">
-                {perfume.line.tr}
+                {perfume.line.en}
               </p>
             ) : null}
           </header>

@@ -211,7 +211,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
         const vector = FAMILY_ORDER.map((family) => note.families[family] ?? 0);
         return {
           noteId: entry.noteId,
-          label: note.name.tr,
+          label: note.name.en,
           family: dominantFamily(vector),
           volatility: note.volatility,
           weight: entry.weight,
@@ -389,7 +389,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
               className="h-1.5 w-1.5 rounded-full"
               style={{ backgroundColor: family.color }}
             />
-            {family.name.tr}
+            {family.name.en}
           </span>
         ))}
       </div>

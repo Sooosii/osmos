@@ -71,7 +71,7 @@ export default function SpaceDraft() {
                 className="h-1.5 w-1.5 rounded-full"
                 style={{ backgroundColor: family.color }}
               />
-              {family.name.tr}
+              {family.name.en}
             </span>
           ))}
         </div>

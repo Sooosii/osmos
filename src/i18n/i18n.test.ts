@@ -1,3 +1,5 @@
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import { EN } from './en';
 import { TR } from './tr';
@@ -50,4 +52,47 @@ describe('sozluk butunlugu', () => {
       expect(value, path).not.toMatch(/[çğıöşüÇĞİÖŞÜ]/);
     }
   });
+});
+
+/** Bir ağaçtaki bütün kaynak dosyalar, verilen uzantılarla. */
+function sourceFiles(dir: string, extensions: readonly string[]): string[] {
+  const found: string[] = [];
+
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) found.push(...sourceFiles(path, extensions));
+    else if (extensions.some((extension) => entry.name.endsWith(extension))) found.push(path);
+  }
+
+  return found;
+}
+
+/** Windows'ta `join` ters bölü üretiyor; karşılaştırmalar tek biçimde. */
+function unix(path: string): string {
+  return path.split('\\').join('/');
+}
+
+/**
+ * Veri okumaları tek uçtan.
+ *
+ * `.tr` alan erişimi kalmışsa ekran karışık dil gösterir. Kaçak Türkçe avcısı
+ * bunu göremez — `.tr` içinde Türkçeye özgü harf yok.
+ *
+ * Muaf: `src/data/**` (veri iki dilli kalıyor) ve `src/i18n/` (sözlüğün evi).
+ */
+test('ekranda .tr okumasi kalmadi', () => {
+  const offenders: string[] = [];
+
+  for (const file of sourceFiles('src', ['.ts', '.tsx'])) {
+    const path = unix(file);
+    if (path.startsWith('src/data/') || path.startsWith('src/i18n/')) continue;
+
+    readFileSync(file, 'utf8')
+      .split('\n')
+      .forEach((line, index) => {
+        if (/\.tr\b/.test(line)) offenders.push(`${path}:${index + 1}`);
+      });
+  }
+
+  expect(offenders).toEqual([]);
 });

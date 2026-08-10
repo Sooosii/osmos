@@ -44,8 +44,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   const note = getNote(id);
   return {
-    title: `${note.name.tr} — nota · OSMOS`,
-    description: note.description.tr,
+    title: `${note.name.en} — nota · OSMOS`,
+    description: note.description.en,
   };
 }
 

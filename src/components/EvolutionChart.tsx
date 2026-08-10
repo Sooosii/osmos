@@ -117,7 +117,7 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
     () =>
       perfume.notes.map((entry) => ({
         noteId: entry.noteId,
-        label: getNote(entry.noteId).name.tr,
+        label: getNote(entry.noteId).name.en,
         color: TIER_COLOR[entry.tier],
       })),
     [perfume],

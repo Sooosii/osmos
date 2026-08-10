@@ -84,7 +84,7 @@ export function PerfumeNotes({ perfume }: PerfumeNotesProps) {
                         }}
                       />
                       <span className="text-sm font-light text-white/60 transition-colors group-hover:text-white">
-                        {note.name.tr}
+                        {note.name.en}
                       </span>
                     </Link>
                   </li>
