@@ -212,3 +212,37 @@ test('ekrana cikabilecek Turkce dize kalmadi', () => {
 
   expect(offenders).toEqual([]);
 });
+
+/**
+ * Sözlük parametresi geçmeyi unutan çağrı avcısı.
+ *
+ * ⚠️ **Ölçülmüş bir hatanın nöbetçisi.** `phaseLabel`, `formatDuration` ve
+ * `axisWord` saf modüllerde duruyor ve sözlüğü **varsayılanlı bir parametre**
+ * olarak alıyor. Varsayılan İngilizce; yani parametre unutulduğunda kod
+ * derleniyor, lint susuyor, kaçak Türkçe avcısı da bir şey görmüyor (kaynakta
+ * Türkçe metin yok — çalışma anında İngilizce metin var).
+ *
+ * `EvolutionSignature` tam olarak böyle kaçırmıştı: Türkçe parfüm sayfasında
+ * ilk kare "Açılış" yazıyor, çizim döngüsünün ikinci karesi üstüne "Opening"
+ * yazıyordu. Ekranda görülerek bulundu.
+ */
+test('sozluk alan fonksiyonlar sozluksuz cagrilmiyor', () => {
+  const takers = ['phaseLabel', 'formatDuration', 'axisWord'];
+  const offenders: string[] = [];
+
+  for (const file of sourceFiles('src', ['.ts', '.tsx'])) {
+    const path = unix(file);
+    if (path.endsWith('.test.ts') || path.startsWith('src/lib/')) continue;
+
+    stripComments(readFileSync(file, 'utf8').split('\n')).forEach((line, index) => {
+      for (const name of takers) {
+        /* Tek argümanlı çağrı: açılıştan kapanışa virgül yok. */
+        if (new RegExp(`\\b${name}\\([^,()]*\\)`).test(line)) {
+          offenders.push(`${path}:${index + 1} ${name}`);
+        }
+      }
+    });
+  }
+
+  expect(offenders).toEqual([]);
+});

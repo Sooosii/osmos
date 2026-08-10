@@ -298,11 +298,11 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
       // gerçekten değiştiğinde yazılıyor — aynı gerekçe: gereksiz yazım, gereksiz
       // layout kirliliği, hissedilir takılma.
       if (phaseRef.current) {
-        const phaseText = phaseLabel(minutes);
+        const phaseText = phaseLabel(minutes, t.phases);
         if (phaseRef.current.textContent !== phaseText) phaseRef.current.textContent = phaseText;
       }
       if (durationRef.current) {
-        const durationText = formatDuration(minutes);
+        const durationText = formatDuration(minutes, t.duration);
         if (durationRef.current.textContent !== durationText) {
           durationRef.current.textContent = durationText;
         }
@@ -315,7 +315,15 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
     // anlatıyor: iptal edilmeyen kare, bileşen geri geldiğinde "zaten kare
     // bekliyor" sanılıp döngüyü kilitliyor.
     return () => cancelAnimationFrame(frame);
-  }, [rows, curves, geometry]);
+    /*
+      ⚠️ `t` bağımlılıkta ve bu şart. Sözlüksüz çağrıldıklarında `phaseLabel` ve
+      `formatDuration` **varsayılan İngilizceye** düşüyor: Türkçe sayfada ilk
+      kare "Açılış · ilk saniyeler" yazıyor, döngünün ikinci karesi üstüne
+      "Opening · 4 minutes" yazıyordu. Kaçak Türkçe avcısı bunu göremez —
+      kaynakta Türkçe metin yok, çalışma anında İngilizce metin var. Ekranda
+      görülerek bulundu (erişilebilirlik turu, 2026-08-10).
+    */
+  }, [rows, curves, geometry, t]);
 
   return (
     <div className="w-full">
