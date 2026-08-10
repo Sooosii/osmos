@@ -72,8 +72,9 @@ export const CURATED_D: readonly Perfume[] = [
     // iz. Ağırlık meyvede ve beyaz miskte; ağır reçineler bilerek yok, onlar
     // kokuyu "temiz yazlık" olmaktan çıkarırdı.
     // `perfumer` YOK ve bu eksik veri değil: marka burnu bilerek öne çıkarmıyor,
-    // anlatısını kavram üzerine kuruyor. Vanille Abricot ile birlikte 44'ün
-    // açıklanmamış iki adı; tahminle doldurulmasın.
+    // anlatısını kavram üzerine kuruyor. Vanille Abricot ile birlikte 52'nin
+    // açıklanmamış iki adı; tahminle doldurulmasın. Long Board da parfümörsüz
+    // ama başka sebeple — `curated-f.ts`.
     id: 'spirit-of-dubai-ajyal',
     name: 'Ajyal',
     brand: 'Spirit of Dubai',

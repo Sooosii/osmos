@@ -6,7 +6,7 @@ import { normalizeAxis } from './space-feel';
 /**
  * Parfüm listesinden çizilmeye hazır nokta listesi.
  *
- * Bu modül **sunucuda** çalışıyor ve orada kalmalı: `projectToSpace` 44×44'lük
+ * Bu modül **sunucuda** çalışıyor ve orada kalmalı: `projectToSpace` 52×52'lik
  * bir kosinüs matrisi kurup üç özvektör çıkarıyor, `nearestNeighbors` her parfüm
  * için tüm havuzu tarıyor. Tarayıcıya inen şey yalnızca sonuç — koordinat, renk,
  * komşu kimlikleri. Nota veritabanı ve benzerlik motoru istemci paketine hiç

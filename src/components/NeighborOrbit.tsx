@@ -23,7 +23,7 @@ import {
  *
  * Bu bileşen istemcide çalışıyor ama **veriyi kendisi hesaplamıyor**: benzerlik
  * ve derinlik sunucuda çıkarılıp düz veri olarak geliyor (`Neighbors.tsx`).
- * Böylece 44×44'lük benzerlik motoru tarayıcı paketine inmiyor —
+ * Böylece 52×52'lik benzerlik motoru tarayıcı paketine inmiyor —
  * `space-marks.ts:11-13`'ün kuralı.
  *
  * Kare başına `setState` yok: `EvolutionChart.tsx:26`'nın ölçerek koyduğu kural.

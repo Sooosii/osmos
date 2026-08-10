@@ -28,10 +28,10 @@ import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
  * garantisiyle gerçek konumlar aynı anda mümkün olmuyordu (ölçüldü: örtüşme
  * 3.16/5) ve kullanıcı garantiyi seçti. Karar geçmişi `lib/neighbor-orbit.ts`te.
  *
- * ④'ün öbür yarısı **künye** de geldi. Bir kez ertelenmişti: 44 parfümün 23'ünde
- * parfümör, 18'inde yıl yoktu. Veri elle tamamlandı; yıl artık 44/44 dolu ve
- * `types.ts` bunu zorunlu kılarak koruyor. Parfümör 42/44 — kalan ikisini marka
- * hiç açıklamadı, o sayfalarda satır tek başına yıla düşüyor.
+ * ④'ün öbür yarısı **künye** de geldi. Bir kez ertelenmişti: o günkü 44 parfümün
+ * 23'ünde parfümör, 18'inde yıl yoktu. Veri elle tamamlandı; yıl artık 52/52 dolu
+ * ve `types.ts` bunu zorunlu kılarak koruyor. Parfümör 49/52 — kalan üçünde satır
+ * tek başına yıla düşüyor, gerekçeleri `types.ts`in `perfumer` alanında.
  *
  * Renk uzaydaki noktanın renginden **türetilmiyor, aynı zincirden geliyor**:
  * `familyVector → dominantFamily → getFamily().color`. İkinci bir kaynak
@@ -159,9 +159,9 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
               İsmin hemen altında duruyor çünkü künye kimliğin parçası: adı okuyan
               göz burnu ve yılı da alıp sonra cümleye geçiyor.
 
-              `perfumer` yoksa satır tek başına yıla düşüyor ve bu bilinçli. 44'ün
-              ikisinde (Vanille Abricot, Ajyal) marka burnu hiç açıklamadı —
-              "bilinmiyor" yazmak da uydurmak da reddedildi, `types.ts:117`.
+              `perfumer` yoksa satır tek başına yıla düşüyor ve bu bilinçli. 52'nin
+              üçünde parfümör yok; hangileri ve neden, `types.ts`in `perfumer`
+              alanında yazıyor — "bilinmiyor" yazmak da uydurmak da reddedildi.
             */}
             <p className="mt-4 text-sm font-light text-white/35">
               {perfume.perfumer ? `${perfume.perfumer}, ` : ''}

@@ -65,7 +65,8 @@ export const CURATED_B: readonly Perfume[] = [
   {
     // `perfumer` YOK ve bu eksik veri değil, bir olgu: marka bu kokunun burnunu
     // hiç açıklamadı. Aranıp bulunamadı diye boş bırakılmış sanılıp bir gün
-    // tahminle doldurulmasın. Ajyal ile birlikte 44'ün açıklanmamış iki adı.
+    // tahminle doldurulmasın. Ajyal ile birlikte 52'nin açıklanmamış iki adı.
+    // Long Board da parfümörsüz ama başka sebeple — `curated-f.ts`.
     id: 'comptoir-sud-pacifique-vanille-abricot',
     name: 'Vanille Abricot',
     brand: 'Comptoir Sud Pacifique',

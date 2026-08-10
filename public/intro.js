@@ -34,7 +34,7 @@
     field.className = 'osmos-intro__field';
     overlay.appendChild(field);
 
-    var dots = pts.map(function (p, i) {
+    var dots = pts.map(function (p) {
       var d = document.createElement('div');
       d.className = 'osmos-intro__dot';
       var size = p.size || 4 + Math.random() * 10;

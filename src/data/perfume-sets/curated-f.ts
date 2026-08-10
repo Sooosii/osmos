@@ -30,6 +30,10 @@ import type { Perfume } from '../types';
  */
 export const CURATED_F: readonly Perfume[] = [
   {
+    // `perfumer` YOK, ama Vanille Abricot ile Ajyal'dan BAŞKA sebeple: onlarda
+    // markanın burnu açıklamadığı araştırılıp doğrulandı, burada öyle bir
+    // araştırma yapılmadı — ad bu turda kaydedilmeden kaldı. Yani "açıklanmamış"
+    // değil, "bakılmamış". Kaynak çıkarsa doldurulsun; tahminle değil.
     id: 'min-new-york-long-board',
     name: 'Long Board',
     brand: 'MiN New York',

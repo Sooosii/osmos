@@ -24,7 +24,7 @@ import { SpaceKeyboardList } from '@/components/space/SpaceKeyboardList';
 /**
  * Koku Uzayı — sitenin ana ekranı.
  *
- * Tuval, çünkü nokta sayısı 44'te durmayacak: 250+ DOM düğümünü her karede
+ * Tuval, çünkü nokta sayısı 52'de durmayacak: 250+ DOM düğümünü her karede
  * yeniden konumlandırmak sürüklemeyi öldürür.
  *
  * Bileşenin işi "ne zaman çizileceği". "Nereye çizileceği" `space-camera.ts`,
@@ -44,7 +44,7 @@ import { SpaceKeyboardList } from '@/components/space/SpaceKeyboardList';
  * Bölme mekanikti — hiçbir mantık değişmedi, davranış birebir aynı.
  *
  * ⚠️ Kamera React durumunda DEĞİL, `useRef` içinde. Sürüklerken kare başına bir
- * `setState` demek kare başına bir React ağacı demek; 44 nokta için gereksiz,
+ * `setState` demek kare başına bir React ağacı demek; 52 nokta için gereksiz,
  * 250'de görünür yavaşlık. React yalnızca seyrek değişenleri (seçim, üstüne
  * gelinen nokta) tutuyor; kamera doğrudan tuvale gidiyor.
  */

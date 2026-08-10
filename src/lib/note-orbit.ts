@@ -11,8 +11,9 @@ import {
  * ama başka bir soruyu cevaplıyor. Orada merkezdeki parfüme **benzeyenler** döner;
  * burada notayı **içerenler**.
  *
- * Modül saf: React, DOM, canvas bilmiyor. Depoda `vitest.config.*` olmadığı için
- * `@/` takma adı sınamalarda çözülmüyor; bu şart kolaylık değil zorunluluk.
+ * Modül saf: React, DOM, canvas bilmiyor. Saflık eskiden araç zorunluluğuydu
+ * (`vitest.config.*` yoktu, `@/` çözülmüyordu); `vitest.config.mts` geldikten
+ * sonra tercih — sınama veri katmanını hiç ayağa kaldırmadan çalışıyor.
  *
  * ## Yarıçap ters
  *

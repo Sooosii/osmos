@@ -56,7 +56,7 @@ export function getFamily(id: ScentFamily): Family {
  *
  * Burada duruyor çünkü tek bağımlılığı `FAMILY_ORDER` ve hem sunucudaki uzay
  * hesabı hem tarayıcıdaki imza bileşeni çağırıyor. `space-marks.ts`'te kalsaydı
- * imza, 44×44'lük benzerlik matrisini istemci paketine sürüklerdi.
+ * imza, 52×52'lik benzerlik matrisini istemci paketine sürüklerdi.
  */
 export function dominantFamily(vector: readonly number[]): ScentFamily {
   let best = 0;

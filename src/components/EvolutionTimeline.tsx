@@ -5,7 +5,7 @@ import { PERFUMES } from '@/data/perfumes';
 import { EvolutionChart } from './EvolutionChart';
 
 /**
- * `/evrim` doğrulama ekranı — 44 parfüm arasında gezinip eğri modelini sınamak.
+ * `/evrim` doğrulama ekranı — 52 parfüm arasında gezinip eğri modelini sınamak.
  *
  * Çizelgenin kendisi artık burada değil, `EvolutionChart` içinde: parfüm
  * sayfası da aynı çizelgeyi kullanıyor ve iki kopya olsaydı biri düzeltilip

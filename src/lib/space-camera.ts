@@ -99,7 +99,7 @@ export interface Viewport {
   /**
    * Nokta bulutunun yarı genişliği ve yarı yüksekliği (dünya birimi).
    *
-   * Ölçek bunlardan hesaplanıyor, sabitten değil: 44 parfümlük bulut 250'ye
+   * Ölçek bunlardan hesaplanıyor, sabitten değil: 52 parfümlük bulut 250'ye
    * çıktığında ya da izdüşüm değiştiğinde çerçeveleme kendiliğinden uyuyor.
    * Elle güncellenecek bir sayı bırakmamak için burada duruyor — sınırları
    * zaten elinde tutan tek yer çizim bileşeni.
