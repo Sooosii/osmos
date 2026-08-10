@@ -1,4 +1,5 @@
 import type { Character, Volatility } from '@/data/types';
+import { EN } from '@/i18n/en';
 import { formatDuration, SIGNATURE_MAX_MINUTES } from '@/lib/evolution-loop';
 import {
   AXES,
@@ -104,11 +105,11 @@ function LifeStrip({ volatility, color }: { readonly volatility: Volatility; rea
       */}
       <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-2 text-[10px] tracking-[0.18em] text-white/45">
         <div className="flex items-baseline gap-2">
-          <dt>TEPE</dt>
+          <dt>{EN.note.measures.peak}</dt>
           <dd className="tabular-nums text-white/60">{formatDuration(volatility.peakMinutes)}</dd>
         </div>
         <div className="flex items-baseline gap-2">
-          <dt>YARI ÖMÜR</dt>
+          <dt>{EN.note.measures.halfLife}</dt>
           <dd className="tabular-nums text-white/60">{formatDuration(volatility.halfLifeMinutes)}</dd>
         </div>
       </dl>
@@ -186,12 +187,16 @@ export function NoteMeasures({ volatility, character, color }: NoteMeasuresProps
   return (
     <>
       <section className="pt-16">
-        <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">UÇUCULUK</h2>
+        <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">
+          {EN.note.measures.volatility}
+        </h2>
         <LifeStrip volatility={volatility} color={color} />
       </section>
 
       <section className="pt-16">
-        <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">KARAKTER</h2>
+        <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">
+          {EN.note.measures.character}
+        </h2>
         <CharacterAxes character={character} color={color} />
       </section>
     </>

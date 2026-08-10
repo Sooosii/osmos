@@ -7,6 +7,7 @@ import { NoteOrbit } from '@/components/NoteOrbit';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
 import { DitherBackdrop } from '@/components/DitherBackdrop';
 import { NoteMeasures } from '@/components/NoteMeasures';
+import { EN } from '@/i18n/en';
 
 /**
  * Nota sayfası — Aşama 3, ansiklopedinin yaprağı.
@@ -44,18 +45,18 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   const note = getNote(id);
   return {
-    title: `${note.name.en} — nota · OSMOS`,
+    title: EN.note.title(note.name.en),
     description: note.description.en,
   };
 }
 
-/** Dakikayı çerçevenin dar alanına sığan biçime indirger: 90′ değil 1s 30′. */
+/** Dakikayı çerçevenin dar alanına sığan biçime indirger: 90′ değil 1h 30′. */
 function minutesLabel(minutes: number): string {
-  if (minutes < 60) return `${minutes}′`;
+  if (minutes < 60) return EN.note.shortMinutes(minutes);
 
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
-  return rest === 0 ? `${hours}s` : `${hours}s ${rest}′`;
+  return rest === 0 ? EN.note.shortHours(hours) : EN.note.shortHoursMinutes(hours, rest);
 }
 
 export default async function NotePage({ params }: { params: Promise<{ id: string }> }) {
@@ -73,14 +74,14 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
     alanına sığan kısaltma var (`minutesLabel`).
   */
   const readouts: readonly FrameReadout[] = [
-    { label: 'BANT', value: band },
-    { label: 'TEPE', value: minutesLabel(note.volatility.peakMinutes) },
-    { label: 'ÖMÜR', value: minutesLabel(note.volatility.halfLifeMinutes) },
+    { label: EN.note.frame.band, value: band },
+    { label: EN.note.frame.peak, value: minutesLabel(note.volatility.peakMinutes) },
+    { label: EN.note.frame.life, value: minutesLabel(note.volatility.halfLifeMinutes) },
   ];
 
   const index = NOTES.findIndex((entry) => entry.id === id) + 1;
-  const position = `NOTA ${String(index).padStart(3, '0')}/${NOTES.length}`;
-  const usage = `${page.carriers.length}/${PERFUMES.length} PARFÜM`;
+  const position = EN.note.position(index, NOTES.length);
+  const usage = EN.note.usage(page.carriers.length, PERFUMES.length);
 
   return (
     <main className="min-h-dvh bg-[#050507] text-white">
@@ -115,7 +116,7 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
               ·
             </span>
             <Link href="/notes" className="transition-colors hover:text-white">
-              NOTALAR
+              {EN.nav.notes}
             </Link>
           </nav>
         }
@@ -151,9 +152,7 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
           {/* ② — "peki bu hangi parfümlerde var?" */}
           <section className="pt-16">
             <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">
-              {page.carriers.length > 0
-                ? `${page.carriers.length} PARFÜMDE`
-                : 'HENÜZ HIÇBIR PARFÜMDE'}
+              {EN.note.carriersHeading(page.carriers.length)}
             </h2>
 
             {page.carriers.length > 0 ? (
@@ -193,8 +192,7 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
                 kullanılmamış olması normal — gerekçe `note-marks.ts`te.
               */
               <p className="max-w-xl text-sm font-light leading-relaxed text-white/40">
-                Bu nota paletin parçası ama seçkideki {PERFUMES.length} parfümün hiçbirinde
-                geçmiyor. Ansiklopedi bir nota sözlüğü; kullanım listesi değil.
+                {EN.note.unused(PERFUMES.length)}
               </p>
             )}
           </section>
@@ -204,13 +202,13 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
               href="/notes"
               className="text-sm font-light text-white/40 transition-colors hover:text-white/80"
             >
-              ← bütün notalar
+              {EN.nav.allNotes}
             </Link>
             <Link
               href="/"
               className="text-sm font-light text-white/40 transition-colors hover:text-white/80"
             >
-              ← uzaya dön
+              {EN.nav.backToSpace}
             </Link>
           </div>
         </div>
