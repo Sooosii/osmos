@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { LOCALES, isLocale } from "@/i18n/locale";
 import { dictFor } from "@/i18n/dict";
 import { LocaleProvider } from "@/i18n/LocaleProvider";
+import { siteUrl } from "@/lib/site-url";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -27,7 +28,15 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang } = await params;
   const t = dictFor(lang);
-  return { title: t.site.title, description: t.site.description };
+  return {
+    /*
+      Paylaşım görsellerinin mutlak adresi buradan çözülüyor. Tek kaynak
+      `lib/site-url.ts`; yayına çıkıldığı gün değişecek tek satır orada.
+    */
+    metadataBase: new URL(siteUrl()),
+    title: t.site.title,
+    description: t.site.description,
+  };
 }
 
 export default async function RootLayout({
