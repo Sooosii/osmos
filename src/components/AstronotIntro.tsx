@@ -18,6 +18,7 @@ import {
   rowsFor,
 } from '@/lib/astronot-tram';
 import { prefersReducedMotion } from '@/lib/motion';
+import { EN } from '@/i18n/en';
 
 /**
  * Açılışın ilk yüzü — karakterlerle taranmış tek astronot, arkasında süzülen
@@ -409,16 +410,18 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
         Perdedeki ipucuyla aynı söz ve aynı ton. "Başka bir şey olmasın"ın
         istisnası — işaretsiz bir tam ekran, kapı değil duvar olurdu.
 
-        `uppercase` bilerek duruyor ve belge `lang="en"` olduğu için "için"
-        IÇIN diye basılıyor — noktasız I. Bu bir hata değil, sahibin tercihi:
-        "İ bunu görmiyim, her yerden düzelt" (2026-08-10). Noktalı İ sitede
-        büyük harfte hiç kullanılmıyor.
+        `uppercase` bilerek duruyor. Metin İngilizce olduğu için noktalı İ
+        sorunu bu satırda ortaya çıkmıyor; sınıf yine de kalkmıyor, çünkü
+        sahibin kuralı ("İ bunu görmiyim, her yerden düzelt", 2026-08-10)
+        belge `lang="en"` kaldığı sürece kendiliğinden işliyor. Türkçe geri
+        geldiği gün (Faz 2) kırılacak yer yalnızca burası değil, sitedeki
+        bütün `uppercase` sınıfları.
       */}
       <p
         ref={hintRef}
         className="absolute -translate-x-1/2 text-[0.6875rem] uppercase tracking-[0.3em] whitespace-nowrap text-white/20 [text-indent:0.3em]"
       >
-        yaklaşmak için kaydır
+        {EN.intro.hint}
       </p>
     </div>
   );

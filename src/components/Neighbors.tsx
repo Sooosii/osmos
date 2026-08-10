@@ -3,6 +3,7 @@ import { dominantFamily, getFamily } from '@/data/families';
 import { familyVector, nearestNeighbors, projectToSpace } from '@/lib/similarity';
 import { NeighborOrbit } from '@/components/NeighborOrbit';
 import type { Perfume } from '@/data/types';
+import { EN } from '@/i18n/en';
 
 /**
  * Uzaydaki komşular — hesabın yapıldığı yer.
@@ -53,15 +54,23 @@ export function Neighbors({ perfume }: NeighborsProps) {
         neighbors={neighbors}
         centerDepth={depths.get(perfume.id) ?? 0.5}
         centerColor={colorOf(perfume)}
-        label={`${perfume.name} parfümüne en çok benzeyen ${neighbors.length} parfüm: ${neighbors
-          .map((entry) => `${entry.name}, %${Math.round(entry.score * 100)}`)
-          .join('; ')}.`}
+        /*
+          Yüzde işareti dile göre taraf değiştiriyor (%85 ↔ 85%), o yüzden
+          biçim burada değil sözlükte: `neighbourEntry`.
+        */
+        label={EN.perfume.neighbourLabel(
+          perfume.name,
+          neighbors.length,
+          neighbors
+            .map((entry) =>
+              EN.perfume.neighbourEntry(entry.name, Math.round(entry.score * 100)),
+            )
+            .join('; '),
+        )}
       />
 
       <p className="mx-auto mt-8 max-w-lg text-xs leading-relaxed text-white/25">
-        Ortadaki bu parfüm. Yakınlık benzerlik: ne kadar yakınsa o kadar benziyor.
-        Yükseklik kokunun uzaydaki derinliği — halkanın üstündekiler daha derin,
-        altındakiler daha yüzeysel. Haritanın düz hâlinde görünmeyen fark bu.
+        {EN.perfume.neighbourCaption}
       </p>
     </div>
   );

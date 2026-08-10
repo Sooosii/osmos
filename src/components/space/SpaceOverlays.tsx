@@ -2,6 +2,7 @@ import type { ReactNode, RefObject } from 'react';
 import type { SpaceMark } from '@/data/types';
 import { APPROACH_CUE } from '@/lib/space-approach';
 import type { FeelTarget } from '@/lib/space-feel';
+import { EN } from '@/i18n/en';
 import { SpaceFeelSliders } from './SpaceFeelSliders';
 
 /**
@@ -116,7 +117,7 @@ export function SpaceOverlays({
         {APPROACH_CUE === 'mark' ? (
           <span className="block h-10 w-px animate-[osmos-breathe_2.8s_ease-in-out_infinite] bg-white/60" />
         ) : (
-          <span className="text-[11px] tracking-[0.45em] text-white/35">OSMOS</span>
+          <span className="text-[11px] tracking-[0.45em] text-white/35">{EN.site.name}</span>
         )}
       </div>
 
@@ -161,7 +162,7 @@ export function SpaceOverlays({
           aria-hidden="true"
         >
           <span className="text-[11px] tracking-[0.25em] text-white/40">
-            KAYDIRMAYA DEVAM ET
+            {EN.space.entryHint}
           </span>
           <span className="h-px w-full overflow-hidden bg-white/10">
             <span

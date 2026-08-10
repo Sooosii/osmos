@@ -12,7 +12,7 @@ import { normalizeAxis } from './space-feel';
  * komşu kimlikleri. Nota veritabanı ve benzerlik motoru istemci paketine hiç
  * girmiyor.
  *
- * Hem Koku Uzayı hem `/uzay` doğrulama taslağı buradan besleniyor. İki ayrı
+ * Hem Koku Uzayı hem `/space` doğrulama taslağı buradan besleniyor. İki ayrı
  * kopya olsaydı biri düzeltilip diğeri unutulduğunda taslak "doğru" derken
  * harita başka bir şey gösterirdi.
  */
@@ -53,7 +53,7 @@ export function buildMarks(perfumes: readonly Perfume[]): readonly SpaceMark[] {
       id: perfume.id,
       name: perfume.name,
       brand: perfume.brand,
-      line: perfume.line?.tr ?? null,
+      line: perfume.line?.en ?? null,
       color: getFamily(dominantFamily(familyVector(perfume))).color,
       x: point.x,
       y: point.y,

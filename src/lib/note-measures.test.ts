@@ -191,36 +191,44 @@ describe('axisWord', () => {
   const TEMPERATURE = AXES[0];
 
   test('merkez iki ucu birden söylüyor', () => {
-    expect(axisWord(TEMPERATURE, 0)).toBe('soğuk ile sıcak arasında');
-    expect(axisWord(TEMPERATURE, 0.1)).toBe('soğuk ile sıcak arasında');
+    expect(axisWord(TEMPERATURE, 0)).toBe('between cool and warm');
+    expect(axisWord(TEMPERATURE, 0.1)).toBe('between cool and warm');
   });
 
   test('eşiklerin her biri kendi sıfatını veriyor', () => {
-    expect(axisWord(TEMPERATURE, 0.2)).toBe('hafif sıcak');
-    expect(axisWord(TEMPERATURE, 0.5)).toBe('sıcak');
-    expect(axisWord(TEMPERATURE, 0.9)).toBe('belirgin sıcak');
+    expect(axisWord(TEMPERATURE, 0.2)).toBe('faintly warm');
+    expect(axisWord(TEMPERATURE, 0.5)).toBe('warm');
+    expect(axisWord(TEMPERATURE, 0.9)).toBe('distinctly warm');
   });
 
   test('eksi taraf öbür ucun sıfatını veriyor', () => {
-    expect(axisWord(TEMPERATURE, -0.2)).toBe('hafif soğuk');
-    expect(axisWord(TEMPERATURE, -0.9)).toBe('belirgin soğuk');
+    expect(axisWord(TEMPERATURE, -0.2)).toBe('faintly cool');
+    expect(axisWord(TEMPERATURE, -0.9)).toBe('distinctly cool');
   });
 
   test('dört bant da veride gerçekten kullanılıyor', () => {
     // Ölçüldü: 544 değerin %15/%29/%41/%16'sı. Bir bant boşalırsa eşikler
     // veriye değil tahmine dayanıyor demektir.
+    //
+    // ⚠️ 'between' kontrolü 'düz'den ÖNCE gelmek zorunda: tarafsız cümlenin
+    // sıfatı yok ve sona bırakılsaydı düz sayılırdı — dört bant dolu görünür,
+    // sınama hiçbir şeyi denetlemezdi.
     const seen = new Set<string>();
     for (const note of NOTES) {
       for (const axis of AXES) {
         const word = axisWord(axis, note.character[axis.id]);
-        seen.add(word.startsWith('hafif') || word.startsWith('belirgin')
-          ? word.split(' ')[0]
-          : word.includes(' ile ')
-            ? 'arada'
-            : 'düz');
+        seen.add(
+          word.startsWith('faintly')
+            ? 'faint'
+            : word.startsWith('distinctly')
+              ? 'distinct'
+              : word.startsWith('between ')
+                ? 'between'
+                : 'plain',
+        );
       }
     }
-    expect(seen).toEqual(new Set(['arada', 'hafif', 'düz', 'belirgin']));
+    expect(seen).toEqual(new Set(['between', 'faint', 'plain', 'distinct']));
   });
 });
 

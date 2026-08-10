@@ -3,12 +3,14 @@
 import Script from 'next/script';
 import { useEffect } from 'react';
 import type { IntroPoint } from '@/lib/intro-points';
+import { EN } from '@/i18n/en';
 import './intro.css';
 
 declare global {
   interface Window {
     OSMOS_INTRO_POINTS?: readonly IntroPoint[];
     OSMOS_INTRO_DISABLE?: boolean;
+    OSMOS_INTRO_TEXT?: { readonly word: string; readonly tag: string; readonly hint: string };
     OsmosIntro?: { readonly init: (points?: readonly IntroPoint[]) => void };
   }
 }
@@ -70,8 +72,19 @@ function fitPerde() {
 }
 
 export function IntroOverlay({ points }: IntroOverlayProps) {
+  /*
+    Noktalar ve metin aynı etkide yazılıyor: ikisi de betiğin okuduğu tek yönlü
+    pencere değişkenleri ve ikisi de `points`e bağlı — tanıtım cümlesindeki sayı
+    noktalardan geliyor. Betiğin kendi yorumu "parfüm eklenince perde de sayar"
+    diyor; sabit bir sayı yazmak o sözü bozardı.
+  */
   useEffect(() => {
     window.OSMOS_INTRO_POINTS = points;
+    window.OSMOS_INTRO_TEXT = {
+      word: EN.intro.word,
+      tag: EN.intro.tag(points.length),
+      hint: EN.intro.hint,
+    };
   }, [points]);
 
   useEffect(() => {

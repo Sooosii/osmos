@@ -1,9 +1,12 @@
 /**
  * Evrim imzasının saati.
  *
- * `space-approach.ts` ile aynı sözleşme: React, DOM, SVG bilmiyor ve hiçbir şey
- * import etmiyor — tek başına okunup sınanabiliyor. Ekranda hiç durmadan dönen
- * animasyonun tamamı bu dosyadaki üç sayıdan ibaret; bileşenin işi yalnızca çizmek.
+ * `space-approach.ts` ile aynı sözleşme: React, DOM, SVG bilmiyor — tek başına
+ * okunup sınanabiliyor. Ekranda hiç durmadan dönen animasyonun tamamı bu
+ * dosyadaki üç sayıdan ibaret; bileşenin işi yalnızca çizmek.
+ *
+ * Tek import sözlük (`i18n/en.ts`) ve sözleşmeyi bozmuyor: kural React/DOM/SVG
+ * içindi, saf bir sabit nesnesi için değil.
  *
  * Zaman eşlemesi logaritmik ve bu bir süsleme değil zorunluluk: doğrusal olsaydı
  * kokunun bütün ilginç kısmı (ilk yarım saat) 12 saniyelik turun ilk yarım
@@ -12,8 +15,10 @@
  *
  * Eşleme eskiden `EvolutionChart` içindeki kaydıracın eşlemesiydi; buraya taşındı
  * ki imza ile çizelge aynı zamanı göstersin. İki kopya olsaydı biri düzeltilip
- * diğeri unutulduğunda parfüm sayfası ile `/evrim` farklı dakikalar gösterirdi.
+ * diğeri unutulduğunda parfüm sayfası ile `/evolution` farklı dakikalar gösterirdi.
  */
+
+import { EN } from '@/i18n/en';
 
 /** Tam bir turun süresi. Doğrudan kullanıcı kararı. */
 export const CYCLE_MS = 12_000;
@@ -30,7 +35,7 @@ export const CYCLE_MS = 12_000;
 export const SIGNATURE_MAX_MINUTES = 480;
 
 /**
- * `/evrim` kaydıracının kapsadığı koku ömrü — 12 saat.
+ * `/evolution` kaydıracının kapsadığı koku ömrü — 12 saat.
  *
  * İmzayla birlikte 8'e **inmedi** ve inmemeli: o ekranın işi eğri modelini sınamak
  * (`EvolutionTimeline.tsx:8`), yarı ömür hatası ise tam da imzadan attığımız o düz
@@ -99,19 +104,28 @@ export function morphAt(progress: number): number {
   return 0.5 - 0.5 * Math.cos(progress * Math.PI * 2);
 }
 
-/** Dakikayı okunur süreye çevirir. */
-export function formatDuration(minutes: number): string {
-  if (minutes < 1) return 'ilk saniyeler';
-  if (minutes < 60) return `${Math.round(minutes)} dakika`;
+/**
+ * Dakikayı okunur süreye çevirir.
+ *
+ * `words` varsayılanlı ve bugün hiç geçilmiyor; Faz 2'de aynı saat Türkçe
+ * okunacak ve o gün bu imza değişmeyecek. Tekil/çoğul ayrımı sözlüğün içinde,
+ * çünkü Türkçede öyle bir ayrım yok.
+ */
+export function formatDuration(
+  minutes: number,
+  words: typeof EN.duration = EN.duration,
+): string {
+  if (minutes < 1) return words.firstSeconds;
+  if (minutes < 60) return words.minutes(Math.round(minutes));
 
   const hours = Math.floor(minutes / 60);
   const rest = Math.round(minutes % 60);
-  return rest === 0 ? `${hours} saat` : `${hours} saat ${rest} dakika`;
+  return rest === 0 ? words.hours(hours) : words.hoursMinutes(hours, rest);
 }
 
 /** Dakikanın hangi evrede olduğu. */
-export function phaseLabel(minutes: number): string {
-  if (minutes < 15) return 'Açılış';
-  if (minutes < 120) return 'Kalp';
-  return 'Dip';
+export function phaseLabel(minutes: number, words: typeof EN.phases = EN.phases): string {
+  if (minutes < 15) return words.opening;
+  if (minutes < 120) return words.heart;
+  return words.base;
 }

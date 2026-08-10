@@ -13,6 +13,7 @@ import {
   phaseLabel,
 } from '@/lib/evolution-loop';
 import type { Perfume, ScentFamily, Volatility } from '@/data/types';
+import { EN } from '@/i18n/en';
 
 /**
  * Evrim imzası — parfümün 8 saatlik ömrü, kendiliğinden ve hiç durmadan.
@@ -211,7 +212,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
         const vector = FAMILY_ORDER.map((family) => note.families[family] ?? 0);
         return {
           noteId: entry.noteId,
-          label: note.name.tr,
+          label: note.name.en,
           family: dominantFamily(vector),
           volatility: note.volatility,
           weight: entry.weight,
@@ -315,12 +316,18 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
     <div className="w-full">
       {/* Saat yazısı — hareketin neyi anlattığını söyleyen tek satır. */}
       <div className="mb-6 flex items-baseline gap-2">
+        {/*
+          Bu ikisi yalnızca ilk kare; sonrasını çizim döngüsü `phaseRef` ve
+          `durationRef` üzerinden `phaseLabel` / `formatDuration`tan yazıyor.
+          Üçü aynı sözlükten okumak zorunda, yoksa ilk kare bir dil, ikinci kare
+          başka dil olur.
+        */}
         <span ref={phaseRef} className="text-sm tracking-wide text-white/80">
-          Açılış
+          {EN.phases.opening}
         </span>
         <span className="text-white/25">·</span>
         <span ref={durationRef} className="text-sm tabular-nums text-white/50">
-          ilk saniyeler
+          {EN.duration.firstSeconds}
         </span>
       </div>
 
@@ -328,9 +335,10 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
         viewBox={`0 0 ${VIEW_WIDTH} ${geometry.viewHeight}`}
         className="block w-full"
         role="img"
-        aria-label={`${perfume.name} evrim imzası: ${rows
-          .map((row) => row.label)
-          .join(', ')} notalarının 8 saat boyunca yükselip düşüşü.`}
+        aria-label={EN.chart.signatureLabel(
+          perfume.name,
+          rows.map((row) => row.label).join(', '),
+        )}
       >
         {rows.map((row, index) => (
           <g key={row.noteId}>
@@ -379,7 +387,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
       {/*
         Renk = aile. Katman göstergesi (Üst/Kalp/Dip) burada YOK: imzada renk
         katmanı değil aileyi anlatıyor, o gösterge yanlış bilgi verirdi. Katmanlı
-        hâli kaydıraçlı çizelgede, `/evrim`'de duruyor.
+        hâli kaydıraçlı çizelgede, `/evolution`'da duruyor.
       */}
       <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2">
         {families.map((family) => (
@@ -389,14 +397,13 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
               className="h-1.5 w-1.5 rounded-full"
               style={{ backgroundColor: family.color }}
             />
-            {family.name.tr}
+            {family.name.en}
           </span>
         ))}
       </div>
 
       <p className="mt-10 max-w-lg text-xs leading-relaxed text-white/25">
-        Bu çizelge bir tahmindir, ölçüm değil. Notaların uçuculuğundan modellenmiştir;
-        gerçek gelişim sıcaklığa, tene ve konsantrasyona göre değişir.
+        {EN.chart.disclaimer}
       </p>
     </div>
   );

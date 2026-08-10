@@ -5,7 +5,7 @@ import { PERFUMES } from '@/data/perfumes';
 import { EvolutionChart } from './EvolutionChart';
 
 /**
- * `/evrim` doğrulama ekranı — 52 parfüm arasında gezinip eğri modelini sınamak.
+ * `/evolution` doğrulama ekranı — 52 parfüm arasında gezinip eğri modelini sınamak.
  *
  * Çizelgenin kendisi artık burada değil, `EvolutionChart` içinde: parfüm
  * sayfası da aynı çizelgeyi kullanıyor ve iki kopya olsaydı biri düzeltilip
@@ -57,7 +57,7 @@ export function EvolutionTimeline() {
         </p>
         {perfume.line ? (
           <p className="mt-6 max-w-xl text-lg font-light leading-relaxed text-white/70">
-            {perfume.line.tr}
+            {perfume.line.en}
           </p>
         ) : null}
       </header>

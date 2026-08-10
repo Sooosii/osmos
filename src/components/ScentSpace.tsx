@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { SpaceMark } from '@/data/types';
+import { EN } from '@/i18n/en';
 
 /**
  * Koku Uzayı — haritanın kendisi.
@@ -51,7 +52,7 @@ export function ScentSpace({ marks }: { readonly marks: readonly SpaceMark[] }) 
         viewBox={`${-VIEW} ${-VIEW} ${VIEW * 2} ${VIEW * 2}`}
         className="h-full w-full rounded-lg border border-white/10 bg-black/40"
         role="img"
-        aria-label="Parfümlerin koku uzayındaki dağılımı"
+        aria-label={EN.draft.spaceLabel}
         onClick={() => setSelectedId(null)}
       >
         {/* Bağlantılar seçimden önce çiziliyor ki noktaların altında kalsınlar. */}

@@ -20,6 +20,12 @@
        window.OSMOS_INTRO_DISABLE = true before this script runs.
     4. Listen for document event 'osmos:intro:done' if you want your app
        to react once the intro has finished.
+    5. To change the wording, set
+
+         window.OSMOS_INTRO_TEXT = { word: '…', tag: '…', hint: '…' };
+
+       before this script runs. Any field you leave out falls back to the
+       English default below, so the file still works on its own.
 */
 (function () {
   function mount(points) {
@@ -59,15 +65,20 @@
       return d;
     });
 
+    var text = window.OSMOS_INTRO_TEXT || {};
+
     var word = document.createElement('div');
     word.className = 'osmos-intro__word';
-    word.textContent = 'osmos';
+    word.textContent = text.word || 'osmos';
     overlay.appendChild(word);
 
     var tag = document.createElement('div');
     tag.className = 'osmos-intro__tag';
     // Sayı gömülü değil, noktalardan sayılıyor: parfüm eklenince perde de sayar.
-    tag.textContent = pts.length + ' parfüm, nota akrabalığından doğan bir harita';
+    // Dışarıdan gelen metin de aynı sözü tutmak zorunda — çağıran onu
+    // `points.length` ile kuruyor (`IntroOverlay`).
+    tag.textContent =
+      text.tag || pts.length + ' perfumes, a map drawn from the kinship of notes';
     overlay.appendChild(tag);
 
     var hint = document.createElement('div');
@@ -77,7 +88,7 @@
      * uzay çok uzakta başlıyor ve tekerlekle geliniyor. Sürüklemek işe yarayan
      * bir hamle, ama sıradaki hamle değil.
      */
-    hint.textContent = 'yaklaşmak için kaydır';
+    hint.textContent = text.hint || 'scroll to come closer';
     overlay.appendChild(hint);
 
     document.body.appendChild(overlay);

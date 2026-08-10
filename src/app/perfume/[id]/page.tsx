@@ -7,6 +7,7 @@ import { EvolutionSignature } from '@/components/EvolutionSignature';
 import { Neighbors } from '@/components/Neighbors';
 import { PerfumeNotes } from '@/components/PerfumeNotes';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
+import { EN } from '@/i18n/en';
 
 /**
  * Parfüm sayfası — yol haritasının ①, ②, ③ ve ④'ü. Tamamı.
@@ -19,7 +20,7 @@ import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
  *
  * ② ile ③ tek bir şeyde birleşti: imza, çizelgenin başka bir hâli. Kaydıraç yok —
  * biçim ve zaman 12 saniyelik bir turda hiç durmadan dönüyor (`EvolutionSignature`).
- * Kaydıraçlı çizelge `/evrim` doğrulama ekranında duruyor; orası iki parfümü aynı
+ * Kaydıraçlı çizelge `/evolution` doğrulama ekranında duruyor; orası iki parfümü aynı
  * dakikada karşılaştırmak için var.
  *
  * ④ ikiye ayrıldı. Komşular geldi: hiç durmadan dönen üç boyutlu bir takımyıldız.
@@ -49,8 +50,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!perfume) return {};
 
   return {
-    title: `${perfume.name} — ${perfume.brand} · OSMOS`,
-    description: perfume.line?.tr ?? `${perfume.name}, ${perfume.brand}.`,
+    title: EN.perfume.title(perfume.name, perfume.brand),
+    description:
+      perfume.line?.en ?? EN.perfume.fallbackDescription(perfume.name, perfume.brand),
   };
 }
 
@@ -75,13 +77,13 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
     belge `lang="en"`.
   */
   const readouts: readonly FrameReadout[] = [
-    { label: 'AILE', value: family.name.tr.toUpperCase() },
-    { label: 'YIL', value: String(perfume.year) },
-    { label: 'NOTA', value: String(perfume.notes.length) },
+    { label: EN.perfume.frame.family, value: family.name.en.toUpperCase() },
+    { label: EN.perfume.frame.year, value: String(perfume.year) },
+    { label: EN.perfume.frame.notes, value: String(perfume.notes.length) },
   ];
 
   const index = PERFUMES.findIndex((entry) => entry.id === id) + 1;
-  const position = `PARFÜM ${String(index).padStart(3, '0')}/${PERFUMES.length}`;
+  const position = EN.perfume.position(index, PERFUMES.length);
 
   return (
     <main className="min-h-dvh bg-[#050507] text-white">
@@ -127,8 +129,8 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
             <span aria-hidden="true" className="text-white/20">
               ·
             </span>
-            <Link href="/notalar" className="transition-colors hover:text-white">
-              NOTALAR
+            <Link href="/notes" className="transition-colors hover:text-white">
+              {EN.nav.notes}
             </Link>
           </nav>
         }
@@ -169,14 +171,16 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
             </p>
             {perfume.line ? (
               <p className="mt-5 max-w-xl text-base font-light leading-relaxed text-white/70 sm:text-lg">
-                {perfume.line.tr}
+                {perfume.line.en}
               </p>
             ) : null}
           </header>
 
           {/* ③ — "aa, o aslında veriymiş" */}
           <section className="pt-14">
-            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">EVRIM</h2>
+            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">
+              {EN.perfume.sections.evolution}
+            </h2>
             <EvolutionSignature perfume={perfume} />
           </section>
 
@@ -192,13 +196,17 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
             tamamen görünmez oluyor ve görünmez bir link yarı zamanlı bir tuzak.
           */}
           <section className="pt-20">
-            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">NOTALAR</h2>
+            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">
+              {EN.perfume.sections.notes}
+            </h2>
             <PerfumeNotes perfume={perfume} />
           </section>
 
           {/* ④ — "peki buna benzeyen ne var?" */}
           <section className="pt-20">
-            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">KOMŞULAR</h2>
+            <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">
+              {EN.perfume.sections.neighbours}
+            </h2>
             <Neighbors perfume={perfume} />
           </section>
 
@@ -207,7 +215,7 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
               href={`/?mark=${perfume.id}`}
               className="text-sm font-light text-white/40 transition-colors hover:text-white/80"
             >
-              ← uzaya dön
+              {EN.nav.backToSpace}
             </Link>
           </div>
         </div>

@@ -165,7 +165,7 @@ export function NeighborOrbit({
                 groupRefs.current[index] = element;
               }}
             >
-              <Link href={`/parfum/${neighbor.id}`} className="group">
+              <Link href={`/perfume/${neighbor.id}`} className="group">
                 <circle
                   ref={(element) => {
                     haloRefs.current[index] = element;

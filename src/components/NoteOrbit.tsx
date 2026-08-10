@@ -18,6 +18,7 @@ import {
 } from '@/lib/note-orbit';
 import { placeLabels } from '@/lib/note-labels';
 import type { NoteMark } from '@/lib/note-marks';
+import { EN } from '@/i18n/en';
 
 /**
  * Nota takımyıldızı — merkezde nota, çevresinde onu içeren parfümler.
@@ -293,10 +294,12 @@ export function NoteOrbit({ carriers, noteName, noteColor }: NoteOrbitProps) {
       role="img"
       aria-label={
         carriers.length === 0
-          ? `${noteName} henüz hiçbir parfümde geçmiyor.`
-          : `${noteName} notasını içeren ${carriers.length} parfüm, üç boyutlu bir yörüngede dönüyor: ${carriers
-              .map((carrier) => carrier.name)
-              .join(', ')}.`
+          ? EN.note.orbitEmpty(noteName)
+          : EN.note.orbitLabel(
+              noteName,
+              carriers.length,
+              carriers.map((carrier) => carrier.name).join(', '),
+            )
       }
       className="block w-full"
       style={{ aspectRatio: `${VIEW_WIDTH} / ${VIEW_HEIGHT}` }}

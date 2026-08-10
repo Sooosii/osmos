@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Perfume, PyramidTier } from '@/data/types';
 import { getNote } from '@/data/notes';
 import { getFamily } from '@/data/families';
+import { EN } from '@/i18n/en';
 
 /**
  * Parfümün nota listesi — ansiklopediye açılan kapı.
@@ -33,11 +34,11 @@ import { getFamily } from '@/data/families';
 
 const TIER_ORDER: readonly PyramidTier[] = ['top', 'heart', 'base'];
 
-const TIER_LABEL: Readonly<Record<PyramidTier, string>> = {
-  top: 'ÜST',
-  heart: 'KALP',
-  base: 'DIP',
-};
+/*
+  Katman adları için ayrı bir harita yok: `EN.bands` aynı üç değeri taşıyor ve
+  `PyramidTier` ile `NoteBand` aynı dize birleşimi. İkinci bir harita tutmak
+  "aynı veriye iki ad takmak" olurdu — bu depoda bir kez şikâyet konusu oldu.
+*/
 
 interface PerfumeNotesProps {
   readonly perfume: Perfume;
@@ -58,7 +59,7 @@ export function PerfumeNotes({ perfume }: PerfumeNotesProps) {
         return (
           <section key={tier}>
             <h3 className="mb-3 text-[0.65rem] tracking-[0.3em] text-white/25">
-              {TIER_LABEL[tier]}
+              {EN.bands[tier]}
             </h3>
             <ul className="flex flex-wrap gap-x-5 gap-y-1">
               {entries.map((entry) => {
@@ -71,7 +72,7 @@ export function PerfumeNotes({ perfume }: PerfumeNotesProps) {
                 return (
                   <li key={entry.noteId}>
                     <Link
-                      href={`/nota/${entry.noteId}`}
+                      href={`/note/${entry.noteId}`}
                       className="group flex items-baseline gap-2 py-1"
                     >
                       <span
@@ -84,7 +85,7 @@ export function PerfumeNotes({ perfume }: PerfumeNotesProps) {
                         }}
                       />
                       <span className="text-sm font-light text-white/60 transition-colors group-hover:text-white">
-                        {note.name.tr}
+                        {note.name.en}
                       </span>
                     </Link>
                   </li>

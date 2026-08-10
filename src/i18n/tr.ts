@@ -1,0 +1,162 @@
+import type { Dict } from './en';
+
+/**
+ * Ekranın sözlüğü — Türkçe, beklemede.
+ *
+ * Faz 1'de ekran bunu okumuyor. Ölü kod değil: sitenin bugüne kadarki bütün
+ * Türkçe metni burada duruyor ve Faz 2'nin (dil değiştirici + `/tr` adresleri)
+ * metin işi hazır bekliyor. Alternatifi dizeleri bulundukları yerde çevirmekti;
+ * o durumda bu cümleler yalnızca git geçmişinde kalırdı ve Faz 2 zaten yazılmış
+ * olanı ikinci kez yazmak zorunda kalırdı.
+ *
+ * Cümleler **birebir** taşındı, yeniden yazılmadı.
+ *
+ * ⚠️ Ekranda noktalı büyük İ yok — sahibin kesin kuralı. IÇIN, KADIFE, KESKIN,
+ * TEMIZ, KIRLI, DIP, AILE: hepsi noktasız I.
+ *
+ * ⚠️ Faz 2'de bu sözlüğün ekrana çıktığı gün `<html lang>` sorusu açılacak:
+ * `lang="tr"` yazılırsa tarayıcı Türkçe büyütme kuralına geçer ve CSS'in
+ * `uppercase` dönüşümü i→İ üretir. Yukarıdaki kural o gün kendiliğinden çöker;
+ * çözüm gerçek tarayıcıda ölçülmeden seçilmemeli.
+ */
+export const TR: Dict = {
+  site: {
+    name: 'OSMOS',
+    title: 'OSMOS',
+    description: 'Koku evreni — niche parfümlerin haritası.',
+  },
+
+  nav: {
+    notes: 'NOTALAR',
+    backToSpace: '← uzaya dön',
+    allNotes: '← bütün notalar',
+  },
+
+  space: {
+    intro: (count) =>
+      `${count} parfüm, konumları nota akrabalığından hesaplandı. Sürükle, yakınlaş, bir noktaya dokun.`,
+    entryHint: 'KAYDIRMAYA DEVAM ET',
+    keyboardList: 'Koku uzayı — parfüme git',
+    perfumeLink: (name) => `${name} sayfası`,
+    sliders: {
+      temperature: { label: 'Sıcaklık — soğuktan sıcağa', low: 'SOĞUK', high: 'SICAK' },
+      cleanliness: { label: 'Temizlik — kirliden temize', low: 'KIRLI', high: 'TEMIZ' },
+      texture: { label: 'Doku — kadifemsiden keskine', low: 'KADIFE', high: 'KESKIN' },
+      proximity: {
+        label: 'Yakınlık — havada dağılandan tene yapışana',
+        low: 'HAVADA',
+        high: 'TENDE',
+      },
+      openDetail: 'Iki eksen daha: doku ve yakınlık',
+      closeDetail: 'Doku ve yakınlık eksenlerini kapat',
+    },
+  },
+
+  intro: {
+    word: 'osmos',
+    tag: (count) => `${count} parfüm, nota akrabalığından doğan bir harita`,
+    hint: 'yaklaşmak için kaydır',
+  },
+
+  perfume: {
+    title: (name, brand) => `${name} — ${brand} · OSMOS`,
+    fallbackDescription: (name, brand) => `${name}, ${brand}.`,
+    frame: { family: 'AILE', year: 'YIL', notes: 'NOTA' },
+    position: (index, total) => `PARFÜM ${String(index).padStart(3, '0')}/${total}`,
+    sections: { evolution: 'EVRIM', notes: 'NOTALAR', neighbours: 'KOMŞULAR' },
+    neighbourLabel: (name, count, list) =>
+      `${name} parfümüne en çok benzeyen ${count} parfüm: ${list}.`,
+    neighbourEntry: (name, percent) => `${name}, %${percent}`,
+    neighbourCaption:
+      'Ortadaki bu parfüm. Yakınlık benzerlik: ne kadar yakınsa o kadar benziyor. Yükseklik kokunun uzaydaki derinliği — halkanın üstündekiler daha derin, altındakiler daha yüzeysel. Haritanın düz hâlinde görünmeyen fark bu.',
+  },
+
+  note: {
+    title: (name) => `${name} — nota · OSMOS`,
+    frame: { band: 'BANT', peak: 'TEPE', life: 'ÖMÜR' },
+    position: (index, total) => `NOTA ${String(index).padStart(3, '0')}/${total}`,
+    usage: (carriers, total) => `${carriers}/${total} PARFÜM`,
+    carriersHeading: (count) => (count > 0 ? `${count} PARFÜMDE` : 'HENÜZ HIÇBIR PARFÜMDE'),
+    unused: (total) =>
+      `Bu nota paletin parçası ama seçkideki ${total} parfümün hiçbirinde geçmiyor. Ansiklopedi bir nota sözlüğü; kullanım listesi değil.`,
+    orbitEmpty: (name) => `${name} henüz hiçbir parfümde geçmiyor.`,
+    orbitLabel: (name, count, list) =>
+      `${name} notasını içeren ${count} parfüm, üç boyutlu bir yörüngede dönüyor: ${list}.`,
+    measures: {
+      volatility: 'UÇUCULUK',
+      character: 'KARAKTER',
+      peak: 'TEPE',
+      halfLife: 'YARI ÖMÜR',
+    },
+    shortMinutes: (minutes) => `${minutes}′`,
+    shortHours: (hours) => `${hours}s`,
+    shortHoursMinutes: (hours, minutes) => `${hours}s ${minutes}′`,
+  },
+
+  notesIndex: {
+    title: (count) => `Notalar — ${count} malzeme · OSMOS`,
+    description: 'Koku uzayını besleyen nota veritabanı, uçuculuk bandına göre.',
+    heading: 'Notalar',
+    lede: (count) =>
+      `${count} malzeme, uçuculuk bandına göre. Renk baskın koku ailesi — uzaydaki noktalarla aynı palet.`,
+    status: (count) => `PALET ${count}`,
+    tail: (used) => `${used} KULLANIMDA`,
+  },
+
+  bands: { top: 'ÜST', heart: 'KALP', base: 'DIP' },
+
+  chart: {
+    tiers: { top: 'Üst', heart: 'Kalp', base: 'Dip' },
+    timeLabel: 'Zaman',
+    disclaimer:
+      'Bu çizelge bir tahmindir, ölçüm değil. Notaların uçuculuğundan modellenmiştir; gerçek gelişim sıcaklığa, tene ve konsantrasyona göre değişir.',
+    signatureLabel: (name, notes) =>
+      `${name} evrim imzası: ${notes} notalarının 8 saat boyunca yükselip düşüşü.`,
+  },
+
+  phases: { opening: 'Açılış', heart: 'Kalp', base: 'Dip' },
+
+  duration: {
+    firstSeconds: 'ilk saniyeler',
+    minutes: (n) => `${n} dakika`,
+    hours: (h) => `${h} saat`,
+    hoursMinutes: (h, m) => `${h} saat ${m} dakika`,
+  },
+
+  axes: {
+    temperature: { low: 'SOĞUK', high: 'SICAK', lowWord: 'soğuk', highWord: 'sıcak' },
+    texture: { low: 'KADIFE', high: 'KESKIN', lowWord: 'kadifemsi', highWord: 'keskin' },
+    cleanliness: { low: 'KIRLI', high: 'TEMIZ', lowWord: 'kirli', highWord: 'temiz' },
+    proximity: {
+      low: 'HAVADA',
+      high: 'TENDE',
+      lowWord: 'havada dağılan',
+      highWord: 'tene yapışan',
+    },
+  },
+
+  axisWords: {
+    between: (low, high) => `${low} ile ${high} arasında`,
+    faint: (word) => `hafif ${word}`,
+    plain: (word) => word,
+    strong: (word) => `belirgin ${word}`,
+  },
+
+  draft: {
+    spaceHeading: 'Uzay taslağı',
+    spaceLede: (count) =>
+      `Benzerlik motorunun doğrulama ekranı. ${count} parfüm; her biri üç kanaldan okunuyor — koku ailesi, karakter (sıcaklık, doku, temizlik, yakınlık) ve paylaşılan notalar. Üçünün birleşiminden çıkan kosinüs uzaklığı klasik MDS ile iki boyuta indirildi. Renk baskın aileyi, nokta boyutu üçüncü bileşeni (derinlik) gösteriyor.`,
+    spaceHint: 'Üstüne gel — adı çıkar. Tıkla — en yakın üç komşusuna bağlanır.',
+    spaceLabel: 'Parfümlerin koku uzayındaki dağılımı',
+    checkpoints: 'Kontrol noktaları',
+    neighbours: 'En yakın komşular',
+    neighboursNote: 'Sayı kosinüs benzerliği: 1.00 aynı karakter, 0.00 ortak hiçbir şey yok.',
+    missing: 'yok',
+    expectations: {
+      nasomatto: 'Nasomatto çifti yakın olmalı',
+      mossy: 'Yosunlu uç bir arada olmalı',
+      dirty: 'Kirli uç bir arada olmalı',
+      alone: 'Not a Perfume yapayalnız olmalı',
+    },
+  },
+};

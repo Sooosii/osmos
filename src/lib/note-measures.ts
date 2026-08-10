@@ -1,4 +1,5 @@
 import type { Character, Volatility } from '@/data/types';
+import { EN } from '@/i18n/en';
 import { intensityAt } from './evolution';
 import { SIGNATURE_MAX_MINUTES } from './evolution-loop';
 import { ditherThreshold } from './dither-field';
@@ -114,56 +115,34 @@ export interface Axis {
 }
 
 /**
- * Dört eksen, `types.ts`teki sırayla.
+ * Eksen sırası — `types.ts`teki `Character` alan sırasıyla aynı, DEĞİŞMEMELİ.
  *
- * Uç adları `Character`ın kendi yorumlarından alındı; ikinci bir sözlük açmak
- * veriyle ekranın ayrışması demek olurdu.
+ * Sıra ve kimlikler bilerek sözlükte değil: kimlikler `Character`ın anahtarları
+ * (çevrilecek bir şey değiller) ve sıra veri şemasına ait. İkisi de sözlüğe
+ * verilseydi bir çeviri dosyası şemayı kaydırabilirdi.
  */
-export const AXES: readonly Axis[] = [
-  {
-    id: 'temperature',
-    low: 'SOĞUK',
-    high: 'SICAK',
-    lowWord: 'soğuk',
-    highWord: 'sıcak',
-  },
-  {
-    /*
-      PÜRÜZSÜZ↔TIRTIKLI'ydı ve ekranda anlaşılmadı — kaydıraçlarda da aynı çift
-      aynı sebeple düşmüştü (`SpaceFeelSliders.tsx`). Sahip ekrana bakıp seçti:
-      KESKIN ucu doğru anlatıyor, karşısına dokunulabilir bir yüzey geldi.
+const AXIS_ORDER = ['temperature', 'texture', 'cleanliness', 'proximity'] as const;
 
-      YUMUŞAK reddedildi (şiddet gibi okunuyor), YUVARLAK ve İPEKSİ de elendi.
-      `kadifemsi` sıfat hâli: ekran okuyucu "hafif kadife" değil "hafif
-      kadifemsi" diyor — `axisWord` sıfat bekliyor, isim değil.
-    */
-    id: 'texture',
-    low: 'KADIFE',
-    high: 'KESKIN',
-    lowWord: 'kadifemsi',
-    highWord: 'keskin',
-  },
-  {
-    id: 'cleanliness',
-    low: 'KIRLI',
-    high: 'TEMIZ',
-    lowWord: 'kirli',
-    highWord: 'temiz',
-  },
-  {
-    /*
-      UZAK değil HAVADA. "Uzak" mesafeden bahsettiği sanılıyordu; oysa eksen
-      kokunun NEREDE durduğunu söylüyor. İki uç da artık yeri adlandırıyor ve
-      `types.ts:71`in kendi sözleriyle aynı. Aynı düzeltme kaydıraçlarda daha
-      önce yapılmıştı; nota sayfası eski sözcükte kalmıştı.
-    */
-    id: 'proximity',
-    low: 'HAVADA',
-    high: 'TENDE',
-    lowWord: 'havada dağılan',
-    highWord: 'tene yapışan',
-  },
-];
+/**
+ * Dört eksen — sözcükler sözlükten, kimlik ve sıra buradan.
+ *
+ * Uç adları uzaydaki kaydıraçlarla (`EN.space.sliders`) **aynı olmak zorunda**:
+ * ikisi aynı veriyi (`Character`) gösteriyor ve tek eksene iki ad takmak
+ * kullanıcıya iki ayrı şey varmış gibi geliyor. Türkçede tam olarak bu şikâyet
+ * yaşandı ve sözcükler o gün eşitlendi.
+ *
+ * Sözcük seçimlerinin geçmişi:
+ *   · Doku PÜRÜZSÜZ↔TIRTIKLI'ydı, ekranda anlaşılmadı; YUMUŞAK şiddet gibi
+ *     okundu, YUVARLAK ve İPEKSİ elendi. KADIFE↔KESKIN sahibin ekrana bakıp
+ *     seçtiği çiftti — İngilizcesi VELVET↔SHARP.
+ *   · Yakınlık UZAK↔YAKIN'dı ve mesafeden bahsettiği sanılıyordu; oysa eksen
+ *     kokunun NEREDE durduğunu söylüyor. HAVADA↔TENDE yeri adlandırıyor —
+ *     İngilizcesi AIR↔SKIN.
+ *
+ * `lowWord`/`highWord` sıfat hâli, isim değil: `axisWord` "faintly velvety"
+ * kuruyor, "faintly velvet" değil.
+ */
+export const AXES: readonly Axis[] = AXIS_ORDER.map((id) => ({ id, ...EN.axes[id] }));
 
 /**
  * Eksen değerinin basamağı, 0–`AXIS_STEPS`.
@@ -215,13 +194,20 @@ const PLAIN_BELOW = 0.7;
  *
  * Görünen şey tram basamakları; ekran okuyucuya giden şey bu cümle. Basamağı
  * "12/16" diye okutmak ölçüyü olduğundan kesin gösterirdi.
+ *
+ * `words` varsayılanlı bir parametre ve bugün hiç geçilmiyor. Faz 2'de aynı
+ * ölçüm Türkçe okunacak; o gün bu imza değişmeyecek, maliyeti bugün sıfır.
  */
-export function axisWord(axis: Axis, value: number): string {
+export function axisWord(
+  axis: Axis,
+  value: number,
+  words: typeof EN.axisWords = EN.axisWords,
+): string {
   const size = Math.abs(value);
-  if (size < NEUTRAL_BELOW) return `${axis.lowWord} ile ${axis.highWord} arasında`;
+  if (size < NEUTRAL_BELOW) return words.between(axis.lowWord, axis.highWord);
 
   const word = value < 0 ? axis.lowWord : axis.highWord;
-  if (size < FAINT_BELOW) return `hafif ${word}`;
-  if (size < PLAIN_BELOW) return word;
-  return `belirgin ${word}`;
+  if (size < FAINT_BELOW) return words.faint(word);
+  if (size < PLAIN_BELOW) return words.plain(word);
+  return words.strong(word);
 }

@@ -11,6 +11,7 @@ import {
   phaseLabel,
 } from '@/lib/evolution-loop';
 import type { Perfume, PyramidTier } from '@/data/types';
+import { EN } from '@/i18n/en';
 
 /**
  * Evrim çizelgesi — bir parfümün notaları zaman içinde yükselip düşüyor.
@@ -19,7 +20,7 @@ import type { Perfume, PyramidTier } from '@/data/types';
  * bu bileşenin içindeydi ve `PERFUMES`'ı doğrudan import ediyordu; o hâliyle
  * parfüm sayfasına konulamazdı, çünkü sayfa tek bir parfümü gösteriyor ve
  * başlığını kendisi kuruyor. Seçici `EvolutionTimeline`'da kaldı — orası
- * `/evrim` doğrulama ekranı, iki ucu karşılaştırmak için var.
+ * `/evolution` doğrulama ekranı, iki ucu karşılaştırmak için var.
  *
  * Kaydıraç logaritmik: yarısı ilk yarım saati, %62'si ilk saati kaplıyor.
  * Doğrusal olsaydı bütün hareket kaydıracın ilk %2'sinde sıkışırdı — kokunun
@@ -46,11 +47,11 @@ const TIER_COLOR: Record<PyramidTier, string> = {
   base: '#9B87D4',
 };
 
-const TIER_LABEL: Record<PyramidTier, string> = {
-  top: 'Üst',
-  heart: 'Kalp',
-  base: 'Dip',
-};
+/*
+  Katman adları burada cümle düzeninde (Top/Heart/Base), nota sayfasında büyük
+  harfle (TOP/HEART/BASE). İki ayrı anahtar bu yüzden var — aynı kavram, farklı
+  tipografi; sözlükte `chart.tiers` ve `bands`.
+*/
 
 interface EvolutionChartProps {
   readonly perfume: Perfume;
@@ -117,7 +118,7 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
     () =>
       perfume.notes.map((entry) => ({
         noteId: entry.noteId,
-        label: getNote(entry.noteId).name.tr,
+        label: getNote(entry.noteId).name.en,
         color: TIER_COLOR[entry.tier],
       })),
     [perfume],
@@ -149,7 +150,7 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
           defaultValue={INITIAL_STEP}
           autoComplete="off"
           onChange={handleSliderInput}
-          aria-label="Zaman"
+          aria-label={EN.chart.timeLabel}
           className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/15 accent-white outline-none"
         />
       </div>
@@ -200,14 +201,13 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
               className="h-1.5 w-1.5 rounded-full"
               style={{ backgroundColor: TIER_COLOR[tier] }}
             />
-            {TIER_LABEL[tier]}
+            {EN.chart.tiers[tier]}
           </span>
         ))}
       </div>
 
       <p className="mt-10 max-w-lg text-xs leading-relaxed text-white/25">
-        Bu çizelge bir tahmindir, ölçüm değil. Notaların uçuculuğundan modellenmiştir;
-        gerçek gelişim sıcaklığa, tene ve konsantrasyona göre değişir.
+        {EN.chart.disclaimer}
       </p>
     </div>
   );
