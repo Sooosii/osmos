@@ -48,10 +48,20 @@ export function proxy(request: NextRequest) {
 }
 
 /*
-  Uzantılı dosyalar dışarıda kalmak zorunda: `public/intro.js` ve `favicon.ico`
-  yeniden yazılsaydı `/en/intro.js` olur ve 404 dönerlerdi. `_next` de aynı
-  sebeple.
+  Yeniden yazmanın dışında kalması gerekenler:
+
+  · `_next` — çatının kendi varlıkları.
+  · Uzantılı dosyalar — `public/intro.js`, `sitemap.xml`, `robots.txt`.
+    `/en/intro.js` diye bir şey yok, 404 dönerlerdi.
+  · `icon` ve `apple-icon` — ⚠️ bunlar `app/` KÖKÜNDE duruyor, `[lang]` altında
+    değil, çünkü simge dile bağlı değil. Yeniden yazılsalardı `/en/icon`a
+    giderlerdi ve orada rota yok: sayfanın head'inde bağlantı görünür, tıklanan
+    yerde 404 çıkardı. Sekme simgesinin gelmemesi sessizce olur — ölçülerek
+    bulundu.
+
+  `opengraph-image` bilerek bu listede DEĞİL: o `[lang]` altında ve yeniden
+  yazılması gerekiyor. Onun kanonik yönlendirme istisnası yukarıda ayrı duruyor.
 */
 export const config = {
-  matcher: ['/((?!_next|.*\\..*).*)'],
+  matcher: ['/((?!_next|icon|apple-icon|.*\\..*).*)'],
 };
