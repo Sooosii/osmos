@@ -1,9 +1,13 @@
 import { describe, expect, test } from 'vitest';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import {
   ACILIS_SEEN_KEY,
   type SessionLike,
   acilisiIsaretle,
   acilistanGecildi,
+  oturumOku,
+  oturumYaz,
 } from './acilis-oturum';
 
 function sahteDepo(baslangic: Record<string, string> = {}): SessionLike {
@@ -67,4 +71,60 @@ describe('depo yoksa ya da fırlatıyorsa', () => {
   test('yazma fırlatırsa çağrı sessizce dönüyor', () => {
     expect(() => acilisiIsaretle(firlatanDepo())).not.toThrow();
   });
+});
+
+describe('genel depo yardimcilari', () => {
+  test('okuma ve yazma herhangi bir anahtarla calisiyor', () => {
+    const depo = sahteDepo();
+    oturumYaz(depo, 'osmos:deneme', 'x');
+    expect(oturumOku(depo, 'osmos:deneme')).toBe('x');
+    expect(oturumOku(depo, 'olmayan')).toBe(null);
+  });
+
+  test('firlatan depo yutuluyor', () => {
+    expect(oturumOku(firlatanDepo(), 'osmos:deneme')).toBe(null);
+    expect(() => oturumYaz(firlatanDepo(), 'osmos:deneme', 'x')).not.toThrow();
+  });
+});
+
+/** Bir ağaçtaki bütün kaynak dosyalar. */
+function kaynaklar(dir: string): string[] {
+  const found: string[] = [];
+
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) found.push(...kaynaklar(path));
+    else if (path.endsWith('.ts') || path.endsWith('.tsx')) found.push(path);
+  }
+
+  return found;
+}
+
+test('hicbir yerde ciplak sessionStorage cagrisi yok', () => {
+  /*
+   * ⚠️ **Uykudaki bir Safari tuzağının nöbetçisi.** Safari "bütün çerezleri
+   * engelle" açıkken `window.sessionStorage`a **erişmek bile** `SecurityError`
+   * fırlatıyor. `use-approach-scene.ts` çıplak çağırıyordu ama çağrılar
+   * `APPROACH_ONCE` sabitinin arkasındaydı ve o sabit `false` — yani satırlar
+   * hiç çalışmıyordu. Tuzak, sabiti bir gün açanın uyarı görmemesiydi; orası
+   * sitenin giriş kapısı. Erişimin tek güvenli yolu `oturumDeposu()` +
+   * `oturumOku`/`oturumYaz`.
+   */
+  const offenders: string[] = [];
+
+  for (const file of kaynaklar('src')) {
+    if (file.endsWith('acilis-oturum.ts') || file.endsWith('acilis-oturum.test.ts')) continue;
+
+    readFileSync(file, 'utf8')
+      .split('\n')
+      .forEach((line, index) => {
+        const trimmed = line.trimStart();
+        const yorum = trimmed.startsWith('*') || trimmed.startsWith('//') || trimmed.startsWith('/*');
+        if (!yorum && line.includes('sessionStorage')) {
+          offenders.push(`${file}:${index + 1}`);
+        }
+      });
+  }
+
+  expect(offenders).toEqual([]);
 });
