@@ -112,6 +112,23 @@ export interface Note {
  */
 export type PyramidTier = 'top' | 'heart' | 'base';
 
+/**
+ * Satıcı bağlantısı — künyedeki "nerede bulunur" satırının bir halkası.
+ *
+ * Para yol haritasının ilk musluğu (sahip onayladı, 2026-08-11): bağlantı
+ * affiliate kimliği taşıdığında, tıklamadan doğan alışveriş komisyon yazar.
+ * Bugün düz mağaza bağlantısı da geçerli — satır bugün de çalışır, affiliate
+ * hesapları açıldığı gün parametre eklenip kazandırmaya başlar.
+ *
+ * ⚠️ `url` mutlak ve `https://` olmak zorunda — `retailers.test.ts` tutuyor.
+ * Kırık bağlantı sessizce kırık kalır: derleme geçer, sayfa çizilir, yalnızca
+ * tıklayan ziyaretçi kaybolur. Kapı bu yüzden sınamada.
+ */
+export interface Retailer {
+  readonly name: string;
+  readonly url: string;
+}
+
 /** Bir parfümün bileşimindeki tek bir nota. */
 export interface PerfumeNote {
   /** `Note.id` referansı. */
@@ -165,6 +182,11 @@ export interface Perfume {
   readonly curated: boolean;
   /** Küratör cümlesi — özgün metin, marka tanıtımından kopyalanmaz. */
   readonly line?: Localized;
+  /**
+   * Satıcı bağlantıları — isteğe bağlı; yokken ya da boşken künyede satır
+   * HİÇ çizilmiyor, sayfa bugünkü hâlinde kalıyor. Gerekçe `Retailer`da.
+   */
+  readonly retailers?: readonly Retailer[];
 }
 
 /** Benzerlik hesabının ürettiği, Koku Uzayı'nda çizilen nokta. */

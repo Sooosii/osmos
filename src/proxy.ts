@@ -94,8 +94,12 @@ export function proxy(request: NextRequest) {
 }
 
 /*
-  Eşleyicinin dışında yalnızca `_next` var — çatının kendi varlıkları, her
-  istekte geliyorlar ve proxy'ye uğramalarının hiçbir faydası yok.
+  Eşleyicinin dışında yalnızca `_next` ve `_vercel` var — ikisi de platformun
+  kendi yolu, uzantı istisnası değil. `_next` çatının varlıkları; `_vercel`
+  ölçümün damarı: Vercel Analytics komut dosyası ve sinyali
+  `/_vercel/insights/...`ten akıyor. Eşleyicinin içine girseydi dil önekiyle
+  `/en/_vercel/...`e yazılır, 404 döner ve ölçüm **sessizce** ölürdü — panel
+  boş kalır, kimse bir hata görmezdi.
 
   ⚠️ Geri kalan her şey bilerek içeride. Eşleyiciye uzantı istisnası eklemek
   cazip ama tam da o, yukarıdaki deliği açan şeydi: proxy'ye uğramayan adres
@@ -106,5 +110,5 @@ export function proxy(request: NextRequest) {
   gerekiyor. Onun kanonik yönlendirme istisnası yukarıda ayrı duruyor.
 */
 export const config = {
-  matcher: ['/((?!_next).*)'],
+  matcher: ['/((?!_next|_vercel).*)'],
 };

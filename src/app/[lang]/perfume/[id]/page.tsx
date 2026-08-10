@@ -210,6 +210,37 @@ export default async function PerfumePage({
               {perfume.perfumer ? `${perfume.perfumer}, ` : ''}
               {perfume.year}
             </p>
+            {/*
+              "Nerede bulunur" — künyenin son satırı; yerini sahip seçti
+              ("kesin künyede", 2026-08-11). Parfümör satırından bir ton daha
+              sönük: künyenin parçası ama kimliğin değil.
+
+              Veri yoksa satır yok — 52 sayfanın retailers'ı boş olanı bugünkü
+              hâlinde duruyor.
+
+              ⚠️ `rel="sponsored"` pazarlık dışı: komisyonlu bağlantının arama
+              motoruna beyanı bu; yoksa cezası siteye yazar. `nofollow` eski
+              robotlar için eşlikçisi, `noopener` yeni sekmenin güvenliği.
+            */}
+            {perfume.retailers?.length ? (
+              <p className="mt-2 text-sm font-light text-white/40">
+                {t.perfume.whereToFind}
+                {' — '}
+                {perfume.retailers.map((retailer, index) => (
+                  <span key={retailer.name}>
+                    {index > 0 ? ' · ' : ''}
+                    <a
+                      href={retailer.url}
+                      target="_blank"
+                      rel="sponsored nofollow noopener"
+                      className="transition-colors hover:text-white/80"
+                    >
+                      {retailer.name} ↗
+                    </a>
+                  </span>
+                ))}
+              </p>
+            ) : null}
             {perfume.line ? (
               <p className="mt-5 max-w-xl text-base font-light leading-relaxed text-white/70 sm:text-lg">
                 {say(perfume.line, locale)}
@@ -251,14 +282,26 @@ export default async function PerfumePage({
             <Neighbors perfume={perfume} lang={lang} />
           </section>
 
-          <div className="mt-24">
-            <Link
-              href={`${withLocale(locale, '/')}?mark=${perfume.id}`}
-              className="text-sm font-light text-white/50 transition-colors hover:text-white/80"
-            >
-              {t.nav.backToSpace}
-            </Link>
-          </div>
+          <footer className="mt-24 space-y-5">
+            {/*
+              Komisyon dipnotu — yasal beyan, yalnızca satıcı satırı olan
+              sayfada. Sayfanın en sönük yazısı: söylenmek zorunda, ama
+              bağırmak zorunda değil.
+            */}
+            {perfume.retailers?.length ? (
+              <p className="text-xs font-light text-white/30">
+                {t.perfume.commissionNote}
+              </p>
+            ) : null}
+            <p>
+              <Link
+                href={`${withLocale(locale, '/')}?mark=${perfume.id}`}
+                className="text-sm font-light text-white/50 transition-colors hover:text-white/80"
+              >
+                {t.nav.backToSpace}
+              </Link>
+            </p>
+          </footer>
         </div>
       </ScreenFrame>
     </main>

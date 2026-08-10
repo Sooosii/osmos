@@ -62,10 +62,14 @@ describe('haritada olmayan adres', () => {
       ⚠️ Eşleyicide uzantı istisnası (`.*\..*`) bir delikti: `/foo.js` gibi
       uydurma adresler proxy'ye uğramadan `[lang]`e düşüyor ve çıplak hata
       belgesi gösteriyordu. Kök varlıklar artık `ROOT_ASSETS`te ada ada sayılı.
+
+      Dışarıda duran iki önek platformun kendi yolları, uzantı istisnası değil:
+      `_next` çatının varlıkları, `_vercel` analitiğin damarı (`proxy.ts`teki
+      gerekçe). İkisi de ada bakıyor, noktaya değil — delik geri açılmıyor.
     */
     const source = read('src/proxy.ts');
 
-    expect(source).toContain("matcher: ['/((?!_next).*)']");
+    expect(source).toContain("matcher: ['/((?!_next|_vercel).*)']");
     expect(source).toContain('ROOT_ASSETS.has(pathname)');
   });
 

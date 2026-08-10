@@ -82,7 +82,8 @@ not what the code does.
 
 Next.js 16 (App Router, Turbopack) · React 19 · Tailwind 4 · TypeScript ·
 Vitest. Drawing is canvas and SVG; there is no charting library. The site is
-generated statically and makes no outbound request at runtime.
+generated statically and makes no third-party request at runtime — the one
+beacon it sends is its own cookie-less, first-party analytics.
 
 ## Configuration
 
