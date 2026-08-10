@@ -59,7 +59,44 @@ sonradan açmak her zaman mümkün, tersi değil.
 CC BY-NC (ikili lisans, bu ölçekte gereksiz karmaşa), ve hiç yazmamak
 (yayın günü ambiguity bırakırdı).
 
+## ④ iPhone turu — kodun göremediği hata oradan çıktı
+
+Sahip siteyi telefonda gezdi ve **cihazsız bulunamayacak** bir şey buldu:
+uzayda iki parmakla yakınlaştırma çalışmıyordu. Üç turda çözüldü ve her tur
+bir şey öğretti.
+
+**Tur 1 — tahmin, tutmadı.** "Safari'nin sayfa yakınlaştırması araya giriyor"
+diye standart dışı `gesture*` olaylarının varsayılanı kesildi. Sahip sınadı:
+sorun sürdü. *Ders: cihaz elimde yokken tahminle düzeltme yapılmamalı.*
+
+**Tur 2 — ölçüm.** Chromium'da **gerçek çift dokunuş** üretildi (CDP
+`Input.dispatchTouchEvent`, iPhone ölçüleri) ve sıkıştırmanın **zaten
+çalıştığı** görüldü. Demek ki kod doğru, sorun işaretçi olaylarının iOS'ta
+bölünmesi. İki parmak **dokunma olaylarından** okunmaya başladı — `touchmove`
+bütün parmakları tek olayda veriyor, yakalama ve iptal karmaşası hiç yok
+(harita kütüphanelerinin iOS için yaptığı da bu).
+
+**Tur 3 — asıl sebep.** Sahip: *"iki parmağımla aşağı çekince büyüyor, yukarı
+çekince küçülüyor."* Bu tarif hatayı tek cümlede verdi: iki parmakla
+**kaydırmanın karşılığı yoktu** ve hareket bütünüyle yakınlaşmaya sayılıyordu.
+İki sebep birden vardı:
+
+- Dokunma yolu yalnızca **mesafeyi** okuyordu. Artık **ortanın yer
+  değiştirmesi** de okunuyor: mesafe yakınlaştırıyor, orta kaydırıyor, ikisi
+  aynı harekette birlikte olabiliyor. Sıra önemli — yakınlaşma ortaya çapalı,
+  o yüzden önce o.
+- Safari iki parmaklı kaydırmayı **tekerlek olayına** çeviriyor ve `onWheel`
+  masaüstündeki gibi yakınlaştırıyordu. Parmak ekrandayken (ve kalktıktan
+  sonraki 400 ms boyunca, savrulma olayları için) tekerleğe artık bakılmıyor.
+
+⚠️ **Kalan kural:** dokunuşun karşılığını yalnızca dokunma yolu verir. Tekerlek
+masaüstünündür; iki parmak kaydırmayı tekerleğe çeviren tarayıcı yüzünden ikisi
+karışırsa hareket iki kez sayılır.
+
+Sahip son hâli telefonda onayladı: "şimdi düzgün çalışıyor".
+
 ## Sonuç
 
-241 sınama yeşil, lint sessiz, 392 sayfa. Geriye kalan tek şey **gerçek bir
-iPhone'da bir tur** — kod tarafında yapılabilecek bir şey kalmadı.
+241 sınama yeşil, lint sessiz, 392 sayfa. iPhone turu yapıldı ve çıkan tek
+hata düzeltildi. Doğrulanmadan kalan: eski iOS'ta (16.4 öncesi) renkler —
+Tailwind 4'ün tabanı orada çalışmıyor ve sahibin telefonu daha yeni.
