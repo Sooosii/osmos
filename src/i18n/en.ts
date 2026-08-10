@@ -89,6 +89,14 @@ export const EN = {
     neighbourEntry: (name: string, percent: number) => `${name}, ${percent}%`,
     neighbourCaption:
       'The one in the middle is this perfume. Closeness is similarity: the nearer it sits, the more alike it is. Height is depth in the space — those above the ring sit deeper, those below sit closer to the surface. It is the difference the flat map cannot show.',
+    /*
+      Künyedeki satıcı satırı. Sözcükler bilerek alçak sesli: "buy now" değil
+      "where to find" — künye kimlik anlatır, satış bağırmaz. Dipnot yasal
+      beyan (komisyonlu bağlantı açıklanmak zorunda) ve yalnızca satırı olan
+      sayfada görünür.
+    */
+    whereToFind: 'where to find',
+    commissionNote: 'links may earn a commission',
   },
 
   note: {

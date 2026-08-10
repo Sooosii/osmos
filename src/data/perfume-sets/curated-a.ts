@@ -23,6 +23,17 @@ export const CURATED_A: readonly Perfume[] = [
     year: 2012,
     perfumer: 'François Demachy',
     curated: true,
+    /*
+      İlk satıcı bağlantısı — "nerede bulunur" satırının ekranda görülüp
+      karara bağlanması için bu tek sayfada. Şimdilik düz arama bağlantısı:
+      satıcıların ürün adresleri elle uydurulmuyor (FragranceNet ve benzeri
+      robota kapalı, adres doğrulanamıyor); affiliate hesapları açıldığında
+      derin bağlantıyı satıcının kendi paneli üretecek ve 52 parfüm o gün
+      topluca dolacak.
+    */
+    retailers: [
+      { name: 'Amazon', url: 'https://www.amazon.com/s?k=Dior+Oud+Ispahan' },
+    ],
     line: {
       en: 'A rose left too long in a room full of smoke — sweet, medicinal, unwilling to leave.',
       tr: 'Dumanla dolu bir odada fazla kalmış bir gül — tatlı, tıbbi, gitmeye niyetsiz.',

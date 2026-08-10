@@ -89,6 +89,9 @@ export const TR: Dict = {
     neighbourEntry: (name, percent) => `${name}, %${percent}`,
     neighbourCaption:
       'Ortadaki bu parfüm. Yakınlık benzerlik: ne kadar yakınsa o kadar benziyor. Yükseklik kokunun uzaydaki derinliği — halkanın üstündekiler daha derin, altındakiler daha yüzeysel. Haritanın düz hâlinde görünmeyen fark bu.',
+    /* İkisi de küçük harf kalıyor; büyütülselerdi kural noktasız I isterdi. */
+    whereToFind: 'nerede bulunur',
+    commissionNote: 'bağlantılar komisyon kazandırabilir',
   },
 
   note: {
