@@ -13,7 +13,8 @@ import {
   phaseLabel,
 } from '@/lib/evolution-loop';
 import type { Perfume, ScentFamily, Volatility } from '@/data/types';
-import { EN } from '@/i18n/en';
+import { useDict, useLocale } from '@/i18n/LocaleProvider';
+import { say } from '@/i18n/dict';
 
 /**
  * Evrim imzası — parfümün 8 saatlik ömrü, kendiliğinden ve hiç durmadan.
@@ -196,6 +197,9 @@ interface EvolutionSignatureProps {
 }
 
 export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
+  const t = useDict();
+  const locale = useLocale();
+
   const pathRefs = useRef<(SVGPathElement | null)[]>([]);
   const nameRefs = useRef<(SVGTextElement | null)[]>([]);
   const valueRefs = useRef<(SVGTextElement | null)[]>([]);
@@ -212,13 +216,14 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
         const vector = FAMILY_ORDER.map((family) => note.families[family] ?? 0);
         return {
           noteId: entry.noteId,
-          label: note.name.en,
+          label: say(note.name, locale),
           family: dominantFamily(vector),
           volatility: note.volatility,
           weight: entry.weight,
         };
       }),
-    [perfume],
+    // Dil de girdinin parçası: nota adları sayfanın dilinde yazılıyor.
+    [perfume, locale],
   );
 
   const geometry = useMemo(() => geometryFor(rows.length), [rows.length]);
@@ -323,11 +328,11 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
           başka dil olur.
         */}
         <span ref={phaseRef} className="text-sm tracking-wide text-white/80">
-          {EN.phases.opening}
+          {t.phases.opening}
         </span>
         <span className="text-white/25">·</span>
         <span ref={durationRef} className="text-sm tabular-nums text-white/50">
-          {EN.duration.firstSeconds}
+          {t.duration.firstSeconds}
         </span>
       </div>
 
@@ -335,7 +340,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
         viewBox={`0 0 ${VIEW_WIDTH} ${geometry.viewHeight}`}
         className="block w-full"
         role="img"
-        aria-label={EN.chart.signatureLabel(
+        aria-label={t.chart.signatureLabel(
           perfume.name,
           rows.map((row) => row.label).join(', '),
         )}
@@ -397,13 +402,13 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
               className="h-1.5 w-1.5 rounded-full"
               style={{ backgroundColor: family.color }}
             />
-            {family.name.en}
+            {say(family.name, locale)}
           </span>
         ))}
       </div>
 
       <p className="mt-10 max-w-lg text-xs leading-relaxed text-white/25">
-        {EN.chart.disclaimer}
+        {t.chart.disclaimer}
       </p>
     </div>
   );

@@ -1,17 +1,25 @@
 import { describe, expect, test } from 'vitest';
 import { NOTES } from '../data/notes';
+import { EN } from '@/i18n/en';
 import {
-  AXES,
   AXIS_CENTER,
   AXIS_STEPS,
   STRIP_COLUMNS,
   STRIP_ROWS,
+  axesFor,
   axisLevel,
   axisSpan,
   axisWord,
   columnMinutes,
   lifeStripCells,
 } from './note-measures';
+
+/**
+ * Eksenler artık sabit değil, sözlükten kuruluyor: aynı eksenin uç adları
+ * sayfanın diline göre değişiyor. Sınamalar İngilizce sözlükle çalışıyor —
+ * beklentiler değişmedi, yalnızca `AXES`in nereden geldiği değişti.
+ */
+const AXES = axesFor(EN);
 
 /** Bir sütunun kaç hücresi yanıyor. */
 function columnFill(cells: readonly boolean[], column: number): number {

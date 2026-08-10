@@ -1,5 +1,7 @@
 import type { Note, Perfume } from '@/data/types';
 import { dominantFamily, getFamily } from '@/data/families';
+import { say } from '@/i18n/dict';
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/locale';
 import { familyVector, projectToSpace } from './similarity';
 
 /**
@@ -100,7 +102,11 @@ export function countUsedNotes(notes: readonly Note[], perfumes: readonly Perfum
  * rengin henüz kullanılmamış olması normal ve sayfa o durumda da açılıyor —
  * yörünge boş, tarif yerinde. Ansiklopedi bir nota sözlüğü; kullanım listesi değil.
  */
-export function buildNotePage(note: Note, perfumes: readonly Perfume[]): NotePage {
+export function buildNotePage(
+  note: Note,
+  perfumes: readonly Perfume[],
+  locale: Locale = DEFAULT_LOCALE,
+): NotePage {
   const points = projectToSpace(perfumes);
   const depthById = new Map(points.map((point) => [point.perfumeId, point.depth]));
 
@@ -128,8 +134,8 @@ export function buildNotePage(note: Note, perfumes: readonly Perfume[]): NotePag
 
   return {
     id: note.id,
-    name: note.name.en,
-    description: note.description.en,
+    name: say(note.name, locale),
+    description: say(note.description, locale),
     color: noteColor(note),
     carriers,
   };

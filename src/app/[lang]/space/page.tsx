@@ -4,7 +4,8 @@ import { familyVector, nearestNeighbors } from '@/lib/similarity';
 import { buildMarks } from '@/lib/space-marks';
 import { ScentSpace } from '@/components/ScentSpace';
 import type { ScentFamily } from '@/data/types';
-import { EN } from '@/i18n/en';
+import type { Dict } from '@/i18n/en';
+import { getDict, localeFor, say } from '@/i18n/dict';
 
 /**
  * Uzay taslağı — benzerlik motorunu doğrulamak için.
@@ -26,26 +27,34 @@ import { EN } from '@/i18n/en';
  * akrabalığı koku akrabalığı demek değil. Nasomatto çifti gerçekten benziyor,
  * ev DNA'sı testi olarak o yeterli.
  */
-const EXPECTATIONS: readonly { readonly label: string; readonly ids: readonly string[] }[] = [
-  {
-    label: EN.draft.expectations.nasomatto,
-    ids: ['nasomatto-baraonda', 'nasomatto-blamage'],
-  },
-  {
-    label: EN.draft.expectations.mossy,
-    ids: ['parfum-dempire-azemour-les-orangers', 'papillon-dryad'],
-  },
-  {
-    label: EN.draft.expectations.dirty,
-    ids: ['bogue-maai', 'serge-lutens-muscs-koublai-khan'],
-  },
-  { label: EN.draft.expectations.alone, ids: ['juliette-has-a-gun-not-a-perfume'] },
-];
+function expectationsFor(
+  t: Dict,
+): readonly { readonly label: string; readonly ids: readonly string[] }[] {
+  return [
+    {
+      label: t.draft.expectations.nasomatto,
+      ids: ['nasomatto-baraonda', 'nasomatto-blamage'],
+    },
+    {
+      label: t.draft.expectations.mossy,
+      ids: ['parfum-dempire-azemour-les-orangers', 'papillon-dryad'],
+    },
+    {
+      label: t.draft.expectations.dirty,
+      ids: ['bogue-maai', 'serge-lutens-muscs-koublai-khan'],
+    },
+    { label: t.draft.expectations.alone, ids: ['juliette-has-a-gun-not-a-perfume'] },
+  ];
+}
 
-export default function SpaceDraft() {
+export default async function SpaceDraft({ params }: { params: Promise<{ lang: string }> }) {
+  const locale = localeFor((await params).lang);
+  const t = getDict(locale);
+  const expectations = expectationsFor(t);
+
   // Bütün hesap burada, sunucuda. İstemciye giden yalnızca çizilmiş sonuç:
   // koordinatlar, renkler ve komşuluk kimlikleri.
-  const marks = buildMarks(PERFUMES);
+  const marks = buildMarks(PERFUMES, locale);
   const pointById = new Map(marks.map((mark) => [mark.id, mark]));
 
   const usedFamilies = new Set(
@@ -55,15 +64,15 @@ export default function SpaceDraft() {
   return (
     <div className="min-h-screen bg-[#0A0A0C] px-6 py-16 text-white sm:px-12">
       <div className="mx-auto max-w-4xl">
-        <p className="mb-2 text-xs tracking-[0.3em] text-white/30">{EN.site.name}</p>
-        <h1 className="text-3xl font-light tracking-tight">{EN.draft.spaceHeading}</h1>
+        <p className="mb-2 text-xs tracking-[0.3em] text-white/30">{t.site.name}</p>
+        <h1 className="text-3xl font-light tracking-tight">{t.draft.spaceHeading}</h1>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/40">
-          {EN.draft.spaceLede(PERFUMES.length)}
+          {t.draft.spaceLede(PERFUMES.length)}
         </p>
 
         {/* Dağılım */}
         <ScentSpace marks={marks} />
-        <p className="mt-3 text-xs text-white/25">{EN.draft.spaceHint}</p>
+        <p className="mt-3 text-xs text-white/25">{t.draft.spaceHint}</p>
 
         {/* Aile göstergesi — yalnızca haritada geçenler */}
         <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2">
@@ -73,15 +82,15 @@ export default function SpaceDraft() {
                 className="h-1.5 w-1.5 rounded-full"
                 style={{ backgroundColor: family.color }}
               />
-              {family.name.en}
+              {say(family.name, locale)}
             </span>
           ))}
         </div>
 
         {/* Kontrol noktaları */}
-        <h2 className="mt-16 text-lg font-light">{EN.draft.checkpoints}</h2>
+        <h2 className="mt-16 text-lg font-light">{t.draft.checkpoints}</h2>
         <ul className="mt-4 space-y-2 text-sm">
-          {EXPECTATIONS.map((check) => (
+          {expectations.map((check) => (
             <li key={check.label} className="text-white/50">
               <span className="text-white/70">{check.label}</span>
               {' — '}
@@ -91,7 +100,7 @@ export default function SpaceDraft() {
                     const point = pointById.get(id);
                     return point
                       ? `(${point.x.toFixed(2)}, ${point.y.toFixed(2)})`
-                      : EN.draft.missing;
+                      : t.draft.missing;
                   })
                   .join(' · ')}
               </span>
@@ -100,8 +109,8 @@ export default function SpaceDraft() {
         </ul>
 
         {/* Komşuluklar — doğrulamanın asıl aracı */}
-        <h2 className="mt-16 text-lg font-light">{EN.draft.neighbours}</h2>
-        <p className="mt-2 text-xs text-white/30">{EN.draft.neighboursNote}</p>
+        <h2 className="mt-16 text-lg font-light">{t.draft.neighbours}</h2>
+        <p className="mt-2 text-xs text-white/30">{t.draft.neighboursNote}</p>
         <ul className="mt-5 space-y-4">
           {PERFUMES.map((perfume) => (
             <li key={perfume.id} className="text-sm">

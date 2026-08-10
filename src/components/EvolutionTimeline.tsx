@@ -3,6 +3,8 @@
 import { useMemo, useState } from 'react';
 import { PERFUMES } from '@/data/perfumes';
 import { EvolutionChart } from './EvolutionChart';
+import { useLocale } from '@/i18n/LocaleProvider';
+import { say } from '@/i18n/dict';
 
 /**
  * `/evolution` doğrulama ekranı — 52 parfüm arasında gezinip eğri modelini sınamak.
@@ -16,6 +18,7 @@ import { EvolutionChart } from './EvolutionChart';
  * karşılaştırmak bu ekranın asıl işi.
  */
 export function EvolutionTimeline() {
+  const locale = useLocale();
   const [perfumeId, setPerfumeId] = useState(PERFUMES[0].id);
 
   const perfume = useMemo(
@@ -57,7 +60,7 @@ export function EvolutionTimeline() {
         </p>
         {perfume.line ? (
           <p className="mt-6 max-w-xl text-lg font-light leading-relaxed text-white/70">
-            {perfume.line.en}
+            {say(perfume.line, locale)}
           </p>
         ) : null}
       </header>

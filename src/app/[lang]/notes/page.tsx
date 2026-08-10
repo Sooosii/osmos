@@ -5,7 +5,8 @@ import { getFamily } from '@/data/families';
 import { countUsedNotes } from '@/lib/note-marks';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
 import type { Note } from '@/data/types';
-import { EN } from '@/i18n/en';
+import { dictFor, getDict, localeFor, say } from '@/i18n/dict';
+import { withLocale } from '@/i18n/locale';
 
 /**
  * Nota dizini — ansiklopedinin ikinci kapısı.
@@ -23,10 +24,10 @@ import { EN } from '@/i18n/en';
  * Sunucu bileşeni; istemci JavaScript'i yok.
  */
 
-export const metadata = {
-  title: EN.notesIndex.title(NOTES.length),
-  description: EN.notesIndex.description,
-};
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const t = dictFor((await params).lang);
+  return { title: t.notesIndex.title(NOTES.length), description: t.notesIndex.description };
+}
 
 /** Notanın baskın ailesi — `note-marks.ts`teki `noteColor` ile aynı mantık. */
 function noteColor(note: Note): string {
@@ -42,7 +43,10 @@ function noteColor(note: Note): string {
   return getFamily(bestFamily as Parameters<typeof getFamily>[0]).color;
 }
 
-export default function NotesIndex() {
+export default async function NotesIndex({ params }: { params: Promise<{ lang: string }> }) {
+  const locale = localeFor((await params).lang);
+  const t = getDict(locale);
+
   /*
     Çerçevedeki her sayı gerçek (`ScreenFrame.tsx`). Üst şeritte paletin kendi
     yapısı — bant başına kaç malzeme; alt şeritte paletin büyüklüğü ve ne
@@ -52,7 +56,7 @@ export default function NotesIndex() {
     savunduğu şeyi rakama çeviriyor: palet ile kullanım listesi aynı şey değil.
   */
   const readouts: readonly FrameReadout[] = BANDS.map(({ band, notes }) => ({
-    label: EN.bands[band],
+    label: t.bands[band],
     value: String(notes.length),
   }));
 
@@ -63,29 +67,29 @@ export default function NotesIndex() {
       <ScreenFrame
         nav={
           <nav className="flex items-center gap-3 text-[10px] tracking-[0.3em] text-white/40">
-            <Link href="/" className="transition-colors hover:text-white">
-              {EN.site.name}
+            <Link href={withLocale(locale, '/')} className="transition-colors hover:text-white">
+              {t.site.name}
             </Link>
           </nav>
         }
         readouts={readouts}
-        status={EN.notesIndex.status(NOTES.length)}
-        tail={EN.notesIndex.tail(used)}
+        status={t.notesIndex.status(NOTES.length)}
+        tail={t.notesIndex.tail(used)}
       >
         <div className="relative mx-auto max-w-3xl px-6 sm:px-10">
           <header className="pt-8 sm:pt-14">
             <h1 className="text-4xl font-light leading-[1.05] tracking-tight sm:text-6xl">
-              {EN.notesIndex.heading}
+              {t.notesIndex.heading}
             </h1>
             <p className="mt-5 max-w-xl text-base font-light leading-relaxed text-white/50">
-              {EN.notesIndex.lede(NOTES.length)}
+              {t.notesIndex.lede(NOTES.length)}
             </p>
           </header>
 
           {BANDS.map(({ band, notes }) => (
             <section key={band} className="pt-16">
               <h2 className="mb-6 text-xs tracking-[0.3em] text-white/30">
-                {EN.bands[band]}
+                {t.bands[band]}
                 <span className="ml-3 text-white/20">{notes.length}</span>
               </h2>
 
@@ -93,7 +97,7 @@ export default function NotesIndex() {
                 {notes.map((note) => (
                   <li key={note.id}>
                     <Link
-                      href={`/note/${note.id}`}
+                      href={withLocale(locale, `/note/${note.id}`)}
                       className="group flex items-baseline gap-3 py-2 transition-colors"
                     >
                       <span
@@ -102,7 +106,7 @@ export default function NotesIndex() {
                         style={{ backgroundColor: noteColor(note) }}
                       />
                       <span className="text-sm font-light text-white/60 transition-colors group-hover:text-white">
-                        {note.name.en}
+                        {say(note.name, locale)}
                       </span>
                     </Link>
                   </li>

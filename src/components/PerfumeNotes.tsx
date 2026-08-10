@@ -2,7 +2,8 @@ import Link from 'next/link';
 import type { Perfume, PyramidTier } from '@/data/types';
 import { getNote } from '@/data/notes';
 import { getFamily } from '@/data/families';
-import { EN } from '@/i18n/en';
+import { getDict, localeFor, say } from '@/i18n/dict';
+import { withLocale } from '@/i18n/locale';
 
 /**
  * Parfümün nota listesi — ansiklopediye açılan kapı.
@@ -42,9 +43,19 @@ const TIER_ORDER: readonly PyramidTier[] = ['top', 'heart', 'base'];
 
 interface PerfumeNotesProps {
   readonly perfume: Perfume;
+  /**
+   * Sayfanın dili.
+   *
+   * ⚠️ Prop olarak **dil geçiyor, sözlük değil**: sözlükte işlev var ve bu
+   * bileşen bir gün `'use client'` alırsa sözlük prop'u serileştirilemezdi.
+   */
+  readonly lang: string;
 }
 
-export function PerfumeNotes({ perfume }: PerfumeNotesProps) {
+export function PerfumeNotes({ perfume, lang }: PerfumeNotesProps) {
+  const locale = localeFor(lang);
+  const t = getDict(locale);
+
   return (
     <div className="flex flex-col gap-8">
       {TIER_ORDER.map((tier) => {
@@ -59,7 +70,7 @@ export function PerfumeNotes({ perfume }: PerfumeNotesProps) {
         return (
           <section key={tier}>
             <h3 className="mb-3 text-[0.65rem] tracking-[0.3em] text-white/25">
-              {EN.bands[tier]}
+              {t.bands[tier]}
             </h3>
             <ul className="flex flex-wrap gap-x-5 gap-y-1">
               {entries.map((entry) => {
@@ -72,7 +83,7 @@ export function PerfumeNotes({ perfume }: PerfumeNotesProps) {
                 return (
                   <li key={entry.noteId}>
                     <Link
-                      href={`/note/${entry.noteId}`}
+                      href={withLocale(locale, `/note/${entry.noteId}`)}
                       className="group flex items-baseline gap-2 py-1"
                     >
                       <span
@@ -85,7 +96,7 @@ export function PerfumeNotes({ perfume }: PerfumeNotesProps) {
                         }}
                       />
                       <span className="text-sm font-light text-white/60 transition-colors group-hover:text-white">
-                        {note.name.en}
+                        {say(note.name, locale)}
                       </span>
                     </Link>
                   </li>

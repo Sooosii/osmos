@@ -18,7 +18,7 @@ import {
 } from '@/lib/note-orbit';
 import { placeLabels } from '@/lib/note-labels';
 import type { NoteMark } from '@/lib/note-marks';
-import { EN } from '@/i18n/en';
+import { useDict } from '@/i18n/LocaleProvider';
 
 /**
  * Nota takımyıldızı — merkezde nota, çevresinde onu içeren parfümler.
@@ -97,6 +97,7 @@ interface NoteOrbitProps {
 }
 
 export function NoteOrbit({ carriers, noteName, noteColor }: NoteOrbitProps) {
+  const t = useDict();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -294,8 +295,8 @@ export function NoteOrbit({ carriers, noteName, noteColor }: NoteOrbitProps) {
       role="img"
       aria-label={
         carriers.length === 0
-          ? EN.note.orbitEmpty(noteName)
-          : EN.note.orbitLabel(
+          ? t.note.orbitEmpty(noteName)
+          : t.note.orbitLabel(
               noteName,
               carriers.length,
               carriers.map((carrier) => carrier.name).join(', '),

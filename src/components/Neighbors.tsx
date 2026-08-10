@@ -3,7 +3,7 @@ import { dominantFamily, getFamily } from '@/data/families';
 import { familyVector, nearestNeighbors, projectToSpace } from '@/lib/similarity';
 import { NeighborOrbit } from '@/components/NeighborOrbit';
 import type { Perfume } from '@/data/types';
-import { EN } from '@/i18n/en';
+import { dictFor } from '@/i18n/dict';
 
 /**
  * Uzaydaki komşular — hesabın yapıldığı yer.
@@ -22,6 +22,13 @@ const NEIGHBOR_COUNT = 5;
 
 interface NeighborsProps {
   readonly perfume: Perfume;
+  /**
+   * Sayfanın dili.
+   *
+   * ⚠️ Prop olarak **dil geçiyor, sözlük değil**: sözlükte işlev var ve bu
+   * bileşen bir gün `'use client'` alırsa sözlük prop'u serileştirilemezdi.
+   */
+  readonly lang: string;
 }
 
 function colorOf(perfume: Perfume): string {
@@ -31,7 +38,9 @@ function colorOf(perfume: Perfume): string {
   return getFamily(dominantFamily(familyVector(perfume))).color;
 }
 
-export function Neighbors({ perfume }: NeighborsProps) {
+export function Neighbors({ perfume, lang }: NeighborsProps) {
+  const t = dictFor(lang);
+
   const depths = new Map(
     projectToSpace(PERFUMES).map((point) => [point.perfumeId, point.depth]),
   );
@@ -58,19 +67,19 @@ export function Neighbors({ perfume }: NeighborsProps) {
           Yüzde işareti dile göre taraf değiştiriyor (%85 ↔ 85%), o yüzden
           biçim burada değil sözlükte: `neighbourEntry`.
         */
-        label={EN.perfume.neighbourLabel(
+        label={t.perfume.neighbourLabel(
           perfume.name,
           neighbors.length,
           neighbors
             .map((entry) =>
-              EN.perfume.neighbourEntry(entry.name, Math.round(entry.score * 100)),
+              t.perfume.neighbourEntry(entry.name, Math.round(entry.score * 100)),
             )
             .join('; '),
         )}
       />
 
       <p className="mx-auto mt-8 max-w-lg text-xs leading-relaxed text-white/25">
-        {EN.perfume.neighbourCaption}
+        {t.perfume.neighbourCaption}
       </p>
     </div>
   );

@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { type FeelTarget, NO_FEEL, hasFeel } from '@/lib/space-feel';
 import { formatFeel, parseFeel } from '@/lib/space-feel-url';
-import { EN } from '@/i18n/en';
-
-/** Dört eksenin sözcükleri; nota sayfasındaki ölçümle aynı kaynaktan. */
-const WORDS = EN.space.sliders;
+import { useDict } from '@/i18n/LocaleProvider';
 
 /**
  * Sinestezi kaydıraçları — uzaya nota adıyla değil hisle sorma yolu.
@@ -144,6 +141,14 @@ interface SpaceFeelSlidersProps {
 }
 
 export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersProps) {
+  /*
+    Dört eksenin sözcükleri; nota sayfasındaki ölçümle aynı kaynaktan.
+
+    ⚠️ Modül düzeyinde duramaz: kanca ancak bileşenin içinde çağrılabilir ve
+    sözcükler artık sayfanın diline bağlı.
+  */
+  const WORDS = useDict().space.sliders;
+
   /*
    * Eksenlerin ham değeri. Durumda değil ref'te, çünkü ekranda değişen şey
    * tuval; React'in yeniden çizeceği bir metin yok.

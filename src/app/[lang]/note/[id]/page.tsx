@@ -7,7 +7,9 @@ import { NoteOrbit } from '@/components/NoteOrbit';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
 import { DitherBackdrop } from '@/components/DitherBackdrop';
 import { NoteMeasures } from '@/components/NoteMeasures';
-import { EN } from '@/i18n/en';
+import type { Dict } from '@/i18n/en';
+import { getDict, localeFor, say } from '@/i18n/dict';
+import { LOCALES, withLocale } from '@/i18n/locale';
 
 /**
  * Nota sayfası — Aşama 3, ansiklopedinin yaprağı.
@@ -35,37 +37,58 @@ import { EN } from '@/i18n/en';
  * kaynak açılmadı — harita, parfüm ve nota aynı rengi göstermek zorunda.
  */
 
+/*
+  Tam bileşim döndürülüyor (`{ lang, id }`), yalnızca `{ id }` değil. İç içe
+  biçim de çalışıyor ama bu hâli tek başına okunabilir ve derlemede sayı
+  doğrulanabilir: 136 × 2.
+*/
 export function generateStaticParams() {
-  return NOTES.map((note) => ({ id: note.id }));
+  return LOCALES.flatMap((lang) => NOTES.map((note) => ({ lang, id: note.id })));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string; id: string }>;
+}) {
+  const { lang, id } = await params;
   if (!hasNote(id)) return {};
 
+  const locale = localeFor(lang);
   const note = getNote(id);
   return {
-    title: EN.note.title(note.name.en),
-    description: note.description.en,
+    title: getDict(locale).note.title(say(note.name, locale)),
+    description: say(note.description, locale),
   };
 }
 
-/** Dakikayı çerçevenin dar alanına sığan biçime indirger: 90′ değil 1h 30′. */
-function minutesLabel(minutes: number): string {
-  if (minutes < 60) return EN.note.shortMinutes(minutes);
+/**
+ * Dakikayı çerçevenin dar alanına sığan biçime indirger: 90′ değil 1h 30′.
+ *
+ * Sözlüğü parametre olarak alıyor çünkü modül düzeyinde duruyor ve sayfanın
+ * dilini bilmesinin başka yolu yok.
+ */
+function minutesLabel(minutes: number, t: Dict): string {
+  if (minutes < 60) return t.note.shortMinutes(minutes);
 
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
-  return rest === 0 ? EN.note.shortHours(hours) : EN.note.shortHoursMinutes(hours, rest);
+  return rest === 0 ? t.note.shortHours(hours) : t.note.shortHoursMinutes(hours, rest);
 }
 
-export default async function NotePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function NotePage({
+  params,
+}: {
+  params: Promise<{ lang: string; id: string }>;
+}) {
+  const { lang, id } = await params;
   if (!hasNote(id)) notFound();
 
+  const locale = localeFor(lang);
+  const t = getDict(locale);
   const note = getNote(id);
-  const page = buildNotePage(note, PERFUMES);
-  const band = EN.bands[noteBand(id)];
+  const page = buildNotePage(note, PERFUMES, locale);
+  const band = t.bands[noteBand(id)];
 
   /*
     Çerçevedeki her sayı gerçek veri; uydurma sayaç yok (`ScreenFrame.tsx`).
@@ -74,14 +97,14 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
     alanına sığan kısaltma var (`minutesLabel`).
   */
   const readouts: readonly FrameReadout[] = [
-    { label: EN.note.frame.band, value: band },
-    { label: EN.note.frame.peak, value: minutesLabel(note.volatility.peakMinutes) },
-    { label: EN.note.frame.life, value: minutesLabel(note.volatility.halfLifeMinutes) },
+    { label: t.note.frame.band, value: band },
+    { label: t.note.frame.peak, value: minutesLabel(note.volatility.peakMinutes, t) },
+    { label: t.note.frame.life, value: minutesLabel(note.volatility.halfLifeMinutes, t) },
   ];
 
   const index = NOTES.findIndex((entry) => entry.id === id) + 1;
-  const position = EN.note.position(index, NOTES.length);
-  const usage = EN.note.usage(page.carriers.length, PERFUMES.length);
+  const position = t.note.position(index, NOTES.length);
+  const usage = t.note.usage(page.carriers.length, PERFUMES.length);
 
   return (
     <main className="min-h-dvh bg-[#050507] text-white">
@@ -109,14 +132,14 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
       <ScreenFrame
         nav={
           <nav className="flex items-center gap-3 text-[10px] tracking-[0.3em] text-white/40">
-            <Link href="/" className="transition-colors hover:text-white">
-              OSMOS
+            <Link href={withLocale(locale, '/')} className="transition-colors hover:text-white">
+              {t.site.name}
             </Link>
             <span aria-hidden="true" className="text-white/20">
               ·
             </span>
-            <Link href="/notes" className="transition-colors hover:text-white">
-              {EN.nav.notes}
+            <Link href={withLocale(locale, '/notes')} className="transition-colors hover:text-white">
+              {t.nav.notes}
             </Link>
           </nav>
         }
@@ -147,12 +170,13 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
             volatility={note.volatility}
             character={note.character}
             color={page.color}
+            lang={lang}
           />
 
           {/* ② — "peki bu hangi parfümlerde var?" */}
           <section className="pt-16">
             <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">
-              {EN.note.carriersHeading(page.carriers.length)}
+              {t.note.carriersHeading(page.carriers.length)}
             </h2>
 
             {page.carriers.length > 0 ? (
@@ -168,7 +192,7 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
                   {page.carriers.map((carrier) => (
                     <li key={carrier.id}>
                       <Link
-                        href={`/perfume/${carrier.id}`}
+                        href={withLocale(locale, `/perfume/${carrier.id}`)}
                         className="group flex items-baseline gap-3 py-2 transition-colors hover:text-white"
                       >
                         <span
@@ -192,23 +216,23 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
                 kullanılmamış olması normal — gerekçe `note-marks.ts`te.
               */
               <p className="max-w-xl text-sm font-light leading-relaxed text-white/40">
-                {EN.note.unused(PERFUMES.length)}
+                {t.note.unused(PERFUMES.length)}
               </p>
             )}
           </section>
 
           <div className="mt-24 flex flex-col gap-3">
             <Link
-              href="/notes"
+              href={withLocale(locale, '/notes')}
               className="text-sm font-light text-white/40 transition-colors hover:text-white/80"
             >
-              {EN.nav.allNotes}
+              {t.nav.allNotes}
             </Link>
             <Link
-              href="/"
+              href={withLocale(locale, '/')}
               className="text-sm font-light text-white/40 transition-colors hover:text-white/80"
             >
-              {EN.nav.backToSpace}
+              {t.nav.backToSpace}
             </Link>
           </div>
         </div>

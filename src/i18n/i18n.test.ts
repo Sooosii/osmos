@@ -149,6 +149,48 @@ function stripComments(lines: readonly string[]): string[] {
  * (URL gibi) o satırın kalanını gizleyebilir. Bu yön güvenli — eksik yakalar,
  * yanlış yakalamaz.
  */
+test('getDict her dil icin dogru sozlugu veriyor', async () => {
+  const { getDict, dictFor } = await import('./dict');
+
+  expect(getDict('en')).toBe(EN);
+  expect(getDict('tr')).toBe(TR);
+  // Bilinmeyen dil varsayilana düşüyor: adres elle yazılabilir.
+  expect(dictFor('de')).toBe(EN);
+  expect(dictFor('tr')).toBe(TR);
+});
+
+/**
+ * CSS `uppercase` yasağı.
+ *
+ * Ölçüldü (Chromium, 2026-08-10): `lang="tr"` altında CSS `text-transform:
+ * uppercase` küçük `i`yi noktalı `İ`ye çeviriyor. Sahibin kuralı ekranda
+ * noktalı İ olmaması; JS `toUpperCase()` dilden bağımsız çalışıyor ve aynı
+ * karar parfüm künyesinde zaten yazılı.
+ *
+ * Yasak "dile bağlı metinlerde kullanılmasın"dan geniş ve bilerek öyle: tek
+ * kural iki kuraldan iyi, ve bu kural gözle denetlenebilir.
+ */
+test('sitede CSS uppercase kullanilmiyor', () => {
+  const files = [
+    ...sourceFiles('src', ['.ts', '.tsx', '.css']),
+    ...sourceFiles('public', ['.js']),
+  ];
+  const offenders: string[] = [];
+
+  for (const file of files) {
+    const path = unix(file);
+    if (path.endsWith('.test.ts')) continue;
+
+    stripComments(readFileSync(file, 'utf8').split('\n')).forEach((line, index) => {
+      if (/text-transform:\s*uppercase|(^|[\s"'`])uppercase([\s"'`]|$)/.test(line)) {
+        offenders.push(`${path}:${index + 1}: ${line.trim()}`);
+      }
+    });
+  }
+
+  expect(offenders).toEqual([]);
+});
+
 test('ekrana cikabilecek Turkce dize kalmadi', () => {
   const files = [
     ...sourceFiles('src', ['.ts', '.tsx', '.css']),

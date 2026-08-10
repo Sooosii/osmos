@@ -7,7 +7,8 @@ import { EvolutionSignature } from '@/components/EvolutionSignature';
 import { Neighbors } from '@/components/Neighbors';
 import { PerfumeNotes } from '@/components/PerfumeNotes';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
-import { EN } from '@/i18n/en';
+import { getDict, localeFor, say } from '@/i18n/dict';
+import { LOCALES, withLocale } from '@/i18n/locale';
 
 /**
  * Parfüm sayfası — yol haritasının ①, ②, ③ ve ④'ü. Tamamı.
@@ -40,26 +41,45 @@ import { EN } from '@/i18n/en';
  * uzaydaki noktayla aynı renkte olması haritanın kendini doğrulaması demek.
  */
 
+/*
+  Tam bileşim döndürülüyor (`{ lang, id }`), yalnızca `{ id }` değil. İç içe
+  biçim de çalışıyor ama bu hâli tek başına okunabilir ve derlemede sayı
+  doğrulanabilir: 52 × 2.
+*/
 export function generateStaticParams() {
-  return PERFUMES.map((perfume) => ({ id: perfume.id }));
+  return LOCALES.flatMap((lang) => PERFUMES.map((perfume) => ({ lang, id: perfume.id })));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string; id: string }>;
+}) {
+  const { lang, id } = await params;
   const perfume = PERFUMES.find((entry) => entry.id === id);
   if (!perfume) return {};
 
+  const locale = localeFor(lang);
+  const t = getDict(locale);
   return {
-    title: EN.perfume.title(perfume.name, perfume.brand),
-    description:
-      perfume.line?.en ?? EN.perfume.fallbackDescription(perfume.name, perfume.brand),
+    title: t.perfume.title(perfume.name, perfume.brand),
+    description: perfume.line
+      ? say(perfume.line, locale)
+      : t.perfume.fallbackDescription(perfume.name, perfume.brand),
   };
 }
 
-export default async function PerfumePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function PerfumePage({
+  params,
+}: {
+  params: Promise<{ lang: string; id: string }>;
+}) {
+  const { lang, id } = await params;
   const perfume = PERFUMES.find((entry) => entry.id === id);
   if (!perfume) notFound();
+
+  const locale = localeFor(lang);
+  const t = getDict(locale);
 
   const family = getFamily(dominantFamily(familyVector(perfume)));
   const color = family.color;
@@ -77,13 +97,13 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
     belge `lang="en"`.
   */
   const readouts: readonly FrameReadout[] = [
-    { label: EN.perfume.frame.family, value: family.name.en.toUpperCase() },
-    { label: EN.perfume.frame.year, value: String(perfume.year) },
-    { label: EN.perfume.frame.notes, value: String(perfume.notes.length) },
+    { label: t.perfume.frame.family, value: say(family.name, locale).toUpperCase() },
+    { label: t.perfume.frame.year, value: String(perfume.year) },
+    { label: t.perfume.frame.notes, value: String(perfume.notes.length) },
   ];
 
   const index = PERFUMES.findIndex((entry) => entry.id === id) + 1;
-  const position = EN.perfume.position(index, PERFUMES.length);
+  const position = t.perfume.position(index, PERFUMES.length);
 
   return (
     <main className="min-h-dvh bg-[#050507] text-white">
@@ -123,14 +143,17 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
               `?mark=` uzayın o parfümü seçili açması için. Tarayıcının geri tuşu
               da aynı yere düşüyor; iki yol tek davranışta buluşuyor.
             */}
-            <Link href={`/?mark=${perfume.id}`} className="transition-colors hover:text-white">
+            <Link href={`${withLocale(locale, '/')}?mark=${perfume.id}`} className="transition-colors hover:text-white">
               OSMOS
             </Link>
             <span aria-hidden="true" className="text-white/20">
               ·
             </span>
-            <Link href="/notes" className="transition-colors hover:text-white">
-              {EN.nav.notes}
+            <Link
+              href={withLocale(locale, '/notes')}
+              className="transition-colors hover:text-white"
+            >
+              {t.nav.notes}
             </Link>
           </nav>
         }
@@ -171,7 +194,7 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
             </p>
             {perfume.line ? (
               <p className="mt-5 max-w-xl text-base font-light leading-relaxed text-white/70 sm:text-lg">
-                {perfume.line.en}
+                {say(perfume.line, locale)}
               </p>
             ) : null}
           </header>
@@ -179,7 +202,7 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
           {/* ③ — "aa, o aslında veriymiş" */}
           <section className="pt-14">
             <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">
-              {EN.perfume.sections.evolution}
+              {t.perfume.sections.evolution}
             </h2>
             <EvolutionSignature perfume={perfume} />
           </section>
@@ -197,25 +220,25 @@ export default async function PerfumePage({ params }: { params: Promise<{ id: st
           */}
           <section className="pt-20">
             <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">
-              {EN.perfume.sections.notes}
+              {t.perfume.sections.notes}
             </h2>
-            <PerfumeNotes perfume={perfume} />
+            <PerfumeNotes perfume={perfume} lang={lang} />
           </section>
 
           {/* ④ — "peki buna benzeyen ne var?" */}
           <section className="pt-20">
             <h2 className="mb-8 text-xs tracking-[0.3em] text-white/30">
-              {EN.perfume.sections.neighbours}
+              {t.perfume.sections.neighbours}
             </h2>
-            <Neighbors perfume={perfume} />
+            <Neighbors perfume={perfume} lang={lang} />
           </section>
 
           <div className="mt-24">
             <Link
-              href={`/?mark=${perfume.id}`}
+              href={`${withLocale(locale, '/')}?mark=${perfume.id}`}
               className="text-sm font-light text-white/40 transition-colors hover:text-white/80"
             >
-              {EN.nav.backToSpace}
+              {t.nav.backToSpace}
             </Link>
           </div>
         </div>

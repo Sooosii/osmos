@@ -2,7 +2,8 @@ import type { ReactNode, RefObject } from 'react';
 import type { SpaceMark } from '@/data/types';
 import { APPROACH_CUE } from '@/lib/space-approach';
 import type { FeelTarget } from '@/lib/space-feel';
-import { EN } from '@/i18n/en';
+import { useDict } from '@/i18n/LocaleProvider';
+import { LangSwitch } from '@/components/LangSwitch';
 import { SpaceFeelSliders } from './SpaceFeelSliders';
 
 /**
@@ -26,6 +27,13 @@ interface SpaceOverlaysProps {
   readonly labelRef: RefObject<HTMLDivElement | null>;
   /** Kaydıraç katmanı — görünürlüğünü yaklaşma sahnesi yazıyor. */
   readonly feelRef: RefObject<HTMLDivElement | null>;
+  /**
+   * Dil değiştiricinin katmanı — görünürlüğünü yaklaşma sahnesi yazıyor.
+   *
+   * Kaydıraçlarla aynı muameleyi görüyor, giriş metniyle değil: içinde
+   * odaklanılabilir bir bağlantı var, yani opaklık tek başına yetmiyor.
+   */
+  readonly switchRef: RefObject<HTMLDivElement | null>;
   /** Kaydıraçların yazdığı tarif; çizim döngüsü okuyor. */
   readonly feelTargetRef: RefObject<FeelTarget>;
   readonly requestDraw: () => void;
@@ -44,6 +52,7 @@ export function SpaceOverlays({
   cueRef,
   labelRef,
   feelRef,
+  switchRef,
   feelTargetRef,
   requestDraw,
   labelled,
@@ -52,6 +61,8 @@ export function SpaceOverlays({
   entryProgress,
   children,
 }: SpaceOverlaysProps) {
+  const t = useDict();
+
   return (
     <>
       {/*
@@ -95,6 +106,20 @@ export function SpaceOverlays({
       </div>
 
       {/*
+        Dil değiştirici — sağ üst.
+
+        Yaklaşma sahnesi boyunca yok, varışta beliriyor: "sahne boyunca ekranda
+        kontrol olmaz" kuralı kaydıraçlarda yazılı ve burada da geçerli.
+        Görünürlüğü ve `inert`i yaklaşma sahnesi yazıyor.
+      */}
+      <div
+        ref={switchRef}
+        className="pointer-events-auto absolute right-6 top-6 opacity-0 transition-opacity duration-700 sm:right-10 sm:top-10"
+      >
+        <LangSwitch />
+      </div>
+
+      {/*
         Yaklaşma ipucu.
 
         Söylediği tek şey "kaydırılabilir" — kimlik değil, hareket. Boşluk
@@ -117,7 +142,7 @@ export function SpaceOverlays({
         {APPROACH_CUE === 'mark' ? (
           <span className="block h-10 w-px animate-[osmos-breathe_2.8s_ease-in-out_infinite] bg-white/60" />
         ) : (
-          <span className="text-[11px] tracking-[0.45em] text-white/35">{EN.site.name}</span>
+          <span className="text-[11px] tracking-[0.45em] text-white/35">{t.site.name}</span>
         )}
       </div>
 
@@ -162,7 +187,7 @@ export function SpaceOverlays({
           aria-hidden="true"
         >
           <span className="text-[11px] tracking-[0.25em] text-white/40">
-            {EN.space.entryHint}
+            {t.space.entryHint}
           </span>
           <span className="h-px w-full overflow-hidden bg-white/10">
             <span

@@ -3,7 +3,7 @@
 import Script from 'next/script';
 import { useEffect } from 'react';
 import type { IntroPoint } from '@/lib/intro-points';
-import { EN } from '@/i18n/en';
+import { useDict } from '@/i18n/LocaleProvider';
 import './intro.css';
 
 declare global {
@@ -72,6 +72,8 @@ function fitPerde() {
 }
 
 export function IntroOverlay({ points }: IntroOverlayProps) {
+  const t = useDict();
+
   /*
     Noktalar ve metin aynı etkide yazılıyor: ikisi de betiğin okuduğu tek yönlü
     pencere değişkenleri ve ikisi de `points`e bağlı — tanıtım cümlesindeki sayı
@@ -81,11 +83,11 @@ export function IntroOverlay({ points }: IntroOverlayProps) {
   useEffect(() => {
     window.OSMOS_INTRO_POINTS = points;
     window.OSMOS_INTRO_TEXT = {
-      word: EN.intro.word,
-      tag: EN.intro.tag(points.length),
-      hint: EN.intro.hint,
+      word: t.intro.word,
+      tag: t.intro.tag(points.length),
+      hint: t.intro.hint.toUpperCase(),
     };
-  }, [points]);
+  }, [points, t]);
 
   useEffect(() => {
     window.visualViewport?.addEventListener('resize', fitPerde);
