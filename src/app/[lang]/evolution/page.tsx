@@ -9,9 +9,12 @@ import { languageAlternates } from '@/lib/site-url';
  * başına bir sayfa olarak kalması geçici: Blok D/9'da parfüm sayfasının ③
  * bölümü olacak, burası da doğrulama ekranı olarak kalacak.
  */
-/** Başlık kök düzenden; buradaki tek iş hreflang. */
-export function generateMetadata() {
-  return { alternates: { languages: languageAlternates('/evolution') } };
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const t = dictFor((await params).lang);
+  return {
+    title: t.draft.evolutionTitle,
+    alternates: { languages: languageAlternates('/evolution') },
+  };
 }
 
 export default async function EvolutionPage({

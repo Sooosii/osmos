@@ -48,9 +48,12 @@ function expectationsFor(
   ];
 }
 
-/** Başlık kök düzenden; buradaki tek iş hreflang. */
-export function generateMetadata() {
-  return { alternates: { languages: languageAlternates('/space') } };
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const t = getDict(localeFor((await params).lang));
+  return {
+    title: t.draft.spaceTitle,
+    alternates: { languages: languageAlternates('/space') },
+  };
 }
 
 export default async function SpaceDraft({ params }: { params: Promise<{ lang: string }> }) {

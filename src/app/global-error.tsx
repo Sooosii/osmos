@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { ErrorBody } from '@/components/ErrorBody';
 import { getDict } from '@/i18n/dict';
 import { stripLocale } from '@/i18n/locale';
+import { SITE_BACKGROUND } from '@/lib/site-color';
 import './globals.css';
 
 /**
@@ -49,6 +50,12 @@ export default function GlobalError({
     <html lang={locale} className={`${geistSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <title>{`${t.error.mark} — ${t.site.name}`}</title>
+        {/*
+          Çubuk rengi burada `viewport` dışa aktarımıyla değil elle yazılıyor:
+          istemci bileşenlerinde o dışa aktarım çalışmıyor, `<title>` ile aynı
+          sebep. React ikisini de head'e taşıyor.
+        */}
+        <meta name="theme-color" content={SITE_BACKGROUND} />
         <ErrorBody locale={locale} onRetry={unstable_retry} />
       </body>
     </html>

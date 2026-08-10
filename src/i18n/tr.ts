@@ -163,6 +163,8 @@ export const TR: Dict = {
   },
 
   draft: {
+    spaceTitle: 'Uzay taslağı · OSMOS',
+    evolutionTitle: 'Evrim taslağı · OSMOS',
     spaceHeading: 'Uzay taslağı',
     spaceLede: (count) =>
       `Benzerlik motorunun doğrulama ekranı. ${count} parfüm; her biri üç kanaldan okunuyor — koku ailesi, karakter (sıcaklık, doku, temizlik, yakınlık) ve paylaşılan notalar. Üçünün birleşiminden çıkan kosinüs uzaklığı klasik MDS ile iki boyuta indirildi. Renk baskın aileyi, nokta boyutu üçüncü bileşeni (derinlik) gösteriyor.`,

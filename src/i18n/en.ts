@@ -196,6 +196,13 @@ export const EN = {
 
   /** Doğrulama ekranları — sahip kalmalarına karar verdi. */
   draft: {
+    /*
+      Sekme başlıkları. Doğrulama ekranlarının ikisi de kök düzenin düz
+      "OSMOS"unu miras alıyordu; sekmede, yer iminde ve geçmişte birbirinden
+      ayırt edilemiyorlardı.
+    */
+    spaceTitle: 'Space draft · OSMOS',
+    evolutionTitle: 'Evolution draft · OSMOS',
     spaceHeading: 'Space draft',
     spaceLede: (count: number) =>
       `The verification screen for the similarity engine. ${count} perfumes; each read through three channels — scent family, character (temperature, texture, cleanliness, proximity) and shared notes. The cosine distance of the three combined was reduced to two dimensions with classical MDS. Colour shows the dominant family, point size the third component (depth).`,
