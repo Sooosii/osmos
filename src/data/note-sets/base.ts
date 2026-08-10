@@ -27,7 +27,7 @@ export const BASE_NOTES: readonly Note[] = [
     character: { temperature: -0.2, texture: 0.4, cleanliness: 0.4, proximity: 0.1 },
     description: {
       en: 'A cut conifer brought indoors — resin, cold air, and the beginning of winter.',
-      tr: 'İçeri alınmış kesik bir kozalaklı — reçine, soğuk hava ve kışın başlangıcı.',
+      tr: 'Içeri alınmış kesik bir kozalaklı — reçine, soğuk hava ve kışın başlangıcı.',
     },
   },
   {
@@ -60,7 +60,7 @@ export const BASE_NOTES: readonly Note[] = [
     character: { temperature: 0.6, texture: 0.5, cleanliness: -0.2, proximity: 0.3 },
     description: {
       en: 'Smoked wood with a rose hidden in it — tar that somehow turned sweet.',
-      tr: 'İçine bir gül saklanmış tütsülü odun — nasıl olduysa tatlanmış bir katran.',
+      tr: 'Içine bir gül saklanmış tütsülü odun — nasıl olduysa tatlanmış bir katran.',
     },
   },
   {
@@ -323,7 +323,7 @@ export const BASE_NOTES: readonly Note[] = [
     character: { temperature: 0.2, texture: -0.8, cleanliness: 0.9, proximity: 0.6 },
     description: {
       en: 'Clean laundry with nobody in it — the emptiest smell in the palette, and the most worn.',
-      tr: 'İçinde kimse olmayan temiz çamaşır — paletteki en boş ve en çok taşınan koku.',
+      tr: 'Içinde kimse olmayan temiz çamaşır — paletteki en boş ve en çok taşınan koku.',
     },
   },
   {

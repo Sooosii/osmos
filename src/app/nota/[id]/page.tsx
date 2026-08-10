@@ -153,7 +153,7 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
             <h2 className="mb-8 text-xs tracking-[0.3em] text-white/45">
               {page.carriers.length > 0
                 ? `${page.carriers.length} PARFÜMDE`
-                : 'HENÜZ HİÇBİR PARFÜMDE'}
+                : 'HENÜZ HIÇBIR PARFÜMDE'}
             </h2>
 
             {page.carriers.length > 0 ? (

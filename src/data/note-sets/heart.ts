@@ -31,7 +31,7 @@ export const HEART_NOTES: readonly Note[] = [
     character: { temperature: -0.3, texture: 0.5, cleanliness: -0.2, proximity: -0.1 },
     description: {
       en: 'Iodine and low tide — the sea at its least romantic.',
-      tr: 'İyot ve cezir — denizin en romantik olmayan hâli.',
+      tr: 'Iyot ve cezir — denizin en romantik olmayan hâli.',
     },
   },
   {
@@ -66,7 +66,7 @@ export const HEART_NOTES: readonly Note[] = [
     character: { temperature: 0.1, texture: -0.3, cleanliness: 0.6, proximity: -0.4 },
     description: {
       en: 'A flower with lemon inside it — creamy and sharp in the same breath.',
-      tr: 'İçinde limon olan bir çiçek — aynı nefeste kremsi ve keskin.',
+      tr: 'Içinde limon olan bir çiçek — aynı nefeste kremsi ve keskin.',
     },
   },
   {
@@ -170,7 +170,7 @@ export const HEART_NOTES: readonly Note[] = [
     character: { temperature: 0.2, texture: -0.5, cleanliness: 0.6, proximity: -0.1 },
     description: {
       en: 'Powder and honey with dust in it — the softest yellow there is.',
-      tr: 'İçinde toz olan pudra ve bal — var olan en yumuşak sarı.',
+      tr: 'Içinde toz olan pudra ve bal — var olan en yumuşak sarı.',
     },
   },
   {
@@ -241,7 +241,7 @@ export const HEART_NOTES: readonly Note[] = [
   },
   {
     id: 'iris',
-    name: { en: 'Iris', tr: 'İris' },
+    name: { en: 'Iris', tr: 'Iris' },
     families: { floral: 0.7, woody: 0.3, mineral: 0.3 },
     volatility: { peakMinutes: 60, halfLifeMinutes: 360 },
     character: { temperature: -0.7, texture: -0.6, cleanliness: 0.5, proximity: 0.4 },
@@ -287,7 +287,7 @@ export const HEART_NOTES: readonly Note[] = [
   },
   {
     id: 'fig',
-    name: { en: 'Fig', tr: 'İncir' },
+    name: { en: 'Fig', tr: 'Incir' },
     families: { fruity: 0.8, green: 0.4, gourmand: 0.3 },
     volatility: { peakMinutes: 20, halfLifeMinutes: 150 },
     character: { temperature: 0.1, texture: -0.2, cleanliness: 0.2, proximity: 0.0 },
@@ -669,7 +669,7 @@ export const HEART_NOTES: readonly Note[] = [
   },
   {
     id: 'indole',
-    name: { en: 'Indole', tr: 'İndol' },
+    name: { en: 'Indole', tr: 'Indol' },
     families: { animalic: 0.9, floral: 0.4 },
     volatility: { peakMinutes: 35, halfLifeMinutes: 280 },
     character: { temperature: 0.4, texture: 0.1, cleanliness: -0.9, proximity: 0.3 },

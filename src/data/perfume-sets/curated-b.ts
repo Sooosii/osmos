@@ -172,7 +172,7 @@ export const CURATED_B: readonly Perfume[] = [
     curated: true,
     line: {
       en: 'A piña colada in a glass you did not order, and flowers on the table.',
-      tr: 'İsmarlamadığın bir bardakta piña colada, masada da çiçekler.',
+      tr: 'Ismarlamadığın bir bardakta piña colada, masada da çiçekler.',
     },
     notes: [
       { noteId: 'pineapple', tier: 'top', weight: 0.8 },

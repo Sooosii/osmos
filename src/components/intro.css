@@ -27,11 +27,11 @@
   overflow: hidden;
 
   /*
-    Zemin sayfanınkiyle aynı (`page.tsx`teki `bg-[#050507]`). Perde saydamlaşırken
-    altındaki tuval aynı renkten çıkıyor: kalkış bir renk değişimi değil, yalnızca
-    içeriğin belirmesi.
+    Zemin sayfanınkiyle aynı (`page.tsx`teki `bg-black` — sahibin mat siyah
+    kararı, 2026-08-10). Perde saydamlaşırken altındaki tuval aynı renkten
+    çıkıyor: kalkış bir renk değişimi değil, yalnızca içeriğin belirmesi.
   */
-  background: #050507;
+  background: #000000;
 
   opacity: 1;
   transition: opacity 700ms ease;

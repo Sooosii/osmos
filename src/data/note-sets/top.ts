@@ -128,7 +128,7 @@ export const TOP_NOTES: readonly Note[] = [
     character: { temperature: 0.5, texture: 0.8, cleanliness: 0.2, proximity: -0.3 },
     description: {
       en: 'Dry heat with no sweetness in it — the smell just before a sneeze.',
-      tr: 'İçinde hiç tatlı olmayan kuru bir sıcaklık — hapşırmadan hemen önceki koku.',
+      tr: 'Içinde hiç tatlı olmayan kuru bir sıcaklık — hapşırmadan hemen önceki koku.',
     },
   },
   {
@@ -254,7 +254,7 @@ export const TOP_NOTES: readonly Note[] = [
   },
   {
     id: 'fig-leaf',
-    name: { en: 'Fig Leaf', tr: 'İncir yaprağı' },
+    name: { en: 'Fig Leaf', tr: 'Incir yaprağı' },
     families: { green: 1.0, aromatic: 0.3, mineral: 0.2 },
     volatility: { peakMinutes: 4, halfLifeMinutes: 50 },
     character: { temperature: -0.6, texture: 0.5, cleanliness: 0.3, proximity: -0.4 },

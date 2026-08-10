@@ -39,17 +39,59 @@ interface IntroOverlayProps {
  * `no-css-tags` kuralına takılıyordu. Betik `public/`te kalmak zorunda — kendini
  * `document.body`ye ekleyen, modül olmayan bir dosya.
  */
+
+/**
+ * Perdeyi görünür alana oturtur — `AstronotIntro`daki çapanın perde hâli.
+ *
+ * Sahibin ekranında perde de merkezden kaymış göründü; sebep sayfa düzeni
+ * değil, düzen görünümüyle GÖRÜNEN alanın ayrışması (görsel yakınlaştırma ya
+ * da dışarıdan basılan `zoom`). Perdenin kendi CSS'i `inset: 0` der; burada
+ * satır içi stil onu görünür kutuya çekiyor ve dıştan gelen zoom'a tersiyle
+ * karşılık veriyor. Normal ortamda ikisi de birebir aynı sonuç: sıfır etki.
+ * `intro.js`e dokunulmuyor — bu iş bağlayıcı katmanın işi.
+ */
+function fitPerde() {
+  const el = document.querySelector<HTMLElement>('.osmos-intro');
+  if (!el) return;
+
+  const read = (target: Element) =>
+    Number.parseFloat(getComputedStyle(target).getPropertyValue('zoom') || '1') || 1;
+  const outside = read(document.documentElement) * read(document.body);
+  if (outside === 1) el.style.removeProperty('zoom');
+  else el.style.setProperty('zoom', String(1 / outside));
+
+  const vv = window.visualViewport;
+  if (!vv) return;
+  el.style.inset = 'auto';
+  el.style.left = `${vv.offsetLeft}px`;
+  el.style.top = `${vv.offsetTop}px`;
+  el.style.width = `${vv.width}px`;
+  el.style.height = `${vv.height}px`;
+}
+
 export function IntroOverlay({ points }: IntroOverlayProps) {
   useEffect(() => {
     window.OSMOS_INTRO_POINTS = points;
   }, [points]);
+
+  useEffect(() => {
+    window.visualViewport?.addEventListener('resize', fitPerde);
+    window.visualViewport?.addEventListener('scroll', fitPerde);
+    return () => {
+      window.visualViewport?.removeEventListener('resize', fitPerde);
+      window.visualViewport?.removeEventListener('scroll', fitPerde);
+    };
+  }, []);
 
   return (
     <>
       <Script
         src="/intro.js"
         strategy="afterInteractive"
-        onReady={() => window.OsmosIntro?.init(points)}
+        onReady={() => {
+          window.OsmosIntro?.init(points);
+          fitPerde(); // `mount` eşzamanlı: perde bu satırda çoktan DOM'da.
+        }}
       />
     </>
   );

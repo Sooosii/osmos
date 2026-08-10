@@ -55,7 +55,7 @@ export function noteBand(id: string): NoteBand {
 export const BAND_LABEL: Readonly<Record<NoteBand, string>> = {
   top: 'ÜST',
   heart: 'KALP',
-  base: 'DİP',
+  base: 'DIP',
 };
 
 /** Bandlar, dizinde göründükleri sırayla. */

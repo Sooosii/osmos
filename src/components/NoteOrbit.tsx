@@ -202,12 +202,19 @@ export function NoteOrbit({ carriers, noteName, noteColor }: NoteOrbitProps) {
       };
 
       behind.forEach(paintDisc);
+      /*
+       * Merkez disk eskiden 0.95/1.05 ile neredeyse dolu boyanıyordu — sahip
+       * "ortada güneş gibi, göz yoruyor" dedi (2026-08-10) ve ÇOK AZ kısılması
+       * istendi: opaklık ve kazanç birlikte indirildi. Kazanç 1'in altına
+       * inince kenar hücreleri Bayer eşiğine takılıp seyreliyor, disk "ışık
+       * kaynağı" olmaktan çıkıp öteki disklerle aynı dokuya dönüyor.
+       */
       ditherDisc(
         CENTER_X * k,
         CENTER_Y * k,
         NOTE_RADIUS * k,
-        withAlpha(noteColor, 0.95),
-        1.05,
+        withAlpha(noteColor, 0.82),
+        0.92,
       );
       front.forEach(paintDisc);
 

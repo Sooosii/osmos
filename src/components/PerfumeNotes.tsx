@@ -36,7 +36,7 @@ const TIER_ORDER: readonly PyramidTier[] = ['top', 'heart', 'base'];
 const TIER_LABEL: Readonly<Record<PyramidTier, string>> = {
   top: 'ÜST',
   heart: 'KALP',
-  base: 'DİP',
+  base: 'DIP',
 };
 
 interface PerfumeNotesProps {
