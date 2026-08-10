@@ -96,3 +96,77 @@ test('ekranda .tr okumasi kalmadi', () => {
 
   expect(offenders).toEqual([]);
 });
+
+/**
+ * Yorumları düşürür, satır numaralarını korur.
+ *
+ * Blok yorumları satırlar arasında takip ediyor. Bu şart: depo JSX yorumlarını
+ * `{/*` ile açıp düz metinle sürdürüyor ve yalnızca `*` ile başlayan satırlara
+ * bakan bir sayaç bu gövdeleri kaçak sanır — ilk ölçüm tam olarak böyle
+ * şişmişti (299 satır dedi, gerçeği 68'di).
+ */
+function stripComments(lines: readonly string[]): string[] {
+  const out: string[] = [];
+  let inBlock = false;
+
+  for (const line of lines) {
+    const trimmed = line.trimStart();
+
+    if (inBlock) {
+      if (trimmed.includes('*/')) inBlock = false;
+      out.push('');
+      continue;
+    }
+    if (trimmed.startsWith('/*') || trimmed.startsWith('{/*')) {
+      if (!trimmed.includes('*/')) inBlock = true;
+      out.push('');
+      continue;
+    }
+    if (trimmed.startsWith('*') || trimmed.startsWith('//')) {
+      out.push('');
+      continue;
+    }
+
+    out.push(line.split('//')[0]);
+  }
+
+  return out;
+}
+
+/**
+ * Kaçak Türkçe avcısı.
+ *
+ * "Site tamamen İngilizce" bir iddia değil, ölçülen bir şey olsun diye.
+ *
+ * Muaf tutulanlar ve nedenleri:
+ *   · `src/data/**`    — nota ve parfüm verisi iki dilli kalıyor
+ *   · `src/i18n/tr.ts` — bekleyen Türkçe sözlüğün evi
+ *   · `*.test.ts`      — sınamaların kendi başlıkları
+ *   · `throw new Error(...)` satırları — geliştirici metni, ekran metni değil;
+ *     gerekçesi kod yorumlarının Türkçe kalmasıyla aynı
+ *
+ * ⚠️ Yorumlar atlanıyor ama dizeler okunuyor: satır içi `//` taşıyan bir dize
+ * (URL gibi) o satırın kalanını gizleyebilir. Bu yön güvenli — eksik yakalar,
+ * yanlış yakalamaz.
+ */
+test('ekrana cikabilecek Turkce dize kalmadi', () => {
+  const files = [
+    ...sourceFiles('src', ['.ts', '.tsx', '.css']),
+    ...sourceFiles('public', ['.js']),
+  ];
+  const offenders: string[] = [];
+
+  for (const file of files) {
+    const path = unix(file);
+    if (path.startsWith('src/data/') || path === 'src/i18n/tr.ts' || path.endsWith('.test.ts')) {
+      continue;
+    }
+
+    stripComments(readFileSync(file, 'utf8').split('\n')).forEach((line, index) => {
+      if (line.includes('throw new Error(')) return;
+      if (/[çğıöşüÇĞİÖŞÜ]/.test(line)) offenders.push(`${path}:${index + 1}: ${line.trim()}`);
+    });
+  }
+
+  expect(offenders).toEqual([]);
+});
