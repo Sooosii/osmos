@@ -143,7 +143,21 @@ export function useSpaceInput({
    * Doluyken işaretçi yolu tamamen susuyor (`handlePointerMove`in başındaki
    * erken dönüş), yoksa aynı hareket iki kez yakınlaştırırdı.
    */
-  const touchPinchRef = useRef<number | null>(null);
+  const touchPinchRef = useRef<{ gap: number; mx: number; my: number } | null>(null);
+
+  /**
+   * Ekranda duran parmak sayısı ve son kalkış anı.
+   *
+   * ⚠️ **Tekerlek olaylarını susturmak için.** Sahip telefonda ölçtü: iki
+   * parmağı birlikte aşağı çekince harita **büyüyordu**, yukarı çekince
+   * küçülüyordu — yani kaydırma hareketi yakınlaşma sanılıyordu. Safari iki
+   * parmaklı kaydırmayı tekerlek olayına çeviriyor ve `onWheel` masaüstündeki
+   * gibi yakınlaştırıyordu. Parmak ekrandayken (ve kalktıktan hemen sonra,
+   * savrulma olayları için) tekerleğe bakılmıyor; dokunuşun karşılığını
+   * yalnızca dokunma yolu veriyor.
+   */
+  const touchCountRef = useRef(0);
+  const lastTouchEndRef = useRef(0);
 
 
   /** Tuvalin sol üst köşesine göre imleç konumu. */
@@ -173,8 +187,18 @@ export function useSpaceInput({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    /* Savrulma tekerlekleri parmak kalktıktan sonra da geliyor. */
+    const TOUCH_WHEEL_QUIET = 400;
+
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
+
+      // Parmakla gelen hareketin karşılığını dokunma yolu veriyor; gerekçe
+      // `touchCountRef`in üstünde.
+      if (touchCountRef.current > 0 || performance.now() - lastTouchEndRef.current < TOUCH_WHEEL_QUIET) {
+        return;
+      }
+
       animationRef.current = null;
 
       const delta = event.deltaMode === 1 ? event.deltaY * LINE_HEIGHT : event.deltaY;
@@ -248,10 +272,17 @@ export function useSpaceInput({
         touches[0].clientY - touches[1].clientY,
       );
 
+    /* İki parmağın ortası — hem yakınlaşmanın çapası hem kaydırmanın tutamağı. */
+    const touchMid = (touches: TouchList) => ({
+      mx: (touches[0].clientX + touches[1].clientX) / 2,
+      my: (touches[0].clientY + touches[1].clientY) / 2,
+    });
+
     const onTouchStart = (event: TouchEvent) => {
+      touchCountRef.current = event.touches.length;
       if (approach.isActive() || event.touches.length < 2) return;
 
-      touchPinchRef.current = touchGap(event.touches);
+      touchPinchRef.current = { gap: touchGap(event.touches), ...touchMid(event.touches) };
       animationRef.current = null;
 
       /*
@@ -267,6 +298,19 @@ export function useSpaceInput({
       event.preventDefault();
     };
 
+    /*
+     * İki parmak **hem yakınlaştırıyor hem kaydırıyor** — telefonda doğru olan
+     * bu ve ölçülerek öğrenildi.
+     *
+     * ⚠️ Önce yalnızca yakınlaşma yazılmıştı ve sahip telefonda "iki parmağı
+     * aşağı çekince büyüyor, yukarı çekince küçülüyor" dedi: iki parmakla
+     * kaydırmanın karşılığı yoktu, hareket bütünüyle yakınlaşmaya sayılıyordu.
+     * Şimdi mesafedeki değişim yakınlaşmayı, **ortanın yer değiştirmesi**
+     * kaydırmayı veriyor; ikisi aynı harekette birlikte olabiliyor.
+     *
+     * Sıra önemli: yakınlaşma ortaya çapalı, o yüzden önce o uygulanıyor;
+     * kaydırma sonra, yeni ölçekte.
+     */
     const onTouchMove = (event: TouchEvent) => {
       const previous = touchPinchRef.current;
       if (previous === null || event.touches.length < 2) return;
@@ -274,14 +318,20 @@ export function useSpaceInput({
       event.preventDefault();
 
       const gap = touchGap(event.touches);
-      touchPinchRef.current = gap;
-      if (previous === 0) return;
+      const { mx, my } = touchMid(event.touches);
+      touchPinchRef.current = { gap, mx, my };
 
-      const { sx, sy } = localPoint(
-        (event.touches[0].clientX + event.touches[1].clientX) / 2,
-        (event.touches[0].clientY + event.touches[1].clientY) / 2,
-      );
-      cameraRef.current = zoomAt(cameraRef.current, sx, sy, gap / previous, viewportRef.current);
+      if (previous.gap > 0 && gap !== previous.gap) {
+        const { sx, sy } = localPoint(mx, my);
+        cameraRef.current = zoomAt(cameraRef.current, sx, sy, gap / previous.gap, viewportRef.current);
+      }
+
+      const dx = mx - previous.mx;
+      const dy = my - previous.my;
+      if (dx !== 0 || dy !== 0) {
+        cameraRef.current = panBy(cameraRef.current, dx, dy, viewportRef.current);
+      }
+
       requestDraw();
     };
 
@@ -291,6 +341,8 @@ export function useSpaceInput({
       olaylarıyla çalışıyor ve dokunuşlar onları da üretiyor.
     */
     const onTouchEnd = (event: TouchEvent) => {
+      touchCountRef.current = event.touches.length;
+      lastTouchEndRef.current = performance.now();
       if (event.touches.length < 2) touchPinchRef.current = null;
     };
 
