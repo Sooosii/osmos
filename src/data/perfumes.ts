@@ -11,7 +11,7 @@ import { FILLERS } from './perfume-sets/fillers';
 /**
  * Parfüm veritabanı — toplayıcı.
  *
- * Notalarda olduğu gibi veri gruplara bölündü (`perfume-sets/`); 44 parfüm tek
+ * Notalarda olduğu gibi veri gruplara bölündü (`perfume-sets/`); 52 parfüm tek
  * dosyada 800 satırı aşıyor. Bu modül onları birleştirip tek giriş noktası
  * sunuyor, böylece `@/data/perfumes` yolu ve `PERFUMES` / `getPerfume`
  * sözleşmesi değişmiyor.
@@ -36,7 +36,7 @@ for (const perfume of PERFUMES) {
   PERFUME_BY_ID.set(perfume.id, perfume);
 
   // Nota kimliği yanlış yazılırsa `getNote` ancak o parfüm ekrana geldiğinde
-  // patlıyordu — 44 parfümde bir harf hatası fark edilmeden kalabilir.
+  // patlıyordu — 52 parfümde bir harf hatası fark edilmeden kalabilir.
   // Yükleme anında hepsi birden denetleniyor.
   for (const entry of perfume.notes) {
     if (!hasNote(entry.noteId)) {

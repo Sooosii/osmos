@@ -315,7 +315,7 @@ export function drawSpace(ctx: CanvasRenderingContext2D, scene: SpaceScene) {
    * Giriş ilerledikçe sönük noktalar çizilmiyor.
    *
    * Kare maliyetinin büyük kısmı nokta başına kurulan radyal degrade lekesi:
-   * 44 nokta = 44 degrade, her karede yeniden. Giriş yarılandığında o
+   * 52 nokta = 52 degrade, her karede yeniden. Giriş yarılandığında o
    * noktaların üstünü zaten büyüyen leke örtüyor — görünmeyen şeyi çizmek
    * açılışın en kritik anında boşa harcanan zaman. Vurgulananlar (seçili +
    * komşuları) çizilmeye devam ediyor: geçişin okunması onlara bağlı.

@@ -2,9 +2,10 @@
  * Komşu takımyıldızının geometrisi — üç boyutlu, sürekli dönen.
  *
  * `space-approach.ts` ve `evolution-loop.ts` ile aynı sözleşme: React, DOM, SVG
- * bilmiyor ve hiçbir şey import etmiyor — tek başına okunup sınanabiliyor. Depoda
- * `vitest.config.*` olmadığı için `@/` takma adı sınamalarda çözülmüyor; bu şart
- * kolaylık değil zorunluluk.
+ * bilmiyor ve hiçbir şey import etmiyor — tek başına okunup sınanabiliyor. Saflık
+ * eskiden araç zorunluluğuydu: depoda `vitest.config.*` yoktu, `@/` takma adı
+ * sınamalarda çözülmüyordu. `vitest.config.mts` geldikten sonra zorunluluk kalktı,
+ * kural kaldı — sınama hâlâ veri katmanını hiç ayağa kaldırmadan çalışıyor.
  *
  * ## Üçüncü boyut süs değil, veri
  *

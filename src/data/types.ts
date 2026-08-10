@@ -127,7 +127,7 @@ export interface Perfume {
   readonly name: string;
   readonly brand: string;
   /**
-   * Çıkış yılı — zorunlu, 44'ün 44'ünde dolu.
+   * Çıkış yılı — zorunlu, 52'nin 52'sinde dolu.
    *
    * `?` bilerek yok: künye ancak bütün veri tamken yayınlanır kararı verildi ve
    * bunu derleme zamanında garanti eden tek yer burası. Sınamayla da olurdu ama
@@ -138,10 +138,17 @@ export interface Perfume {
   /**
    * Parfümör — isteğe bağlı, ve bu bir veri eksikliği değil.
    *
-   * 44'ün 42'sinde dolu. Kalan ikisinde (`comptoir-sud-pacifique-vanille-abricot`,
-   * `spirit-of-dubai-ajyal`) marka burnu hiç açıklamadı; aranıp bulunamadığı için
-   * değil, açıklanmadığı için boş. Künye o iki sayfada yalnızca yılı yazıyor —
-   * uydurma da yok, "bilinmiyor" yazısı da yok.
+   * 52'nin 49'unda dolu ve kalan üçü tek bir sebeple boş değil.
+   *
+   * İkisinde (`comptoir-sud-pacifique-vanille-abricot`, `spirit-of-dubai-ajyal`)
+   * marka burnu hiç açıklamadı; aranıp bulunamadığı için değil, açıklanmadığı
+   * için boş. Üçüncüsü (`min-new-york-long-board`) sekiz parfüm turunda geldi ve
+   * burnu hiç araştırılmadı — "açıklanmamış" diye doğrulanmış değil, yalnızca
+   * bakılmamış. Aradaki fark doldurma iznini belirliyor: ilk ikisinde kaynak
+   * çıksa bile şüpheyle karşılanmalı, üçüncüsünde kaynakla doldurulabilir.
+   *
+   * Künye o üç sayfada yalnızca yılı yazıyor — uydurma da yok, "bilinmiyor"
+   * yazısı da yok.
    */
   readonly perfumer?: string;
   readonly notes: readonly PerfumeNote[];
@@ -166,7 +173,7 @@ export interface SpacePoint {
  * `SpacePoint`ten farkı: konuma ek olarak ekranda gereken her şeyi taşıyor
  * (ad, renk, komşu kimlikleri), böylece tarayıcının parfüm veritabanına da
  * benzerlik motoruna da ihtiyacı kalmıyor. Bu yüzden burada, saf tip
- * dosyasında duruyor — istemci bileşeni tipi alırken 44×44'lük kosinüs
+ * dosyasında duruyor — istemci bileşeni tipi alırken 52×52'lik kosinüs
  * matrisini paketine sürüklemesin.
  */
 export interface SpaceMark {
@@ -189,7 +196,7 @@ export interface SpaceMark {
    * Adı bilerek `character` değil. `Character` ham veri ve nota başına duruyor;
    * bu, onun parfüm düzeyinde ortalanıp **gözlenen aralığa yayılmış** hâli. Aynı
    * adı vermek aynı sayılar sanılmasına yol açardı — buradaki 0.5 "nötr" değil,
-   * "44 parfümün ortası" demek.
+   * "52 parfümün ortası" demek.
    *
    * Dördü de iniyor ama ekranda ikisi açık duruyor; doku ve yakınlık "…" ile
    * geliyor. Dördü de veride kalmaya ve benzerlik hesabını beslemeye devam

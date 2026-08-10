@@ -69,7 +69,7 @@ export function SpaceOverlays({
         {/*
           Giriş metni — sunucuda üretiliyor, görünürlüğü burada.
 
-          Sahne boyunca yok: uzaktayken ekranda "44 parfüm" yazması, henüz 44 nokta
+          Sahne boyunca yok: uzaktayken ekranda "52 parfüm" yazması, henüz 52 nokta
           görünmezken verilmiş bir söz olurdu. Varışta yerine yerleşiyor.
         */}
         <div ref={introRef} className="opacity-0 transition-opacity duration-700">

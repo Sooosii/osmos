@@ -11,9 +11,10 @@
  * seti uydurmak ikisinin de kalibrasyonunu bozardı.
  *
  * Modül saf: React, DOM, SVG bilmiyor ve hiçbir şey import etmiyor —
- * `space-approach.ts` ve `evolution-loop.ts` ile aynı sözleşme. Depoda
- * `vitest.config.*` olmadığı için `@/` takma adı sınamalarda çözülmüyor; bu şart
- * kolaylık değil zorunluluk.
+ * `space-approach.ts` ve `evolution-loop.ts` ile aynı sözleşme. Saflık eskiden
+ * araç zorunluluğuydu (`vitest.config.*` yoktu, `@/` çözülmüyordu);
+ * `vitest.config.mts` geldikten sonra tercih — sınama veri katmanını hiç ayağa
+ * kaldırmadan çalışıyor.
  */
 
 /** Sahnenin kamerası. Her takımyıldız kendi değerlerini veriyor. */

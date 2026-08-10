@@ -7,7 +7,7 @@ import type { Perfume } from '@/data/types';
 /**
  * Uzaydaki komşular — hesabın yapıldığı yer.
  *
- * **Sunucu bileşeni ve öyle kalmalı.** Benzerlik motoru 44×44'lük bir kosinüs
+ * **Sunucu bileşeni ve öyle kalmalı.** Benzerlik motoru 52×52'lik bir kosinüs
  * matrisi kuruyor (`space-marks.ts:11-13`); istemciye inseydi tarayıcı paketi
  * bütün veri setini ve benzerlik hesabını taşırdı. Burada hesaplanıp aşağıya düz
  * veri olarak geçiyor, dönen çizim `NeighborOrbit`te.
