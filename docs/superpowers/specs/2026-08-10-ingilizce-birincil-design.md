@@ -168,6 +168,14 @@ Muaf tutulanlar ve nedenleri:
 - `src/data/**` — TR metin orada tasarım gereği duruyor
 - `src/i18n/tr.ts` — bekleyen Türkçe sözlüğün evi
 - `*.test.ts` — sınamaların kendi metinleri
+- `throw new Error(...)` satırları — geliştirici metni, ekran metni değil;
+  gerekçesi kod yorumlarının Türkçe kalmasıyla aynı
+
+⚠️ **`BAND_LABEL` bu muafiyetin açtığı deliği gösterdi.** `src/data/notes.ts`
+içinde duran `{ top: 'ÜST', heart: 'KALP', base: 'DIP' }` haritası veri değil
+**ekran metni** — ve `src/data/**` muaf olduğu için tarayıcı onu hiç
+görmeyecekti. Planın 8. görevi onu sözlüğe taşıyor. Kural: ekran metni veri
+klasöründe durmaz.
 
 ⚠️ Tarayıcı **yorumları atlar ama dizeleri okur**; satır içi `//` içeren bir
 dize (URL gibi) o satırın kalanını gizleyebilir. Bu yön güvenli: eksik yakalar,
@@ -178,6 +186,18 @@ yanlış yakalamaz.
 
 Mevcut 178 sınama yeşil kalmalı. Yol adı değişiklikleri sınamalara dokunmuyor:
 sınananlar saf modüller, hiçbiri rota bilmiyor.
+
+⚠️ Ama **iki sınama dosyası ekran metni sınıyor** ve onlar değişecek:
+`evolution-loop.test.ts` (`formatDuration` → `'21 dakika'`, `'ilk saniyeler'`,
+`'3 saat 5 dakika'`; `phaseLabel` → `'Açılış'`, `'Kalp'`, `'Dip'`) ve
+`note-measures.test.ts` (`axisWord` → `'soğuk ile sıcak arasında'`,
+`'hafif sıcak'`, `'belirgin soğuk'`). İkisi de metni bilerek sınıyor —
+`evolution-loop.test.ts:87` bunu yazılı olarak savunuyor: *"Sayı değil, görünen
+metin sınanıyor."* Karar korunuyor, beklentiler İngilizceye çevriliyor.
+
+Bir sınama da ekleniyor: İngilizcenin Türkçede olmayan tekil/çoğul ayrımı.
+`formatDuration(1)` bugün `'1 dakika'` üretiyor, İngilizcede `'1 minutes'`
+üretirdi — ve `peakMinutes` 1 olan gerçek notalar var (`aldehydes`).
 
 ## Yapı
 
@@ -192,14 +212,18 @@ sınananlar saf modüller, hiçbiri rota bilmiyor.
 
 ## Ölçülen büyüklük
 
-Yorum dışı, Türkçeye özgü harf geçen **299 satır / 27 dosya**. En yoğunları:
-`SpaceFeelSliders` (42), `nota/[id]/page.tsx` (40), `SpaceOverlays` (35),
-`app/page.tsx` (30), `notalar/page.tsx` (23), `note-measures.ts` (16),
-`NoteMeasures` (15).
+⚠️ İlk ölçüm **299 satır / 27 dosya** demişti ve yanlıştı: sayaç yalnızca `*`
+ve `//` ile başlayan satırları yorum sayıyordu, oysa bu depo JSX yorumlarını
+`{/*` açıp düz metinle sürdürüyor. Yani rakamın çoğu yorum gövdesiydi.
 
-Bu bir üst sınır değil alt sınır: Türkçe harf içermeyen dizeler (`KESKIN`,
-`DIP`, `PARFUM`) sayıma girmiyor. Gerçek dize listesi plan aşamasında
-çıkarılacak.
+Blok yorumları gerçekten atlayan sayım: **68 satır**, ve bunlar yalnızca Türkçeye
+özgü harf taşıyanlar. Yanına diakritiksiz ekran etiketleri ekleniyor — `AILE`,
+`YIL`, `NOTA`, `BANT`, `TEPE`, `KESKIN`, `TEMIZ`, `KIRLI`, `DIP`, `KALP`,
+`EVRIM`, `NOTALAR`, `PALET`. Plan aşamasında çıkarılan tam liste **~120 dize**.
+
+Ders sayıdan büyük: bir tarama aracının kendi kör noktası ölçümü üç katına
+çıkarabiliyor. Görev 10'un kaçak Türkçe avcısı bu yüzden blok yorumlarını
+satırlar arasında takip ediyor.
 
 ## Kapsam dışı — Faz 2
 
