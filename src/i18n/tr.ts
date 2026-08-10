@@ -32,6 +32,11 @@ export const TR: Dict = {
     allNotes: '← bütün notalar',
   },
 
+  notFound: {
+    mark: 'HARITADA YOK',
+    line: 'Böyle bir sayfa yok. Adres yanlış yazılmış olabilir, ya da seçkiye hiç girmemiş bir parfüm olabilir.',
+  },
+
   space: {
     intro: (count) =>
       `${count} parfüm, konumları nota akrabalığından hesaplandı. Sürükle, yakınlaş, bir noktaya dokun.`,
