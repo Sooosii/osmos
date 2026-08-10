@@ -403,8 +403,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
       </div>
 
       <p className="mt-10 max-w-lg text-xs leading-relaxed text-white/25">
-        Bu çizelge bir tahmindir, ölçüm değil. Notaların uçuculuğundan modellenmiştir;
-        gerçek gelişim sıcaklığa, tene ve konsantrasyona göre değişir.
+        {EN.chart.disclaimer}
       </p>
     </div>
   );

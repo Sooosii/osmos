@@ -85,8 +85,8 @@ describe('minutesAt', () => {
     // Turun ortası `morphAt`in tepesi, yani biçimin çizelgeye oturduğu an. Ekranda
     // o sırada hangi saatin yazdığı doğrudan kullanıcı deneyimi: 12 saatlik turda
     // 26 dakikaydı, 8 saatlik turda 21. Sayı değil, görünen metin sınanıyor.
-    expect(formatDuration(minutesAt(0.5, SIGNATURE_MAX_MINUTES))).toBe('21 dakika');
-    expect(formatDuration(minutesAt(0.5, SLIDER_MAX_MINUTES))).toBe('26 dakika');
+    expect(formatDuration(minutesAt(0.5, SIGNATURE_MAX_MINUTES))).toBe('21 minutes');
+    expect(formatDuration(minutesAt(0.5, SLIDER_MAX_MINUTES))).toBe('26 minutes');
   });
 });
 
@@ -126,36 +126,44 @@ describe('morphAt', () => {
 
 describe('formatDuration', () => {
   test('bir dakikanın altı sözle söyleniyor', () => {
-    expect(formatDuration(0)).toBe('ilk saniyeler');
-    expect(formatDuration(0.4)).toBe('ilk saniyeler');
+    expect(formatDuration(0)).toBe('the first seconds');
+    expect(formatDuration(0.4)).toBe('the first seconds');
   });
 
   test('saatin altı dakikayla', () => {
-    expect(formatDuration(3)).toBe('3 dakika');
+    expect(formatDuration(3)).toBe('3 minutes');
   });
 
   test('tam saat dakikasız yazılıyor', () => {
-    expect(formatDuration(120)).toBe('2 saat');
+    expect(formatDuration(120)).toBe('2 hours');
   });
 
   test('60 dakika sınırı — saat biçimine tam burada geçiyor', () => {
     // Sınır sınanmıyordu: `< 60` yanlışlıkla `<= 60` yapılsa 60 dakika
-    // "60 dakika" diye yazılır ve hiçbir sınama bunu yakalamazdı.
-    expect(formatDuration(59)).toBe('59 dakika');
-    expect(formatDuration(60)).toBe('1 saat');
+    // "60 minutes" diye yazılır ve hiçbir sınama bunu yakalamazdı.
+    expect(formatDuration(59)).toBe('59 minutes');
+    expect(formatDuration(60)).toBe('1 hour');
   });
 
   test('saat ve dakika birlikte', () => {
-    expect(formatDuration(185)).toBe('3 saat 5 dakika');
+    expect(formatDuration(185)).toBe('3 hours 5 minutes');
+  });
+
+  test('tekil biçimler — İngilizcenin Türkçede olmayan ayrımı', () => {
+    // Türkçe "1 dakika" der ve sorun çıkmaz; İngilizce "1 minutes" derdi.
+    // Uydurma bir sınır değil: `aldehydes` notasının `peakMinutes`ı 1 ve bu
+    // sayı ekrana nota sayfasından çıkıyor.
+    expect(formatDuration(1)).toBe('1 minute');
+    expect(formatDuration(61)).toBe('1 hour 1 minute');
   });
 });
 
 describe('phaseLabel', () => {
   test('evre sınırları', () => {
-    expect(phaseLabel(0)).toBe('Açılış');
-    expect(phaseLabel(14)).toBe('Açılış');
-    expect(phaseLabel(15)).toBe('Kalp');
-    expect(phaseLabel(119)).toBe('Kalp');
-    expect(phaseLabel(120)).toBe('Dip');
+    expect(phaseLabel(0)).toBe('Opening');
+    expect(phaseLabel(14)).toBe('Opening');
+    expect(phaseLabel(15)).toBe('Heart');
+    expect(phaseLabel(119)).toBe('Heart');
+    expect(phaseLabel(120)).toBe('Base');
   });
 });

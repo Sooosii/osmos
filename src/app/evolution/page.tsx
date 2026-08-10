@@ -1,4 +1,5 @@
 import { EvolutionTimeline } from '@/components/EvolutionTimeline';
+import { EN } from '@/i18n/en';
 
 /**
  * Evrim çizelgesi — zaman kaydıracıyla notaların yükselip düşüşü.
@@ -11,7 +12,7 @@ export default function EvolutionPage() {
   return (
     <div className="min-h-screen bg-[#0A0A0C] px-6 py-24 sm:px-12">
       <div className="mx-auto flex max-w-3xl flex-col">
-        <p className="mb-16 text-xs tracking-[0.3em] text-white/30">OSMOS</p>
+        <p className="mb-16 text-xs tracking-[0.3em] text-white/30">{EN.site.name}</p>
         <EvolutionTimeline />
       </div>
     </div>

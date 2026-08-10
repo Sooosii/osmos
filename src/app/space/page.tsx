@@ -4,6 +4,7 @@ import { familyVector, nearestNeighbors } from '@/lib/similarity';
 import { buildMarks } from '@/lib/space-marks';
 import { ScentSpace } from '@/components/ScentSpace';
 import type { ScentFamily } from '@/data/types';
+import { EN } from '@/i18n/en';
 
 /**
  * Uzay taslağı — benzerlik motorunu doğrulamak için.
@@ -26,13 +27,19 @@ import type { ScentFamily } from '@/data/types';
  * ev DNA'sı testi olarak o yeterli.
  */
 const EXPECTATIONS: readonly { readonly label: string; readonly ids: readonly string[] }[] = [
-  { label: 'Nasomatto çifti yakın olmalı', ids: ['nasomatto-baraonda', 'nasomatto-blamage'] },
   {
-    label: 'Yosunlu uç bir arada olmalı',
+    label: EN.draft.expectations.nasomatto,
+    ids: ['nasomatto-baraonda', 'nasomatto-blamage'],
+  },
+  {
+    label: EN.draft.expectations.mossy,
     ids: ['parfum-dempire-azemour-les-orangers', 'papillon-dryad'],
   },
-  { label: 'Kirli uç bir arada olmalı', ids: ['bogue-maai', 'serge-lutens-muscs-koublai-khan'] },
-  { label: 'Not a Perfume yapayalnız olmalı', ids: ['juliette-has-a-gun-not-a-perfume'] },
+  {
+    label: EN.draft.expectations.dirty,
+    ids: ['bogue-maai', 'serge-lutens-muscs-koublai-khan'],
+  },
+  { label: EN.draft.expectations.alone, ids: ['juliette-has-a-gun-not-a-perfume'] },
 ];
 
 export default function SpaceDraft() {
@@ -48,20 +55,15 @@ export default function SpaceDraft() {
   return (
     <div className="min-h-screen bg-[#0A0A0C] px-6 py-16 text-white sm:px-12">
       <div className="mx-auto max-w-4xl">
-        <p className="mb-2 text-xs tracking-[0.3em] text-white/30">OSMOS</p>
-        <h1 className="text-3xl font-light tracking-tight">Uzay taslağı</h1>
+        <p className="mb-2 text-xs tracking-[0.3em] text-white/30">{EN.site.name}</p>
+        <h1 className="text-3xl font-light tracking-tight">{EN.draft.spaceHeading}</h1>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/40">
-          Benzerlik motorunun doğrulama ekranı. {PERFUMES.length} parfüm; her biri üç kanaldan
-          okunuyor — koku ailesi, karakter (sıcaklık, doku, temizlik, yakınlık) ve paylaşılan
-          notalar. Üçünün birleşiminden çıkan kosinüs uzaklığı klasik MDS ile iki boyuta
-          indirildi. Renk baskın aileyi, nokta boyutu üçüncü bileşeni (derinlik) gösteriyor.
+          {EN.draft.spaceLede(PERFUMES.length)}
         </p>
 
         {/* Dağılım */}
         <ScentSpace marks={marks} />
-        <p className="mt-3 text-xs text-white/25">
-          Üstüne gel — adı çıkar. Tıkla — en yakın üç komşusuna bağlanır.
-        </p>
+        <p className="mt-3 text-xs text-white/25">{EN.draft.spaceHint}</p>
 
         {/* Aile göstergesi — yalnızca haritada geçenler */}
         <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2">
@@ -77,7 +79,7 @@ export default function SpaceDraft() {
         </div>
 
         {/* Kontrol noktaları */}
-        <h2 className="mt-16 text-lg font-light">Kontrol noktaları</h2>
+        <h2 className="mt-16 text-lg font-light">{EN.draft.checkpoints}</h2>
         <ul className="mt-4 space-y-2 text-sm">
           {EXPECTATIONS.map((check) => (
             <li key={check.label} className="text-white/50">
@@ -87,7 +89,9 @@ export default function SpaceDraft() {
                 {check.ids
                   .map((id) => {
                     const point = pointById.get(id);
-                    return point ? `(${point.x.toFixed(2)}, ${point.y.toFixed(2)})` : 'yok';
+                    return point
+                      ? `(${point.x.toFixed(2)}, ${point.y.toFixed(2)})`
+                      : EN.draft.missing;
                   })
                   .join(' · ')}
               </span>
@@ -96,10 +100,8 @@ export default function SpaceDraft() {
         </ul>
 
         {/* Komşuluklar — doğrulamanın asıl aracı */}
-        <h2 className="mt-16 text-lg font-light">En yakın komşular</h2>
-        <p className="mt-2 text-xs text-white/30">
-          Sayı kosinüs benzerliği: 1.00 aynı karakter, 0.00 ortak hiçbir şey yok.
-        </p>
+        <h2 className="mt-16 text-lg font-light">{EN.draft.neighbours}</h2>
+        <p className="mt-2 text-xs text-white/30">{EN.draft.neighboursNote}</p>
         <ul className="mt-5 space-y-4">
           {PERFUMES.map((perfume) => (
             <li key={perfume.id} className="text-sm">
