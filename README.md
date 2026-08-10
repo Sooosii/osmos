@@ -72,3 +72,9 @@ One optional environment variable:
 | `NEXT_PUBLIC_SITE_URL` | Absolute base for the sitemap, `hreflang` links and share images. Falls back to the host's own production URL, then to `http://localhost:3000`. Set it once a custom domain is in place. |
 
 See `.env.example`.
+
+## License
+
+All rights reserved — see [LICENSE](LICENSE). The code is readable, but the
+selection, the descriptions and the measurements are original work and are not
+free to reuse. Ask if you want to.
