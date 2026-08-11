@@ -31,6 +31,30 @@ import type { SpaceMark } from '@/data/types';
 const MARGIN = 1.12;
 
 /**
+ * Portre ekranlarda çerçeveyi dikeye doğru açan pay.
+ *
+ * ⚠️ **Ölçülerek kondu** (2026-08-11, 390×844): bulut ekranın yalnızca **%36**
+ * 'sını kaplıyordu — masaüstünde %91. Sebep süs değil geometri: bulut kareye
+ * yakın (x ±1.0, y ±0.84), telefon ise iki kattan uzun. Ölçek iki eksenin
+ * **küçüğüne** oturduğu için telefonda genişlik sınırlıyor ve dikeyde ekranın
+ * üçte ikisi boş kalıyordu — noktalar da o oranda küçülüyordu, dokunması zor.
+ *
+ * `PORTRAIT_RATIO`: bu orandan uzun ekranlar portre sayılıyor. 1.6, tabletin
+ * (4:3 ≈ 1.33) dışında, telefonun (≈2.1) içinde kalıyor.
+ *
+ * `PORTRAIT_FILL`: açılımın tavanı. Bedeli bilinçli ve sınırlı — en kenardaki
+ * birkaç parfüm durağan görünümde ekranın dışında kalıyor, sürükleyince
+ * geliyor. Harita zaten sürüklenebilir ve giriş metni bunu söylüyor
+ * ("Drag, zoom, touch a point"). Tavan olmadan bulut ekranı taşardı;
+ * `space-camera.test.ts` iki ucu da tutuyor.
+ *
+ * ⚠️ Bu yalnızca **oturtma** ölçeğini değiştiriyor, kameranın `scale`ını değil:
+ * yakınlaşma, kaydırma ve `FOCUS_SCALE` aynı sayıları görmeye devam ediyor.
+ */
+const PORTRAIT_RATIO = 1.6;
+const PORTRAIT_FILL = 1.45;
+
+/**
  * Kameranın gidebileceği en uzak dünya noktası. **Bilerek `VIEW`'dan bağımsız.**
  *
  * Eskiden ikisi tek sabitti; çerçeveyi sıkmak için `VIEW`'ı düşürmek kaydırma
@@ -157,8 +181,18 @@ function clamp(value: number, low: number, high: number): number {
 export function pixelsPerUnit(viewport: Viewport, scale: number): number {
   const fitX = viewport.width / (viewport.halfX * 2 * MARGIN);
   const fitY = viewport.height / (viewport.halfY * 2 * MARGIN);
+  const fit = Math.min(fitX, fitY);
 
-  return Math.min(fitX, fitY) * scale;
+  /*
+    Portrede çerçeve dikeye doğru açılıyor; gerekçe `PORTRAIT_FILL`da.
+    `Math.min(fitY, …)` tavanın üstüne bir tavan daha: açılım hiçbir durumda
+    bulutu dikeyde de kırpacak kadar büyümüyor.
+  */
+  if (viewport.height / viewport.width >= PORTRAIT_RATIO) {
+    return Math.min(fitY, fit * PORTRAIT_FILL) * scale;
+  }
+
+  return fit * scale;
 }
 
 /** Noktanın kaydırmaya verdiği tepki katsayısı; 1 = kamerayla birebir. */
