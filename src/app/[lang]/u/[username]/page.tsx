@@ -191,7 +191,13 @@ export default async function ProfilePage({
           ) : null}
 
           {readable >= MIN_NOSE_PERFUMES ? (
-            <section className="mt-4">
+            /*
+              Boşluk yukarıda ne olduğuna bağlı: raf satırı varsa onun altına
+              yakın duruyor (ikisi bir küme), yoksa Top 4 kartlarından ayrılması
+              gerekiyor. Rafı boş ama dörtlüsü dolu profil en sık durum —
+              sabit `mt-4` orada satırı kartlara yapıştırıyordu.
+            */
+            <section className={shelfTotal > 0 ? 'mt-4' : 'mt-14'}>
               <Link
                 href={withLocale(locale, `/u/${profile.username}/nose`)}
                 className="group flex items-baseline gap-4 text-sm font-light transition-colors"
