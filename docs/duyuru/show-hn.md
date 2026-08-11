@@ -46,13 +46,13 @@ cümlelerinle, kendi sıranla yaz. Kısa olsun — 5-8 cümle yeter.
 - 52 parfüm, 136 nota. Her nota iki sayı (tepe dakikası, yarı ömür) ve dört
   karakter ekseni taşıyor.
 - Konum = üç kanalın (aile, karakter, paylaşılan nota) kosinüs uzaklığı,
-  klasik MDS ile iki boyuta indirilmiş.
+  klasik MDS + SMACOF ile iki boyuta indirilmiş.
 - Evrim eğrisi = yükseliş × sönüm; parfümün imzası notalarının toplamı.
 - Sitede tek bir fotoğraf yok, grafik kütüphanesi de yok.
 
 **Teknik, HN'in gerçekten ilgisini çekecek kısım:**
 - Hesap sunucuda: benzerlik matrisi tarayıcıya hiç inmiyor.
-- 394 sayfa statik üretiliyor.
+- 396 sayfa statik üretiliyor.
 - Elle ayarlanmış her sayı bir sınamayla tutuluyor (yörünge geometrisi,
   tram eşikleri, etiket yerleşimi) — tarayıcıda ayarlandılar, kayarsa
   sınama kırılıyor.
@@ -71,7 +71,8 @@ düşünüyorsunuz"dan çok daha fazla yorum getirir.
 | Soru | Cevap |
 |---|---|
 | "Veri nereden?" | Elle yazıldı; nota listeleri markaların yayınladığı piramitlerden, değerler ve cümleler benim. Öznel, saklamıyorum. |
-| "MDS neden, UMAP/t-SNE değil?" | Klasik MDS global uzaklıkları koruyor; burada asıl mesele iki noktanın *arasındaki* mesafenin anlamlı olması. UMAP yerel kümeleri güzel ayırır ama uzaklıklar yorumlanamaz hâle gelir. |
+| "MDS neden, UMAP/t-SNE değil?" | MDS global uzaklıkları koruyor; burada asıl mesele iki noktanın *arasındaki* mesafenin anlamlı olması. UMAP yerel kümeleri güzel ayırır ama uzaklıklar yorumlanamaz hâle gelir. ⚠️ Devamını da söyle, HN bunu sever: klasik MDS **tek başına yetmedi** — gerçek uzaklığı 0.29 olan iki parfümü haritada 0.007'ye yapıştırıyordu (%3). SMACOF ile düzeltildi; başlangıç yine klasik çözüm, ikisi de sabit tohumlu, yani harita her yenilemede aynı. |
+| "Hesap gerekiyor mu?" | Hayır, her şey girişsiz açık. Hesap tek bir şey ekliyor: profilde dört parfüm, raflar ve onlardan okunan bir "burun raporu". |
 | "Eğri gerçek mi?" | Model. Sitede de yazıyor; gerçek gelişim sıcaklığa, tene ve konsantrasyona göre kayıyor. |
 | "Açık kaynak mı?" | Depo herkese açık ve okunabilir, lisans "tüm hakları saklı" — seçki ve tarifler özgün iş. |
 | "Neden fotoğraf yok?" | Şişe fotoğrafı kokuyu anlatmıyor, markayı anlatıyor. Bir de: telif. |
