@@ -59,6 +59,9 @@ export const CURATED_C: readonly Perfume[] = [
       { noteId: 'tonka', tier: 'base', weight: 0.4 },
       { noteId: 'white-musk', tier: 'base', weight: 0.3 },
     ],
+    retailers: [
+      { name: "Penhaligon's", url: 'https://www.penhaligons.com/us/en/p/sartorial-eau-de-toilette-100-ml--000000000065229708' },
+    ],
   },
   {
     id: 'essential-parfums-velvet-iris',
@@ -80,6 +83,9 @@ export const CURATED_C: readonly Perfume[] = [
       { noteId: 'sandalwood', tier: 'base', weight: 0.6 },
       { noteId: 'cashmeran', tier: 'base', weight: 0.5 },
       { noteId: 'white-musk', tier: 'base', weight: 0.5 },
+    ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/velvet-iris-by-essential-parfums' },
     ],
   },
   {

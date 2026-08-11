@@ -138,6 +138,9 @@ export const CURATED_B: readonly Perfume[] = [
       { noteId: 'tonka', tier: 'base', weight: 0.4 },
       { noteId: 'sandalwood', tier: 'base', weight: 0.3 },
     ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/bonbon-pop-by-the-house-of-oud' },
+    ],
   },
   {
     id: 'lorenzo-pazzaglia-summer-hammer',
