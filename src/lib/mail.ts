@@ -18,7 +18,54 @@ import 'server-only';
  * olmaması, sessiz veri kaybının ta kendisi.
  */
 
+/**
+ * Gönderen.
+ *
+ * ⚠️ **Yedek adres (`onboarding@resend.dev`) Resend'in PAYLAŞIMLI deneme
+ * adresi ve mektubun spam'e düşmesinin birinci sebebi.** Binlerce hesap aynı
+ * adresten atıyor, dolayısıyla itibarı düşük; üstelik gönderen alan adı
+ * sitenin alan adıyla hizalı olmadığı için DMARC'ın doğrulayacağı bir şey de
+ * yok. Ölçüldü: mektup gidiyor, gelen kutusuna değil spam'e düşüyor.
+ *
+ * Kod tarafında kapatılabilecek bir açık değil — çözümü **kendi alan adı**:
+ * Resend'de doğrulanıp DNS'e SPF/DKIM kayıtları girildiğinde bu değişken
+ * `OSMOS <merhaba@kendi-alan-adin>` olur ve mesele biter. Adımlar
+ * `docs/posta-teslimat.md`te.
+ */
 const FROM = process.env.MAIL_FROM?.trim() || 'OSMOS <onboarding@resend.dev>';
+
+/**
+ * Cevap adresi — isteğe bağlı.
+ *
+ * Cevaplanamayan bir adresten gelen mektup hem filtreler hem insanlar için
+ * zayıf bir işaret. Tanımlıysa ekleniyor; yokken alan hiç gönderilmiyor
+ * (boş bir `reply_to` göndermek, olmayan bir adresi varmış gibi göstermek olurdu).
+ */
+const REPLY_TO = process.env.MAIL_REPLY_TO?.trim();
+
+/**
+ * ⚠️ **Tehlikeli bileşim: davet açık ama gönderen hâlâ deneme adresi.**
+ *
+ * Bu ikisi bir arada, kayıt olan yabancının kilitlenmesi demek — mektup ya
+ * hiç gitmiyor (Resend sahibi olmayan adrese 403 veriyor) ya da spam'e
+ * düşüyor; kişi giriş yapamıyor, tekrar kayıt olamıyor. Davetin ayrı bir
+ * bayrağa bağlanmasının sebebi buydu (`SignInLink`), ama bayrak açıldığında
+ * `MAIL_FROM`u kurmayı unutmak mümkün ve sessiz.
+ *
+ * Bu yüzden sessiz kalmıyor: üretim günlüğüne bir kez yazıyor. Fırlatmıyor —
+ * bugün sahibin kendi adresine posta ÇALIŞIYOR ve onu kırmak, düzeltmeye
+ * çalıştığımız şeyden daha kötü olurdu.
+ */
+if (
+  process.env.NODE_ENV === 'production' &&
+  process.env.NEXT_PUBLIC_ACCOUNTS_ENABLED &&
+  !process.env.MAIL_FROM?.trim()
+) {
+  console.warn(
+    'MAIL_FROM kurulu degil: davet acikken paylasimli deneme adresinden posta gidiyor, ' +
+      'yabancilar kilitlenir. docs/posta-teslimat.md',
+  );
+}
 
 async function send(to: string, subject: string, text: string): Promise<void> {
   const key = process.env.RESEND_API_KEY?.trim();
@@ -37,7 +84,13 @@ async function send(to: string, subject: string, text: string): Promise<void> {
       Authorization: `Bearer ${key}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ from: FROM, to, subject, text }),
+    body: JSON.stringify({
+      from: FROM,
+      to,
+      subject,
+      text,
+      ...(REPLY_TO ? { reply_to: REPLY_TO } : {}),
+    }),
   });
 
   if (!response.ok) {

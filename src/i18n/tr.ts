@@ -211,6 +211,50 @@ export const TR: Dict = {
     hintTouch: 'yaklaşmak için kaydır',
   },
 
+  shelf: {
+    kinds: { owned: 'bende var', tried: 'denedim', wishlist: 'istiyorum' },
+    removeLabel: (label: string) => `"${label}" işaretini kaldır`,
+    title: (username: string) => `${username} — rafları · OSMOS`,
+    heading: 'RAFLAR',
+    description: (username: string) =>
+      `${username} nelere sahip, neleri denedi, neleri istiyor.`,
+    open: 'raflar',
+    headings: { owned: 'BENDE VAR', tried: 'DENEDIM', wishlist: 'ISTIYORUM' },
+    counts: {
+      owned: (n: number) => `${n} bende`,
+      tried: (n: number) => `${n} denedim`,
+      wishlist: (n: number) => `${n} listemde`,
+    },
+    empty: 'Raflar henüz boş.',
+  },
+
+  nose: {
+    title: (username: string) => `${username} — burun raporu · OSMOS`,
+    heading: 'BURUN RAPORU',
+    description: (username: string) =>
+      `${username} kullanıcısının parfümlerinin ortak yanı.`,
+    open: 'burun raporu',
+    readFrom: (count: number) => `${count} parfümden okundu.`,
+    notEnough: (need: number) =>
+      need === 1
+        ? 'Bir parfüm daha işaretle, rapor belirsin.'
+        : `${need} parfüm daha işaretle, rapor belirsin.`,
+    sections: {
+      families: 'AILELER',
+      character: 'KARAKTER',
+      range: 'GENIŞLIK',
+      outlier: 'YABANCI',
+      next: 'SIRADAKI',
+    },
+    range: {
+      narrow: 'Dar bir burun — bunlar yakın akraba.',
+      balanced: 'Dengeli bir burun — akraba ama kendini tekrar etmiyor.',
+      wide: 'Geniş bir burun — bu parfümlerin ortak yanı az.',
+    },
+    outlierNote: 'Kalanlara en az benzeyen.',
+    nextNote: 'Burnuna en yakın olanlar; henüz raflarında değiller.',
+  },
+
   perfume: {
     title: (name, brand) => `${name} — ${brand} · OSMOS`,
     fallbackDescription: (name, brand) => `${name}, ${brand}.`,

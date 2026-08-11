@@ -8,6 +8,7 @@ import { EvolutionSignature } from '@/components/EvolutionSignature';
 import { Neighbors } from '@/components/Neighbors';
 import { PerfumeNotes } from '@/components/PerfumeNotes';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
+import { ShelfPicker } from '@/components/ShelfPicker';
 import { getDict, localeFor, say } from '@/i18n/dict';
 import { LOCALES, withLocale } from '@/i18n/locale';
 import { pageAlternates } from '@/lib/site-url';
@@ -262,6 +263,13 @@ export default async function PerfumePage({
               Sayfa statik; oturum tarayıcıda çözülüyor (gerekçe bileşende).
             */}
             <AddToTopFour perfumeId={perfume.id} />
+
+            {/*
+              Raflar — dörtlüden ayrı bir soru. Top 4 "en sevdiğin dört şey
+              ne", raf "elinde ne var". Altında duruyor çünkü sırası o:
+              önce iddia, sonra kayıt.
+            */}
+            <ShelfPicker perfumeId={perfume.id} />
           </header>
 
           {/* ③ — "aa, o aslında veriymiş" */}

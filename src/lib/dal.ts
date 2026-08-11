@@ -6,7 +6,9 @@ import { eq } from 'drizzle-orm';
 import type { PerfumeNote } from '@/data/types';
 import { getDb, schema } from '@/db';
 import { getAuth, authReady } from './auth';
-import { listCompositions } from './profile-store';
+import { noseReport, type NoseReport } from './nose';
+import { listCompositions, readShelf } from './profile-store';
+import { groupShelf, type GroupedShelf, type ShelfEntry } from './shelf';
 import { cleanTopFour } from './top-four';
 
 /**
@@ -48,6 +50,15 @@ export interface PublicProfile {
   /** Süslemeleri açan bayrak; ücretli üyelik. */
   readonly patron: boolean;
   readonly compositions: readonly { readonly slug: string; readonly name: string }[];
+  /**
+   * Üç raf, kimlik listeleri hâlinde.
+   *
+   * Profil sayfası bundan yalnızca üç sayı okuyor ama tamamı geliyor ve bu
+   * bilinçli: raf en fazla katalog boyunda (52 satır) ve aynı çağrı raf
+   * sayfasını da burun raporunu da besliyor. Ayrı bir "sayı" sorgusu açmak
+   * üç sayfa için üç ayrı yol demek olurdu.
+   */
+  readonly shelf: GroupedShelf;
 }
 
 /**
@@ -101,6 +112,17 @@ export const topFourOf = cache(async (userId: string): Promise<readonly string[]
 });
 
 /**
+ * Bir kullanıcının rafları — ham kayıtlar, gruplanmamış.
+ *
+ * `cache` şart: profil sayfası bunu profil üzerinden, künye ucu doğrudan
+ * çağırıyor ve bir çizimde ikisi de olabilir.
+ */
+export const shelfOf = cache(async (userId: string): Promise<readonly ShelfEntry[]> => {
+  if (!authReady()) return [];
+  return readShelf(getDb(), userId);
+});
+
+/**
  * Herkese açık profil — yoksa ya da **gizliyse** `null`.
  *
  * ⚠️ Gizli profil "gizli" sayfası değil `null` dönüyor; sayfa onu 404'e
@@ -134,8 +156,45 @@ export const publicProfile = cache(async (username: string): Promise<PublicProfi
     topFour: await topFourOf(found.id),
     /* Listede yalnızca ad ve adres; notalar kompozisyonun kendi sayfasında. */
     compositions: compositions.map((entry) => ({ slug: entry.slug, name: entry.name })),
+    shelf: groupShelf(await shelfOf(found.id)),
   };
 });
+
+/**
+ * Bir kullanıcının burun raporu — gizli profilde `null`.
+ *
+ * ⚠️ Neyin okunacağı **burada** kuruluyor, `nose.ts`te değil: saf modül
+ * "hangi liste hangi role girer" sorusuna karışmıyor, yalnız hesabı yapıyor.
+ *
+ *   okunan  = Top 4 + sahibim + denedim   → koklanmış olanlar
+ *   çift    = Top 4                       → iddia, kayıttan ağır basıyor
+ *   düşecek = hepsi + listemde            → zaten bilineni önermek boş
+ *
+ * "Listemde" okunanlara girmiyor; gerekçe `nose.ts`in başında.
+ */
+export const publicNose = cache(
+  async (
+    username: string,
+  ): Promise<{
+    readonly username: string;
+    readonly report: NoseReport | null;
+    /** Kaç parfüm okundu — rapor çıkmadığında davetin sayısını bu veriyor. */
+    readonly count: number;
+  } | null> => {
+    const profile = await publicProfile(username);
+    if (!profile) return null;
+
+    const read = [...profile.topFour, ...profile.shelf.owned, ...profile.shelf.tried];
+    const exclude = [...read, ...profile.shelf.wishlist];
+
+    return {
+      username: profile.username,
+      report: noseReport(read, profile.topFour, exclude),
+      /* Kimlikler okuma tarafında zaten temizlenmiş; tekilleştirmek yeterli. */
+      count: new Set(read).size,
+    };
+  },
+);
 
 /**
  * Tek bir kompozisyon — sahibinin adı ve slug'ıyla.

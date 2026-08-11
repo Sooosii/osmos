@@ -2,14 +2,17 @@
 
 import { getDb } from '@/db';
 import { currentViewer } from '@/lib/dal';
+import { isShelfKind, type ShelfKind } from '@/lib/shelf';
 import {
   appendToTopFour,
   claimUsername,
   deleteComposition,
   saveComposition,
   saveProfile,
+  setShelf,
   writeSlot,
   type SaveError,
+  type ShelfError,
 } from '@/lib/profile-store';
 
 /**
@@ -98,6 +101,24 @@ export async function deleteCompositionAction(slug: string): Promise<Result> {
 
   await deleteComposition(getDb(), viewer.id, slug);
   return { ok: true };
+}
+
+/**
+ * Künyedeki üç raf düğmesinin yolu — koy, taşı ya da (`null`) çıkar.
+ *
+ * ⚠️ `kind` **burada da** doğrulanıyor, deponun kapısına güvenilerek
+ * geçilmiyor. Tip imzası istemciyi bağlamıyor: bu bir Server Action, yani
+ * herkese açık bir uç ve gövdeye ne geleceği belli olmaz.
+ */
+export async function setShelfAction(
+  perfumeId: string,
+  kind: ShelfKind | null,
+): Promise<{ ok: true } | { ok: false; error: ShelfError | 'unauthorized' }> {
+  const viewer = await currentViewer();
+  if (!viewer) return { ok: false, error: 'unauthorized' };
+  if (kind !== null && !isShelfKind(kind)) return { ok: false, error: 'unknownKind' };
+
+  return setShelf(getDb(), viewer.id, perfumeId, kind);
 }
 
 /** Parfüm sayfasındaki düğmenin yolu. */

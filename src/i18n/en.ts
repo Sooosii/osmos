@@ -262,6 +262,69 @@ export const EN = {
     hintTouch: 'swipe to come closer',
   },
 
+  /**
+   * Raflar — künyedeki üç düğme ve kendi sayfası.
+   *
+   * ⚠️ `kinds` anahtarları `SHELF_KINDS` ile birebir; ekran o diziyi geziyor,
+   * yani buradan bir anahtar düşerse düğme yazısız çizilir.
+   */
+  shelf: {
+    kinds: { owned: 'have it', tried: 'tried it', wishlist: 'want it' },
+    /** Etkin düğmeye tekrar basmanın ne yapacağı — ekran okuyucu için. */
+    removeLabel: (label: string) => `take "${label}" back off`,
+    title: (username: string) => `${username}'s shelves · OSMOS`,
+    heading: 'SHELVES',
+    description: (username: string) => `What ${username} has, has tried, and wants.`,
+    /** Profildeki özet satırının bağlantısı. */
+    open: 'shelves',
+    headings: { owned: 'HAS', tried: 'TRIED', wishlist: 'WANTS' },
+    counts: {
+      owned: (n: number) => `${n} owned`,
+      tried: (n: number) => `${n} tried`,
+      wishlist: (n: number) => `${n} wanted`,
+    },
+    empty: 'Nothing on the shelves yet.',
+  },
+
+  /**
+   * Burun raporu — rafların ve Top 4'ün birlikte söylediği şey.
+   *
+   * Eksen adları burada YOK: `space.sliders` zaten söylüyor ve ikinci bir
+   * kopya, bir gün biri değişince raporla kaydıraçların ayrı şeyler demesine
+   * yol açardı.
+   */
+  nose: {
+    title: (username: string) => `${username}'s nose · OSMOS`,
+    heading: 'NOSE REPORT',
+    description: (username: string) => `What ${username}'s perfumes have in common.`,
+    open: 'nose report',
+    /**
+     * Dürüstlük satırı — raporun kaç parfümden okunduğu.
+     *
+     * Site hiçbir yerde elindekinden fazlasını iddia etmiyor; üç parfümlük bir
+     * portre ile yirmi parfümlük olanı ayırt etmek okuyanın hakkı.
+     */
+    readFrom: (count: number) => `Read from ${count} perfumes.`,
+    notEnough: (need: number) =>
+      need === 1
+        ? 'Mark one more perfume and the report appears.'
+        : `Mark ${need} more perfumes and the report appears.`,
+    sections: {
+      families: 'FAMILIES',
+      character: 'CHARACTER',
+      range: 'RANGE',
+      outlier: 'THE ODD ONE',
+      next: 'WHAT TO TRY NEXT',
+    },
+    range: {
+      narrow: 'A narrow nose — these are close relatives.',
+      balanced: 'A balanced nose — related, but not repeating themselves.',
+      wide: 'A wide nose — these perfumes have little in common.',
+    },
+    outlierNote: 'The one least like the rest.',
+    nextNote: 'Closest to your nose, and not on your shelves yet.',
+  },
+
   perfume: {
     title: (name: string, brand: string) => `${name} — ${brand} · OSMOS`,
     fallbackDescription: (name: string, brand: string) => `${name}, ${brand}.`,

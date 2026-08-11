@@ -1,4 +1,4 @@
-import { PERFUMES } from '@/data/perfumes';
+import { hasPerfume } from '@/data/perfumes';
 
 /**
  * Top 4 kuralları — saf, sınanabilir.
@@ -17,10 +17,6 @@ export const MAX_TOP_FOUR = 4;
 
 export type TopFourError = 'tooMany' | 'duplicate' | 'unknown';
 
-function isKnown(id: string): boolean {
-  return PERFUMES.some((perfume) => perfume.id === id);
-}
-
 /**
  * Kuralı çiğneyen ilk şey, ya da `null`.
  *
@@ -31,7 +27,7 @@ function isKnown(id: string): boolean {
 export function topFourError(ids: readonly string[]): TopFourError | null {
   if (ids.length > MAX_TOP_FOUR) return 'tooMany';
   if (new Set(ids).size !== ids.length) return 'duplicate';
-  if (ids.some((id) => !isKnown(id))) return 'unknown';
+  if (ids.some((id) => !hasPerfume(id))) return 'unknown';
   return null;
 }
 
@@ -49,7 +45,7 @@ export function cleanTopFour(ids: readonly string[]): readonly string[] {
 
   for (const id of ids) {
     if (clean.length >= MAX_TOP_FOUR) break;
-    if (seen.has(id) || !isKnown(id)) continue;
+    if (seen.has(id) || !hasPerfume(id)) continue;
     seen.add(id);
     clean.push(id);
   }
@@ -73,7 +69,7 @@ export function setSlot(
   perfumeId: string | null,
 ): readonly string[] {
   if (!Number.isInteger(slot) || slot < 0 || slot >= MAX_TOP_FOUR) return ids;
-  if (perfumeId !== null && !isKnown(perfumeId)) return ids;
+  if (perfumeId !== null && !hasPerfume(perfumeId)) return ids;
 
   const next = [...ids];
 

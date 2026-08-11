@@ -20,6 +20,7 @@ import { type FeelTarget, NO_FEEL } from '@/lib/space-feel';
 import { START_SCALE } from '@/lib/space-approach';
 import { useApproachScene } from '@/components/space/use-approach-scene';
 import { useSpaceInput } from '@/components/space/use-space-input';
+import { useShelfRings } from '@/components/space/use-shelf-rings';
 import { SpaceOverlays } from '@/components/space/SpaceOverlays';
 import { SpaceKeyboardList } from '@/components/space/SpaceKeyboardList';
 
@@ -110,6 +111,15 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
    * değil. Ayrımın tamamı `space-feel.ts`te.
    */
   const feelTargetRef = useRef<FeelTarget>(NO_FEEL);
+
+  /**
+   * Okuyucunun "sahibim" rafı — halkalı çizilecek noktalar.
+   *
+   * Kaydıraç tarifiyle aynı gerekçeyle ref'te: değeri yalnızca tuval okuyor,
+   * React'in yeniden çizeceği hiçbir metin ona bakmıyor. Boş doğuyor ve
+   * girişsiz ziyaretçide boş kalıyor — uzay o hâlde bugünkü hâlinde.
+   */
+  const shelvedRef = useRef<ReadonlySet<string>>(new Set());
 
   /*
    * Kamera yaklaşmanın başladığı yerde doğuyor, `INITIAL_CAMERA`'da değil.
@@ -355,6 +365,13 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
    */
   useCanvasSize({ canvasRef, viewportRef, boundsRef, requestDraw });
 
+  /*
+    Raf halkaları — ilk boyamadan sonra iniyor, sayfa statik kalıyor.
+    Yaklaşma sahnesi ~2.6 saniye sürdüğü için istek o sırada tamamlanıyor;
+    halkalar sahne biterken yerinde oluyor, görünür bir sıçrama yok.
+  */
+  useShelfRings(shelvedRef, requestDraw);
+
   const input = useSpaceInput({
     marks,
     markById,
@@ -427,6 +444,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
       hoveredId: hoveredRef.current,
       entry: entryRef.current,
       feel: feelTargetRef.current,
+      shelved: shelvedRef.current,
     });
 
     // Etiket tuvale değil üstüne bindirilmiş HTML'e çiziliyor: punto haritanın
