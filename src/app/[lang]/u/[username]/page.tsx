@@ -8,6 +8,7 @@ import { ScreenFrame } from '@/components/ScreenFrame';
 import { dictFor, getDict, localeFor } from '@/i18n/dict';
 import { withLocale } from '@/i18n/locale';
 import { currentViewer, publicProfile } from '@/lib/dal';
+import { MIN_NOSE_PERFUMES } from '@/lib/nose';
 import { cardsFor } from '@/lib/perfume-cards';
 import { SHELF_KINDS } from '@/lib/shelf';
 import { normalizeUsername } from '@/lib/username';
@@ -62,6 +63,17 @@ export default async function ProfilePage({
   const isOwn = viewer?.username === profile.username;
   const cards = cardsFor(profile.topFour);
   const shelfTotal = SHELF_KINDS.reduce((sum, kind) => sum + profile.shelf[kind].length, 0);
+
+  /*
+    Burun raporunun bağlantısı ancak rapor GERÇEKTEN çıkacaksa çiziliyor.
+    Kural `publicNose`unkiyle aynı olmak zorunda (okunanlar = Top 4 + sahibim
+    + denedim), yoksa profil "rapor var" der, sayfa "yetmiyor" derdi.
+  */
+  const readable = new Set([
+    ...profile.topFour,
+    ...profile.shelf.owned,
+    ...profile.shelf.tried,
+  ]).size;
 
   return (
     <main className="min-h-dvh bg-[#050507] text-white">
@@ -171,6 +183,22 @@ export default async function ProfilePage({
                     {t.shelf.counts[kind](profile.shelf[kind].length)}
                   </span>
                 ))}
+                <span aria-hidden="true" className="text-white/25 group-hover:text-white/60">
+                  →
+                </span>
+              </Link>
+            </section>
+          ) : null}
+
+          {readable >= MIN_NOSE_PERFUMES ? (
+            <section className="mt-4">
+              <Link
+                href={withLocale(locale, `/u/${profile.username}/nose`)}
+                className="group flex items-baseline gap-4 text-sm font-light transition-colors"
+              >
+                <span className="text-xs tracking-[0.3em] text-white/50 group-hover:text-white/80">
+                  {t.nose.heading}
+                </span>
                 <span aria-hidden="true" className="text-white/25 group-hover:text-white/60">
                   →
                 </span>

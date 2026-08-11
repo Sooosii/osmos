@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 import type { PerfumeNote } from '@/data/types';
 import { getDb, schema } from '@/db';
 import { getAuth, authReady } from './auth';
+import { noseReport, type NoseReport } from './nose';
 import { listCompositions, readShelf } from './profile-store';
 import { groupShelf, type GroupedShelf, type ShelfEntry } from './shelf';
 import { cleanTopFour } from './top-four';
@@ -158,6 +159,42 @@ export const publicProfile = cache(async (username: string): Promise<PublicProfi
     shelf: groupShelf(await shelfOf(found.id)),
   };
 });
+
+/**
+ * Bir kullanıcının burun raporu — gizli profilde `null`.
+ *
+ * ⚠️ Neyin okunacağı **burada** kuruluyor, `nose.ts`te değil: saf modül
+ * "hangi liste hangi role girer" sorusuna karışmıyor, yalnız hesabı yapıyor.
+ *
+ *   okunan  = Top 4 + sahibim + denedim   → koklanmış olanlar
+ *   çift    = Top 4                       → iddia, kayıttan ağır basıyor
+ *   düşecek = hepsi + listemde            → zaten bilineni önermek boş
+ *
+ * "Listemde" okunanlara girmiyor; gerekçe `nose.ts`in başında.
+ */
+export const publicNose = cache(
+  async (
+    username: string,
+  ): Promise<{
+    readonly username: string;
+    readonly report: NoseReport | null;
+    /** Kaç parfüm okundu — rapor çıkmadığında davetin sayısını bu veriyor. */
+    readonly count: number;
+  } | null> => {
+    const profile = await publicProfile(username);
+    if (!profile) return null;
+
+    const read = [...profile.topFour, ...profile.shelf.owned, ...profile.shelf.tried];
+    const exclude = [...read, ...profile.shelf.wishlist];
+
+    return {
+      username: profile.username,
+      report: noseReport(read, profile.topFour, exclude),
+      /* Kimlikler okuma tarafında zaten temizlenmiş; tekilleştirmek yeterli. */
+      count: new Set(read).size,
+    };
+  },
+);
 
 /**
  * Tek bir kompozisyon — sahibinin adı ve slug'ıyla.
