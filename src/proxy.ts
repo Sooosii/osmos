@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { DEFAULT_LOCALE, PATH_HEADER, isLocale } from '@/i18n/locale';
+import { hostOf, shouldMoveToCanonical } from '@/lib/canonical-host';
 
 /**
  * Dil öneki katmanı.
@@ -88,9 +89,37 @@ function isRootPath(pathname: string): boolean {
   );
 }
 
+/**
+ * Kanonik ana bilgisayar, derleme anında bir kez çözülüyor.
+ *
+ * `NEXT_PUBLIC_SITE_URL` kurulu değilken `null` ve kural tamamen uykuda —
+ * yani bu kod, değişken kurulmadan da güvenle yayına çıkabiliyor.
+ */
+const CANONICAL_HOST = hostOf(process.env.NEXT_PUBLIC_SITE_URL);
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const first = pathname.split('/')[1] ?? '';
+
+  /*
+    Eski `.vercel.app` adresi kanonik adrese taşınıyor.
+
+    ⚠️ **Her şeyden önce**, `isRootPath`ten bile önce: sitemap, besleme ve
+    paylaşım kartları da doğru adresten servis edilmeli. Aşağıdaki erken
+    dönüş onları proxy'nin dışına çıkarıyor, dolayısıyla bu satır oranın
+    üstünde olmak zorunda.
+
+    ⚠️ 308, 302 değil: yöntem korunuyor (POST bir uçta bozulmasın) ve arama
+    motoru kalıcı taşınma olarak okuyor. Kuralın neden yalnızca `.vercel.app`
+    ile sınırlı olduğu — sonsuz döngü — `canonical-host.ts`te.
+  */
+  if (shouldMoveToCanonical(request.headers.get('host'), CANONICAL_HOST, process.env.VERCEL_ENV)) {
+    const url = request.nextUrl.clone();
+    url.protocol = 'https:';
+    url.host = CANONICAL_HOST as string;
+    url.port = '';
+    return NextResponse.redirect(url, 308);
+  }
 
   if (isRootPath(pathname)) return NextResponse.next();
 
