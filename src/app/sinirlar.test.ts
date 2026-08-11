@@ -155,10 +155,29 @@ describe('kok varliklari', () => {
       '/icon-512',
       '/feed.xml',
       '/sw.js',
-      '/api/push',
     ]) {
       expect(source, path).toContain(`'${path}'`);
     }
+  });
+
+  test('api adresleri onekle geciyor, esleyicinin disinda degil', () => {
+    /*
+      ⚠️ İki ayrı şey ve karıştırılmamalı:
+
+        · `/api/...` proxy'den GEÇİYOR (eşleyicinin içinde) — yalnızca yeniden
+          yazılmıyor. Önek listesi bunun için.
+        · Eşleyiciye `api` eklenseydi o adresler proxy'ye hiç uğramazdı ve
+          kapatılmış delik geri açılırdı: proxy'siz adres `[lang]`e düşer,
+          kök düzen `notFound()` atar, hiçbir sınır saramaz.
+
+      Bu sınama ikisini birden tutuyor: önek var, eşleyici temiz.
+    */
+    const source = read('src/proxy.ts');
+
+    expect(source).toContain("ROOT_PREFIXES");
+    expect(source).toContain("'/api/'");
+    expect(source).toContain('isRootPath(pathname)');
+    expect(source).toContain("matcher: ['/((?!_next|_vercel).*)']");
   });
 
   test('manifest simgeleri gercek rotalari gosteriyor', () => {

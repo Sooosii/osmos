@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { PERFUMES } from '@/data/perfumes';
 import { dominantFamily, getFamily } from '@/data/families';
 import { familyVector } from '@/lib/similarity';
+import { AddToTopFour } from '@/components/AddToTopFour';
 import { EvolutionSignature } from '@/components/EvolutionSignature';
 import { Neighbors } from '@/components/Neighbors';
 import { PerfumeNotes } from '@/components/PerfumeNotes';
@@ -253,6 +254,14 @@ export default async function PerfumePage({
                 {say(perfume.line, locale)}
               </p>
             ) : null}
+
+            {/*
+              Künyenin son satırı: giriş yapmış ziyaretçi için "dörtlüme
+              ekle". Girişsizde HİÇ çizilmiyor — sayfa bugünkü hâlinde
+              kalıyor ve üyelik daveti köşede duruyor, her parfümde değil.
+              Sayfa statik; oturum tarayıcıda çözülüyor (gerekçe bileşende).
+            */}
+            <AddToTopFour perfumeId={perfume.id} />
           </header>
 
           {/* ③ — "aa, o aslında veriymiş" */}

@@ -19,8 +19,15 @@ import { defineConfig } from 'vitest/config';
  */
 export default defineConfig({
   resolve: {
+    /*
+      ⚠️ İkinci takma ad `server-only` paketi için ve gerekçesi
+      `vitest/server-only-stub.ts`in başında: paket sunucu koşulu
+      seçilmediğinde fırlatıyor, Vitest de o ayrımı yapmıyor. Koruma
+      kaldırılmadı — yalnızca sınamada boş bir modülle değiştirildi.
+    */
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      'server-only': fileURLToPath(new URL('./vitest/server-only-stub.ts', import.meta.url)),
     },
   },
 });

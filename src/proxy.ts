@@ -60,14 +60,39 @@ const ROOT_ASSETS: ReadonlySet<string> = new Set([
   */
   '/feed.xml',
   '/sw.js',
-  '/api/push',
 ]);
+
+/**
+ * Kökte duran **adres aileleri** — tam ad değil, önek.
+ *
+ * ⚠️ `ROOT_ASSETS` tam adres eşleştiriyor ve bu `/api/push` için yetiyordu:
+ * tek bir adres. Giriş sistemi öyle değil — Better Auth'un işleyicisi altında
+ * sayısız alt yol var (`/api/auth/callback/google`, `/api/auth/sign-in/email`,
+ * `/api/auth/sign-out` …) ve hepsini ada ada saymak imkânsız. Bu yüzden bir
+ * önek listesi.
+ *
+ * ⚠️ **Eşleyiciye `api` EKLENMEYECEK** — kolay görünen ama yanlış olan yol
+ * bu. `_next`/`_vercel` platformun kendi yolları; `/api` bizim. Eşleyicinin
+ * dışına çıkarsa o adresler proxy'ye hiç uğramaz ve depoda bir kez ölçülüp
+ * kapatılmış delik geri açılabilir: proxy'ye uğramayan adres `[lang]`e düşer,
+ * orada kök düzen `notFound()` atar ve o çağrıyı hiçbir sınır saramaz —
+ * ziyaretçi Next'in çıplak hata belgesini görür. Önek burada duruyor ki
+ * `/api/...` proxy'den GEÇSİN, yalnızca yeniden yazılmasın.
+ */
+const ROOT_PREFIXES: readonly string[] = ['/api/'];
+
+function isRootPath(pathname: string): boolean {
+  return (
+    ROOT_ASSETS.has(pathname) ||
+    ROOT_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+  );
+}
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const first = pathname.split('/')[1] ?? '';
 
-  if (ROOT_ASSETS.has(pathname)) return NextResponse.next();
+  if (isRootPath(pathname)) return NextResponse.next();
 
   /*
     Gelen yol başlığa yazılıyor: haritada olmayan adresin sayfası dilini

@@ -41,6 +41,87 @@ export const TR: Dict = {
     pushBody: (name, brand) => `Haritaya yeni parfüm girdi: ${name} — ${brand}`,
   },
 
+  account: {
+    signIn: 'giriş yap',
+    signOut: 'çıkış yap',
+    signInTitle: 'Giriş · OSMOS',
+    signInLede: 'Hesap isteğe bağlı. Sana üstünde dört parfüm olan bir profil veriyor.',
+    withGoogle: 'Google ile devam et',
+    orEmail: 'ya da bir e-posta adresiyle',
+    email: 'E-posta',
+    password: 'Şifre',
+    createAccount: 'Hesap oluştur',
+    haveAccount: 'Zaten hesabım var',
+    emailOptIn: 'Haritaya yeni parfüm girince haber ver',
+    checkInbox: 'Gelen kutuna bak — adresi doğrulayacak bir bağlantı bekliyor.',
+
+    username: {
+      title: 'Kullanıcı adı seç · OSMOS',
+      heading: 'Kullanıcı adı seç',
+      lede: (base) => `Profilin şurada duracak: ${base}/u/…`,
+      label: 'Kullanıcı adı',
+      save: 'Devam',
+      errors: {
+        tooShort: 'En az 3 karakter.',
+        tooLong: 'En fazla 20 karakter.',
+        charset: 'Yalnızca a–z harfleri, rakam ve alt tire.',
+        startsWithDigit: 'Bir harfle başlasın.',
+        reserved: 'Bu ad sitenin kendisine ait.',
+        taken: 'Bu adı birisi almış.',
+      },
+    },
+
+    profile: {
+      title: (username) => `${username} · OSMOS`,
+      description: (username) => `OSMOS'ta ${username} — dört parfüm.`,
+      topFour: 'DÖRTLÜ',
+      empty: 'Henüz parfüm seçilmemiş.',
+      signatureLabel: (username) => `${username} imzası, dört parfümünden çizildi`,
+      edit: 'düzenle',
+      bioLabel: 'Kendinle ilgili bir satır',
+    },
+
+    settings: {
+      title: 'Ayarlar · OSMOS',
+      heading: 'Ayarlar',
+      bio: 'Senin satırın',
+      bioHint: (max) => `En fazla ${max} karakter.`,
+      hidden: 'Profilimi gizle',
+      hiddenHint: 'Profilin başkasına açılmaz olur. Hiçbir şey silinmez.',
+      save: 'Kaydet',
+      saved: 'Kaydedildi.',
+      dangerHeading: 'Hesabı sil',
+      dangerLine: 'Hesabın, dört parfümün ve satırın silinir. Bunun geri dönüşü yok.',
+      deleteConfirm: 'Onaylamak için kullanıcı adını yaz',
+      delete: 'Hesabımı sil',
+    },
+
+    top: {
+      heading: 'Senin dörtlün',
+      add: 'dörtlüme ekle',
+      added: 'dörtlünde',
+      remove: 'çıkar',
+      search: '52 parfüm içinde ara',
+      noMatch: 'Eşleşen yok.',
+      full: 'Sınır dört — birini değiştir.',
+      errors: {
+        tooMany: 'Sınır dört.',
+        duplicate: 'Bu zaten dörtlünde.',
+        unknown: 'Böyle bir parfüm yok.',
+      },
+    },
+
+    privacy: {
+      title: 'Gizlilik · OSMOS',
+      heading: 'Ne saklanıyor',
+      body: [
+        'Bu siteyi hesapsız gezmek hiçbir şey saklamıyor: çerez yok, hesap yok, takip yok. Ziyaretler sitenin kendi çerezsiz ölçümüyle sayılıyor ve o ölçüm kimseyi tanıyamıyor.',
+        'Hesap açarsan üç şey saklanıyor: giriş yaptığın e-posta adresi, seçtiğin kullanıcı adı ve satır, bir de seçtiğin dört parfüm. Giriş ayrıca bir çerez bırakıyor — tek işi seni girişte tutmak.',
+        'Profilin, ayarlardan gizlemediğin sürece herkese açık. Hesabını silmek bunların hepsini bir anda ve kalıcı olarak siliyor.',
+      ],
+    },
+  },
+
   notFound: {
     mark: 'HARITADA YOK',
     line: 'Böyle bir sayfa yok. Adres yanlış yazılmış olabilir, ya da seçkiye hiç girmemiş bir parfüm olabilir.',
