@@ -24,16 +24,26 @@ export const CURATED_A: readonly Perfume[] = [
     perfumer: 'François Demachy',
     curated: true,
     /*
-      İlk satıcı bağlantısı — "nerede bulunur" satırının ekranda görülüp
-      karara bağlanması için bu tek sayfada. Şimdilik düz arama bağlantısı:
-      satıcıların ürün adresleri elle uydurulmuyor (FragranceNet ve benzeri
-      robota kapalı, adres doğrulanamıyor); affiliate hesapları açıldığında
-      derin bağlantıyı satıcının kendi paneli üretecek ve 52 parfüm o gün
-      topluca dolacak.
+      ⚠️ **Buradaki tek satıcı bağlantısı KALDIRILDI ve arama bağlantısı bir
+      daha konmayacak — ölçüldü.** (2026-08-11)
+
+      Satır "nerede bulunur" örneği olsun diye düz bir Amazon aramasına
+      bağlanıyordu. Gerçek tarayıcıda üç parfümle denendi ve sonuç şu:
+
+        Dior Oud Ispahan → Versace Pour Homme Oud Noir, Lattafa (klonlar)
+        Orto Parisi Megamare → RASASI Shuhrah, Jo Milano (alakasız)
+        Bogue Maai → hiç sonuç yok
+
+      Yani bağlantı işe yaramaz değil, **yanıltıcıydı**: küratörlü bir
+      parfümü arayan ziyaretçiyi klonuna gönderiyordu. Sitenin bütün değeri
+      dürüst seçki olduğu için bu, sayfadaki en pahalı hataydı.
+
+      Satırın kendisi ve altyapısı duruyor (`Retailer` tipi, sınamalar,
+      i18n metinleri, komisyon dipnotu): `retailers` boşken satır zaten
+      çizilmiyor. Affiliate hesapları açıldığında satıcının kendi paneli
+      **ürün sayfasına** derin bağlantı üretecek ve 52 parfüm topluca
+      dolacak. `retailers.test.ts` arama biçimli adresleri reddediyor.
     */
-    retailers: [
-      { name: 'Amazon', url: 'https://www.amazon.com/s?k=Dior+Oud+Ispahan' },
-    ],
     line: {
       en: 'A rose left too long in a room full of smoke — sweet, medicinal, unwilling to leave.',
       tr: 'Dumanla dolu bir odada fazla kalmış bir gül — tatlı, tıbbi, gitmeye niyetsiz.',

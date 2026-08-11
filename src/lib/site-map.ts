@@ -14,7 +14,19 @@ import { absolute } from './site-url';
  * doğrudan üretiyor
  * (`node_modules/next/dist/docs/.../01-metadata/sitemap.md`).
  */
-const STATIC_PATHS = ['/', '/notes', '/evolution', '/space'] as const;
+/**
+ * ⚠️ Doğrulama ekranları (`/evolution`, `/space`) bilerek YOK.
+ *
+ * Ekranların kendisi kalıyor — sahibin kararı, bir daha sorulmayacak. Ama
+ * sitemap'te durmaları ayrı bir şeydi ve kimse sormamıştı: sekme başlıkları
+ * harfiyen "Space draft · OSMOS" ve aramadan gelen ziyaretçi kendini "taslak"
+ * diye tanıtan bir sayfaya düşüyordu. İç araç, vitrin değil.
+ *
+ * Sitemap'ten çıkmak tek başına yetmez — sitemap bir davet, yasak değil.
+ * İki sayfa ayrıca `robots: { index: false }` taşıyor (kendi
+ * `generateMetadata`larında). Biri kalkarsa sayfalar sessizce indekse döner.
+ */
+const STATIC_PATHS = ['/', '/notes'] as const;
 
 export function sitemapEntries(): MetadataRoute.Sitemap {
   const paths = [

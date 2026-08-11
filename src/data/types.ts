@@ -123,6 +123,14 @@ export type PyramidTier = 'top' | 'heart' | 'base';
  * ⚠️ `url` mutlak ve `https://` olmak zorunda — `retailers.test.ts` tutuyor.
  * Kırık bağlantı sessizce kırık kalır: derleme geçer, sayfa çizilir, yalnızca
  * tıklayan ziyaretçi kaybolur. Kapı bu yüzden sınamada.
+ *
+ * ⚠️ **Adres ÜRÜN SAYFASI olmak zorunda, arama sayfası değil** — ölçüldü
+ * (2026-08-11): düz Amazon araması küratörlü parfümü arayan ziyaretçiyi
+ * klonuna gönderiyordu (Dior Oud Ispahan → Versace/Lattafa; Bogue Maai → hiç
+ * sonuç yok). Yanlış ürüne giden bağlantı, bağlantı olmamasından kötü. Bu
+ * yüzden bugün **hiçbir parfümde `retailers` yok** ve satır hiç çizilmiyor;
+ * alan affiliate panelleri derin bağlantı üretince dolacak. Sınama arama
+ * biçimli adresleri reddediyor.
  */
 export interface Retailer {
   readonly name: string;

@@ -7,13 +7,25 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-/** Diller dışındaki sabit sayfalar: `/`, `/notes`, `/evolution`, `/space`. */
-const SABIT_SAYFA = 4;
+/** Diller dışındaki sabit sayfalar: `/` ve `/notes`. */
+const SABIT_SAYFA = 2;
 
 describe('sitemapEntries', () => {
   test('her sayfa iki dilde bir kez listeleniyor', () => {
     const beklenen = (SABIT_SAYFA + NOTES.length + PERFUMES.length) * 2;
     expect(sitemapEntries()).toHaveLength(beklenen);
+  });
+
+  test('dogrulama ekranlari sitemapte yok', () => {
+    /*
+      İç araçlar vitrine girmiyor: başlıkları "draft" diyor ve aramadan gelen
+      ziyaretçi kendini taslak ilan eden bir sayfaya düşerdi. Ekranların
+      kendisi duruyor, yalnızca daveti kalktı — `noindex` de sayfalarında.
+    */
+    const urls = sitemapEntries().map((entry) => entry.url);
+    for (const path of ['/space', '/evolution']) {
+      expect(urls.some((url) => url.endsWith(path)), path).toBe(false);
+    }
   });
 
   test('her girdide iki dilin de alternatifi var', () => {

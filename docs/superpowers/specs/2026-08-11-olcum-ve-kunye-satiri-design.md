@@ -68,6 +68,32 @@ aynı satıcı iki kez yok. Kırık bağlantı sessizce kırık kalır — derle
 geçer, sayfa çizilir, yalnızca ziyaretçi kaybolur; şemayı tip tutamadığı
 için sınama tutuyor.
 
+## ⚠️ Sonradan devrilen karar: arama bağlantısı (2026-08-11, aynı gün akşamı)
+
+③'teki "bugün tek örnek sayfa var (`dior-oud-ispahan`, düz Amazon araması)"
+kararı **ölçülerek geri alındı.** Gerçek tarayıcıda üç parfümle denendi:
+
+| Arama | Amazon'un döndürdüğü |
+|---|---|
+| Dior Oud Ispahan | Versace Pour Homme Oud Noir, Lattafa — **klonlar** |
+| Orto Parisi Megamare | RASASI Shuhrah, Jo Milano — alakasız |
+| Bogue Maai | hiç sonuç yok |
+
+Yani arama bağlantısı işe yaramaz değil, **yanıltıcıydı**: küratörlü bir
+parfümü arayan ziyaretçiyi klonuna gönderiyordu. Sitenin bütün değeri dürüst
+seçki olduğu için bu, sayfadaki en pahalı hataydı — üstelik komisyon da
+getirmiyordu (affiliate kimliği henüz yok, kazanç sıfır).
+
+**Yeni durum:** hiçbir parfümde `retailers` yok, satır hiç çizilmiyor,
+komisyon dipnotu da görünmüyor. Tasarım, i18n metinleri, sınamalar ve
+künyedeki yer **aynen duruyor** — sahibin "kesin künyede" kararı geçerli,
+değişen tek şey verinin ne zaman gireceği. Affiliate panelleri **ürün
+sayfasına** derin bağlantı üretince 52 parfüm topluca dolacak.
+
+Ders sınamaya yazıldı (`retailers.test.ts`): arama biçimli adresler
+(`?k=`, `/s?`, `/search`) reddediliyor. Arama bağlantısı ucuz ve cazip —
+52 parfümü tek satırla "doldurur"; kapı bu yüzden kondu.
+
 ## Reddedilenler
 
 - **Banner/display reklam, pop-up, bülten modali** — sahibe "gerekeni yap"

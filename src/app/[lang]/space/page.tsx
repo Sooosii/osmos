@@ -53,6 +53,13 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   return {
     title: t.draft.spaceTitle,
     alternates: pageAlternates('/space'),
+    /*
+      ⚠️ İç araç, vitrin değil. Sitemap'ten de çıkarıldı (`site-map.ts`) ama
+      sitemap bir davet, yasak değil: bağlantıyı bulan robot yine indeksler.
+      Aramadan gelen ziyaretçinin kendini "draft" diye tanıtan bir sayfaya
+      düşmesi, bitmemiş bir site izlenimi veriyordu.
+    */
+    robots: { index: false, follow: true },
   };
 }
 

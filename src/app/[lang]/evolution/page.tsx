@@ -20,6 +20,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   return {
     title: t.draft.evolutionTitle,
     alternates: pageAlternates('/evolution'),
+    /* Gerekçe `space/page.tsx`te: iç araç, vitrin değil. */
+    robots: { index: false, follow: true },
   };
 }
 
