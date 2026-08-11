@@ -15,6 +15,13 @@
       "when": 1786458589619,
       "tag": "0001_sloppy_callisto",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786463952418,
+      "tag": "0002_new_warstar",
+      "breakpoints": true
     }
   ]
 }

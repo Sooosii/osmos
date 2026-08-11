@@ -132,6 +132,49 @@ export const topFour = pgTable(
 );
 
 /**
+ * Raflar — "sahibim / denedim / listemde".
+ *
+ * Top 4 bir seçki; raf bir kayıt. Ikisi ayrı tablolar çünkü ayrı sorulara
+ * cevap veriyorlar: Top 4 "en sevdiğin dört şey ne", raf "elinde ne var".
+ *
+ * ⚠️ **Bir parfüm tek rafta durabilir** — `unique(userId, perfumeId)`, `kind`
+ * anahtara dahil DEĞIL. Üç raf, tek bir ilişkinin birbirini dışlayan hâlleri;
+ * etiket değiller. "Hem sahibim hem listemde" anlamsız bir cümle ve veritabanı
+ * onu kurulamaz kılıyor. Rafta gezinmek bu yüzden yeni satır değil güncelleme
+ * (`setShelf`, `onConflictDoUpdate`).
+ *
+ * ⚠️ **Yapay bir üst sınır yok ve gerekmiyor.** Benzersizlik kısıtı, "parfüm
+ * veride var mı" denetimiyle (`shelfError`) birleşince rafı katalog boyuna
+ * kilitliyor: bugün en fazla 52 satır. Kompozisyonlardaki `MAX_SAVED_...`
+ * gibi bir sayıya ihtiyaç duyulmamasının sebebi bu — orada içerik kullanıcıdan
+ * geliyordu, burada kapalı bir listeden seçiliyor.
+ *
+ * `perfumeId` yine yabancı anahtar değil: parfümler kodda yaşıyor (`src/data/`),
+ * veritabanında değil. `topFour` ile aynı gerekçe.
+ */
+export const shelf = pgTable(
+  'shelf',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    perfumeId: text('perfume_id').notNull(),
+    /**
+     * `SHELF_KINDS`ten biri — sözlük **`lib/shelf.ts`te**, bu dosyada değil.
+     *
+     * ⚠️ Yeri bilinçli: raf adlarını künyedeki istemci düğmeleri de okuyor ve
+     * bu dosyayı içeri almaları `drizzle-orm`u tarayıcı paketine sokardı.
+     * `@/db/schema` yalnızca sunucuda okunuyor (sayfalar sunucu bileşeni,
+     * değerleri prop olarak geçiriyorlar) ve öyle kalmalı.
+     */
+    kind: text('kind').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [unique('shelf_user_perfume').on(table.userId, table.perfumeId)],
+);
+
+/**
  * Kullanıcının kendi kompozisyonu — Patron'un asıl sebebi.
  *
  * ⚠️ `notes` **jsonb** ve bu bilinçli: nota listesi kompozisyonun *kendisi*,

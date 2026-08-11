@@ -51,6 +51,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await client.query('delete from composition');
+  await client.query('delete from shelf');
   await client.query('delete from top_four');
   await client.query('delete from "user"');
 });
@@ -286,6 +287,106 @@ describe('kompozisyonlar', () => {
     await store.saveComposition(db, 'u1', { name: 'Gece', notes: three });
     await client.query(`delete from "user" where id = 'u1'`);
     const rows = await client.query(`select count(*)::int as n from composition`);
+    expect(rows.rows[0].n).toBe(0);
+  });
+});
+
+describe('raflar', () => {
+  test('rafa koyma yaziliyor', async () => {
+    await makeUser('u1', 'u1@osmos.test');
+    expect(await store.setShelf(db, 'u1', a, 'owned')).toEqual({ ok: true });
+
+    const rows = await client.query(`select perfume_id, kind from shelf where user_id = 'u1'`);
+    expect(rows.rows).toEqual([{ perfume_id: a, kind: 'owned' }]);
+  });
+
+  test('raftan rafa tasimak YENI SATIR acmiyor', async () => {
+    /*
+      ⚠️ Şemadaki kararın ekrandaki karşılığı: üç raf birbirini dışlıyor.
+      Ayrı satırlar kalsaydı "hem sahibim hem listemde" diye bir durum doğar,
+      burun raporu da aynı parfümü iki kez sayardı.
+    */
+    await makeUser('u1', 'u1@osmos.test');
+    await store.setShelf(db, 'u1', a, 'wishlist');
+    await store.setShelf(db, 'u1', a, 'owned');
+
+    const rows = await client.query(`select perfume_id, kind from shelf where user_id = 'u1'`);
+    expect(rows.rows).toEqual([{ perfume_id: a, kind: 'owned' }]);
+  });
+
+  test('null raftan cikariyor', async () => {
+    await makeUser('u1', 'u1@osmos.test');
+    await store.setShelf(db, 'u1', a, 'owned');
+    expect(await store.setShelf(db, 'u1', a, null)).toEqual({ ok: true });
+    expect(await store.readShelf(db, 'u1')).toEqual([]);
+  });
+
+  test('veride olmayan parfum reddediliyor ve veriye dokunmuyor', async () => {
+    await makeUser('u1', 'u1@osmos.test');
+    expect(await store.setShelf(db, 'u1', 'yok-boyle-bir-parfum', 'owned')).toEqual({
+      ok: false,
+      error: 'unknownPerfume',
+    });
+
+    const rows = await client.query(`select count(*)::int as n from shelf`);
+    expect(rows.rows[0].n).toBe(0);
+  });
+
+  test('gecersiz raf adi reddediliyor', async () => {
+    await makeUser('u1', 'u1@osmos.test');
+    const result = await store.setShelf(db, 'u1', a, 'sahibim');
+    expect(result).toEqual({ ok: false, error: 'unknownKind' });
+
+    const rows = await client.query(`select count(*)::int as n from shelf`);
+    expect(rows.rows[0].n).toBe(0);
+  });
+
+  test('baskasinin rafina dokunulmuyor', async () => {
+    await makeUser('u1', 'u1@osmos.test');
+    await makeUser('u2', 'u2@osmos.test');
+    await store.setShelf(db, 'u1', a, 'owned');
+    await store.setShelf(db, 'u2', a, 'wishlist');
+
+    /* Aynı parfüm iki kullanıcıda ayrı satır: kısıt kullanıcı BAZINDA. */
+    expect(await store.readShelf(db, 'u1')).toEqual([{ perfumeId: a, kind: 'owned' }]);
+    expect(await store.readShelf(db, 'u2')).toEqual([{ perfumeId: a, kind: 'wishlist' }]);
+
+    await store.setShelf(db, 'u1', a, null);
+    expect(await store.readShelf(db, 'u2')).toEqual([{ perfumeId: a, kind: 'wishlist' }]);
+  });
+
+  test('okuma yeniden eskiye siraliyor', async () => {
+    await makeUser('u1', 'u1@osmos.test');
+    await store.setShelf(db, 'u1', a, 'owned');
+    await client.query(`update shelf set created_at = now() - interval '1 hour'`);
+    await store.setShelf(db, 'u1', b, 'tried');
+
+    expect((await store.readShelf(db, 'u1')).map((e: { perfumeId: string }) => e.perfumeId)).toEqual(
+      [b, a],
+    );
+  });
+
+  test('bozuk satir okumada eleniyor, sayfa cokmuyor', async () => {
+    /*
+      `kind` sütunu `text`; veriden çıkmış bir parfüm ya da elle yazılmış bir
+      raf adı gelebilir. Okuma affedici — reddetme yazma kapısının işi.
+    */
+    await makeUser('u1', 'u1@osmos.test');
+    await client.query(
+      `insert into shelf (id, user_id, perfume_id, kind) values
+         ('x1','u1','yok-boyle','owned'), ('x2','u1',$1,'sahibim')`,
+      [b],
+    );
+    await store.setShelf(db, 'u1', a, 'owned');
+
+    expect(await store.readShelf(db, 'u1')).toEqual([{ perfumeId: a, kind: 'owned' }]);
+  });
+
+  test('hesap silinince raf da gidiyor', async () => {
+    await makeUser('u1', 'u1@osmos.test');
+    await store.setShelf(db, 'u1', a, 'owned');
+    await client.query(`delete from "user" where id = 'u1'`);
+    const rows = await client.query(`select count(*)::int as n from shelf`);
     expect(rows.rows[0].n).toBe(0);
   });
 });

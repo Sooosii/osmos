@@ -45,6 +45,17 @@ for (const perfume of PERFUMES) {
   }
 }
 
+/**
+ * Kimlik veride var mı — `hasNote`in parfüm karşılığı.
+ *
+ * Kullanıcıdan gelen kimliği doğrulayan her kapı (Top 4, raflar) buradan
+ * geçiyor. Ayrı ayrı `PERFUMES.some(...)` yazmak hem üç kopya hem her
+ * çağrıda 52'lik bir tarama demekti; harita zaten kurulu.
+ */
+export function hasPerfume(id: string): boolean {
+  return PERFUME_BY_ID.has(id);
+}
+
 export function getPerfume(id: string): Perfume {
   const perfume = PERFUME_BY_ID.get(id);
   if (!perfume) {

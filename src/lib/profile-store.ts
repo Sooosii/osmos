@@ -3,9 +3,11 @@ import 'server-only';
 import { and, eq, ne, sql } from 'drizzle-orm';
 import { schema } from '@/db';
 import { BIO_MAX, COMPOSITION_NAME_MAX, FREE_COMPOSITION_NOTES } from '@/db/schema';
+import { hasPerfume } from '@/data/perfumes';
 import type { PerfumeNote } from '@/data/types';
 import { compositionError, type CompositionError } from './composition';
 import { uniqueSlug } from './composition-slug';
+import { isShelfKind, type ShelfEntry, type ShelfKind } from './shelf';
 import { MAX_TOP_FOUR, setSlot, topFourError } from './top-four';
 import { normalizeUsername, usernameError, type UsernameError } from './username';
 
@@ -165,6 +167,87 @@ export async function appendToTopFour(
 export async function countUsers(db: Db): Promise<number> {
   const rows = await db.select({ n: sql<number>`count(*)::int` }).from(schema.user);
   return rows[0]?.n ?? 0;
+}
+
+/* ───────────────────────────────  Raflar  ─────────────────────────────── */
+
+export type ShelfError = 'unknownPerfume' | 'unknownKind';
+
+/**
+ * Kişinin rafları — yeniden eskiye, bozuk kayıt elenmiş.
+ *
+ * Okuma tarafı **affedici** (`cleanTopFour` ve `listCompositions` ile aynı
+ * duruş): veriden bir parfüm çıkarsa ya da `kind` sütununa bir gün elle bir
+ * şey yazılırsa o satır listeden düşüyor, sayfa çökmüyor. Reddetmenin doğru
+ * olduğu yer yazma kapısı, burası değil.
+ */
+export async function readShelf(db: Db, userId: string): Promise<readonly ShelfEntry[]> {
+  const rows = await db
+    .select({
+      perfumeId: schema.shelf.perfumeId,
+      kind: schema.shelf.kind,
+      createdAt: schema.shelf.createdAt,
+    })
+    .from(schema.shelf)
+    .where(eq(schema.shelf.userId, userId));
+
+  return [...rows]
+    .sort(
+      (a: { createdAt: Date }, b: { createdAt: Date }) =>
+        b.createdAt.getTime() - a.createdAt.getTime(),
+    )
+    .filter(
+      (row: { perfumeId: string; kind: string }) =>
+        hasPerfume(row.perfumeId) && isShelfKind(row.kind),
+    )
+    .map((row: { perfumeId: string; kind: ShelfKind }) => ({
+      perfumeId: row.perfumeId,
+      kind: row.kind,
+    }));
+}
+
+/**
+ * Bir parfümü rafa koyar, rafını değiştirir ya da raftan çıkarır.
+ *
+ * ⚠️ **Rafta gezinmek yeni satır AÇMIYOR** — `shelf_user_perfume` kısıtı
+ * üzerinden güncelleme. Şemadaki karar burada uygulanıyor: üç raf tek bir
+ * ilişkinin birbirini dışlayan hâlleri, etiket değil. Ayrı satırlar bıraksaydık
+ * "hem sahibim hem listemde" diye bir durum doğar, rapor da aynı parfümü iki
+ * kez sayardı.
+ *
+ * `kind === null` raftan tamamen çıkarıyor — düğmeye tekrar basmanın karşılığı.
+ */
+export async function setShelf(
+  db: Db,
+  userId: string,
+  perfumeId: string,
+  kind: ShelfKind | null,
+): Promise<{ ok: true } | { ok: false; error: ShelfError }> {
+  /*
+    Kimlik istemciden geliyor ve uç herkese açık. Doğrulanmadan yazılsaydı
+    rafta var olmayan bir parfüm dururdu: ekran onu atlar, yani kullanıcı
+    kaydının düştüğünü hiç fark etmez.
+  */
+  if (!hasPerfume(perfumeId)) return { ok: false, error: 'unknownPerfume' };
+
+  if (kind === null) {
+    await db
+      .delete(schema.shelf)
+      .where(and(eq(schema.shelf.userId, userId), eq(schema.shelf.perfumeId, perfumeId)));
+    return { ok: true };
+  }
+
+  if (!isShelfKind(kind)) return { ok: false, error: 'unknownKind' };
+
+  await db
+    .insert(schema.shelf)
+    .values({ id: `${userId}:${perfumeId}`.slice(0, 190), userId, perfumeId, kind })
+    .onConflictDoUpdate({
+      target: [schema.shelf.userId, schema.shelf.perfumeId],
+      set: { kind },
+    });
+
+  return { ok: true };
 }
 
 /* ─────────────────────────  Kompozisyonlar  ───────────────────────── */
