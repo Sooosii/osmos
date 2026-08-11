@@ -24,11 +24,12 @@ import { pageAlternates } from '@/lib/site-url';
  */
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
-  const t = dictFor((await params).lang);
+  const { lang } = await params;
+  const t = dictFor(lang);
   return {
     title: t.notesIndex.title(NOTES.length),
     description: t.notesIndex.description,
-    alternates: pageAlternates('/notes'),
+    alternates: pageAlternates('/notes', localeFor(lang)),
   };
 }
 

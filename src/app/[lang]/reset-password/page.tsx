@@ -15,10 +15,11 @@ import { pageAlternates } from '@/lib/site-url';
  * ⚠️ `noindex`: tek kullanımlık bir bağlantının indeksinde işi yok.
  */
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
-  const t = dictFor((await params).lang);
+  const { lang } = await params;
+  const t = dictFor(lang);
   return {
     title: t.account.resetTitle,
-    alternates: pageAlternates('/reset-password'),
+    alternates: pageAlternates('/reset-password', localeFor(lang)),
     robots: { index: false, follow: false },
   };
 }

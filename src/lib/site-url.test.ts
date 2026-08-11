@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { absolute, siteUrl } from './site-url';
+import { absolute, pageAlternates, siteUrl } from './site-url';
 
 /**
  * Taban adres.
@@ -50,5 +50,36 @@ describe('absolute', () => {
     vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://osmos.example');
     expect(absolute('/tr/notes')).toBe('https://osmos.example/tr/notes');
     expect(absolute('/')).toBe('https://osmos.example/');
+  });
+});
+
+describe('pageAlternates — canonical', () => {
+  test('her dilin KENDI canonicali var', () => {
+    /*
+      ⚠️ İkisini birbirine işaret ettirmek, Türkçe sayfayı indeksten silmek
+      olurdu. Eşleştirmeyi hreflang yapıyor, canonical değil.
+    */
+    vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://osmos.example');
+    expect(pageAlternates('/notes', 'en').canonical).toBe('https://osmos.example/notes');
+    expect(pageAlternates('/notes', 'tr').canonical).toBe('https://osmos.example/tr/notes');
+  });
+
+  test('canonical SORGUSUZ yolu gosteriyor', () => {
+    /*
+      Kararın sebebi: uzay sayfası `?mark=<id>` (52 değer) ve `?feel=...`
+      (sonsuz değer) taşıyor. Canonical olmasa sitenin en önemli sayfası
+      onlarca kopya hâlinde indekslenirdi.
+    */
+    vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://osmos.example');
+    expect(pageAlternates('/', 'en').canonical).toBe('https://osmos.example/');
+    expect(pageAlternates('/', 'tr').canonical).toBe('https://osmos.example/tr');
+  });
+
+  test('hreflang ve besleme otokesfi duruyor', () => {
+    vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://osmos.example');
+    const alt = pageAlternates('/notes', 'tr');
+    expect(alt.languages.en).toBe('https://osmos.example/notes');
+    expect(alt.languages.tr).toBe('https://osmos.example/tr/notes');
+    expect(alt.types['application/rss+xml']).toBe('/feed.xml');
   });
 });

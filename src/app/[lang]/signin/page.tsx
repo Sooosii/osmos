@@ -17,10 +17,11 @@ import { pageAlternates } from '@/lib/site-url';
  * aykırı olurdu.
  */
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
-  const t = dictFor((await params).lang);
+  const { lang } = await params;
+  const t = dictFor(lang);
   return {
     title: t.account.signInTitle,
-    alternates: pageAlternates('/signin'),
+    alternates: pageAlternates('/signin', localeFor(lang)),
     robots: { index: false, follow: true },
   };
 }

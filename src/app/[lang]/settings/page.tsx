@@ -21,10 +21,11 @@ import { pageAlternates } from '@/lib/site-url';
  * koruma değil — eylemler herkese açık uçlar.
  */
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
-  const t = dictFor((await params).lang);
+  const { lang } = await params;
+  const t = dictFor(lang);
   return {
     title: t.account.settings.title,
-    alternates: pageAlternates('/settings'),
+    alternates: pageAlternates('/settings', localeFor(lang)),
     robots: { index: false, follow: false },
   };
 }

@@ -1,5 +1,5 @@
 import { EvolutionTimeline } from '@/components/EvolutionTimeline';
-import { dictFor } from '@/i18n/dict';
+import { dictFor, localeFor } from '@/i18n/dict';
 import { pageAlternates } from '@/lib/site-url';
 
 /**
@@ -16,10 +16,11 @@ import { pageAlternates } from '@/lib/site-url';
  * öbürü unutulduğunda sayfa ile doğrulama ekranı farklı şeyler gösterirdi.
  */
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
-  const t = dictFor((await params).lang);
+  const { lang } = await params;
+  const t = dictFor(lang);
   return {
     title: t.draft.evolutionTitle,
-    alternates: pageAlternates('/evolution'),
+    alternates: pageAlternates('/evolution', localeFor(lang)),
     /* Gerekçe `space/page.tsx`te: iç araç, vitrin değil. */
     robots: { index: false, follow: true },
   };
@@ -30,7 +31,8 @@ export default async function EvolutionPage({
 }: {
   params: Promise<{ lang: string }>;
 }) {
-  const t = dictFor((await params).lang);
+  const { lang } = await params;
+  const t = dictFor(lang);
 
   return (
     <div className="min-h-screen bg-[#0A0A0C] px-6 py-24 sm:px-12">

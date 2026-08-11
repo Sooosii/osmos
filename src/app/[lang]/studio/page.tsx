@@ -22,11 +22,12 @@ import { pageAlternates } from '@/lib/site-url';
  * değişmesi kötü. Bu sayfa statik listede değil, bedeli yok.
  */
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
-  const t = dictFor((await params).lang);
+  const { lang } = await params;
+  const t = dictFor(lang);
   return {
     title: t.studio.title,
     description: t.studio.lede,
-    alternates: pageAlternates('/studio'),
+    alternates: pageAlternates('/studio', localeFor(lang)),
   };
 }
 

@@ -85,7 +85,7 @@ export async function generateMetadata({
     description: perfume.line
       ? say(perfume.line, locale)
       : t.perfume.fallbackDescription(perfume.name, perfume.brand),
-    alternates: pageAlternates(`/perfume/${id}`),
+    alternates: pageAlternates(`/perfume/${id}`, locale),
   };
 }
 

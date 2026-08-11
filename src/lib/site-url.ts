@@ -67,11 +67,32 @@ export function languageAlternates(path: string): Record<Locale, string> {
  * yardımcı; sayfalar `languages`ı tek başına kurmaya dönerse besleme
  * bağlantısı o sayfadan sessizce düşer.
  */
-export function pageAlternates(path: string): {
+export function pageAlternates(
+  path: string,
+  locale: Locale,
+): {
+  readonly canonical: string;
   readonly languages: Record<Locale, string>;
   readonly types: Readonly<Record<string, string>>;
 } {
   return {
+    /*
+      ⚠️ **Kendine işaret eden canonical — sorgu parametreleri yüzünden şart.**
+
+      Uzay sayfası adreste iki parametre taşıyor: `?mark=<id>` (parfüm
+      sayfasından dönüş, 52 değer) ve `?feel=0.9,,0.2` (kaydıraç tarifi,
+      sonsuz değer). Bunların her biri arama motoru için AYRI bir adres;
+      canonical olmadan sitenin en önemli sayfası onlarca kopya hâlinde
+      indekslenebilir ve hiçbiri diğerinin gücünü almaz.
+
+      Canonical parametresiz yolu gösteriyor, hepsi tek sayfada birleşiyor.
+
+      Dil parametre olarak alınıyor çünkü **her dilin kendi canonical'ı var**:
+      `/tr/notes`ın kanoniği kendisi, `/notes` değil. İkisini birbirine
+      işaret ettirmek, Türkçe sayfayı indeksten silmek olurdu — hreflang
+      zaten ikisini eşleştiriyor.
+    */
+    canonical: absolute(withLocale(locale, path)),
     languages: languageAlternates(path),
     types: { 'application/rss+xml': '/feed.xml' },
   };

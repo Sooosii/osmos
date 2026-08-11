@@ -49,10 +49,11 @@ function expectationsFor(
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
-  const t = getDict(localeFor((await params).lang));
+  const locale = localeFor((await params).lang);
+  const t = getDict(locale);
   return {
     title: t.draft.spaceTitle,
-    alternates: pageAlternates('/space'),
+    alternates: pageAlternates('/space', locale),
     /*
       ⚠️ İç araç, vitrin değil. Sitemap'ten de çıkarıldı (`site-map.ts`) ama
       sitemap bir davet, yasak değil: bağlantıyı bulan robot yine indeksler.

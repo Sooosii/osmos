@@ -17,10 +17,11 @@ import { pageAlternates } from '@/lib/site-url';
  * yok. Oturum okusaydı 2 sayfa daha dinamiğe düşerdi.
  */
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
-  const t = dictFor((await params).lang);
+  const { lang } = await params;
+  const t = dictFor(lang);
   return {
     title: t.account.privacy.title,
-    alternates: pageAlternates('/privacy'),
+    alternates: pageAlternates('/privacy', localeFor(lang)),
   };
 }
 

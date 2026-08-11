@@ -76,7 +76,7 @@ export async function generateMetadata({
   return {
     title: getDict(locale).note.title(say(note.name, locale)),
     description: say(note.description, locale),
-    alternates: pageAlternates(`/note/${id}`),
+    alternates: pageAlternates(`/note/${id}`, locale),
   };
 }
 

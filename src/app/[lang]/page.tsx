@@ -23,8 +23,8 @@ import { pageAlternates } from '@/lib/site-url';
   bilgiyi ayrıca veriyor ve bu bir tekrar değil — arama motoru ikisini birden
   okuyor, sitemap tek başına yeterli sayılmıyor.
 */
-export function generateMetadata() {
-  return { alternates: pageAlternates('/') };
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  return { alternates: pageAlternates('/', localeFor((await params).lang)) };
 }
 
 export default async function Home({ params }: { params: Promise<{ lang: string }> }) {
