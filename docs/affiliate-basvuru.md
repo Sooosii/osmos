@@ -48,6 +48,35 @@ Neyse ki gereği de yok: **affiliate paneli derin bağlantıyı kendisi üretiyo
 alınan adresler `retailers` alanına girer ve satır aynı gün para kazanmaya
 başlar.
 
+## ⚠️ SIRA UYARISI: trafiksiz başvuru reddediliyor
+
+CJ'nin yayıncı kabul ölçütlerinde açıkça yazıyor: başvurular **düşük trafik**
+ve **çok yeni site** sebebiyle reddediliyor. OSMOS bugün tam olarak o
+tanıma giriyor — alan adı bir günlük, duyuru hiç yapılmadı, ziyaretçi
+neredeyse yok.
+
+**Bu yüzden önerilen sıra:**
+
+1. **Önce duyuru dalgası** — Show HN, r/InternetIsBeautiful, Product Hunt, X.
+   Paket `docs/duyuru/`de hazır ve artık gerçek bir alan adı var.
+2. **Bir hafta sonra başvuru** — elinde gerçek bir ziyaretçi sayısı olur ve
+   "launching" yerine rakam yazarsın.
+
+Ters sırada gidilirse red gelebilir ve bazı ağlarda yeniden başvurmak için
+beklemek gerekiyor. Yine de bugün başvurmak isteniyorsa: **Awin'den başla**
+(incelemesi daha yumuşak), CJ'yi trafik geldikten sonra dene.
+
+## Nereden başvurulur
+
+| ağ | adres | ücret | not |
+|---|---|---|---|
+| **Awin** (Notino) | `ui.awin.com/publisher-signup/en/awin/step1` | **5 $ depozito** | İade ediliyor: onaydan sonra hesaba geçiyor, ilk komisyon ödemesinde geri alınıyor. Kart doğrulaması için. |
+| **CJ** (FragranceX) | `signup.cj.com` | ücretsiz | Vergi bilgisi ve gerçek ad/işletme bilgisi istiyor. Onay birkaç gün. Ağa girdikten sonra **her reklamverene ayrı** başvuruluyor. |
+| Amazon Associates | `affiliate-program.amazon.com` | ücretsiz | ⚠️ **180 günde 3 satış** şartı var; tutmazsa hesap kapanıyor. Trafiksizken açmak riskli. |
+
+⚠️ **Hesap açmayı ben yapamıyorum** — vergi ve ödeme bilgisi giren işlemler.
+Adım adım tarif ederim, tıklayan sen olursun.
+
 ## Başvuruda soracakları ve cevapları
 
 Ağlar (CJ, Awin) şu bilgileri istiyor. Hazır cevaplar:
