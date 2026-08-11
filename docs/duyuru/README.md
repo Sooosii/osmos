@@ -35,11 +35,15 @@ senin sesinle konuşmak zorunda. Başlıklar, X dizisi ve Product Hunt alanları
 
 1. **Show HN** — salı/çarşamba/perşembe, 16:00–19:00 TSİ. İlk saat başında
    ol: yorumlara cevap vermek gönderiden önemli.
-2. **r/dataisbeautiful** — HN'den 2-3 gün sonra, `[OC]` etiketiyle.
-3. **X dizisi** — HN gönderisiyle aynı gün, HN bağlantısını da alıntıla.
-4. **r/fragrance** — ⚠️ ÖNCE MODLARA SOR (aşağıda), en son.
-5. **Product Hunt** — bir hafta sonra, ilk üç kanaldan gelen geri bildirim
+2. **X dizisi** — HN gönderisiyle aynı gün, HN bağlantısını da alıntıla.
+3. **r/dataisbeautiful** — HN'den 2-3 gün sonra, `[OC]` etiketiyle.
+   ⚠️ Tek atış: alt forumda 1 ay tekrar gönderim yasağı var.
+4. **Product Hunt** — bir hafta sonra, ilk kanallardan gelen geri bildirim
    metni keskinleştirdikten sonra.
+
+⛔ **r/fragrance listeden ÇIKTI.** Kural metni kendi sitesini paylaşmayı
+açıkça yasaklıyor (`reddit.md`de kelimesi kelimesine). Yerine
+r/InternetIsBeautiful bakılabilir.
 
 ## Dosyalar
 
