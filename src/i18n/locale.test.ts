@@ -35,6 +35,35 @@ describe('stripLocale', () => {
     // 'note' bir dil degil; kirpilmamali.
     expect(stripLocale('/note/tr')).toEqual({ locale: 'en', rest: '/note/tr' });
   });
+
+  test('proxy ic yolu (/en/...) da ayriliyor', () => {
+    /*
+      ⚠️ Bu sınama ÖLÇÜLMÜŞ bir 404'ten doğdu (2026-08-11, üretim derlemesinde
+      bütün site taranırken).
+
+      `/en/...` "ortada dolaşmayan bir adres" sanılıyordu — proxy onu öneksiz
+      hâline yönlendirdiği için. Ama proxy öneksiz yolları da İÇERİDEN
+      `/en/...`e yeniden yazıyor ve `usePathname()` statik üretim sırasında
+      **o iç yolu** döndürüyor. Önek tanınmayınca `switchPath` üstüne bir de
+      `/tr` ekliyordu:
+
+        /notes → usePathname() '/en/notes' → TR bağlantısı '/tr/en/notes' → 404
+
+      Hata gizliydi: `LangSwitch`in tıklama işleyicisi düz sol tıkta araya
+      girip doğru adrese gidiyor. Kırılan yalnızca Ctrl/orta tık, "bağlantıyı
+      kopyala" ve **arama motorları** — yani her İngilizce sayfa bir 404'e
+      bağlanıyordu.
+    */
+    expect(stripLocale('/en')).toEqual({ locale: 'en', rest: '/' });
+    expect(stripLocale('/en/notes')).toEqual({ locale: 'en', rest: '/notes' });
+    expect(stripLocale('/en/perfume/dior-oud-ispahan')).toEqual({
+      locale: 'en',
+      rest: '/perfume/dior-oud-ispahan',
+    });
+    /* Ve öbür yöne: bu yoldan üretilen bağlantı öneki iki kez almıyor. */
+    expect(switchPath('/en/notes', '', 'tr')).toBe('/tr/notes');
+    expect(switchPath('/en/notes', '', 'en')).toBe('/notes');
+  });
 });
 
 describe('withLocale', () => {

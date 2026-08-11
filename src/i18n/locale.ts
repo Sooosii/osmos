@@ -37,14 +37,25 @@ export function isLocale(value: string): value is Locale {
  * Geri kalan **öneksiz İngilizce yol**: `/tr/note/oud` → `/note/oud`. Bütün
  * bağlantılar bu biçimde yazılıyor; dil eklemek `withLocale`in işi.
  *
- * `DEFAULT_LOCALE` öneki bilerek tanınmıyor: `/en/...` ortada dolaşan bir adres
- * değil, `proxy.ts` onu öneksiz hâline yönlendiriyor.
+ * ⚠️ **`/en/...` öneki de ayrılmak ZORUNDA** ve bu bir 404 ölçülerek öğrenildi
+ * (2026-08-11). Burada eskiden `first !== DEFAULT_LOCALE` şartı vardı; gerekçe
+ * "`/en/...` ortada dolaşan bir adres değil, proxy onu öneksiz hâline
+ * yönlendiriyor" idi. Gerekçenin yarısı eksikti: proxy **öneksiz** yolları da
+ * içeriden `/en/...`e yeniden yazıyor ve `usePathname()` statik üretimde o iç
+ * yolu döndürüyor. Önek tanınmayınca `switchPath` üstüne bir de `/tr` ekliyordu:
+ *
+ *     /notes → usePathname() '/en/notes' → TR bağlantısı '/tr/en/notes' → 404
+ *
+ * Yani her İngilizce sayfa bir 404'e bağlanıyordu. Hata gizliydi çünkü
+ * `LangSwitch` düz sol tıkta araya girip doğru adrese gidiyor — kırılan
+ * Ctrl/orta tık, "bağlantıyı kopyala" ve **arama motorlarıydı.** Şart geri
+ * konursa hata da geri gelir; `locale.test.ts` tutuyor.
  */
 export function stripLocale(pathname: string): { readonly locale: Locale; readonly rest: string } {
   const segments = pathname.split('/');
   const first = segments[1] ?? '';
 
-  if (isLocale(first) && first !== DEFAULT_LOCALE) {
+  if (isLocale(first)) {
     const rest = segments.slice(2).join('/');
     return { locale: first, rest: rest === '' ? '/' : `/${rest}` };
   }
