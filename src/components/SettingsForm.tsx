@@ -291,17 +291,34 @@ export function SettingsForm(props: SettingsFormProps) {
 function DeleteAccount({ username }: { readonly username: string }) {
   const t = useDict();
   const locale = useLocale();
-  const router = useRouter();
   const [typed, setTyped] = useState('');
   const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   async function remove() {
     setBusy(true);
+    setFailed(false);
     try {
       const { authClient } = await import('@/lib/auth-client');
-      await authClient.deleteUser();
-      router.push(withLocale(locale, '/'));
-    } finally {
+      const result = await authClient.deleteUser();
+      if (result.error) {
+        setFailed(true);
+        setBusy(false);
+        return;
+      }
+      /*
+        ⚠️ **Sert gezinme, `router.push` DEĞİL** — ölçülerek öğrenildi:
+        silme sunucuda tamamlanmıştı (kullanıcı, oturum, Top 4 hepsi gitti)
+        ama tarayıcı `/settings`te kaldı. Sebep istemci yönlendiricisinin
+        önbelleği: oturum çerezi artık yok, ama React ağacı ve rota
+        önbelleği hâlâ giriş yapılmış hâli tutuyor.
+
+        Hesap silindikten sonra doğru davranış her şeyi sıfırlamak; yumuşak
+        geçiş, silinmiş bir hesabın ekranında oturmaya devam etmek demek.
+      */
+      window.location.href = withLocale(locale, '/');
+    } catch {
+      setFailed(true);
       setBusy(false);
     }
   }
@@ -321,6 +338,7 @@ function DeleteAccount({ username }: { readonly username: string }) {
         autoComplete="off"
         className="w-full border-b border-white/10 bg-transparent py-2 text-sm font-light text-white/70 outline-none placeholder:text-white/20 focus:border-white/30"
       />
+      {failed ? <p className="text-xs font-light text-white/60">{t.error.line}</p> : null}
       <button
         type="button"
         onClick={remove}
