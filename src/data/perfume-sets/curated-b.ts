@@ -111,6 +111,9 @@ export const CURATED_B: readonly Perfume[] = [
       { noteId: 'tonka', tier: 'base', weight: 0.5 },
       { noteId: 'white-musk', tier: 'base', weight: 0.4 },
     ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/bianco-oro-by-giardini-di-toscana' },
+    ],
   },
 
   // ——— Tropik / meyveli gurme ———
