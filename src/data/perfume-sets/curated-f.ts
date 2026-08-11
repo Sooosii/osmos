@@ -77,6 +77,9 @@ export const CURATED_F: readonly Perfume[] = [
       { noteId: 'amber-accord', tier: 'base', weight: 0.5 },
       { noteId: 'vetiver', tier: 'base', weight: 0.5 },
     ],
+    retailers: [
+      { name: 'Floraiku', url: 'https://us.floraiku.com/products/gong-eau-de-parfum' },
+    ],
   },
   {
     id: 'les-liquides-imaginaires-blanche-bete',
@@ -101,6 +104,9 @@ export const CURATED_F: readonly Perfume[] = [
       { noteId: 'vanilla', tier: 'base', weight: 0.7 },
       { noteId: 'tonka', tier: 'base', weight: 0.6 },
       { noteId: 'cocoa', tier: 'base', weight: 0.4 },
+    ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/blanche-bete-by-liquides-imaginaires' },
     ],
   },
   {

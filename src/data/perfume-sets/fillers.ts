@@ -65,6 +65,10 @@ export const FILLERS: readonly Perfume[] = [
       { noteId: 'vetiver', tier: 'base', weight: 0.5 },
       { noteId: 'patchouli', tier: 'base', weight: 0.5 },
     ],
+    retailers: [
+      { name: 'Bogue Profumo', url: 'https://shop.bogue-profumo.com/products/maai-extrait-de-parfum' },
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/maai-by-bogue-profumo' },
+    ],
   },
   {
     // Uzayın kontrol noktası: tek nota. Hiçbir kümeye yakın düşmemeli.
