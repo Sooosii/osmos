@@ -138,7 +138,18 @@ export function SettingsForm(props: SettingsFormProps) {
       <section>
         <h2 className="mb-6 text-xs tracking-[0.3em] text-white/50">{t.account.top.heading}</h2>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {/*
+          ⚠️ Bekleme sırasında görsel bir işaret şart. Düğmeler `disabled`
+          oluyordu ama ekranda hiçbir şey değişmiyordu: telefonda dokunup
+          ~2 saniye bekleyen kişi dokunuşun kaydedilmediğini sanıyor ve
+          tekrar dokunuyor. Site dönen bir çark kullanmıyor — karşılığı
+          sönme; sitenin geri kalanının dili de bu.
+        */}
+        <div
+          className={`grid grid-cols-2 gap-3 transition-opacity duration-200 sm:grid-cols-4 ${
+            pending ? 'opacity-50' : ''
+          }`}
+        >
           {slots.map((card, slot) => (
             <div key={slot} className="space-y-2">
               <button
@@ -159,16 +170,33 @@ export function SettingsForm(props: SettingsFormProps) {
                     />
                   </>
                 ) : (
-                  <span className="text-[10px] tracking-[0.2em] text-white/25">{slot + 1}</span>
+                  /*
+                    ⚠️ Boş yuvada eskiden yalnızca sıra numarası yazıyordu
+                    ("4") ve telefonda ne olduğu anlaşılmıyordu — sayı mı,
+                    başlık mı, tıklanır mı? Artık numara sönük bir köşe
+                    işareti, ortadaki `+` ise ne yapılacağını söylüyor.
+                  */
+                  <span className="flex h-full w-full flex-col justify-between">
+                    <span className="text-[10px] tracking-[0.2em] text-white/20">{slot + 1}</span>
+                    <span className="self-center pb-2 text-2xl font-light leading-none text-white/25">
+                      +
+                    </span>
+                  </span>
                 )}
               </button>
 
               {card ? (
+                /*
+                  ⚠️ Dokunma hedefi: metin 10 px ama düğmenin kendisi `py-2`
+                  ile ~30 px yüksekliğinde ve kartın tam genişliğinde.
+                  Telefonda ölçüldü — tek satırlık bir bağlantı olarak
+                  parmakla ıskalanıyordu.
+                */
                 <button
                   type="button"
                   onClick={() => pick(slot, null)}
                   disabled={pending}
-                  className="text-[10px] tracking-[0.18em] text-white/30 transition-colors hover:text-white/60"
+                  className="w-full py-2 text-left text-[10px] tracking-[0.18em] text-white/30 transition-colors hover:text-white/60"
                 >
                   {t.account.top.remove}
                 </button>
