@@ -45,6 +45,8 @@ route below exists in both.
 | `/note/[id]` | A note: its own measurements, and the turning constellation of perfumes that carry it |
 | `/evolution`, `/space` | Verification screens — internal tools, not indexed |
 | `/u/[username]` | A profile: four perfumes and a signature drawn from them |
+| `/u/[username]/shelf` | Three shelves: what someone has, has tried, and wants |
+| `/u/[username]/nose` | A nose report read from those shelves — families, character, range, the odd one out, and what to try next |
 | `/signin`, `/settings`, `/privacy` | The optional account |
 
 New perfumes travel by two channels: an RSS feed at
@@ -56,11 +58,22 @@ never asks on its own.
 ## Accounts are optional
 
 The site is fully usable without one, and browsing signed out stores nothing —
-no cookie, no account, no tracking. An account adds exactly one thing: a public
-profile at `/u/yourname` holding **four perfumes**, a line you write, and a
-signature drawn from those four — concentric rings whose colours are the scent
-families and whose dots are note weights. There are no photographs here either,
-including profile pictures; the identity mark comes from the data.
+no cookie, no account, no tracking. An account adds a public profile at
+`/u/yourname` holding **four perfumes**, a line you write, and a signature drawn
+from those four — concentric rings whose colours are the scent families and
+whose dots are note weights. There are no photographs here either, including
+profile pictures; the identity mark comes from the data.
+
+From a perfume page you can also put anything on one of three **shelves** — have
+it, tried it, want it — and once three perfumes are marked the site can read a
+**nose report** back to you: which families dominate, where you sit on the four
+character axes, how wide your taste ranges, which perfume is the odd one out,
+and what to try next. It is the same similarity engine the map runs on; your
+perfumes are merged into one synthetic perfume and measured with the same ruler
+as the other 52. The report says how many perfumes it was read from, because a
+portrait drawn from three is not the same as one drawn from twenty.
+
+Signed in, the map knows you too: the perfumes you own wear a thin ring.
 
 Signing in sets one cookie, and that is the only cookie the site ever sets.
 Everything stored and how to delete it is on [`/privacy`](https://osmos-three.vercel.app/privacy).
@@ -104,15 +117,18 @@ Next.js 16 (App Router, Turbopack) · React 19 · Tailwind 4 · TypeScript ·
 Vitest · Better Auth, Drizzle and Postgres for the account layer. Drawing is
 canvas and SVG; there is no charting library.
 
-**Nearly everything is static** — 396 pages, generated at build time. Only two
-routes render per request, and only because their content belongs to one
-person: `/settings` and `/u/[username]`. The perfume pages keep their "add to
-my top four" button without leaving the static set: the session is read in the
-browser, never on the server.
+**Nearly everything is static** — 396 pages, generated at build time. The only
+routes that render per request are the ones whose content belongs to one
+person: `/settings`, `/studio`, and everything under `/u/[username]`. The
+perfume pages keep their "add to my top four" and shelf buttons without leaving
+the static set, and the map keeps its rings the same way: the session is read in
+the browser, never on the server.
 
-The server surface is deliberately small: `/api/push` stores push subscriptions
-(Upstash Redis), `/api/auth/*` handles sign-in (Postgres). Push *sending* runs
-in a GitHub Action, so the VAPID private key never touches the site. Outbound
+The server surface is deliberately small: `/api/auth/*` handles sign-in
+(Postgres), `/api/push` stores push subscriptions (Upstash Redis),
+`/api/compose/nearest` ranks a draft composition, and `/api/shelf` returns your
+own shelves — the last one is private and never cached. Push *sending* runs in a
+GitHub Action, so the VAPID private key never touches the site. Outbound
 requests at runtime: the site's own cookie-less analytics beacon, and — only
 when someone signs up — one transactional email.
 

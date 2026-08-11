@@ -110,6 +110,29 @@ describe('disari sizan veri', () => {
     expect(card).toContain('if (!profile)');
   });
 
+  test('gizli profilin rafi, raporu ve raporun karti da acilmiyor', () => {
+    /*
+      ⚠️ Raflar ve burun raporu **iki yeni herkese açık adres** ve bir kart
+      daha açtı; üçü de gizli profilin varlığını sızdırabilecek yeni yüzey.
+      Kart 404 veremiyor, o yüzden düz siyah kare basıyor — olmayan
+      kullanıcıyla gizli kullanıcı ayırt edilemiyor.
+    */
+    expect(read('src/app/[lang]/u/[username]/shelf/page.tsx')).toContain(
+      'if (!profile) notFound()',
+    );
+    expect(read('src/app/[lang]/u/[username]/nose/page.tsx')).toContain('if (!nose) notFound()');
+    expect(read('src/app/[lang]/u/[username]/nose/opengraph-image.tsx')).toContain(
+      'if (!nose?.report)',
+    );
+
+    /*
+      Üçü de gizliliği tek bir yerden devralıyor: `publicNose` kendi sorgusunu
+      açmıyor, `publicProfile`ı çağırıyor. Ayrı bir sorgu açsaydı `hidden`
+      denetimini bir gün orada unutmak mümkün olurdu.
+    */
+    expect(dal).toMatch(/publicNose[\s\S]{0,600}await publicProfile\(username\)/);
+  });
+
   test('istemciye inen parfum karti yalniz cizim alanlarini tasiyor', () => {
     /* Ayrıntı `perfume-cards.test.ts`te; burada yalnızca varlığı hatırlatılıyor. */
     expect(read('src/lib/perfume-cards.ts')).toContain('search');
