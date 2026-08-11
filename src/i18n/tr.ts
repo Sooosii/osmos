@@ -55,6 +55,8 @@ export const TR: Dict = {
     emailOptIn: 'Haritaya yeni parfüm girince haber ver',
     checkInbox: 'Gelen kutuna bak — adresi doğrulayacak bir bağlantı bekliyor.',
 
+    resendConfirm: 'Doğrulama mektubunu tekrar gönder',
+    resentConfirm: 'O adresin doğrulanması gerekiyorsa yeni bağlantı yola çıktı.',
     forgot: 'Şifremi unuttum',
     sendReset: 'Sıfırlama bağlantısı gönder',
     sentReset: 'O adresin hesabı varsa sıfırlama bağlantısı yola çıktı.',

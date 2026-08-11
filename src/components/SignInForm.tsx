@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { requestPasswordReset, signIn, signUp } from '@/lib/auth-client';
+import { requestPasswordReset, sendVerificationEmail, signIn, signUp } from '@/lib/auth-client';
 import { useDict, useLocale } from '@/i18n/LocaleProvider';
 import { withLocale } from '@/i18n/locale';
 
@@ -216,6 +216,39 @@ export function SignInForm() {
             {t.account.forgot}
           </button>
         )}
+
+        {/*
+          ⚠️ **Bu bağlantı bir kilidin anahtarı ve ölçülerek kondu.**
+
+          Doğrulama mektubu gitmezse — posta servisi düşer, adres yanlış
+          yazılır, mektup spam'e düşüp silinir — kişi KALICI olarak
+          kilitleniyordu: giriş yapamıyor (doğrulanmamış), tekrar kayıt
+          olamıyor (e-posta sızdırmamak için sahte başarı dönüyor) ve
+          mektubu yeniden isteyemiyordu. Ölçüldü: posta anahtarı bozukken
+          kayıt 200 dönüyor ve doğrulanmamış bir hesap geride kalıyor.
+
+          Cevap her zaman aynı ve belirsiz — "o adresin doğrulanması
+          gerekiyorsa" — çünkü kesin konuşmak, bir adresin kayıtlı olup
+          olmadığını söylemek olurdu.
+        */}
+        <button
+          type="button"
+          disabled={busy || !email}
+          onClick={async () => {
+            setError(null);
+            setBusy(true);
+            try {
+              await sendVerificationEmail({ email, callbackURL: withLocale(locale, '/settings') });
+            } catch {
+              /* Cevap yine de belirsiz kalıyor; hata da bir bilgi olurdu. */
+            }
+            setNotice(t.account.resentConfirm);
+            setBusy(false);
+          }}
+          className="w-full text-center text-xs font-light text-white/25 transition-colors hover:text-white/50 disabled:opacity-40"
+        >
+          {t.account.resendConfirm}
+        </button>
       </div>
     </div>
   );

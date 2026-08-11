@@ -81,6 +81,15 @@ export const EN = {
      * adresin kayıtlı olup olmadığını herkese söyleyen bir sorgu açardı.
      * Kayıt ekranındaki sahte başarıyla aynı gerekçe.
      */
+    /**
+     * ⚠️ **Bu bağlantı bir kilidin anahtarı.** Doğrulama mektubu gitmezse
+     * (posta servisi düşer, adres yanlış yazılır, mektup spam'e düşüp
+     * silinir) kişi kalıcı olarak kilitleniyordu: giriş yapamıyor çünkü
+     * doğrulanmamış, tekrar kayıt olamıyor çünkü sahte başarı dönüyor,
+     * ve mektubu yeniden isteyemiyor. Ölçüldü.
+     */
+    resendConfirm: 'Send the confirmation email again',
+    resentConfirm: 'If that address needs confirming, a new link is on its way.',
     forgot: 'I forgot my password',
     sendReset: 'Send a reset link',
     sentReset: 'If that address has an account, a reset link is on its way.',

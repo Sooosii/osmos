@@ -127,7 +127,7 @@ All optional — the site runs with none of them set:
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Server-side store for push subscriptions (Upstash Redis; the `UPSTASH_REDIS_REST_*` names are read too). Without them `/api/push` answers 503 in production. |
 | `DATABASE_URL` | Postgres for accounts (Neon). Without it the account pages are unreachable and the rest of the site is untouched. |
 | `BETTER_AUTH_SECRET` | Signs the session cookie. Changing it signs everyone out. |
-| `RESEND_API_KEY`, `MAIL_FROM` | Address confirmation and password reset. Without a key those messages print to the server console in development and signing up fails loudly in production — better than leaving someone waiting for a letter that never arrives. |
+| `RESEND_API_KEY`, `MAIL_FROM` | Address confirmation and password reset. Without a key those messages print to the server console in development. **In production a failed send does not fail the sign-up** — the account is created unverified and the error only reaches the server log; the sign-in screen therefore carries a "send the confirmation again" link, which is what unsticks anyone whose letter never arrived. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXT_PUBLIC_GOOGLE_ENABLED` | Google sign-in. Email and password work without them. The third one is what makes the button appear — set all three together, or the button shows and fails. |
 
 Push *sending* needs its own secrets on the GitHub side (`VAPID_PUBLIC_KEY`,

@@ -21,5 +21,12 @@ export const authClient = createAuthClient();
  * bu sürümde yok ve derleme kırılıyor. Uçların kendisi paketten okundu:
  * `/request-password-reset` ve `/reset-password`.
  */
-export const { useSession, signIn, signOut, signUp, requestPasswordReset, resetPassword } =
-  authClient;
+export const {
+  useSession,
+  signIn,
+  signOut,
+  signUp,
+  requestPasswordReset,
+  resetPassword,
+  sendVerificationEmail,
+} = authClient;
