@@ -4,6 +4,7 @@ import { APPROACH_CUE } from '@/lib/space-approach';
 import type { FeelTarget } from '@/lib/space-feel';
 import { useDict } from '@/i18n/LocaleProvider';
 import { LangSwitch } from '@/components/LangSwitch';
+import { NotifyControl } from '@/components/NotifyControl';
 import { SpaceFeelSliders } from './SpaceFeelSliders';
 
 /**
@@ -106,16 +107,19 @@ export function SpaceOverlays({
       </div>
 
       {/*
-        Dil değiştirici — sağ üst.
+        Meta kontroller — sağ üst: bildirim + dil.
 
-        Yaklaşma sahnesi boyunca yok, varışta beliriyor: "sahne boyunca ekranda
-        kontrol olmaz" kuralı kaydıraçlarda yazılı ve burada da geçerli.
-        Görünürlüğü ve `inert`i yaklaşma sahnesi yazıyor.
+        Yaklaşma sahnesi boyunca yok, varışta beliriyorlar: "sahne boyunca
+        ekranda kontrol olmaz" kuralı kaydıraçlarda yazılı ve burada da
+        geçerli. Görünürlüğü ve `inert`i yaklaşma sahnesi yazıyor — `inert`
+        ikisini birden kapsıyor, opaklığı 0 olan düğme de sekmeyle
+        odaklanılamıyor.
       */}
       <div
         ref={switchRef}
-        className="pointer-events-auto absolute right-6 top-6 opacity-0 transition-opacity duration-700 sm:right-10 sm:top-10"
+        className="pointer-events-auto absolute right-6 top-6 flex items-center gap-3 opacity-0 transition-opacity duration-700 sm:right-10 sm:top-10"
       >
+        <NotifyControl />
         <LangSwitch />
       </div>
 

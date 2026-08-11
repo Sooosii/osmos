@@ -176,6 +176,29 @@ describe('kok varliklari', () => {
     expect(existsSync('src/app/icon-512/route.tsx')).toBe(true);
   });
 
+  test('service worker iki olayi da dinliyor', () => {
+    /*
+      Çalışanın tek işi bildirim: push olayını ekrana çevirmek ve dokunuşu
+      sayfaya açmak. Sayfa önbelleği ya da fetch araya girmesi YOK — biri
+      eklenirse bu sınama değil, tasarım kararı değişmiş demektir.
+    */
+    const source = read('public/sw.js');
+    expect(source).toContain("addEventListener('push'");
+    expect(source).toContain("addEventListener('notificationclick'");
+    /* Çalışan kendi kendine yeter; dışarıdan betik çekmek delik olurdu. */
+    expect(source).not.toContain('importScripts');
+  });
+
+  test('sw.js http onbellegine takilmiyor', () => {
+    /*
+      ⚠️ Tarayıcı çalışanı HTTP önbelleğinden tazeleyebiliyor; başlık düşerse
+      eski çalışan günlerce takılı kalır ve bunu kimse görmez. Kayıt tarafı
+      da `updateViaCache: 'none'` ile aynı sözü veriyor (`NotifyControl`).
+    */
+    expect(read('next.config.ts')).toMatch(/source: '\/sw\.js'/);
+    expect(read('next.config.ts')).toContain('no-cache');
+  });
+
   test('simge cizimi tek yerde', () => {
     /*
       Üç rota da aynı kareyi basıyor. Çizim kopyalanırsa biri düzeltilip
