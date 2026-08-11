@@ -172,6 +172,13 @@ export const EN = {
         'Browsing this site without an account stores nothing: no cookie, no account, no tracking. Visits are counted by the site\'s own cookie-less analytics, which cannot identify anyone.',
         'If you create an account, three things are stored: the email address you signed in with, the username and line you chose, and the four perfumes you picked. Signing in also sets one cookie — it only keeps you signed in.',
         'Your profile is public unless you hide it in settings. Deleting your account removes all of it, at once and for good.',
+        /*
+          ⚠️ Ortaklık beyanı. Affiliate ağları (CJ, Awin, Amazon) siteyi
+          inceleyip görünür bir beyan arıyor; künyedeki dipnot tek başına
+          zayıf kalıyordu. Son cümle editoryal bağımsızlık sözü — hem
+          doğru hem incelemede istenen şey.
+        */
+        'Some perfume pages carry links to shops. Where a link is an affiliate link, buying through it may earn this site a commission. It never changes the price you pay, and it never affects which perfumes are on the map or what is written about them.',
       ],
     },
   },
@@ -347,7 +354,8 @@ export const EN = {
       sayfada görünür.
     */
     whereToFind: 'where to find',
-    commissionNote: 'links may earn a commission',
+    /* Bağlantının HEMEN yanında duran beyan — ağların istediği yakınlık. */
+    commissionNote: 'some of these are affiliate links: buying through one may earn this site a commission, at no extra cost to you',
   },
 
   note: {
