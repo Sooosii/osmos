@@ -75,6 +75,25 @@ const LINK_WIDTH = 1;
 const RING_GAP = 9;
 const RING_WIDTH = 2;
 
+/**
+ * Raf halkası — giriş yapmış kişinin **sahip olduğu** parfümlerin işareti.
+ *
+ * ⚠️ **Renk taşımıyor ve bu bilinçli.** Sitede renk = koku ailesi; halkayı
+ * aile renginde çizmek onu noktanın kendisinin bir parçası gibi gösterirdi,
+ * renkli başka bir tonda çizmek ise olmayan bir aile iddia ederdi. Beyaz,
+ * anlam taşımayan bir işaret — imleç tozundaki kararın aynısı.
+ *
+ * ⚠️ Yalnızca "sahibim" rafı. Üç raf için üç halka biçimi, kimsenin
+ * okumayacağı bir lejant olurdu.
+ *
+ * Giriş halkasından (`RING_GAP = 9`) daha içeride duruyor: ikisi aynı anda
+ * görünebiliyor (rafındaki bir noktaya basılı tutmak) ve üst üste binmemeleri
+ * gerekiyor.
+ */
+const SHELF_RING_GAP = 4.5;
+const SHELF_RING_WIDTH = 1;
+const SHELF_RING_ALPHA = 0.55;
+
 /** Ekranın düz renge kapanmaya başladığı ilerleme. Son çeyrek. */
 const COVER_START = 0.75;
 
@@ -88,6 +107,15 @@ export interface SpaceScene {
   readonly entry: { readonly markId: string | null; readonly progress: number };
   /** Sinestezi kaydıraçlarının tarifi; dokunulmamışken `NO_FEEL`. */
   readonly feel: FeelTarget;
+  /**
+   * Okuyucunun "sahibim" rafındaki parfümler — halkayla işaretleniyor.
+   *
+   * Girişsiz ziyaretçide ve raf inmeden önce **boş**; uzay o hâlde bugünkü
+   * hâlinde çiziliyor. İsteğe bağlı yapılmadı bilerek: varsayılan bir değer,
+   * bir gün birinin alanı geçirmeyi unutup halkaların sessizce kaybolmasına
+   * yol açardı.
+   */
+  readonly shelved: ReadonlySet<string>;
 }
 
 /**
@@ -202,6 +230,22 @@ function drawMark(
   ctx.beginPath();
   ctx.arc(sx, sy, radius, 0, Math.PI * 2);
   ctx.fill();
+
+  /*
+    Raf halkası en son ve noktanın ÜSTÜNE.
+
+    ⚠️ Opaklığı noktanınkinden türüyor (`alpha * SHELF_RING_ALPHA`), sabit
+    değil. Sabit olsaydı seçim yapıldığında sönen bir noktanın halkası parlak
+    kalırdı: harita "şu, şuna benziyor" derken aynı anda alakasız bir noktayı
+    işaret etmiş olurdu. "Seçim kazanır" kuralı halkayı da kapsıyor.
+  */
+  if (scene.shelved.has(mark.id)) {
+    ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * SHELF_RING_ALPHA})`;
+    ctx.lineWidth = SHELF_RING_WIDTH;
+    ctx.beginPath();
+    ctx.arc(sx, sy, radius + SHELF_RING_GAP, 0, Math.PI * 2);
+    ctx.stroke();
+  }
 }
 
 /** Seçili noktadan en yakın komşularına ince çizgiler. Noktaların ALTINDA kalıyor. */
