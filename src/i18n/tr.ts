@@ -161,6 +161,8 @@ export const TR: Dict = {
     },
     mine: 'KOMPOZISYONLAR',
     patronMark: 'PATRON',
+    clip: 'klip olarak indir',
+    clipBusy: 'kaydediliyor',
   },
 
   notFound: {

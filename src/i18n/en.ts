@@ -211,6 +211,9 @@ export const EN = {
     mine: 'COMPOSITIONS',
     /** Sönük rozet — statü değil, destek işareti. */
     patronMark: 'PATRON',
+    /** Hareketli imza; hikâye boyutunda iniyor. */
+    clip: 'download it as a clip',
+    clipBusy: 'recording',
   },
 
   /** Haritada olmayan bir adrese gidildiğinde. */

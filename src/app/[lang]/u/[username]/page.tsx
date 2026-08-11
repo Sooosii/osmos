@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { NoseSignature } from '@/components/NoseSignature';
+import { PatronBackdrop } from '@/components/PatronBackdrop';
+import { SignatureClip } from '@/components/SignatureClip';
 import { PerfumeMiniCard } from '@/components/PerfumeMiniCard';
 import { ScreenFrame } from '@/components/ScreenFrame';
 import { dictFor, getDict, localeFor } from '@/i18n/dict';
@@ -61,6 +63,15 @@ export default async function ProfilePage({
 
   return (
     <main className="min-h-dvh bg-[#050507] text-white">
+      {/*
+        Patron zemini — imzanın büyütülmüş, sönük ve yavaşça dönen hâli.
+        Yalnızca Patron profilinde ve yalnızca dört parfüm seçilmişse:
+        boş bir imzadan zemin de doğmuyor.
+      */}
+      {profile.patron && profile.topFour.length > 0 ? (
+        <PatronBackdrop perfumeIds={profile.topFour} />
+      ) : null}
+
       <ScreenFrame
         nav={
           <nav className="flex items-center gap-3 text-[10px] tracking-[0.3em] text-white/50">
@@ -103,13 +114,21 @@ export default async function ProfilePage({
                 </p>
               ) : null}
               {isOwn ? (
-                <p className="mt-4">
+                <p className="mt-4 flex items-center gap-4">
                   <Link
                     href={withLocale(locale, '/settings')}
                     className="text-xs font-light text-white/40 transition-colors hover:text-white/70"
                   >
                     {t.account.profile.edit}
                   </Link>
+                  {/*
+                    Klip yalnızca profilin SAHİBİNE ve yalnızca Patron'a:
+                    başkasının imzasını indirmek onun işareti üzerinden
+                    paylaşım yapmak olurdu.
+                  */}
+                  {profile.patron ? (
+                    <SignatureClip perfumeIds={profile.topFour} username={profile.username} />
+                  ) : null}
                 </p>
               ) : null}
             </div>
