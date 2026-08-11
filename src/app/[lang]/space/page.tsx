@@ -6,7 +6,7 @@ import { ScentSpace } from '@/components/ScentSpace';
 import type { ScentFamily } from '@/data/types';
 import type { Dict } from '@/i18n/en';
 import { getDict, localeFor, say } from '@/i18n/dict';
-import { languageAlternates } from '@/lib/site-url';
+import { pageAlternates } from '@/lib/site-url';
 
 /**
  * Uzay taslağı — benzerlik motorunu doğrulamak için.
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const t = getDict(localeFor((await params).lang));
   return {
     title: t.draft.spaceTitle,
-    alternates: { languages: languageAlternates('/space') },
+    alternates: pageAlternates('/space'),
   };
 }
 

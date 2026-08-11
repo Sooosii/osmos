@@ -1,6 +1,21 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  /*
+    ⚠️ Service worker HTTP önbelleğine takılmamalı. Tarayıcı `sw.js`i http
+    önbelleğinden tazeleyebiliyor; bu başlık olmadan eski çalışan günlerce
+    takılı kalır ve bunu kimse görmez — bildirim düşmez, hata da görünmez.
+    Kayıt tarafındaki `updateViaCache: 'none'` (NotifyControl) tek başına
+    yetmiyor: o yalnızca kayıt anındaki denetimi kapsıyor.
+  */
+  async headers() {
+    return [
+      {
+        source: '/sw.js',
+        headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
+      },
+    ];
+  },
   experimental: {
     /*
       Haritada olmayan adreslerin sayfası `app/global-not-found.tsx`.

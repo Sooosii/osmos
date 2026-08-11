@@ -31,6 +31,23 @@ export const EN = {
     allNotes: '← all notes',
   },
 
+  /**
+   * Bildirim düğmesi ve bildirimin kendisi.
+   *
+   * `cta`/`active` çerçevenin mikro-tipografisinde duruyor — kısa ve büyük
+   * harfli. Bildirim metni de ekran metnidir: noktalı büyük İ yasağı sistem
+   * bildirimi için de geçerli (`push-payload.test.ts` 52 parfümü iki dilde
+   * tarıyor).
+   */
+  notify: {
+    cta: 'NOTIFY',
+    active: 'NOTIFYING',
+    aria: 'New-perfume notifications',
+    blocked: 'Notifications are blocked in this browser',
+    pushTitle: 'OSMOS',
+    pushBody: (name: string, brand: string) => `New perfume on the map: ${name} — ${brand}`,
+  },
+
   /** Haritada olmayan bir adrese gidildiğinde. */
   notFound: {
     mark: 'NOT ON THE MAP',

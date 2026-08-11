@@ -45,6 +45,12 @@ route below exists in both.
 | `/note/[id]` | A note: its own measurements, and the turning constellation of perfumes that carry it |
 | `/evolution`, `/space` | Verification screens — internal tools, not part of the site proper |
 
+New perfumes travel by two channels: an RSS feed at
+[`/feed.xml`](https://osmos-three.vercel.app/feed.xml), and a quiet NOTIFY
+button in the frame that delivers a push notification when a perfume enters the
+map. The permission prompt opens only when the button is pressed — the site
+never asks on its own.
+
 ## The data
 
 Three sets, all written by hand under `src/data/`:
@@ -85,13 +91,23 @@ Vitest. Drawing is canvas and SVG; there is no charting library. The site is
 generated statically and makes no third-party request at runtime — the one
 beacon it sends is its own cookie-less, first-party analytics.
 
+Pages are static; the one server piece is `/api/push`, which stores push
+subscriptions (Upstash Redis) and nothing else. Sending happens in a GitHub
+Action, so the VAPID private key never touches the site.
+
 ## Configuration
 
-One optional environment variable:
+All optional — the site runs with none of them set:
 
 | variable | what |
 |---|---|
 | `NEXT_PUBLIC_SITE_URL` | Absolute base for the sitemap, `hreflang` links and share images. Falls back to the host's own production URL, then to `http://localhost:3000`. Set it once a custom domain is in place. |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Enables the NOTIFY button. Without it the button never renders and the site behaves as before. |
+| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Server-side store for push subscriptions (Upstash Redis; the `UPSTASH_REDIS_REST_*` names are read too). Without them `/api/push` answers 503 in production. |
+
+Sending needs its own secrets on the GitHub side (`VAPID_PUBLIC_KEY`,
+`VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, plus the two store variables) — see
+`.github/workflows/push-notify.yml`.
 
 See `.env.example`.
 

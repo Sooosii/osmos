@@ -1,0 +1,52 @@
+# Yeni parfüm bildirimi.
+#
+# İki tetik:
+#   · master'a itişte parfüm verisi değiştiyse — gönderici depodaki
+#     "duyurulmuşlar" kümesiyle farkı bulur, yalnızca yeniyi duyurur.
+#     (Veri dosyaları perfume-sets/ altında; toplayıcı perfumes.ts nadiren
+#     değişir ama ikisi de dinleniyor.)
+#   · elle (workflow_dispatch) — `message` doluysa veri farkına bakılmaz,
+#     o metin bütün abonelere gider: kurulumun "bildirim gerçekten düşüyor mu"
+#     doğrulaması. Boşsa normal akış (ilk çalışmada kümeyi tohumlar).
+#
+# ⚠️ VAPID özel anahtarı YALNIZCA burada yaşar (GitHub secrets); Vercel'e ve
+# koda hiç girmez. Vercel'deki NEXT_PUBLIC_VAPID_PUBLIC_KEY ile buradaki
+# VAPID_PUBLIC_KEY aynı çiftin açık yarısı olmak zorunda — ayrışırlarsa
+# abonelik başka anahtara açılır ve gönderim sessizce düşer.
+name: push-notify
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/data/perfumes.ts'
+      - 'src/data/perfume-sets/**'
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Deneme gönderimi metni (boş = normal akış)'
+        required: false
+        type: string
+
+jobs:
+  gonder:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx tsx scripts/push-send.ts
+        env:
+          PUSH_TEST_MESSAGE: ${{ inputs.message }}
+          VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
+          KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}

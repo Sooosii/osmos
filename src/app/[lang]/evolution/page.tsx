@@ -1,6 +1,6 @@
 import { EvolutionTimeline } from '@/components/EvolutionTimeline';
 import { dictFor } from '@/i18n/dict';
-import { languageAlternates } from '@/lib/site-url';
+import { pageAlternates } from '@/lib/site-url';
 
 /**
  * Evrim çizelgesi — zaman kaydıracıyla notaların yükselip düşüşü.
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const t = dictFor((await params).lang);
   return {
     title: t.draft.evolutionTitle,
-    alternates: { languages: languageAlternates('/evolution') },
+    alternates: pageAlternates('/evolution'),
   };
 }
 

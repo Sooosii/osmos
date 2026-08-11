@@ -5,7 +5,7 @@ import { introPoints } from '@/lib/intro-points';
 import { ScentSpaceCanvas } from '@/components/ScentSpaceCanvas';
 import { Acilis } from '@/components/Acilis';
 import { getDict, localeFor } from '@/i18n/dict';
-import { languageAlternates } from '@/lib/site-url';
+import { pageAlternates } from '@/lib/site-url';
 
 /**
  * Koku Uzayı — sitenin kapısı.
@@ -23,7 +23,7 @@ import { languageAlternates } from '@/lib/site-url';
   okuyor, sitemap tek başına yeterli sayılmıyor.
 */
 export function generateMetadata() {
-  return { alternates: { languages: languageAlternates('/') } };
+  return { alternates: pageAlternates('/') };
 }
 
 export default async function Home({ params }: { params: Promise<{ lang: string }> }) {

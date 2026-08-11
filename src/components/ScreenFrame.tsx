@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { LangSwitch } from './LangSwitch';
+import { NotifyControl } from './NotifyControl';
 
 /**
  * Ekran çerçevesi — sayfanın etrafına geçen ince HUD.
@@ -101,10 +102,13 @@ export function ScreenFrame({ children, nav, readouts, status, tail }: ScreenFra
             </dl>
 
             {/*
-              Dil değiştirici ölçümlerin sağında. `ScreenFrame` sunucu bileşeni
-              ve öyle kalıyor: `LangSwitch` kendi `'use client'` sınırını
-              taşıyor, sarmalayanı istemciye düşürmüyor.
+              Meta kontroller ölçümlerin sağında: bildirim + dil. `ScreenFrame`
+              sunucu bileşeni ve öyle kalıyor: ikisi de kendi `'use client'`
+              sınırını taşıyor, sarmalayanı istemciye düşürmüyor. Bildirim
+              düğmesi desteksiz tarayıcıda ve anahtar yokken kendini hiç
+              çizmiyor — şerit bugünkü hâline düşüyor.
             */}
+            <NotifyControl />
             <LangSwitch />
           </div>
         </div>

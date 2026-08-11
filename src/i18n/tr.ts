@@ -32,6 +32,15 @@ export const TR: Dict = {
     allNotes: '← bütün notalar',
   },
 
+  notify: {
+    cta: 'HABER VER',
+    active: 'HABERDAR',
+    aria: 'Yeni parfüm bildirimleri',
+    blocked: 'Tarayıcı bildirimleri engelliyor',
+    pushTitle: 'OSMOS',
+    pushBody: (name, brand) => `Haritaya yeni parfüm girdi: ${name} — ${brand}`,
+  },
+
   notFound: {
     mark: 'HARITADA YOK',
     line: 'Böyle bir sayfa yok. Adres yanlış yazılmış olabilir, ya da seçkiye hiç girmemiş bir parfüm olabilir.',
