@@ -4,6 +4,7 @@ import { buildMarks } from '@/lib/space-marks';
 import { introPoints } from '@/lib/intro-points';
 import { ScentSpaceCanvas } from '@/components/ScentSpaceCanvas';
 import { Acilis } from '@/components/Acilis';
+import { CursorGlitter } from '@/components/CursorGlitter';
 import { getDict, localeFor } from '@/i18n/dict';
 import { pageAlternates } from '@/lib/site-url';
 
@@ -94,6 +95,15 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         Suspense'in dışında: adres parametresiyle işi yok.
       */}
       <Acilis points={introPoints(marks)} />
+
+      {/*
+        İmleç tozu — sahibin isteği, yalnızca burada.
+
+        Belge sayfalarında imlecin ardında parıltı okumayı bölerdi; uzay ise
+        zaten bir sahne. Dokunmatikte ve `prefers-reduced-motion` altında
+        kendini hiç çizmiyor (gerekçeler bileşende).
+      */}
+      <CursorGlitter />
     </main>
   );
 }
