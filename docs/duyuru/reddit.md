@@ -112,20 +112,64 @@ pahalıya gelir.
 
 ---
 
-## r/fragrance'ın yerine — alternatifler
+## ⚠️ r/InternetIsBeautiful — iki gerçek engel var, karar sahibin
 
-Parfüm kitlesi kapandı, ama boşluğu dolduracak iki aday var. ⚠️ **İkisinin
-de kurallarını okumadım** (Reddit kapalı) — gitmeye karar verirsen kural
-metnini yapıştır, buraya işleyeyim.
+Kural metni sahip tarafından getirildi (2026-08-11). Çoğu madde bizim
+lehimize, ama ikisi düşünmeden geçilecek gibi değil.
 
-- **r/InternetIsBeautiful** — "güzel/ilginç site" kitlesi; etkileşimli,
-  ücretsiz, kayıtsız siteler tam oraya ait. r/fragrance'ın yerine en doğal
-  aday, muhtemelen daha da çok trafik getirir.
+**Rahat geçtiklerimiz:**
+
+| Kural | Durum |
+|---|---|
+| Kişisel bilgi isteyen site yasak (e-posta, hesap, bekleme listesi) | ✅ **Tam bizim tarifimiz** — kayıt yok, e-posta yok |
+| Mağaza / ücretli / freemium yasak | ✅ Her şey bedava, kilitli özellik yok |
+| Makale, video, görsel, galeri yasak | ✅ Etkileşimli site |
+| Eklenti / indirme yasak | ✅ |
+| Web oyunu, quiz yasak | ✅ |
+| Benzersiz olmalı | ✅ Bunun benzeri yok |
+| İş araçları (SEO, iş ilanı vb.) yasak | ✅ |
+
+**① AI-Generated Content — asıl mesele bu:**
+
+> *"submissions are not allowed if their primary content is produced by AI,
+> or if AI is used to drive functionality"*
+
+İki yarısı iki ayrı cevap veriyor ve dürüst olmak gerek:
+
+- *"AI ile çalışan işlevsellik"* → **temiz, kesin hayır.** Sitede çalışma
+  anında hiçbir yapay zekâ yok; hesap klasik MDS ve kapalı formüller,
+  dışarıya istek bile atmıyor. Bu iddia savunulabilir ve kanıtlanabilir.
+- *"birincil içerik yapay zekâ üretimi mi"* → **burada net değiliz.** Kod
+  bir yapay zekâ asistanıyla yazıldı; nota tarifleri ve küratör cümleleri
+  de bu oturumlarda birlikte üretildi. Seçki, ölçüler, bütün tasarım
+  kararları ve reddedilenler sahibin — ama "hiç yapay zekâ değmedi"
+  denemez.
+
+⚠️ **Bu yüzden kural, "yorumlarsak geçeriz" diye geçilecek bir şey değil.**
+Modun sorması hâlinde verilecek dürüst cevap şu: *"Sitede yapay zekâ
+çalışmıyor; kodu bir asistanla yazdım, seçki ve tasarım kararları benim."*
+Sahip bu cümleyi kamuya söylemekten rahatsızsa **oraya gönderilmemeli** —
+sonradan ortaya çıkması, hiç göndermemekten çok daha pahalı.
+
+**② 90/10 kuralı — bugün için pratik engel:**
+
+> *"90% of your recent participation on Reddit should have nothing to do
+> with a site you own or operate."*
+
+Reddit hesabının geçmişi yoksa ya da yalnızca bu proje için açıldıysa
+gönderi **kural gereği** kabul edilmiyor. Bu, beklemekle çözülen bir şey:
+birkaç hafta gerçek katılım, sonra gönderi.
+
+**Sonuç:** r/InternetIsBeautiful hemen bugünün kanalı değil. Sıraya
+alınabilir, ama ① sorusuna sahibin vereceği cevap belirleyici.
+
+### Öbür alternatifler (kuralları okunmadı)
+
 - **r/SideProject** — yapan-kitle; kendi projeni paylaşmak burada beklenen
-  davranış, yasak değil. HN'in yumuşak hâli.
+  davranış. Yapay zekâ yardımıyla yazılmış proje orada olağan.
+- Teknik taraf: r/nextjs, r/webdev, r/creativecoding (canvas açısı).
 
-Teknik taraf istersen ayrıca: r/nextjs, r/webdev (kendi tanıtım kuralları
-var), r/creativecoding (canvas çizimi açısı).
+Gitmeye karar verirsen kural metnini yapıştır, buraya işlerim.
 
 ---
 
