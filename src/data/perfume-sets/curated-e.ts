@@ -191,5 +191,8 @@ export const CURATED_E: readonly Perfume[] = [
       { noteId: 'ambrette', tier: 'base', weight: 0.3 },
       { noteId: 'cedar', tier: 'base', weight: 0.3 },
     ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/good-morning-by-jusbox' },
+    ],
   },
 ] as const;

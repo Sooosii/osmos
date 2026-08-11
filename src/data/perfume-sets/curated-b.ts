@@ -209,5 +209,8 @@ export const CURATED_B: readonly Perfume[] = [
       { noteId: 'sandalwood', tier: 'base', weight: 0.5 },
       { noteId: 'ambrette', tier: 'base', weight: 0.4 },
     ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/mango-skin-by-vilhelm-parfumerie' },
+    ],
   },
 ] as const;

@@ -177,6 +177,9 @@ export const CURATED_F: readonly Perfume[] = [
       { noteId: 'ambergris', tier: 'base', weight: 0.7 },
       { noteId: 'vetiver', tier: 'base', weight: 0.6 },
     ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/every-storm-a-serenade-by-imaginary-authors' },
+    ],
   },
   {
     id: 'serge-lutens-santal-majuscule',
@@ -215,6 +218,9 @@ export const CURATED_F: readonly Perfume[] = [
       { noteId: 'mandarin', tier: 'heart', weight: 0.4 },
       { noteId: 'sandalwood', tier: 'base', weight: 1.0 },
       { noteId: 'leather', tier: 'base', weight: 0.5 },
+    ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/moonmilk-by-stora-skuggan' },
     ],
   },
 ];

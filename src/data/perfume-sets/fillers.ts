@@ -37,6 +37,9 @@ export const FILLERS: readonly Perfume[] = [
       { noteId: 'patchouli', tier: 'base', weight: 0.5 },
       { noteId: 'cistus', tier: 'base', weight: 0.4 },
     ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/azemour-les-orangers-by-parfum-dempire' },
+    ],
   },
   {
     id: 'bogue-maai',
@@ -76,6 +79,12 @@ export const FILLERS: readonly Perfume[] = [
       tr: 'Tek bir molekül. Kokunun kendisi değil, tenin ona verdiği cevap.',
     },
     notes: [{ noteId: 'ambroxan', tier: 'base', weight: 1.0 }],
+    retailers: [
+      {
+        name: 'Luckyscent',
+        url: 'https://www.luckyscent.com/products/not-a-perfume-by-juliette-has-a-gun',
+      },
+    ],
   },
   {
     id: 'papillon-dryad',
@@ -102,6 +111,9 @@ export const FILLERS: readonly Perfume[] = [
       { noteId: 'styrax', tier: 'base', weight: 0.4 },
       { noteId: 'patchouli', tier: 'base', weight: 0.4 },
       { noteId: 'sandalwood', tier: 'base', weight: 0.4 },
+    ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/dryad-by-papillon-artisan-perfumes' },
     ],
   },
   {
@@ -154,6 +166,9 @@ export const FILLERS: readonly Perfume[] = [
       { noteId: 'leather', tier: 'base', weight: 0.4 },
       { noteId: 'vanilla', tier: 'base', weight: 0.3 },
     ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/salome-by-papillon-artisan-perfumes' },
+    ],
   },
   {
     // Haritanın en dumanlı noktası. Bir uç nokta daha: is ekseninin ucunda
@@ -177,6 +192,9 @@ export const FILLERS: readonly Perfume[] = [
       { noteId: 'cistus', tier: 'base', weight: 0.6 },
       { noteId: 'guaiac-wood', tier: 'base', weight: 0.5 },
       { noteId: 'labdanum', tier: 'base', weight: 0.4 },
+    ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/bois-dascese-by-naomi-goodsir' },
     ],
   },
 ] as const;

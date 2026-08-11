@@ -178,5 +178,8 @@ export const CURATED_D: readonly Perfume[] = [
       { noteId: 'cedar', tier: 'base', weight: 0.4 },
       { noteId: 'ambrette', tier: 'base', weight: 0.3 },
     ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/lune-feline-by-atelier-des-ors' },
+    ],
   },
 ] as const;
