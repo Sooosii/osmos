@@ -40,9 +40,14 @@ export const CURATED_A: readonly Perfume[] = [
 
       Satırın kendisi ve altyapısı duruyor (`Retailer` tipi, sınamalar,
       i18n metinleri, komisyon dipnotu): `retailers` boşken satır zaten
-      çizilmiyor. Affiliate hesapları açıldığında satıcının kendi paneli
-      **ürün sayfasına** derin bağlantı üretecek ve 52 parfüm topluca
-      dolacak. `retailers.test.ts` arama biçimli adresleri reddediyor.
+      çizilmiyor. `retailers.test.ts` arama biçimli adresleri reddediyor.
+
+      ⚠️ **Alan artık dolmaya başladı** (2026-08-11, sahip "kesin olsun"
+      dedi): arama yerine **ürün sayfaları** giriyor ve her biri tek tek
+      açılıp doğrulanıyor. İki tür — markanın kendi mağazası (klon riski
+      sıfır) ve Luckyscent (affiliate programı var). Bu parfümün (Dior)
+      kendi satırı hâlâ boş: designer bir parfüm ve doğru ürün sayfası
+      henüz doğrulanmadı.
     */
     line: {
       en: 'A rose left too long in a room full of smoke — sweet, medicinal, unwilling to leave.',
@@ -101,6 +106,10 @@ export const CURATED_A: readonly Perfume[] = [
       { noteId: 'amber-accord', tier: 'base', weight: 0.5 },
       { noteId: 'benzoin', tier: 'base', weight: 0.4 },
     ],
+    retailers: [
+      { name: 'Nasomatto', url: 'https://nasomatto.com/products/baraonda' },
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/baraonda-by-nasomatto' },
+    ],
   },
   {
     // Küratör yönü: doğrudan deri, geri kalanı onun üstüne kuruluyor.
@@ -124,6 +133,10 @@ export const CURATED_A: readonly Perfume[] = [
       { noteId: 'patchouli', tier: 'base', weight: 0.4 },
       { noteId: 'civet', tier: 'base', weight: 0.3 },
       { noteId: 'earth', tier: 'base', weight: 0.3 },
+    ],
+    retailers: [
+      { name: 'Nasomatto', url: 'https://nasomatto.com/products/blamage' },
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/blamage-by-nasomatto' },
     ],
   },
 
@@ -151,6 +164,10 @@ export const CURATED_A: readonly Perfume[] = [
       { noteId: 'honey', tier: 'heart', weight: 0.4 },
       { noteId: 'white-musk', tier: 'base', weight: 0.6 },
       { noteId: 'sandalwood', tier: 'base', weight: 0.5 },
+    ],
+    retailers: [
+      { name: 'Zoologist', url: 'https://www.zoologistperfumes.com/products/hummingbird' },
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/hummingbird-by-zoologist' },
     ],
   },
   {
@@ -181,6 +198,9 @@ export const CURATED_A: readonly Perfume[] = [
       { noteId: 'earth', tier: 'base', weight: 0.4 },
       { noteId: 'sandalwood', tier: 'base', weight: 0.3 },
     ],
+    retailers: [
+      { name: 'Zoologist', url: 'https://www.zoologistperfumes.com/products/zoologist-rabbit-deluxe-bottle' },
+    ],
   },
 
   // ——— Orto Parisi çifti ———
@@ -208,6 +228,10 @@ export const CURATED_A: readonly Perfume[] = [
       { noteId: 'vetiver', tier: 'base', weight: 0.6 },
       { noteId: 'patchouli', tier: 'base', weight: 0.3 },
     ],
+    retailers: [
+      { name: 'Orto Parisi', url: 'https://ortoparisi.com/products/viride' },
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/viride-by-orto-parisi' },
+    ],
   },
   {
     id: 'orto-parisi-megamare',
@@ -229,6 +253,10 @@ export const CURATED_A: readonly Perfume[] = [
       { noteId: 'ambergris', tier: 'base', weight: 0.8 },
       { noteId: 'ambroxan', tier: 'base', weight: 0.7 },
       { noteId: 'cedar', tier: 'base', weight: 0.4 },
+    ],
+    retailers: [
+      { name: 'Orto Parisi', url: 'https://ortoparisi.com/products/megamare' },
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/megamare-by-orto-parisi' },
     ],
   },
 

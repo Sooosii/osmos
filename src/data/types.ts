@@ -127,10 +127,18 @@ export type PyramidTier = 'top' | 'heart' | 'base';
  * ⚠️ **Adres ÜRÜN SAYFASI olmak zorunda, arama sayfası değil** — ölçüldü
  * (2026-08-11): düz Amazon araması küratörlü parfümü arayan ziyaretçiyi
  * klonuna gönderiyordu (Dior Oud Ispahan → Versace/Lattafa; Bogue Maai → hiç
- * sonuç yok). Yanlış ürüne giden bağlantı, bağlantı olmamasından kötü. Bu
- * yüzden bugün **hiçbir parfümde `retailers` yok** ve satır hiç çizilmiyor;
- * alan affiliate panelleri derin bağlantı üretince dolacak. Sınama arama
- * biçimli adresleri reddediyor.
+ * sonuç yok). Yanlış ürüne giden bağlantı, bağlantı olmamasından kötü.
+ * Sınama arama biçimli adresleri reddediyor.
+ *
+ * ⚠️ **Her adres tek tek AÇILIP doğrulandı** — tahmin edilmedi. Marka
+ * sitelerinin ürün adresleri öngörülebilir görünüyor ama değil: Zoologist'te
+ * `/products/rabbit` 404 verirken doğrusu `/products/zoologist-rabbit-deluxe-bottle`
+ * çıktı. Yeni bağlantı eklerken aynı disiplin: aç, ürünün adını gör, öyle yaz.
+ *
+ * Bugün iki tür bağlantı var: **markanın kendi mağazası** (her zaman doğru
+ * ürün, klon riski sıfır) ve **Luckyscent** (niş satıcı, affiliate programı
+ * var — hesap açıldığı gün adrese parametre eklenir ve komisyon başlar).
+ * Alanı boş olan parfümde satır hiç çizilmiyor, sayfa bugünkü hâlinde kalıyor.
  */
 export interface Retailer {
   readonly name: string;
