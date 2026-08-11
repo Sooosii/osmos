@@ -129,6 +129,7 @@ All optional — the site runs with none of them set:
 | `BETTER_AUTH_SECRET` | Signs the session cookie. Changing it signs everyone out. |
 | `RESEND_API_KEY`, `MAIL_FROM` | Address confirmation and password reset. Without a key those messages print to the server console in development. **In production a failed send does not fail the sign-up** — the account is created unverified and the error only reaches the server log; the sign-in screen therefore carries a "send the confirmation again" link, which is what unsticks anyone whose letter never arrived. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXT_PUBLIC_GOOGLE_ENABLED` | Google sign-in. Email and password work without them. The third one is what makes the button appear — set all three together, or the button shows and fails. |
+| `NEXT_PUBLIC_ACCOUNTS_ENABLED` | Shows the "sign in" invitation. Held back until email is deliverable to strangers, so nobody is invited through a door that leads nowhere. `/signin` still works by direct address. |
 
 Push *sending* needs its own secrets on the GitHub side (`VAPID_PUBLIC_KEY`,
 `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, plus the two store variables) — see

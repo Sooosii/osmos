@@ -22,6 +22,21 @@ import { withLocale } from '@/i18n/locale';
  * bütün siteyi dinamikleştirmek. Zıplamayı azaltmak için oturum belirsizken
  * hiçbir şey çizilmiyor — yanlış bir şey göstermektense boş kalmak iyi.
  */
+/**
+ * ⚠️ **Davet, kapıdan ayrı bir anahtarla açılıyor.**
+ *
+ * Hesap katmanı hazır ve çalışıyor, ama posta gönderimi doğrulanmış bir alan
+ * adı olmadan **yalnızca site sahibinin adresine** ulaşıyor (Resend'in kuralı,
+ * 403 ile ölçüldü). O hâlde başka biri kayıt olursa: hesabı oluşuyor, mektup
+ * hiç gitmiyor, ve kişi kilitleniyor — giriş yapamıyor, tekrar kayıt olamıyor.
+ *
+ * Bu yüzden köşedeki davet ayrı bir bayrağa bağlı. Adresler çalışmaya devam
+ * ediyor (`/signin` doğrudan açılıyor, sahip deneyebiliyor); görünen tek şey
+ * değişiyor: kimse çıkışı olmayan bir kapıya çağrılmıyor. Alan adı Resend'de
+ * doğrulandığı gün tek bir değişken açılıyor.
+ */
+const ACCOUNTS_INVITED = Boolean(process.env.NEXT_PUBLIC_ACCOUNTS_ENABLED);
+
 export function SignInLink({ className = '' }: { readonly className?: string }) {
   const { data, isPending } = useSession();
   const t = useDict();
@@ -29,6 +44,12 @@ export function SignInLink({ className = '' }: { readonly className?: string }) 
 
   /* Oturum henüz bilinmiyor: yanlış bir şey göstermektense hiçbir şey. */
   if (isPending) return null;
+
+  /*
+    Girişliye her zaman gösteriliyor — profiline ve ayarlarına ulaşması gerek.
+    Kapanan yalnızca girişsize yapılan DAVET.
+  */
+  if (!ACCOUNTS_INVITED && !data?.user) return null;
 
   const user = data?.user as { username?: string | null } | undefined;
   const label = user ? (user.username ?? t.account.settings.heading.toLowerCase()) : t.account.signIn;
