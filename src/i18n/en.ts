@@ -48,6 +48,107 @@ export const EN = {
     pushBody: (name: string, brand: string) => `New perfume on the map: ${name} — ${brand}`,
   },
 
+  /**
+   * Hesaplar, profil ve Top 4.
+   *
+   * ⚠️ Üyelik **isteğe bağlı** ve dil bunu yansıtıyor: hiçbir yerde "kayıt ol
+   * ve şunu kazan" yok. Köşedeki bağlantı sönük, davet alçak sesli. Site
+   * girişsiz bugünkü gibi gezilmeye devam ediyor.
+   *
+   * Hata metinleri **anahtarla** eşleşiyor (`username.ts`, `top-four.ts`
+   * anahtar döndürüyor, cümle değil): saf modülün içine ekran metni koymak
+   * bu depoda bir kez düzeltilmiş bir hataydı.
+   */
+  account: {
+    signIn: 'sign in',
+    signOut: 'sign out',
+    signInTitle: 'Sign in · OSMOS',
+    /* Neden var olduğu tek cümlede; kimseye bir şey vaat etmeden. */
+    signInLede: 'An account is optional. It gives you a profile with four perfumes on it.',
+    withGoogle: 'Continue with Google',
+    orEmail: 'or with an email address',
+    email: 'Email',
+    password: 'Password',
+    createAccount: 'Create account',
+    haveAccount: 'I already have an account',
+    emailOptIn: 'Tell me when a new perfume enters the map',
+    checkInbox: 'Check your inbox — there is a link waiting to confirm the address.',
+
+    username: {
+      title: 'Choose a username · OSMOS',
+      heading: 'Choose a username',
+      lede: (base: string) => `Your profile will live at ${base}/u/…`,
+      label: 'Username',
+      save: 'Continue',
+      /** `usernameError` anahtarlarıyla birebir eşleşiyor. */
+      errors: {
+        tooShort: 'At least 3 characters.',
+        tooLong: 'At most 20 characters.',
+        charset: 'Letters a–z, digits and underscore only.',
+        startsWithDigit: 'Start with a letter.',
+        reserved: 'That one is taken by the site.',
+        taken: 'Someone already has that one.',
+      },
+    },
+
+    profile: {
+      title: (username: string) => `${username} · OSMOS`,
+      description: (username: string) => `${username} on OSMOS — four perfumes.`,
+      topFour: 'TOP FOUR',
+      empty: 'No perfumes chosen yet.',
+      /** İmzanın ekran okuyucu karşılığı. */
+      signatureLabel: (username: string) => `${username}'s signature, drawn from their four perfumes`,
+      edit: 'edit',
+      bioLabel: 'A line about you',
+    },
+
+    settings: {
+      title: 'Settings · OSMOS',
+      heading: 'Settings',
+      bio: 'Your line',
+      bioHint: (max: number) => `${max} characters at most.`,
+      hidden: 'Hide my profile',
+      hiddenHint: 'Your profile stops opening for anyone else. Nothing is deleted.',
+      save: 'Save',
+      saved: 'Saved.',
+      dangerHeading: 'Delete account',
+      dangerLine:
+        'Your account, your four perfumes and your line are removed. This cannot be undone.',
+      deleteConfirm: 'Type your username to confirm',
+      delete: 'Delete my account',
+    },
+
+    top: {
+      heading: 'Your four',
+      add: 'add to my top four',
+      added: 'in your top four',
+      remove: 'remove',
+      search: 'Search the 52 perfumes',
+      noMatch: 'Nothing matches.',
+      full: 'Four is the limit — replace one instead.',
+      errors: {
+        tooMany: 'Four is the limit.',
+        duplicate: 'That one is already in your four.',
+        unknown: 'No such perfume.',
+      },
+    },
+
+    privacy: {
+      title: 'Privacy · OSMOS',
+      heading: 'What is stored',
+      /*
+        ⚠️ Bu sayfa dürüst olmak zorunda ve bir cümlesi sitenin eski sözünü
+        düzeltiyor: site bugüne kadar hiç çerez yazmıyordu. Giriş yapan için
+        bir oturum çerezi var; girişsiz gezinti hâlâ çerezsiz.
+      */
+      body: [
+        'Browsing this site without an account stores nothing: no cookie, no account, no tracking. Visits are counted by the site\'s own cookie-less analytics, which cannot identify anyone.',
+        'If you create an account, three things are stored: the email address you signed in with, the username and line you chose, and the four perfumes you picked. Signing in also sets one cookie — it only keeps you signed in.',
+        'Your profile is public unless you hide it in settings. Deleting your account removes all of it, at once and for good.',
+      ],
+    },
+  },
+
   /** Haritada olmayan bir adrese gidildiğinde. */
   notFound: {
     mark: 'NOT ON THE MAP',
