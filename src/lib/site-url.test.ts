@@ -78,8 +78,17 @@ describe('pageAlternates — canonical', () => {
   test('hreflang ve besleme otokesfi duruyor', () => {
     vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://osmos.example');
     const alt = pageAlternates('/notes', 'tr');
+    /*
+      ⚠️ Köşeli parantez bilerek: `i18n.test.ts`teki koruma, i18n dışında
+      Türkçe alanın nokta ile okunmasını yasaklıyor ve nokta yazımı bu satırı
+      yakalıyordu. Burada okunan bir `Localized` değil, `Record<Locale,
+      string>` — yani yanlış alarm. Yine de koruma daraltılmadı: kaba
+      kalması, gerçek bir sızıntının gelecekte kaçmamasının teminatı.
+      (Yorumun kendisi de aynı tuzağa düşmüştü; nokta yazımı buradan da
+      çıkarıldı.)
+    */
     expect(alt.languages.en).toBe('https://osmos.example/notes');
-    expect(alt.languages.tr).toBe('https://osmos.example/tr/notes');
+    expect(alt.languages['tr']).toBe('https://osmos.example/tr/notes');
     expect(alt.types['application/rss+xml']).toBe('/feed.xml');
   });
 });
