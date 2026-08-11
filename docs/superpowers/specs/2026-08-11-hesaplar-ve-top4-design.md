@@ -159,6 +159,43 @@ Next'in kendi kılavuzundan alınan, bu işte geçerli olan kurallar:
 - **Neon yerine Upstash** — abone kaydı için anahtar-değer yetiyordu, ama
   kullanıcı/Top 4/oturum ilişkisel veri; Postgres'in işi.
 
+## Uygulamada değişenler ve ölçülenler (2026-08-11 akşamı)
+
+Spec yazıldıktan sonra iş yapılırken çıkanlar — karar değiştiren her biri
+burada, çünkü belgeyle kod ayrışırsa belgeye kimse güvenmez.
+
+- **Dört ekran yerine tek `/settings`.** Kullanıcı adı, cümle, Top 4 ve silme
+  aynı sayfada; dördü de "hesabımı yönetiyorum" eylemi ve aralarında gezinmek
+  iki alan doldurmak için üç sayfa açmak demekti. Adı olmayan hesapta başka
+  hiçbir şey gösterilmiyor.
+- ⚠️ **Yinelenen kayıt hata DÖNMÜYOR** ve doğru olan bu: Better Auth
+  e-posta sızdırmasını engellemek için sahte başarı dönüyor. Ölçüldü —
+  veritabanında tek satır kalıyor, gerçek kullanıcının verisi değişmiyor,
+  dönen nesne saldırganın kendi girdisi, saldırganın şifresiyle giriş
+  çalışmıyor. Bedeli: giriş ekranı "bu adres kayıtlı" diyemiyor; karşılığı
+  aynı ekrandaki "zaten hesabım var" bağlantısı.
+- ⚠️ **Hesap silmede sert gezinme şart.** Silme sunucuda bitmişti ama
+  tarayıcı `/settings`te kalıyordu: çerez gitmiş, istemci yönlendiricisinin
+  önbelleği hâlâ giriş yapılmış hâli tutuyordu. `router.push` yerine
+  `window.location`.
+- ⚠️ **Paylaşım kartında imza `<svg>` DEĞİL, `<div>` daireler.** Satori
+  JSX'e gömülü svg ağacını çizmiyor. Çizim iki yerde ayrı, **tarif tek**
+  (`signatureOf`) — saf modülün baştan ayrılma sebebi buydu. İlk render'da
+  noktalar yarı boyuttaydı: `dot.r` yarıçap, `div`in `width`i çap.
+- ⚠️ **`auth` tembel tekil olmak zorunda.** `export const auth = betterAuth(…)`
+  modül yüklenirken veritabanı bağlantısı istiyordu ve bu dosyayı dolaylı
+  içeri alan her şeyi — 396 sayfanın üretimi dahil — `DATABASE_URL`e
+  bağımlı kılıyordu.
+- ⚠️ **Neon'da `neon_auth` şeması var** (Neon'un kendi kimlik ürünü), içinde
+  bizimkilerle aynı adlı tablolar. Bizimkiler `public`'te. Şema süzmeyen bir
+  sorgu ikisini birleştirip gösteriyor.
+- ⚠️ **Resend, doğrulanmış alan adı olmadan yalnızca hesap sahibinin kendi
+  adresine gönderiyor.** Yani alan adı alınana kadar canlıda sahipten başkası
+  kayıt olamaz — bu, alan adını estetik bir tercihten önkoşula çeviriyor.
+- **PGlite** (Postgres'in WASM sürümü) sınamalarda gerçek veritabanı olarak
+  kullanıldı: göç dosyası gerçekten koşuyor. Kimlik kodunu taklitle sınamak
+  sınamamakla aynı şey.
+
 ## Doğrulama
 
 - Kayıt ol → gir → kullanıcı adı seç → Top 4 seç → cümle yaz → profili paylaş
