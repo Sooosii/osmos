@@ -104,6 +104,9 @@ export const CURATED_D: readonly Perfume[] = [
       { noteId: 'amber-accord', tier: 'base', weight: 0.3 },
       { noteId: 'oud', tier: 'base', weight: 0.2 },
     ],
+    retailers: [
+      { name: 'The Spirit of Dubai', url: 'https://www.thespiritofdubai.com/dubaiajyal50ml' },
+    ],
   },
   {
     id: 'jovoy-les-jeux-sont-faits',

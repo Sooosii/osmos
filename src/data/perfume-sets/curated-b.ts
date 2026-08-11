@@ -61,6 +61,9 @@ export const CURATED_B: readonly Perfume[] = [
       { noteId: 'white-musk', tier: 'base', weight: 0.4 },
       { noteId: 'ambrette', tier: 'base', weight: 0.3 },
     ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/sel-vanille-by-maison-tahite' },
+    ],
   },
   {
     // `perfumer` YOK ve bu eksik veri değil, bir olgu: marka bu kokunun burnunu
@@ -85,6 +88,9 @@ export const CURATED_B: readonly Perfume[] = [
       { noteId: 'sugar', tier: 'base', weight: 0.4 },
       { noteId: 'white-musk', tier: 'base', weight: 0.5 },
       { noteId: 'sandalwood', tier: 'base', weight: 0.3 },
+    ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/vanille-abricot-by-comptoir-sud-pacifique' },
     ],
   },
   {
@@ -166,6 +172,9 @@ export const CURATED_B: readonly Perfume[] = [
       { noteId: 'tonka', tier: 'base', weight: 0.5 },
       { noteId: 'benzoin', tier: 'base', weight: 0.4 },
       { noteId: 'white-musk', tier: 'base', weight: 0.4 },
+    ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/summer-hammer-by-lorenzo-pazzaglia' },
     ],
   },
   {
