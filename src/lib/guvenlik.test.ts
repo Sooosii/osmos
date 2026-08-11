@@ -30,11 +30,16 @@ function read(path: string): string {
 describe('server action yetkileri', () => {
   const source = read('src/app/[lang]/actions.ts');
 
-  test('her eylem ilk isi olarak oturumu dogruluyor', () => {
+  test('her eylem ilk isi olarak yazma kapisindan geciyor', () => {
     /*
       ⚠️ Next'in kimlik kılavuzunun kuralı: Server Action'lar herkese açık
       uçlardır. "Düğme görünmüyor" bir koruma değil — istemci paketini okuyan
       biri eylemi doğrudan çağırabilir.
+
+      Denetim eskiden her eylemde ayrı ayrı `currentViewer()` çağrısıydı; hız
+      sınırı eklenince ikisi tek kapıda birleşti (`writeGate`). Sınama artık
+      kapının çağrıldığını arıyor — ve kapının kendisinin oturumu doğrulayıp
+      sınırı uyguladığını aşağıda ayrıca tutuyor.
     */
     const actions = source.match(/export async function (\w+)/g) ?? [];
     expect(actions.length).toBeGreaterThan(0);
@@ -43,9 +48,24 @@ describe('server action yetkileri', () => {
       const name = action.replace('export async function ', '');
       const body = source.slice(source.indexOf(action));
       const upToNext = body.slice(0, body.indexOf('\n}\n') + 1);
-      expect(upToNext, `${name}: currentViewer() çağrısı yok`).toContain('await currentViewer()');
-      expect(upToNext, `${name}: yetkisizlik reddedilmiyor`).toContain("error: 'unauthorized'");
+      expect(upToNext, `${name}: writeGate() çağrısı yok`).toContain('await writeGate()');
+      expect(upToNext, `${name}: kapı reddi geçirilmiyor`).toContain('if (!gate.ok) return gate');
     }
+  });
+
+  test('yazma kapisi hem oturumu hem hiz sinirini uyguluyor', () => {
+    /*
+      Yukarıdaki sınama artık tek bir fonksiyona güveniyor; o fonksiyonun ne
+      yaptığı burada tutuluyor. İkisinden biri kapıdan düşerse bütün eylemler
+      sessizce korumasız kalırdı.
+    */
+    const gate = source.slice(source.indexOf('async function writeGate'));
+    const body = gate.slice(0, gate.indexOf('\n}\n') + 1);
+
+    expect(body, 'kapı oturumu doğrulamıyor').toContain('await currentViewer()');
+    expect(body, 'kapı yetkisizliği reddetmiyor').toContain("error: 'unauthorized'");
+    expect(body, 'kapı hız sınırı uygulamıyor').toContain("allow('write'");
+    expect(body, 'kapı sınırı aşanı reddetmiyor').toContain("error: 'tooFast'");
   });
 
   test('hicbir eylem kullanici kimligini disaridan almiyor', () => {

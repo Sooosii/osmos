@@ -119,6 +119,8 @@ export const TR: Dict = {
         tooMany: 'Sınır dört.',
         duplicate: 'Bu zaten dörtlünde.',
         unknown: 'Böyle bir parfüm yok.',
+        /* Hız sınırı — koruma devreye girdiğinde. */
+        tooFast: 'Hızlı oldu. Bir an bekleyip tekrar dene.',
       },
     },
 
@@ -154,6 +156,7 @@ export const TR: Dict = {
       duplicate: 'Bu nota zaten içinde.',
       unknown: 'Böyle bir nota yok.',
       weight: 'Bu ağırlık aralığın dışında.',
+      tooFast: 'Hızlı oldu. Bir an bekleyip tekrar dene.',
       noName: 'Bir ad koy.',
       needsPatron: 'Ücretsiz sürüm üç notada duruyor.',
       tooManySaved: 'Saklayabileceğin kadarı bu.',

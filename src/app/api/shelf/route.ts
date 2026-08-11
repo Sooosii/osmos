@@ -1,4 +1,5 @@
 import { currentViewer, shelfOf } from '@/lib/dal';
+import { allow, clientIp, tooManyRequests } from '@/lib/rate-limit';
 
 /**
  * Okuyucunun **kendi** rafı.
@@ -24,7 +25,18 @@ import { currentViewer, shelfOf } from '@/lib/dal';
  *
  * Kök varlık: `proxy.ts`teki `ROOT_PREFIXES` (`/api/`) bunu kapsıyor.
  */
-export async function GET(): Promise<Response> {
+/*
+  Sınır IP başına ve cömert: uç her künye sayfasında ve uzayın açılışında
+  çağrılıyor, yani normal gezinmede dakikada birkaç kez. Durdurduğu şey
+  betikle atılan yüzlerce istek.
+*/
+const RATE_LIMIT = 60;
+const RATE_WINDOW = 60;
+
+export async function GET(request: Request): Promise<Response> {
+  const verdict = await allow('shelf', clientIp(request.headers), RATE_LIMIT, RATE_WINDOW);
+  if (!verdict.ok) return tooManyRequests(verdict);
+
   const viewer = await currentViewer();
   const entries = viewer ? await shelfOf(viewer.id) : [];
 

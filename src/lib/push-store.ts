@@ -1,4 +1,5 @@
 import { parseSubscription, type StoredSubscription } from './push-subscription';
+import { memoryAllowed, redisCommand, redisTarget, type RedisTarget } from './redis-rest';
 
 /**
  * Abone deposu — Upstash Redis'e SDK'sız REST.
@@ -24,51 +25,17 @@ import { parseSubscription, type StoredSubscription } from './push-subscription'
 const SUBS_KEY = 'push:subs';
 const ANNOUNCED_KEY = 'push:announced';
 
-interface RedisTarget {
-  readonly url: string;
-  readonly token: string;
-}
-
-/*
-  İki ad da okunuyor: Vercel'in Upstash entegrasyonu kurulum yaşına göre
-  `KV_REST_API_*` (eski Vercel KV adları) ya da `UPSTASH_REDIS_REST_*` basıyor.
-  Tek adı desteklemek, öbür adla kurulmuş panelde ölçümün sessizce ölmesi demek.
-*/
-function redisTarget(): RedisTarget | null {
-  const url = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return null;
-  return { url, token };
-}
-
-function memoryAllowed(): boolean {
-  return process.env.NODE_ENV !== 'production';
-}
-
 /** Uç bunu 503'e çevirir; depo yokken tarayıcıya yarım söz verilmez. */
 export function storeReady(): boolean {
   return redisTarget() !== null || memoryAllowed();
 }
 
-async function redis(target: RedisTarget, command: readonly string[]): Promise<unknown> {
-  const response = await fetch(target.url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${target.token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(command),
-    cache: 'no-store',
-  });
-  if (!response.ok) {
-    throw new Error(`Redis ${response.status}: ${command[0]}`);
-  }
-  const data = (await response.json()) as { result?: unknown; error?: string };
-  if (data.error) {
-    throw new Error(`Redis: ${data.error}`);
-  }
-  return data.result;
-}
+/*
+  Taşıma (`fetch` sarmalayıcısı, iki env adı, bellek izni) `redis-rest.ts`e
+  çıkarıldı: hız sınırı da aynı Redis'i kullanıyor ve iki kopya, bir gün
+  yalnız birinin düzeltilmesi demekti.
+*/
+const redis = redisCommand;
 
 const memorySubs = new Map<string, StoredSubscription>();
 const memoryAnnounced = new Set<string>();

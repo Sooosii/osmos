@@ -1,4 +1,5 @@
 import { parseEndpoint, parseSubscription } from '@/lib/push-subscription';
+import { allow, clientIp, tooManyRequests } from '@/lib/rate-limit';
 import { deleteSubscription, saveSubscription, storeReady } from '@/lib/push-store';
 
 /**
@@ -33,7 +34,17 @@ async function readJson(request: Request): Promise<Parsed> {
   }
 }
 
+/*
+  Abonelik kaydı seyrek bir eylem: kişi düğmeye bir kez basıyor. Sınır bu
+  yüzden dar — bir betiğin depoyu sahte kayıtla doldurmasını engelliyor.
+*/
+const RATE_LIMIT = 10;
+const RATE_WINDOW = 60;
+
 export async function POST(request: Request): Promise<Response> {
+  const verdict = await allow('push', clientIp(request.headers), RATE_LIMIT, RATE_WINDOW);
+  if (!verdict.ok) return tooManyRequests(verdict);
+
   if (!storeReady()) return new Response(null, { status: 503 });
 
   const parsed = await readJson(request);
@@ -52,6 +63,9 @@ export async function POST(request: Request): Promise<Response> {
 }
 
 export async function DELETE(request: Request): Promise<Response> {
+  const verdict = await allow('push', clientIp(request.headers), RATE_LIMIT, RATE_WINDOW);
+  if (!verdict.ok) return tooManyRequests(verdict);
+
   if (!storeReady()) return new Response(null, { status: 503 });
 
   const parsed = await readJson(request);

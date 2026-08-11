@@ -155,6 +155,8 @@ export const EN = {
         tooMany: 'Four is the limit.',
         duplicate: 'That one is already in your four.',
         unknown: 'No such perfume.',
+        /* Hız sınırı — koruma devreye girdiğinde. */
+        tooFast: 'That was quick. Give it a moment and try again.',
       },
     },
 
@@ -202,6 +204,7 @@ export const EN = {
       duplicate: 'That note is already in.',
       unknown: 'No such note.',
       weight: 'That weight is out of range.',
+      tooFast: 'That was quick. Give it a moment and try again.',
       noName: 'Give it a name.',
       needsPatron: 'Three notes is where the free version stops.',
       tooManySaved: 'That is as many as you can keep.',

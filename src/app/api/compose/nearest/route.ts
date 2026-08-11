@@ -1,4 +1,5 @@
 import { nearestToComposition } from '@/lib/composition';
+import { allow, clientIp, tooManyRequests } from '@/lib/rate-limit';
 import type { PerfumeNote } from '@/data/types';
 
 /**
@@ -20,7 +21,25 @@ import type { PerfumeNote } from '@/data/types';
 const MAX_BODY = 4096;
 const LIMIT = 5;
 
+/**
+ * ⚠️ **Sitenin en pahalı ucu ve tek girişsiz yazma-benzeri yükü.**
+ *
+ * Her istek benzerlik motorunu 52 parfüm üzerinde çalıştırıyor: 52 profil
+ * vektörü kurup 52 kosinüs hesaplıyor. Ucuz görünüyor ama saniyede yüzlerce
+ * istekle çarpılınca hem site yavaşlıyor hem fatura şişiyor — ve buraya
+ * girişsiz herkes erişebiliyor.
+ *
+ * Sınır IP başına, çünkü kimlik yok. Cömert tutuldu: kurma aracı yazarken
+ * her tuşta değil, geciktirilerek istek atıyor; gerçek bir kullanıcı dakikada
+ * 40'a yaklaşmaz.
+ */
+const RATE_LIMIT = 40;
+const RATE_WINDOW = 60;
+
 export async function POST(request: Request): Promise<Response> {
+  const verdict = await allow('nearest', clientIp(request.headers), RATE_LIMIT, RATE_WINDOW);
+  if (!verdict.ok) return tooManyRequests(verdict);
+
   const text = await request.text();
   if (text.length > MAX_BODY) return new Response(null, { status: 413 });
 

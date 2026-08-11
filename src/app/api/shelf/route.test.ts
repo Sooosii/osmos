@@ -17,6 +17,10 @@ vi.mock('@/lib/dal', () => ({
 
 const { GET } = await import('@/app/api/shelf/route');
 
+/** Uç artık isteği okuyor (hız sınırı için IP); sınamalarda boş bir istek yeter. */
+const req = (ip = '10.0.0.1') =>
+  new Request('https://osmos.me/api/shelf', { headers: { 'x-real-ip': ip } });
+
 beforeEach(() => {
   viewer.current = null;
   shelf.rows = [];
@@ -29,7 +33,7 @@ describe('GET /api/shelf', () => {
       401 dönseydi her ziyarette konsol kırmızı yanar, gerçek arıza o
       gürültünün içinde kaybolurdu.
     */
-    const response = await GET();
+    const response = await GET(req());
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ entries: [] });
   });
@@ -38,7 +42,7 @@ describe('GET /api/shelf', () => {
     viewer.current = { id: 'u1' };
     shelf.rows = [{ perfumeId: 'a', kind: 'owned' }];
 
-    expect(await (await GET()).json()).toEqual({ entries: [{ perfumeId: 'a', kind: 'owned' }] });
+    expect(await (await GET(req())).json()).toEqual({ entries: [{ perfumeId: 'a', kind: 'owned' }] });
   });
 
   test('cevap paylasimli onbellege GIRMIYOR', async () => {
@@ -46,7 +50,7 @@ describe('GET /api/shelf', () => {
       ⚠️ Kişiye özel veri. Ara bir vekil bu cevabı tutsaydı birinin rafını
       başkasına servis ederdi — sessiz ve gerçek bir sızıntı.
     */
-    const header = (await GET()).headers.get('cache-control') ?? '';
+    const header = (await GET(req())).headers.get('cache-control') ?? '';
     expect(header).toContain('no-store');
     expect(header).toContain('private');
   });

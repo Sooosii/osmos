@@ -1,7 +1,8 @@
 'use server';
 
 import { getDb } from '@/db';
-import { currentViewer } from '@/lib/dal';
+import { currentViewer, type Viewer } from '@/lib/dal';
+import { allow } from '@/lib/rate-limit';
 import { isShelfKind, type ShelfKind } from '@/lib/shelf';
 import {
   appendToTopFour,
@@ -41,13 +42,45 @@ import {
  * gerekir — geneli değil.
  */
 
-type Result = { ok: true } | { ok: false; error: SaveError | 'unauthorized' };
+/**
+ * Yazma kapısı — oturum **ve** hız sınırı, tek yerde.
+ *
+ * ⚠️ Her eylem bunu çağırıyor. Denetimi eylem eylem tekrarlamak, bir gün
+ * birinde unutulması demekti; buradaki tek satır bunu imkânsız kılıyor ve
+ * `guvenlik.test.ts` her eylemin ilk işinin bu olduğunu tutuyor.
+ *
+ * Kimlik **kullanıcı kimliği**, IP değil: giriş yapmış birinin ne kadar
+ * yazabileceğini sınırlıyoruz ve aynı evden giren iki kişi birbirini
+ * kilitlememeli. Girişsizin buraya zaten erişimi yok.
+ *
+ * Sınır cömert (dakikada 30): gerçek bir kullanıcı Top 4'ünü düzenlerken ya
+ * da raf işaretlerken bunu görmez. Durdurduğu şey saniyede yüzlerce yazan
+ * bir betik.
+ */
+const WRITE_LIMIT = 30;
+const WRITE_WINDOW = 60;
 
-export async function chooseUsernameAction(raw: string): Promise<Result> {
+async function writeGate(): Promise<
+  { ok: true; viewer: Viewer } | { ok: false; error: 'unauthorized' | 'tooFast' }
+> {
   const viewer = await currentViewer();
   if (!viewer) return { ok: false, error: 'unauthorized' };
 
-  const result = await claimUsername(getDb(), viewer.id, raw);
+  const verdict = await allow('write', viewer.id, WRITE_LIMIT, WRITE_WINDOW);
+  if (!verdict.ok) return { ok: false, error: 'tooFast' };
+
+  return { ok: true, viewer };
+}
+
+type Gate = 'unauthorized' | 'tooFast';
+
+type Result = { ok: true } | { ok: false; error: SaveError | Gate };
+
+export async function chooseUsernameAction(raw: string): Promise<Result> {
+  const gate = await writeGate();
+  if (!gate.ok) return gate;
+
+  const result = await claimUsername(getDb(), gate.viewer.id, raw);
   if (!result.ok) return result;
 
   return { ok: true };
@@ -58,10 +91,10 @@ export async function saveProfileAction(input: {
   hidden?: boolean;
   emailOptIn?: boolean;
 }): Promise<Result> {
-  const viewer = await currentViewer();
-  if (!viewer) return { ok: false, error: 'unauthorized' };
+  const gate = await writeGate();
+  if (!gate.ok) return gate;
 
-  const result = await saveProfile(getDb(), viewer.id, input);
+  const result = await saveProfile(getDb(), gate.viewer.id, input);
   if (!result.ok) return result;
 
   return { ok: true };
@@ -69,13 +102,13 @@ export async function saveProfileAction(input: {
 
 type TopResult =
   | { ok: true; ids: readonly string[] }
-  | { ok: false; error: 'tooMany' | 'duplicate' | 'unknown' | 'unauthorized' };
+  | { ok: false; error: 'tooMany' | 'duplicate' | 'unknown' | Gate };
 
 export async function setSlotAction(slot: number, perfumeId: string | null): Promise<TopResult> {
-  const viewer = await currentViewer();
-  if (!viewer) return { ok: false, error: 'unauthorized' };
+  const gate = await writeGate();
+  if (!gate.ok) return gate;
 
-  return writeSlot(getDb(), viewer.id, slot, perfumeId);
+  return writeSlot(getDb(), gate.viewer.id, slot, perfumeId);
 }
 
 /**
@@ -89,17 +122,17 @@ export async function saveCompositionAction(input: {
   name: string;
   notes: readonly { noteId: string; tier: 'top' | 'heart' | 'base'; weight: number }[];
 }): Promise<{ ok: true; slug: string } | { ok: false; error: string }> {
-  const viewer = await currentViewer();
-  if (!viewer) return { ok: false, error: 'unauthorized' };
+  const gate = await writeGate();
+  if (!gate.ok) return gate;
 
-  return saveComposition(getDb(), viewer.id, input);
+  return saveComposition(getDb(), gate.viewer.id, input);
 }
 
 export async function deleteCompositionAction(slug: string): Promise<Result> {
-  const viewer = await currentViewer();
-  if (!viewer) return { ok: false, error: 'unauthorized' };
+  const gate = await writeGate();
+  if (!gate.ok) return gate;
 
-  await deleteComposition(getDb(), viewer.id, slug);
+  await deleteComposition(getDb(), gate.viewer.id, slug);
   return { ok: true };
 }
 
@@ -113,18 +146,18 @@ export async function deleteCompositionAction(slug: string): Promise<Result> {
 export async function setShelfAction(
   perfumeId: string,
   kind: ShelfKind | null,
-): Promise<{ ok: true } | { ok: false; error: ShelfError | 'unauthorized' }> {
-  const viewer = await currentViewer();
-  if (!viewer) return { ok: false, error: 'unauthorized' };
+): Promise<{ ok: true } | { ok: false; error: ShelfError | Gate }> {
+  const gate = await writeGate();
+  if (!gate.ok) return gate;
   if (kind !== null && !isShelfKind(kind)) return { ok: false, error: 'unknownKind' };
 
-  return setShelf(getDb(), viewer.id, perfumeId, kind);
+  return setShelf(getDb(), gate.viewer.id, perfumeId, kind);
 }
 
 /** Parfüm sayfasındaki düğmenin yolu. */
 export async function addToTopFourAction(perfumeId: string): Promise<TopResult> {
-  const viewer = await currentViewer();
-  if (!viewer) return { ok: false, error: 'unauthorized' };
+  const gate = await writeGate();
+  if (!gate.ok) return gate;
 
-  return appendToTopFour(getDb(), viewer.id, perfumeId);
+  return appendToTopFour(getDb(), gate.viewer.id, perfumeId);
 }
