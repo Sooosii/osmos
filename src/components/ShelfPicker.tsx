@@ -82,7 +82,13 @@ export function ShelfPicker({ perfumeId }: { readonly perfumeId: string }) {
   }
 
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+    /*
+      ⚠️ `-my-2` + düğmelerdeki `py-3` bir dokunma hedefi düzeltmesi.
+      Ölçüldü (2026-08-11): satır tipografisi 20 piksel yüksekliğinde bir
+      isabet alanı bırakıyor, Apple 44 / Android 48 istiyor. Görünüm aynı
+      kalıyor; büyüyen yalnızca parmağın vurabileceği alan.
+    */
+    <div className="-my-2 mt-2 flex flex-wrap items-center gap-x-4">
       {SHELF_KINDS.map((option) => {
         const active = option === kind;
         const label = t.shelf.kinds[option];
@@ -100,7 +106,7 @@ export function ShelfPicker({ perfumeId }: { readonly perfumeId: string }) {
               ayrılsaydı fark renk körlüğünde ve düşük kontrastlı ekranda
               kaybolurdu; `aria-pressed` de ekran okuyucu için eşlikçisi.
             */
-            className={`text-sm font-light transition-colors disabled:opacity-50 ${
+            className={`py-3 text-sm font-light transition-colors disabled:opacity-50 ${
               active
                 ? 'text-white underline decoration-white/30 underline-offset-4'
                 : 'text-white/35 hover:text-white/70'

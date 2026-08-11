@@ -97,9 +97,19 @@ export default async function ShelfPage({
                   {t.shelf.headings[kind]}
                   <span className="tabular-nums text-[10px] text-white/25">{cards.length}</span>
                 </h2>
-                <ul className="space-y-2">
+                {/*
+                  ⚠️ Satırın TAMAMI tıklanabilir (`before:absolute
+                  before:inset-0`) ve `py-3` ile hedef 44 piksele çıkıyor.
+                  Ölçüldü: tıklanabilir olan yalnızca isimdi ve 18 piksel
+                  yüksekliğindeydi — parmakla ıskalanıyordu. Gerekçenin tamamı
+                  `PerfumeMiniCard`ta.
+                */}
+                <ul className="-my-2">
                   {cards.map((card) => (
-                    <li key={card.id} className="flex items-center gap-3 text-sm font-light">
+                    <li
+                      key={card.id}
+                      className="relative flex items-center gap-3 py-3 text-sm font-light"
+                    >
                       {/* Renk = koku ailesi; sitenin her yerinde aynı kod. */}
                       <span
                         aria-hidden="true"
@@ -108,7 +118,7 @@ export default async function ShelfPage({
                       />
                       <Link
                         href={withLocale(locale, `/perfume/${card.id}`)}
-                        className="text-white/75 transition-colors hover:text-white"
+                        className="text-white/75 transition-colors before:absolute before:inset-0 before:content-[''] hover:text-white"
                       >
                         {card.name}
                       </Link>

@@ -31,9 +31,22 @@ export function PerfumeMiniCard({ card, locale, action }: PerfumeMiniCardProps) 
       <div className="p-4">
         <p className="text-[9px] tracking-[0.22em] text-white/40">{card.brand.toUpperCase()}</p>
         <p className="mt-1.5 text-sm font-light leading-tight text-white/90">
+          {/*
+            ⚠️ **Kartın TAMAMI tıklanabilir** — `before:absolute before:inset-0`
+            bağlantıyı kartın üstüne geriyor (kart `relative`).
+
+            Ölçüldü (2026-08-11, sahip telefonda bildirdi): tıklanabilir olan
+            yalnızca isim satırıydı ve 390 px'te **18 piksel** yüksekliğindeydi.
+            Apple'ın dokunma hedefi alt sınırı 44, Android'in 48 — yani parmakla
+            isabet ettirmek şans işiydi ve ıskalayan dokunuş sessizce hiçbir şey
+            yapıyordu. Şimdi hedef kartın kendisi, ~110 piksel.
+
+            İşaretleme bozulmuyor: bağlantı hâlâ adın etrafında, ekran okuyucu
+            aynı metni okuyor. Yalnızca isabet alanı büyüyor.
+          */}
           <Link
             href={withLocale(locale, `/perfume/${card.id}`)}
-            className="transition-colors hover:text-white"
+            className="transition-colors before:absolute before:inset-0 before:content-[''] hover:text-white"
           >
             {card.name}
           </Link>
@@ -56,7 +69,12 @@ export function PerfumeMiniCard({ card, locale, action }: PerfumeMiniCardProps) 
         </div>
       </div>
 
-      {action ? <div className="absolute right-2 top-3">{action}</div> : null}
+      {/*
+        `z-10`: gerilmiş bağlantı kartın tamamını kaplıyor, eylem düğmesi onun
+        ÜSTÜNDE kalmalı — yoksa ayarlardaki "çıkar" düğmesine basmak parfüm
+        sayfasını açardı.
+      */}
+      {action ? <div className="absolute right-2 top-3 z-10">{action}</div> : null}
     </div>
   );
 }

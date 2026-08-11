@@ -173,9 +173,19 @@ export default async function ProfilePage({
           */}
           {shelfTotal > 0 ? (
             <section className="mt-14">
+              {/*
+                ⚠️ `-my-3 py-3` — dokunma hedefi, süs değil.
+
+                Ölçüldü (2026-08-11, sahibin telefonundan bildirdiği hata):
+                satır 342 piksel genişti ama yalnızca **20 piksel** yüksekti.
+                Apple 44, Android 48 istiyor; parmakla ıskalanan dokunuş
+                sessizce hiçbir şey yapıyordu ve sahip "sayfa açılmadı" dedi.
+                Padding hedefi 44'e çıkarıyor, negatif margin görünümü
+                olduğu yerde tutuyor.
+              */}
               <Link
                 href={withLocale(locale, `/u/${profile.username}/shelf`)}
-                className="group flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm font-light text-white/45 transition-colors hover:text-white/80"
+                className="group -my-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 py-3 text-sm font-light text-white/45 transition-colors hover:text-white/80"
               >
                 <span className="text-xs tracking-[0.3em] text-white/50">{t.shelf.heading}</span>
                 {SHELF_KINDS.filter((kind) => profile.shelf[kind].length > 0).map((kind) => (
@@ -198,9 +208,10 @@ export default async function ProfilePage({
               sabit `mt-4` orada satırı kartlara yapıştırıyordu.
             */
             <section className={shelfTotal > 0 ? 'mt-4' : 'mt-14'}>
+              {/* Dokunma hedefi — gerekçe yukarıdaki raf satırında. */}
               <Link
                 href={withLocale(locale, `/u/${profile.username}/nose`)}
-                className="group flex items-baseline gap-4 text-sm font-light transition-colors"
+                className="group -my-3 flex items-baseline gap-4 py-3 text-sm font-light transition-colors"
               >
                 <span className="text-xs tracking-[0.3em] text-white/50 group-hover:text-white/80">
                   {t.nose.heading}

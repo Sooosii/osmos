@@ -122,7 +122,8 @@ export function NoseReadout({ report, t, locale }: NoseReadoutProps) {
       {outlier ? (
         <section className="mt-14">
           <h2 className="mb-4 text-xs tracking-[0.3em] text-white/50">{t.nose.sections.outlier}</h2>
-          <p className="flex items-center gap-3 text-sm font-light">
+          {/* Dokunma hedefi — gerekçe `PerfumeMiniCard`ta. */}
+          <p className="relative -my-2 flex items-center gap-3 py-3 text-sm font-light">
             <span
               aria-hidden="true"
               className="size-2 shrink-0 rounded-full"
@@ -130,7 +131,7 @@ export function NoseReadout({ report, t, locale }: NoseReadoutProps) {
             />
             <Link
               href={withLocale(locale, `/perfume/${outlier.id}`)}
-              className="text-white/75 transition-colors hover:text-white"
+              className="text-white/75 transition-colors before:absolute before:inset-0 before:content-[''] hover:text-white"
             >
               {outlier.name}
             </Link>
@@ -143,9 +144,12 @@ export function NoseReadout({ report, t, locale }: NoseReadoutProps) {
       {next.length > 0 ? (
         <section className="mt-14">
           <h2 className="mb-4 text-xs tracking-[0.3em] text-white/50">{t.nose.sections.next}</h2>
-          <ul className="space-y-2">
+          <ul className="-my-2">
             {next.map((card) => (
-              <li key={card.id} className="flex items-center gap-3 text-sm font-light">
+              <li
+                key={card.id}
+                className="relative flex items-center gap-3 py-3 text-sm font-light"
+              >
                 <span
                   aria-hidden="true"
                   className="size-2 shrink-0 rounded-full"
@@ -153,7 +157,7 @@ export function NoseReadout({ report, t, locale }: NoseReadoutProps) {
                 />
                 <Link
                   href={withLocale(locale, `/perfume/${card.id}`)}
-                  className="text-white/75 transition-colors hover:text-white"
+                  className="text-white/75 transition-colors before:absolute before:inset-0 before:content-[''] hover:text-white"
                 >
                   {card.name}
                 </Link>
