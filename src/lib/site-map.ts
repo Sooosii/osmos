@@ -33,6 +33,12 @@ export function sitemapEntries(): MetadataRoute.Sitemap {
     ...STATIC_PATHS,
     ...NOTES.map((note) => `/note/${note.id}`),
     ...PERFUMES.map((perfume) => `/perfume/${perfume.id}`),
+    /*
+      "Buna benzeyenler" sayfaları — parfüm başına bir tane, arama motorundan
+      gelen "X'e benzeyen parfümler" sorusunun kapısı. Künyenin kopyası
+      değiller: paylaşılan notaları yazıyorlar (gerekçe `similar.ts`te).
+    */
+    ...PERFUMES.map((perfume) => `/similar/${perfume.id}`),
   ];
 
   const now = new Date();

@@ -259,6 +259,17 @@ export const TR: Dict = {
     nextNote: 'Burnuna en yakın olanlar; henüz raflarında değiller.',
   },
 
+  similar: {
+    title: (name: string, brand: string) => `${name} — ${brand} benzerleri · OSMOS`,
+    description: (name: string, count: number) =>
+      `${name} parfümüne en yakın ${count} parfüm ve paylaştıkları notalar.`,
+    heading: (name: string) => `${name} benzerleri`,
+    lede: (count: number) => `En yakın ${count} parfüm, ve her birinin onunla paylaştığı.`,
+    sharedLabel: 'ortak',
+    noShared: 'adı ortak nota yok — benzerlik ailede ve karakterde',
+    open: 'benzer parfümler',
+    back: (name: string) => `${name} sayfasına dön`,
+  },
   perfume: {
     title: (name, brand) => `${name} — ${brand} · OSMOS`,
     fallbackDescription: (name, brand) => `${name}, ${brand}.`,

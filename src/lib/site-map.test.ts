@@ -12,8 +12,23 @@ const SABIT_SAYFA = 2;
 
 describe('sitemapEntries', () => {
   test('her sayfa iki dilde bir kez listeleniyor', () => {
-    const beklenen = (SABIT_SAYFA + NOTES.length + PERFUMES.length) * 2;
+    /* Parfüm başına IKI sayfa: künye ve "buna benzeyenler". */
+    const beklenen = (SABIT_SAYFA + NOTES.length + PERFUMES.length * 2) * 2;
     expect(sitemapEntries()).toHaveLength(beklenen);
+  });
+
+  test('her parfumun benzerler sayfasi da listede', () => {
+    /*
+      Bu sayfalar sitemap'e girmezse var olma sebepleri kalkıyor: tamamı
+      arama motorundan gelecek ziyaretçi için yazıldı.
+    */
+    const urls = sitemapEntries().map((entry) => entry.url);
+    for (const perfume of PERFUMES) {
+      expect(
+        urls.some((url) => url.endsWith(`/similar/${perfume.id}`)),
+        perfume.id,
+      ).toBe(true);
+    }
   });
 
   test('dogrulama ekranlari sitemapte yok', () => {

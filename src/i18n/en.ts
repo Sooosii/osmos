@@ -335,6 +335,25 @@ export const EN = {
     nextNote: 'Closest to your nose, and not on your shelves yet.',
   },
 
+  /**
+   * "Buna benzeyenler" — kendi adresi olan liste.
+   *
+   * ⚠️ Sayfanın var olma sebebi künyedeki komşu bölümü DEĞİL: orada beş
+   * komşu dönen bir takımyıldızda duruyor ama neden benzedikleri hiç
+   * yazmıyor. Buradaki yeni bilgi paylaşılan notalar.
+   */
+  similar: {
+    title: (name: string, brand: string) => `Perfumes similar to ${name} by ${brand} · OSMOS`,
+    description: (name: string, count: number) =>
+      `The ${count} perfumes closest to ${name}, and the notes they share.`,
+    heading: (name: string) => `Similar to ${name}`,
+    lede: (count: number) => `The ${count} closest, and what each one shares with it.`,
+    sharedLabel: 'shares',
+    /* Ortak notası olmayan komşu listeden düşmüyor; gerekçe `similar.ts`te. */
+    noShared: 'nothing in common by name — the likeness is in family and character',
+    open: 'similar perfumes',
+    back: (name: string) => `back to ${name}`,
+  },
   perfume: {
     title: (name: string, brand: string) => `${name} — ${brand} · OSMOS`,
     fallbackDescription: (name: string, brand: string) => `${name}, ${brand}.`,

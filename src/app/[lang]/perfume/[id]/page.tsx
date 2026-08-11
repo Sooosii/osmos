@@ -304,6 +304,22 @@ export default async function PerfumePage({
               {t.perfume.sections.neighbours}
             </h2>
             <Neighbors perfume={perfume} lang={lang} />
+
+            {/*
+              Kendi adresi olan uzun listeye kapı. Bağlantı olmadan o sayfalar
+              öksüz kalırdı: yalnızca sitemap'ten bulunurlar, okur hiç
+              görmezdi. Buradaki takımyıldız beş komşuyu gösteriyor ve neden
+              benzediklerini söylemiyor — orada sekiz komşu ve paylaşılan
+              notalar var.
+            */}
+            <p className="mt-8">
+              <Link
+                href={withLocale(locale, `/similar/${perfume.id}`)}
+                className="text-sm font-light text-white/50 transition-colors hover:text-white/80"
+              >
+                {t.similar.open} →
+              </Link>
+            </p>
           </section>
 
           <footer className="mt-24 space-y-5">
