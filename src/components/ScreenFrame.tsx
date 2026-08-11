@@ -92,8 +92,21 @@ export function ScreenFrame({ children, nav, readouts, status, tail }: ScreenFra
               {readouts.map((readout, index) => (
                 <div
                   key={readout.label}
-                  // Dar ekranda ikiden fazlası sığmıyor; kalanlar sırayla düşüyor.
-                  className={`flex items-baseline gap-1.5 ${index >= 2 ? 'hidden sm:flex' : ''}`}
+                  /*
+                    Ölçümler sırayla düşüyor: yer daraldıkça önce sonuncusu,
+                    sonra ikincisi gidiyor.
+
+                    ⚠️ İkinci eşik (`min-[420px]`) ÖLÇÜLEREK kondu (390 px,
+                    2026-08-11): bildirim düğmesi şeride girince küme genişledi
+                    ve **dil değiştirici ekranın dışında kaldı** (sağ kenarı
+                    408 px). Sayfa yatay kaymadığı için hata görünmüyordu —
+                    telefondaki ziyaretçi dili değiştiremiyordu, o kadar.
+                    Ölçümler ikincil veri; iki kontrol (bildirim ve dil) her
+                    zaman ekranda kalmalı, düşecek olan ölçümdür.
+                  */
+                  className={`flex items-baseline gap-1.5 ${
+                    index >= 2 ? 'hidden sm:flex' : index >= 1 ? 'hidden min-[420px]:flex' : ''
+                  }`}
                 >
                   <dt className="text-white/50">{readout.label}</dt>
                   <dd className="tabular-nums text-white/55">{readout.value}</dd>

@@ -229,11 +229,18 @@ export default async function PerfumePage({
                 {perfume.retailers.map((retailer, index) => (
                   <span key={retailer.name}>
                     {index > 0 ? ' · ' : ''}
+                    {/*
+                      ⚠️ `whitespace-nowrap`: satır birden çok satıcı taşıdığında
+                      telefonda sarıyor ve ok, adından kopup alt satıra tek
+                      başına düşüyordu (390 px'te ölçüldü). Ad ile oku aynı
+                      parçada tutuyor; satır yine sarıyor, ama satıcı adları
+                      bütün kalıyor.
+                    */}
                     <a
                       href={retailer.url}
                       target="_blank"
                       rel="sponsored nofollow noopener"
-                      className="transition-colors hover:text-white/80"
+                      className="whitespace-nowrap transition-colors hover:text-white/80"
                     >
                       {retailer.name} ↗
                     </a>
