@@ -105,6 +105,9 @@ export const CURATED_E: readonly Perfume[] = [
       { noteId: 'amber-accord', tier: 'base', weight: 0.4 },
       { noteId: 'white-musk', tier: 'base', weight: 0.3 },
     ],
+    retailers: [
+      { name: 'Memo Paris', url: 'https://us.memoparis.com/products/argentina-eau-de-parfum' },
+    ],
   },
   {
     // Küratör: "incir kokularının baş tacı, mükemmel bir incir kokusu, tonka ile
@@ -131,6 +134,9 @@ export const CURATED_E: readonly Perfume[] = [
       { noteId: 'sandalwood', tier: 'base', weight: 0.5 },
       { noteId: 'white-musk', tier: 'base', weight: 0.4 },
       { noteId: 'cedar', tier: 'base', weight: 0.3 },
+    ],
+    retailers: [
+      { name: 'Floraiku', url: 'https://us.floraiku.com/products/ao-eau-de-parfum' },
     ],
   },
   {
