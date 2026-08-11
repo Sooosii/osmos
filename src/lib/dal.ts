@@ -3,8 +3,10 @@ import 'server-only';
 import { cache } from 'react';
 import { headers } from 'next/headers';
 import { eq } from 'drizzle-orm';
+import type { PerfumeNote } from '@/data/types';
 import { getDb, schema } from '@/db';
 import { getAuth, authReady } from './auth';
+import { listCompositions } from './profile-store';
 import { cleanTopFour } from './top-four';
 
 /**
@@ -43,6 +45,9 @@ export interface PublicProfile {
   readonly username: string;
   readonly bio: string | null;
   readonly topFour: readonly string[];
+  /** Süslemeleri açan bayrak; ücretli üyelik. */
+  readonly patron: boolean;
+  readonly compositions: readonly { readonly slug: string; readonly name: string }[];
 }
 
 /**
@@ -111,6 +116,7 @@ export const publicProfile = cache(async (username: string): Promise<PublicProfi
       username: schema.user.username,
       bio: schema.user.bio,
       hidden: schema.user.hidden,
+      patron: schema.user.patron,
     })
     .from(schema.user)
     .where(eq(schema.user.username, username))
@@ -119,9 +125,61 @@ export const publicProfile = cache(async (username: string): Promise<PublicProfi
   const found = rows[0];
   if (!found?.username || found.hidden) return null;
 
+  const compositions = await listCompositions(getDb(), found.id);
+
   return {
     username: found.username,
     bio: found.bio,
+    patron: found.patron,
     topFour: await topFourOf(found.id),
+    /* Listede yalnızca ad ve adres; notalar kompozisyonun kendi sayfasında. */
+    compositions: compositions.map((entry) => ({ slug: entry.slug, name: entry.name })),
   };
 });
+
+/**
+ * Tek bir kompozisyon — sahibinin adı ve slug'ıyla.
+ *
+ * ⚠️ **Gizli profilin kompozisyonu da yok.** Profil sayfası gibi bu da `null`
+ * dönüyor: gizlemek profili saklamak değil, kişinin var olduğunu söylememek.
+ * Kompozisyon adresi açık kalsaydı gizli bir profilin varlığı oradan sızardı.
+ */
+export const publicComposition = cache(
+  async (
+    username: string,
+    slug: string,
+  ): Promise<{
+    readonly username: string;
+    readonly patron: boolean;
+    readonly name: string;
+    readonly notes: readonly PerfumeNote[];
+  } | null> => {
+    if (!authReady()) return null;
+
+    const rows = await getDb()
+      .select({
+        id: schema.user.id,
+        username: schema.user.username,
+        hidden: schema.user.hidden,
+        patron: schema.user.patron,
+      })
+      .from(schema.user)
+      .where(eq(schema.user.username, username))
+      .limit(1);
+
+    const owner = rows[0];
+    if (!owner?.username || owner.hidden) return null;
+
+    const found = (await listCompositions(getDb(), owner.id)).find(
+      (entry) => entry.slug === slug,
+    );
+    if (!found) return null;
+
+    return {
+      username: owner.username,
+      patron: owner.patron,
+      name: found.name,
+      notes: found.notes,
+    };
+  },
+);

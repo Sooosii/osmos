@@ -86,6 +86,17 @@ export default async function ProfilePage({
               <h1 className="text-3xl font-light leading-tight tracking-tight sm:text-4xl">
                 {profile.username}
               </h1>
+              {/*
+                Patron rozeti — çerçevenin mikro-tipografisinde, sönük.
+                Bağırmıyor: ücretli üyelik bir statü işareti değil, bir
+                destek işareti; büyük bir rozet burayı reklam panosuna
+                çevirirdi.
+              */}
+              {profile.patron ? (
+                <p className="mt-2 text-[9px] tracking-[0.24em] text-white/35">
+                  {t.studio.patronMark}
+                </p>
+              ) : null}
               {profile.bio ? (
                 <p className="mt-3 max-w-md text-sm font-light leading-relaxed text-white/60">
                   {profile.bio}
@@ -119,6 +130,31 @@ export default async function ProfilePage({
               </div>
             )}
           </section>
+
+          {/*
+            Kompozisyonlar — kişinin kendi kurdukları.
+
+            Boşken bölüm HİÇ çizilmiyor: profilin çoğunda bu liste boş olacak
+            ve boş bir başlık "burada bir eksik var" der. Kendi profiline
+            bakan kişi davetini zaten kurma aracında görüyor.
+          */}
+          {profile.compositions.length > 0 ? (
+            <section className="mt-16">
+              <h2 className="mb-5 text-xs tracking-[0.3em] text-white/50">{t.studio.mine}</h2>
+              <ul className="space-y-2">
+                {profile.compositions.map((entry) => (
+                  <li key={entry.slug}>
+                    <Link
+                      href={withLocale(locale, `/u/${profile.username}/k/${entry.slug}`)}
+                      className="text-sm font-light text-white/70 transition-colors hover:text-white"
+                    >
+                      {entry.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
           <footer className="mt-24">
             <Link

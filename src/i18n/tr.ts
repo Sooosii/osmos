@@ -160,6 +160,7 @@ export const TR: Dict = {
       unauthorized: 'Önce giriş yap.',
     },
     mine: 'KOMPOZISYONLAR',
+    patronMark: 'PATRON',
   },
 
   notFound: {

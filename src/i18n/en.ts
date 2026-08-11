@@ -209,6 +209,8 @@ export const EN = {
     },
     /** Profildeki bölüm. */
     mine: 'COMPOSITIONS',
+    /** Sönük rozet — statü değil, destek işareti. */
+    patronMark: 'PATRON',
   },
 
   /** Haritada olmayan bir adrese gidildiğinde. */
