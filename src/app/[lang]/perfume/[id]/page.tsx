@@ -9,7 +9,7 @@ import { PerfumeNotes } from '@/components/PerfumeNotes';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
 import { getDict, localeFor, say } from '@/i18n/dict';
 import { LOCALES, withLocale } from '@/i18n/locale';
-import { languageAlternates } from '@/lib/site-url';
+import { pageAlternates } from '@/lib/site-url';
 
 /**
  * Parfüm sayfası — yol haritasının ①, ②, ③ ve ④'ü. Tamamı.
@@ -83,7 +83,7 @@ export async function generateMetadata({
     description: perfume.line
       ? say(perfume.line, locale)
       : t.perfume.fallbackDescription(perfume.name, perfume.brand),
-    alternates: { languages: languageAlternates(`/perfume/${id}`) },
+    alternates: pageAlternates(`/perfume/${id}`),
   };
 }
 

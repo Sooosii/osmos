@@ -56,3 +56,23 @@ export function languageAlternates(path: string): Record<Locale, string> {
     LOCALES.map((locale) => [locale, absolute(withLocale(locale, path))]),
   ) as Record<Locale, string>;
 }
+
+/**
+ * Sayfaların ortak `alternates` bloğu: hreflang + RSS otokeşfi.
+ *
+ * ⚠️ Otokeşif bağlantısı düzene (`[lang]/layout.tsx`) KONULAMAZ: Next
+ * metadata'yı anahtar düzeyinde birleştiriyor ve altı sayfanın altısı da
+ * kendi `alternates`ını tanımlıyor — çocuğun bloğu ebeveyninkini komple
+ * eziyor, düzendeki `types` hiçbir sayfada görünmüyordu. Tek kaynak bu
+ * yardımcı; sayfalar `languages`ı tek başına kurmaya dönerse besleme
+ * bağlantısı o sayfadan sessizce düşer.
+ */
+export function pageAlternates(path: string): {
+  readonly languages: Record<Locale, string>;
+  readonly types: Readonly<Record<string, string>>;
+} {
+  return {
+    languages: languageAlternates(path),
+    types: { 'application/rss+xml': '/feed.xml' },
+  };
+}

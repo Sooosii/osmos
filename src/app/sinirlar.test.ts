@@ -153,6 +153,9 @@ describe('kok varliklari', () => {
       '/apple-icon',
       '/manifest.webmanifest',
       '/icon-512',
+      '/feed.xml',
+      '/sw.js',
+      '/api/push',
     ]) {
       expect(source, path).toContain(`'${path}'`);
     }

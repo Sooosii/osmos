@@ -52,6 +52,15 @@ const ROOT_ASSETS: ReadonlySet<string> = new Set([
   */
   '/manifest.webmanifest',
   '/icon-512',
+  /*
+    Duyuru kanalları (2026-08-11): besleme derlemede üretilen statik XML,
+    `sw.js` public'te duran service worker, `api/push` abone kaydının ucu.
+    Üçü de dil bilmez; öneklenirlerse besleme ve çalışan sessizce 404 döner,
+    abone kaydı ise hiç ulaşılamaz hâle gelir.
+  */
+  '/feed.xml',
+  '/sw.js',
+  '/api/push',
 ]);
 
 export function proxy(request: NextRequest) {
