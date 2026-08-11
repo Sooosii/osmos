@@ -41,6 +41,10 @@ export const CURATED_D: readonly Perfume[] = [
       { noteId: 'cedar', tier: 'base', weight: 0.4 },
       { noteId: 'white-musk', tier: 'base', weight: 0.3 },
     ],
+    retailers: [
+      { name: 'Maison Crivelli', url: 'https://maisoncrivelli.us/products/oud-maracuja' },
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/oud-maracuja-by-maison-crivelli' },
+    ],
   },
   {
     // Referans noktası: listedeki "saf oud" bu. Diğer iki oudun ne kadar

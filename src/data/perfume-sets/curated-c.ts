@@ -108,6 +108,10 @@ export const CURATED_C: readonly Perfume[] = [
       { noteId: 'white-musk', tier: 'base', weight: 0.5 },
       { noteId: 'cashmeran', tier: 'base', weight: 0.4 },
     ],
+    retailers: [
+      { name: 'Marc-Antoine Barrois', url: 'https://marcantoinebarrois.com/en-us/products/ganymede' },
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/product/822001/ganymede-by-marc-antoine-barrois' },
+    ],
   },
   {
     id: 'filippo-sorcinelli-lavs',
@@ -130,6 +134,9 @@ export const CURATED_C: readonly Perfume[] = [
       { noteId: 'benzoin', tier: 'base', weight: 0.5 },
       { noteId: 'styrax', tier: 'base', weight: 0.4 },
       { noteId: 'papyrus', tier: 'base', weight: 0.4 },
+    ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/lavs-by-unum' },
     ],
   },
   {
@@ -158,6 +165,9 @@ export const CURATED_C: readonly Perfume[] = [
       { noteId: 'moss', tier: 'base', weight: 0.5 },
       { noteId: 'vetiver', tier: 'base', weight: 0.4 },
       { noteId: 'white-musk', tier: 'base', weight: 0.3 },
+    ],
+    retailers: [
+      { name: 'Nishane', url: 'https://nishane.com/product/ege-%CE%B1%CE%B9%CE%B3%CE%B1%CE%B9%CE%BF/' },
     ],
   },
   {

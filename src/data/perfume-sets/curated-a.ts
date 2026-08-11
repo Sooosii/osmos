@@ -79,6 +79,9 @@ export const CURATED_A: readonly Perfume[] = [
       { noteId: 'coconut', tier: 'heart', weight: 0.4 },
       { noteId: 'cedar', tier: 'base', weight: 0.7 },
     ],
+    retailers: [
+      { name: 'Diptyque', url: 'https://us.diptyqueparis.com/en-us/products/eau-de-toilette-philosykos-philo100v2' },
+    ],
   },
 
   // ——— Nasomatto çifti ———
