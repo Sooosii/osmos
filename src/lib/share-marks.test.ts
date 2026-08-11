@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
 import { PERFUMES } from '@/data/perfumes';
 import { NOTES, getNote } from '@/data/notes';
-import { getFamily } from '@/data/families';
+import { FAMILY_ORDER, getFamily } from '@/data/families';
 import { noteColor } from './note-marks';
-import { SHARE_DOT_LIMIT, noteDots, perfumeDots } from './share-marks';
+import { projectToSpace } from './similarity';
+import { SHARE_DOT_LIMIT, mapDots, noteDots, perfumeDots } from './share-marks';
 
 /**
  * Paylaşım kartının imza satırını besleyen modül.
@@ -77,5 +78,50 @@ describe('renk zinciri tek', () => {
     const perfume = PERFUMES[0];
     const enAgir = [...perfume.notes].sort((a, b) => b.weight - a.weight)[0];
     expect(perfumeDots(perfume)[0].weight).toBe(enAgir.weight);
+  });
+});
+
+describe('mapDots — paylasim kartindaki harita', () => {
+  const BOX = 560;
+  const dots = mapDots(PERFUMES, BOX);
+
+  test('her parfum icin bir nokta', () => {
+    expect(dots).toHaveLength(PERFUMES.length);
+  });
+
+  test('hicbir nokta kutunun disina tasmiyor', () => {
+    for (const dot of dots) {
+      expect(dot.x).toBeGreaterThanOrEqual(0);
+      expect(dot.y).toBeGreaterThanOrEqual(0);
+      expect(dot.x + dot.size).toBeLessThanOrEqual(BOX);
+      expect(dot.y + dot.size).toBeLessThanOrEqual(BOX);
+    }
+  });
+
+  test('IKI EKSEN AYNI CARPANLA — harita gerilmiyor', () => {
+    /*
+      ⚠️ Kararın kalbi. Eksenler ayrı ayrı normalize edilseydi harita gerilir
+      ve uzaklıklar yalan söylerdi; sitenin bütün iddiası uzaklık.
+
+      Ölçü: nokta bulutunun kartta kapladığı en/boy oranı, ham koordinatların
+      en/boy oranıyla aynı kalmalı.
+    */
+    const raw = projectToSpace(PERFUMES);
+    const rawW = Math.max(...raw.map((p) => p.x)) - Math.min(...raw.map((p) => p.x));
+    const rawH = Math.max(...raw.map((p) => p.y)) - Math.min(...raw.map((p) => p.y));
+
+    const cardW = Math.max(...dots.map((d) => d.x)) - Math.min(...dots.map((d) => d.x));
+    const cardH = Math.max(...dots.map((d) => d.y)) - Math.min(...dots.map((d) => d.y));
+
+    expect(cardW / cardH).toBeCloseTo(rawW / rawH, 5);
+  });
+
+  test('renk aile zincirinden geliyor, uydurulmuyor', () => {
+    const palette = new Set(FAMILY_ORDER.map((family) => getFamily(family).color));
+    for (const dot of dots) expect(palette.has(dot.color)).toBe(true);
+  });
+
+  test('kararli — ayni girdi ayni kart', () => {
+    expect(mapDots(PERFUMES, BOX)).toEqual(dots);
   });
 });

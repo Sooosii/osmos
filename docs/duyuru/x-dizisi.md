@@ -20,7 +20,7 @@ ilk 10 saniye burada da çalışır); yoksa `docs/preview/` altındaki üç kare
 > So I built a map. 52 perfumes, placed by what their notes share.
 > No photographs anywhere — everything is drawn from data.
 >
-> osmos-three.vercel.app
+> osmos.me
 
 **2/6** — görsel: uzay karesi
 
@@ -63,7 +63,7 @@ ilk 10 saniye burada da çalışır); yoksa `docs/preview/` altındaki üç kare
 > If you know perfume: tell me where the map gets the neighbours wrong.
 > That's the feedback I want.
 >
-> osmos-three.vercel.app
+> osmos.me
 
 ---
 
@@ -78,7 +78,7 @@ Dizi fazla gelirse (ya da dizi tutmazsa bir hafta sonra tekrar denemek için):
 > No photographs, no charting library, no signup. Each perfume's evolution
 > signature turns on its own.
 >
-> osmos-three.vercel.app
+> osmos.me
 
 ## Etiketler
 

@@ -3,7 +3,7 @@
 An attempt to make scent readable. 52 perfumes and 136 notes; there are no
 photographs anywhere — everything on screen is drawn from data.
 
-**[osmos-three.vercel.app](https://osmos-three.vercel.app)** — the site is live.
+**[osmos.me](https://osmos.me)** — the site is live.
 
 [![CI](https://github.com/Sooosii/osmos/actions/workflows/ci.yml/badge.svg)](https://github.com/Sooosii/osmos/actions/workflows/ci.yml)
 
@@ -50,7 +50,7 @@ route below exists in both.
 | `/signin`, `/settings`, `/privacy` | The optional account |
 
 New perfumes travel by two channels: an RSS feed at
-[`/feed.xml`](https://osmos-three.vercel.app/feed.xml), and a quiet NOTIFY
+[`/feed.xml`](https://osmos.me/feed.xml), and a quiet NOTIFY
 button in the frame that delivers a push notification when a perfume enters the
 map. The permission prompt opens only when the button is pressed — the site
 never asks on its own.
@@ -76,7 +76,7 @@ portrait drawn from three is not the same as one drawn from twenty.
 Signed in, the map knows you too: the perfumes you own wear a thin ring.
 
 Signing in sets one cookie, and that is the only cookie the site ever sets.
-Everything stored and how to delete it is on [`/privacy`](https://osmos-three.vercel.app/privacy).
+Everything stored and how to delete it is on [`/privacy`](https://osmos.me/privacy).
 
 ## The data
 

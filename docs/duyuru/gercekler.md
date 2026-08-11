@@ -77,9 +77,9 @@ Duyuruda bunları kendin söylemek, birinin bulup yazmasından her zaman iyi:
 
 ## Bağlantılar
 
-- Site: https://osmos-three.vercel.app
+- Site: https://osmos.me
 - Depo: https://github.com/Sooosii/osmos
-- Besleme: https://osmos-three.vercel.app/feed.xml
+- Besleme: https://osmos.me/feed.xml
 
 ## Yığın
 

@@ -1,7 +1,7 @@
 import type { Note, Perfume } from '@/data/types';
 import { getNote } from '@/data/notes';
 import { dominantFamily, getFamily } from '@/data/families';
-import { familyVector } from './similarity';
+import { familyVector, projectToSpace } from './similarity';
 import { noteColor } from './note-marks';
 
 /**
@@ -52,4 +52,64 @@ export function noteDots(note: Note, perfumes: readonly Perfume[]): readonly Sha
       color: getFamily(dominantFamily(familyVector(perfume))).color,
       weight: perfume.notes.find((entry) => entry.noteId === note.id)?.weight ?? 0.5,
     }));
+}
+
+/* ─────────────────────────  Haritanın kendisi  ───────────────────────── */
+
+export interface MapDot {
+  /** Kutunun sol/üst kenarına göre piksel — Satori mutlak konum istiyor. */
+  readonly x: number;
+  readonly y: number;
+  readonly size: number;
+  readonly color: string;
+  readonly opacity: number;
+}
+
+/** Kartta noktanın en küçük ve en büyük çapı (px). */
+const DOT_MIN = 5;
+const DOT_RANGE = 7;
+
+/** Derinlikten gelen opaklık — uzaktakiler sönük, tıpkı sitede olduğu gibi. */
+const ALPHA_MIN = 0.45;
+const ALPHA_RANGE = 0.55;
+
+/**
+ * Koku Uzayı'nın kendisi, paylaşım kartına sığacak biçimde.
+ *
+ * Kart bugüne kadar düz siyah bir yazıydı ve sitenin bütün cazibesi olan
+ * haritayı hiç göstermiyordu — oysa Reddit'te, HN'de ve X'te tıklamayı
+ * belirleyen şey o önizleme.
+ *
+ * ⚠️ **İki eksen AYNI çarpanla ölçekleniyor.** `projectToSpace` bunu zaten
+ * kendi içinde yapıyor ve gerekçesi orada yazılı: ayrı ayrı normalize
+ * edilirse harita gerilir ve uzaklıklar yalan söyler. Kart dikdörtgen
+ * (1200×630) ama nokta bulutu kare kalmak zorunda; bu yüzden kutu **kare**
+ * veriliyor ve kartın düzeni ona göre kuruluyor, tersi değil.
+ *
+ * Tuval yok: Satori yalnız kutu, daire ve yazı biliyor. Nokta = yuvarlatılmış
+ * bir `div`; kompozisyon kartındaki çubuk kararının aynısı.
+ */
+export function mapDots(perfumes: readonly Perfume[], box: number): readonly MapDot[] {
+  const points = projectToSpace(perfumes);
+  const byId = new Map(perfumes.map((perfume) => [perfume.id, perfume]));
+
+  /* En büyük nokta kenardan taşmasın diye kenar payı. */
+  const pad = DOT_MIN + DOT_RANGE;
+  const span = box - pad * 2;
+
+  return points.map((point) => {
+    const perfume = byId.get(point.perfumeId);
+    const color = perfume
+      ? getFamily(dominantFamily(familyVector(perfume))).color
+      : '#ffffff';
+
+    return {
+      /* [-1, 1] → [0, span]; ikisi de aynı `span` ile, gerilme yok. */
+      x: pad + ((point.x + 1) / 2) * span,
+      y: pad + ((1 - point.y) / 2) * span,
+      size: DOT_MIN + point.depth * DOT_RANGE,
+      color,
+      opacity: ALPHA_MIN + point.depth * ALPHA_RANGE,
+    };
+  });
 }
