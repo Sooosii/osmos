@@ -128,7 +128,7 @@ All optional — the site runs with none of them set:
 | `DATABASE_URL` | Postgres for accounts (Neon). Without it the account pages are unreachable and the rest of the site is untouched. |
 | `BETTER_AUTH_SECRET` | Signs the session cookie. Changing it signs everyone out. |
 | `RESEND_API_KEY`, `MAIL_FROM` | Address confirmation and password reset. Without a key those messages print to the server console in development and signing up fails loudly in production — better than leaving someone waiting for a letter that never arrives. |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google sign-in. Email and password work without them. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXT_PUBLIC_GOOGLE_ENABLED` | Google sign-in. Email and password work without them. The third one is what makes the button appear — set all three together, or the button shows and fails. |
 
 Push *sending* needs its own secrets on the GitHub side (`VAPID_PUBLIC_KEY`,
 `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, plus the two store variables) — see

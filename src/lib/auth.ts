@@ -122,10 +122,23 @@ export function buildAuth(db: Parameters<typeof drizzleAdapter>[0]) {
         Bir sınama ikisini birlikte tutuyor.
       */
       additionalFields: {
+        /*
+          ⚠️ Üçü `input: false`: kayıt isteğinden ASLA doldurulamazlar. Açık
+          olsaydı biri kayıt olurken kendine hazır bir kullanıcı adı yazmayı
+          deneyebilirdi; ad seçimi kendi denetiminden geçmek zorunda.
+        */
         username: { type: 'string', required: false, input: false },
         bio: { type: 'string', required: false, input: false },
         hidden: { type: 'boolean', required: false, defaultValue: false, input: false },
-        emailOptIn: { type: 'boolean', required: false, defaultValue: false, input: false },
+        /*
+          ⚠️ Bu ise `input: true` ve gerekçesi ayrı: onay kutusu KAYIT
+          ekranında duruyor ve orada henüz oturum yok — kaydedilebilmesinin
+          tek yolu kayıt isteğiyle birlikte gelmesi. Kötüye kullanımı yok,
+          kişi yalnızca kendi tercihini yazıyor. Kutu bir süre ekranda durup
+          hiçbir şey yapmıyordu: yarım bir söz vermektense ya çalışmalı ya
+          kalkmalıydı.
+        */
+        emailOptIn: { type: 'boolean', required: false, defaultValue: false, input: true },
       },
       deleteUser: {
         /* Hesap silme kullanıcının kendi hakkı; şema cascade ile Top 4'ü de siliyor. */

@@ -15,4 +15,11 @@ import { createAuthClient } from 'better-auth/react';
  */
 export const authClient = createAuthClient();
 
-export const { useSession, signIn, signOut, signUp } = authClient;
+/**
+ * ⚠️ Şifre sıfırlamanın adı **`requestPasswordReset`** — `forgetPassword`
+ * DEĞİL. İkincisi kütüphanenin eski adı ve hâlâ birçok yazıda geçiyor;
+ * bu sürümde yok ve derleme kırılıyor. Uçların kendisi paketten okundu:
+ * `/request-password-reset` ve `/reset-password`.
+ */
+export const { useSession, signIn, signOut, signUp, requestPasswordReset, resetPassword } =
+  authClient;

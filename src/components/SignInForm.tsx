@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn, signUp } from '@/lib/auth-client';
+import { requestPasswordReset, signIn, signUp } from '@/lib/auth-client';
 import { useDict, useLocale } from '@/i18n/LocaleProvider';
 import { withLocale } from '@/i18n/locale';
 
@@ -23,7 +23,16 @@ import { withLocale } from '@/i18n/locale';
  * "zaten hesabım var" bağlantısı. O bağlantı olmazsa hesabını unutan kişi
  * hiç gelmeyecek bir mektubu bekler.
  */
-type Mode = 'signIn' | 'signUp';
+type Mode = 'signIn' | 'signUp' | 'forgot';
+
+/**
+ * Google düğmesi yalnızca **yapılandırılmışsa** çiziliyor.
+ *
+ * ⚠️ Anahtar yokken de çiziliyordu ve basan kişi hataya düşüyordu — çalışmayan
+ * bir düğme, hiç olmayan düğmeden kötü. Değer derlemede satıra gömülüyor, o
+ * yüzden tam adıyla yazılmak zorunda.
+ */
+const GOOGLE_READY = Boolean(process.env.NEXT_PUBLIC_GOOGLE_ENABLED);
 
 export function SignInForm() {
   const t = useDict();
@@ -45,15 +54,29 @@ export function SignInForm() {
     setNotice(null);
 
     try {
-      if (mode === 'signUp') {
-        const result = await signUp.email({ email, password, name: email.split('@')[0] ?? 'osmos' });
+      if (mode === 'forgot') {
+        await requestPasswordReset({ email, redirectTo: withLocale(locale, '/reset-password') });
+        /*
+          ⚠️ Cevap her zaman aynı ve bu bilinçli: "böyle bir hesap yok" demek,
+          bir adresin kayıtlı olup olmadığını herkese söyleyen bir sorgu
+          açardı. Kayıttaki sahte başarıyla aynı gerekçe.
+        */
+        setNotice(t.account.sentReset);
+      } else if (mode === 'signUp') {
+        const result = await signUp.email({
+          email,
+          password,
+          name: email.split('@')[0] ?? 'osmos',
+          /*
+            Onay kutusu kayıt isteğiyle birlikte gidiyor: bu ekranda henüz
+            oturum yok, kaydedilebilmesinin tek yolu bu (`auth.ts`te alan
+            `input: true`). Önceden yalnızca ekranda duruyor ve hiçbir şey
+            yapmıyordu.
+          */
+          emailOptIn: optIn,
+        } as Parameters<typeof signUp.email>[0]);
         if (result.error) setError(result.error.message ?? t.error.line);
         else setNotice(t.account.checkInbox);
-        /*
-          `optIn` şimdilik yalnızca ekranda: kayıt anında oturum yok, yani
-          profili güncelleyecek yetki de yok. Doğrulamadan sonra ayarlardan
-          açılıyor — Faz 3'ün e-posta listesi oradan besleniyor.
-        */
       } else {
         const result = await signIn.email({ email, password });
         if (result.error) setError(result.error.message ?? t.error.line);
@@ -71,17 +94,23 @@ export function SignInForm() {
 
   return (
     <div className="space-y-8">
-      <button
-        type="button"
-        onClick={() => signIn.social({ provider: 'google', callbackURL: withLocale(locale, '/settings') })}
-        className="w-full border border-white/20 py-3 text-[11px] tracking-[0.2em] text-white/70 transition-colors hover:border-white/40 hover:text-white"
-      >
-        {t.account.withGoogle}
-      </button>
+      {GOOGLE_READY ? (
+        <>
+          <button
+            type="button"
+            onClick={() =>
+              signIn.social({ provider: 'google', callbackURL: withLocale(locale, '/settings') })
+            }
+            className="w-full border border-white/20 py-3 text-[11px] tracking-[0.2em] text-white/70 transition-colors hover:border-white/40 hover:text-white"
+          >
+            {t.account.withGoogle}
+          </button>
 
-      <p className="text-center text-[10px] tracking-[0.18em] text-white/30">
-        {t.account.orEmail}
-      </p>
+          <p className="text-center text-[10px] tracking-[0.18em] text-white/30">
+            {t.account.orEmail}
+          </p>
+        </>
+      ) : null}
 
       <form onSubmit={submit} className="space-y-5">
         <label className="block">
@@ -96,18 +125,23 @@ export function SignInForm() {
           />
         </label>
 
-        <label className="block">
-          <span className="text-[10px] tracking-[0.18em] text-white/40">{t.account.password}</span>
-          <input
-            type="password"
-            required
-            minLength={8}
-            autoComplete={mode === 'signUp' ? 'new-password' : 'current-password'}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className={field}
-          />
-        </label>
+        {/* Unut kipinde şifre sorulmuyor: istenen tek şey adres. */}
+        {mode === 'forgot' ? null : (
+          <label className="block">
+            <span className="text-[10px] tracking-[0.18em] text-white/40">
+              {t.account.password}
+            </span>
+            <input
+              type="password"
+              required
+              minLength={8}
+              autoComplete={mode === 'signUp' ? 'new-password' : 'current-password'}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className={field}
+            />
+          </label>
+        )}
 
         {mode === 'signUp' ? (
           <label className="flex items-start gap-2.5 text-xs font-light text-white/50">
@@ -129,21 +163,60 @@ export function SignInForm() {
           disabled={busy}
           className="w-full border border-white/25 py-3 text-[11px] tracking-[0.2em] text-white/80 transition-colors hover:border-white/50 hover:text-white disabled:opacity-50"
         >
-          {mode === 'signUp' ? t.account.createAccount : t.account.signIn.toUpperCase()}
+          {mode === 'forgot'
+            ? t.account.sendReset
+            : mode === 'signUp'
+              ? t.account.createAccount
+              : t.account.signIn.toUpperCase()}
         </button>
       </form>
 
-      <button
-        type="button"
-        onClick={() => {
-          setMode(mode === 'signUp' ? 'signIn' : 'signUp');
-          setError(null);
-          setNotice(null);
-        }}
-        className="w-full text-center text-xs font-light text-white/40 transition-colors hover:text-white/70"
-      >
-        {mode === 'signUp' ? t.account.haveAccount : t.account.createAccount}
-      </button>
+      <div className="space-y-3">
+        <button
+          type="button"
+          onClick={() => {
+            setMode(mode === 'signUp' ? 'signIn' : 'signUp');
+            setError(null);
+            setNotice(null);
+          }}
+          className="w-full text-center text-xs font-light text-white/40 transition-colors hover:text-white/70"
+        >
+          {mode === 'signUp' ? t.account.haveAccount : t.account.createAccount}
+        </button>
+
+        {/*
+          ⚠️ Şifre sıfırlama yolu bir süre HİÇ YOKTU: arka uçta kuruluydu ama
+          onu tetikleyecek tek bir bağlantı yazılmamıştı, yani şifresini
+          unutan kişi hesabına bir daha giremiyordu. Kayıt ekranında sahte
+          başarı döndüğü için (e-posta sızdırmamak adına) hesabı olduğunu
+          unutan kişinin tek çıkışı da burası.
+        */}
+        {mode === 'forgot' ? (
+          <button
+            type="button"
+            onClick={() => {
+              setMode('signIn');
+              setNotice(null);
+              setError(null);
+            }}
+            className="w-full text-center text-xs font-light text-white/30 transition-colors hover:text-white/60"
+          >
+            {t.account.signIn}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setMode('forgot');
+              setNotice(null);
+              setError(null);
+            }}
+            className="w-full text-center text-xs font-light text-white/30 transition-colors hover:text-white/60"
+          >
+            {t.account.forgot}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

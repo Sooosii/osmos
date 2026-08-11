@@ -74,6 +74,22 @@ export const EN = {
     emailOptIn: 'Tell me when a new perfume enters the map',
     checkInbox: 'Check your inbox — there is a link waiting to confirm the address.',
 
+    /**
+     * Şifre sıfırlama.
+     *
+     * ⚠️ `sentReset` bilerek **belirsiz**: "böyle bir hesap yok" demek, bir
+     * adresin kayıtlı olup olmadığını herkese söyleyen bir sorgu açardı.
+     * Kayıt ekranındaki sahte başarıyla aynı gerekçe.
+     */
+    forgot: 'I forgot my password',
+    sendReset: 'Send a reset link',
+    sentReset: 'If that address has an account, a reset link is on its way.',
+    resetTitle: 'New password · OSMOS',
+    resetHeading: 'Choose a new password',
+    newPassword: 'New password',
+    resetDone: 'Done — you can sign in with the new password.',
+    resetBadLink: 'This link has expired or was already used. Ask for a new one.',
+
     username: {
       title: 'Choose a username · OSMOS',
       heading: 'Choose a username',

@@ -55,6 +55,15 @@ export const TR: Dict = {
     emailOptIn: 'Haritaya yeni parfüm girince haber ver',
     checkInbox: 'Gelen kutuna bak — adresi doğrulayacak bir bağlantı bekliyor.',
 
+    forgot: 'Şifremi unuttum',
+    sendReset: 'Sıfırlama bağlantısı gönder',
+    sentReset: 'O adresin hesabı varsa sıfırlama bağlantısı yola çıktı.',
+    resetTitle: 'Yeni şifre · OSMOS',
+    resetHeading: 'Yeni bir şifre seç',
+    newPassword: 'Yeni şifre',
+    resetDone: 'Oldu — yeni şifrenle giriş yapabilirsin.',
+    resetBadLink: 'Bu bağlantının süresi dolmuş ya da kullanılmış. Yenisini iste.',
+
     username: {
       title: 'Kullanıcı adı seç · OSMOS',
       heading: 'Kullanıcı adı seç',
