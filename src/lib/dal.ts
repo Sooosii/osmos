@@ -34,6 +34,8 @@ export interface Viewer {
   readonly bio: string | null;
   readonly hidden: boolean;
   readonly emailOptIn: boolean;
+  /** Ücretli üyelik; bugün elle çevriliyor, yarın webhook. */
+  readonly patron: boolean;
 }
 
 /** Başkasının profili — buradan e-posta ve oturum bilgisi ASLA çıkmıyor. */
@@ -63,6 +65,7 @@ export const currentViewer = cache(async (): Promise<Viewer | null> => {
     bio?: string | null;
     hidden?: boolean | null;
     emailOptIn?: boolean | null;
+    patron?: boolean | null;
   };
 
   return {
@@ -71,6 +74,7 @@ export const currentViewer = cache(async (): Promise<Viewer | null> => {
     bio: user.bio ?? null,
     hidden: user.hidden ?? false,
     emailOptIn: user.emailOptIn ?? false,
+    patron: user.patron ?? false,
   };
 });
 

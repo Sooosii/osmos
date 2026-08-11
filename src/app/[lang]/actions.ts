@@ -5,6 +5,8 @@ import { currentViewer } from '@/lib/dal';
 import {
   appendToTopFour,
   claimUsername,
+  deleteComposition,
+  saveComposition,
   saveProfile,
   writeSlot,
   type SaveError,
@@ -71,6 +73,31 @@ export async function setSlotAction(slot: number, perfumeId: string | null): Pro
   if (!viewer) return { ok: false, error: 'unauthorized' };
 
   return writeSlot(getDb(), viewer.id, slot, perfumeId);
+}
+
+/**
+ * Kompozisyonu kaydeder.
+ *
+ * ⚠️ Patron sınırı **burada değil, depoda** (`saveComposition`): kural veriye
+ * en yakın yerde duruyor ve oradaki sınama onu tutuyor. Bu katmanın işi
+ * yalnızca kimliği doğrulamak.
+ */
+export async function saveCompositionAction(input: {
+  name: string;
+  notes: readonly { noteId: string; tier: 'top' | 'heart' | 'base'; weight: number }[];
+}): Promise<{ ok: true; slug: string } | { ok: false; error: string }> {
+  const viewer = await currentViewer();
+  if (!viewer) return { ok: false, error: 'unauthorized' };
+
+  return saveComposition(getDb(), viewer.id, input);
+}
+
+export async function deleteCompositionAction(slug: string): Promise<Result> {
+  const viewer = await currentViewer();
+  if (!viewer) return { ok: false, error: 'unauthorized' };
+
+  await deleteComposition(getDb(), viewer.id, slug);
+  return { ok: true };
 }
 
 /** Parfüm sayfasındaki düğmenin yolu. */

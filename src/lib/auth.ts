@@ -139,6 +139,11 @@ export function buildAuth(db: Parameters<typeof drizzleAdapter>[0]) {
           kalkmalıydı.
         */
         emailOptIn: { type: 'boolean', required: false, defaultValue: false, input: true },
+        /*
+          ⚠️ `input: false` — ücretli üyelik istemciden ASLA açılamaz. Bugün
+          elle, yarın Lemon Squeezy webhook'uyla çevriliyor.
+        */
+        patron: { type: 'boolean', required: false, defaultValue: false, input: false },
       },
       deleteUser: {
         /* Hesap silme kullanıcının kendi hakkı; şema cascade ile Top 4'ü de siliyor. */

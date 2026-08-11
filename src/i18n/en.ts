@@ -174,6 +174,43 @@ export const EN = {
     },
   },
 
+  /**
+   * Kurma aracı — Patron'un asıl sebebi.
+   *
+   * Dil bilerek sakin: "sınırsız erişim", "hemen yükselt" yok. Araç kendini
+   * anlatıyor; davet yalnızca sınıra gelindiğinde ve tek cümlede.
+   */
+  studio: {
+    title: 'Compose · OSMOS',
+    heading: 'Compose your own',
+    lede: 'Choose notes, set how loud each one is, and watch the thing take shape. It is read with the same measure as the 52 on the map.',
+    notes: 'NOTES',
+    search: 'Search the 136 notes',
+    weight: 'How loud',
+    curve: 'HOW IT UNFOLDS',
+    nearest: 'CLOSEST ON THE MAP',
+    name: 'Name it',
+    save: 'Save it',
+    saved: 'Saved —',
+    signInToSave: 'Sign in to keep it',
+    limitReached: 'Twelve notes is the limit.',
+    /* Sınıra gelen kişiye tek cümle; bağırmadan. */
+    needsPatron: 'Three notes is where the free version stops. Patron opens the rest.',
+    errors: {
+      tooFew: 'At least two notes.',
+      tooMany: 'Twelve notes is the limit.',
+      duplicate: 'That note is already in.',
+      unknown: 'No such note.',
+      weight: 'That weight is out of range.',
+      noName: 'Give it a name.',
+      needsPatron: 'Three notes is where the free version stops.',
+      tooManySaved: 'That is as many as you can keep.',
+      unauthorized: 'Sign in first.',
+    },
+    /** Profildeki bölüm. */
+    mine: 'COMPOSITIONS',
+  },
+
   /** Haritada olmayan bir adrese gidildiğinde. */
   notFound: {
     mark: 'NOT ON THE MAP',
