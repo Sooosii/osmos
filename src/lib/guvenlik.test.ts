@@ -11,8 +11,20 @@ import { describe, expect, test } from 'vitest';
  * lint ve göz bunları yakalamıyor; sınama yakalıyor.
  */
 
+/**
+ * ⚠️ **Satır sonları normalize ediliyor ve bu şart.**
+ *
+ * Bu dosyadaki bazı sınamalar kaynağı satır satır ayrıştırıyor (`\n}\n` gibi
+ * sınırlar arıyor). Git, Windows'ta çalışma kopyasını CRLF ile yazıyor;
+ * ayrıştırma sessizce boş dönüyor ve sınama **ortama göre** sonuç veriyordu:
+ * CI'da (Linux, LF) yeşil, geliştirme makinesinde kırmızı.
+ *
+ * Bu, kırılmasından daha kötü bir durum: yeşil geçen bir güvenlik sınaması,
+ * hiç olmayan bir sınamadan daha tehlikeli çünkü güven veriyor. Ölçüldü ve
+ * master'a alındıktan hemen sonra yakalandı.
+ */
 function read(path: string): string {
-  return readFileSync(path, 'utf8');
+  return readFileSync(path, 'utf8').replaceAll('\r\n', '\n');
 }
 
 describe('server action yetkileri', () => {
