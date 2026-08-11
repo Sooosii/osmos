@@ -1,6 +1,6 @@
 # Gerçekler — bütün duyuru metinlerinin kaynağı
 
-⚠️ **Buradaki her sayı koddan sayıldı** (2026-08-11). Duyuruda bunların
+⚠️ **Buradaki her sayı koddan sayıldı** (yeniden sayım: 2026-08-12). Duyuruda bunların
 dışında bir rakam kullanma; "yüzlerce nota", "binlerce kombinasyon" gibi
 şişirmeler ilk yorumda çürütülür ve bütün gönderinin güvenilirliğini alır.
 Veri değişirse (parfüm eklenince) bu dosya yeniden sayılır.
@@ -14,8 +14,8 @@ Veri değişirse (parfüm eklenince) bu dosya yeniden sayılır.
 | Yıl aralığı | **1994–2025** |
 | Nota | **136** |
 | Parfüm başına ortalama nota | **9.4** |
-| Üretilen sayfa | **394** (iki dil dahil, hepsi statik) |
-| Sınama | **279** |
+| Üretilen sayfa | **396** (iki dil dahil; hesap sayfaları hariç hepsi statik) |
+| Sınama | **498** |
 | Koku ailesi | **15** |
 | Karakter ekseni | **4** (sıcaklık, doku, temizlik, yakınlık) |
 
@@ -28,17 +28,41 @@ Veri değişirse (parfüm eklenince) bu dosya yeniden sayılır.
 - **Hesap sunucuda kalıyor.** Benzerlik matrisi ve izdüşüm tarayıcıya hiç
   inmiyor; istemciye yalnızca sonuç gidiyor (ad, renk, konum, derinlik).
 - **İki dilli**, İngilizce kökte, Türkçe `/tr` altında.
-- **Statik site.** Tek sunucu parçası bildirim aboneliği kaydı.
-- **Üçüncü tarafa istek yok.** Tek sinyal kendi çerezsiz analitiği.
+- **Neredeyse tamamı statik.** 396 sayfa derlemede üretiliyor. İstek başına
+  çizilen tek şey kişiye ait olanlar: `/settings`, `/studio` ve `/u/...`.
+- **Tarayıcıdan üçüncü tarafa istek yok.** Tek sinyal sitenin kendi çerezsiz
+  analitiği; giriş, raf ve kompozisyon uçlarının hepsi aynı köken.
+- **Hesap isteğe bağlı.** Girişsiz gezinti hiçbir şey saklamıyor — çerez yok,
+  hesap yok, takip yok.
 - **Renk = koku ailesi**, sitenin her yerinde aynı; birkaç sayfa sonra
   kod okunur hâle geliyor.
+
+## Hesap açanın gördüğü (isteğe bağlı katman)
+
+Duyuruda öne çıkarılacak şey harita; bunlar "bir de şu var" satırı olarak
+kullanılabilir, başlık olarak değil.
+
+- **Top 4** — profilde dört parfüm ve onlardan türeyen bir imza çizimi.
+  Fotoğraf yok, profil resmi bile yok: kimlik işareti veriden doğuyor.
+- **Raflar** — sahibim / denedim / istiyorum.
+- **Burun raporu** — raflardan okunan portre: baskın aileler yüzdeyle, dört
+  eksendeki yer, koleksiyonun genişliği, aradaki yabancı, ve sıradaki beş
+  öneri. Aynı benzerlik motoru; kişinin parfümleri tek bir sentetik parfümde
+  birleştirilip 52'nin cetveliyle ölçülüyor.
+- **Kompozisyon aracı** — 136 notadan kendi parfümünü kur; site evrim
+  eğrisini çiziyor ve haritada en yakınları söylüyor. Üç notaya kadar
+  ücretsiz.
 
 ## Yöntem — "bu nasıl hesaplandı" sorusunun dürüst cevabı
 
 **Uzaydaki konum:** her parfüm üç kanaldan okunuyor — koku ailesi ağırlıkları,
 karakter (dört eksen) ve paylaşılan notalar. Üçünün birleşimi üzerinde kosinüs
-uzaklığı hesaplanıp **klasik MDS** ile iki boyuta indiriliyor. Nokta boyutu
-üçüncü bileşen (derinlik).
+uzaklığı hesaplanıp iki boyuta indiriliyor: önce klasik MDS, sonra **SMACOF**
+ile düzeltme. Nokta boyutu üçüncü bileşen (derinlik).
+
+⚠️ SMACOF adımı süs değil ve sorulursa anlatılacak iyi bir hikâye: klasik MDS
+tek başına yerel yapıyı eziyordu — gerçek uzaklığı 0.29 olan iki parfümü
+haritada 0.007'ye yapıştırıyordu (%3). Ölçüldü ve düzeltildi.
 
 **Evrim eğrisi:** her notanın iki sayısı var — tepe dakikası ve yarı ömür.
 Eğri `yükseliş × sönüm`: `(1 − e^(−t / (tepe/k))) × 0.5^(t / yarıömür)`.
