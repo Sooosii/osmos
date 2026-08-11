@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { LangSwitch } from './LangSwitch';
 import { NotifyControl } from './NotifyControl';
+import { SignInLink } from './SignInLink';
 
 /**
  * Ekran çerçevesi — sayfanın etrafına geçen ince HUD.
@@ -84,43 +85,58 @@ export function ScreenFrame({ children, nav, readouts, status, tail }: ScreenFra
           className="h-[3px] w-full text-white/40 opacity-30"
           style={DITHER}
         />
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-2.5 sm:px-10">
-          {nav}
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-2.5 sm:gap-4 sm:px-10">
+          {/*
+            Sayfa yolu (`nav`) **ezilebilir**, kontroller değil. 320 px'lik
+            eski telefonlarda üç kontrol + yol aynı satıra sığmıyordu ve
+            kesilen yine dil düğmesi oluyordu. Sıralama net: kaybolacaksa
+            önce ölçüm, sonra yolun harfleri — kontroller asla.
+          */}
+          <div className="min-w-0 shrink overflow-hidden">{nav}</div>
 
-          <div className="flex items-center gap-3 sm:gap-5">
-            <dl className="flex items-center gap-3 text-[9px] tracking-[0.18em] text-white/50 sm:gap-5">
-              {readouts.map((readout, index) => (
-                <div
-                  key={readout.label}
-                  /*
-                    Ölçümler sırayla düşüyor: yer daraldıkça önce sonuncusu,
-                    sonra ikincisi gidiyor.
+          {/*
+            ⚠️ **Bu yerleşim iki kez kırıldıktan sonra böyle yazıldı; eşik
+            ayarlamaya geri dönülmeyecek.**
 
-                    ⚠️ İkinci eşik (`min-[420px]`) ÖLÇÜLEREK kondu (390 px,
-                    2026-08-11): bildirim düğmesi şeride girince küme genişledi
-                    ve **dil değiştirici ekranın dışında kaldı** (sağ kenarı
-                    408 px). Sayfa yatay kaymadığı için hata görünmüyordu —
-                    telefondaki ziyaretçi dili değiştiremiyordu, o kadar.
-                    Ölçümler ikincil veri; iki kontrol (bildirim ve dil) her
-                    zaman ekranda kalmalı, düşecek olan ölçümdür.
-                  */
-                  className={`flex items-baseline gap-1.5 ${
-                    index >= 2 ? 'hidden sm:flex' : index >= 1 ? 'hidden min-[420px]:flex' : ''
-                  }`}
-                >
-                  <dt className="text-white/50">{readout.label}</dt>
-                  <dd className="tabular-nums text-white/55">{readout.value}</dd>
-                </div>
-              ))}
-            </dl>
+            Önce bildirim düğmesi, sonra giriş bağlantısı şeride girdi ve her
+            seferinde **dil değiştirici ekranın dışında kaldı** (390 px'te sağ
+            kenarı 408, sonra 375 ve 420 px'te yine). Sayfa yatay kaymadığı
+            için hiçbir belirti yoktu — telefondaki ziyaretçi yalnızca dili
+            değiştiremiyordu. İki kez de `min-[…]` eşiği ekleyerek düzeltildi
+            ve ikinci kontrol eklendiğinde yine kırıldı: eşik ayarı, her yeni
+            kontrolde tekrar ayar isteyen bir borç.
 
-            {/*
-              Meta kontroller ölçümlerin sağında: bildirim + dil. `ScreenFrame`
-              sunucu bileşeni ve öyle kalıyor: ikisi de kendi `'use client'`
-              sınırını taşıyor, sarmalayanı istemciye düşürmüyor. Bildirim
-              düğmesi desteksiz tarayıcıda ve anahtar yokken kendini hiç
-              çizmiyor — şerit bugünkü hâline düşüyor.
-            */}
+            Şimdi yapı kendi kendini düzeltiyor:
+              · kontroller `shrink-0` — asla ezilmiyor, asla taşmıyor
+              · ölçümler `min-w-0 overflow-hidden` ile kalan yeri alıyor;
+                sığmayan kırpılıyor, kimseyi itmiyor
+              · aradaki `flex-1` boşluk ikisini ayırıyor (`justify-between`
+                yerine, çünkü artık ortada esneyen bir alan var)
+
+            Yeni bir kontrol eklendiğinde hiçbir eşik güncellenmesi gerekmiyor.
+          */}
+          <dl className="flex min-w-0 flex-1 items-center justify-end gap-3 overflow-hidden text-[9px] tracking-[0.18em] text-white/50 sm:gap-5">
+            {readouts.map((readout, index) => (
+              <div
+                key={readout.label}
+                /* Dar ekranda sonuncusu bilerek düşüyor; gerisini kırpma halleder. */
+                className={`flex shrink-0 items-baseline gap-1.5 ${index >= 2 ? 'hidden sm:flex' : ''}`}
+              >
+                <dt className="text-white/50">{readout.label}</dt>
+                <dd className="tabular-nums text-white/55">{readout.value}</dd>
+              </div>
+            ))}
+          </dl>
+
+          {/*
+            Meta kontroller: giriş, bildirim, dil. `ScreenFrame` sunucu
+            bileşeni ve öyle kalıyor — üçü de kendi `'use client'` sınırını
+            taşıyor, sarmalayanı istemciye düşürmüyor. Bildirim düğmesi
+            desteksiz tarayıcıda ve anahtar yokken, giriş bağlantısı da oturum
+            çözülene kadar kendini hiç çizmiyor.
+          */}
+          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+            <SignInLink />
             <NotifyControl />
             <LangSwitch />
           </div>

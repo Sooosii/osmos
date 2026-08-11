@@ -5,6 +5,7 @@ import type { FeelTarget } from '@/lib/space-feel';
 import { useDict } from '@/i18n/LocaleProvider';
 import { LangSwitch } from '@/components/LangSwitch';
 import { NotifyControl } from '@/components/NotifyControl';
+import { SignInLink } from '@/components/SignInLink';
 import { SpaceFeelSliders } from './SpaceFeelSliders';
 
 /**
@@ -119,6 +120,7 @@ export function SpaceOverlays({
         ref={switchRef}
         className="pointer-events-auto absolute right-6 top-6 flex items-center gap-3 opacity-0 transition-opacity duration-700 sm:right-10 sm:top-10"
       >
+        <SignInLink />
         <NotifyControl />
         <LangSwitch />
       </div>
