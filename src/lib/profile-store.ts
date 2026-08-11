@@ -2,7 +2,10 @@ import 'server-only';
 
 import { and, eq, ne, sql } from 'drizzle-orm';
 import { schema } from '@/db';
-import { BIO_MAX } from '@/db/schema';
+import { BIO_MAX, COMPOSITION_NAME_MAX, FREE_COMPOSITION_NOTES } from '@/db/schema';
+import type { PerfumeNote } from '@/data/types';
+import { compositionError, type CompositionError } from './composition';
+import { uniqueSlug } from './composition-slug';
 import { MAX_TOP_FOUR, setSlot, topFourError } from './top-four';
 import { normalizeUsername, usernameError, type UsernameError } from './username';
 
@@ -162,4 +165,104 @@ export async function appendToTopFour(
 export async function countUsers(db: Db): Promise<number> {
   const rows = await db.select({ n: sql<number>`count(*)::int` }).from(schema.user);
   return rows[0]?.n ?? 0;
+}
+
+/* ─────────────────────────  Kompozisyonlar  ───────────────────────── */
+
+export interface StoredComposition {
+  readonly slug: string;
+  readonly name: string;
+  readonly notes: readonly PerfumeNote[];
+}
+
+export type ComposeError = CompositionError | 'needsPatron' | 'noName' | 'tooManySaved';
+
+/**
+ * Bir kişinin kaydedebileceği en fazla kompozisyon.
+ *
+ * Sınırsız bırakmak, tek bir hesabın veritabanını doldurmasına açık kapı
+ * bırakırdı; yirmi tane, gerçek bir kullanıcının isteyebileceğinden fazla.
+ */
+export const MAX_SAVED_COMPOSITIONS = 20;
+
+/** Kişinin kompozisyonları — yeniden eskiye, bozuk kayıt atlanmış. */
+export async function listCompositions(
+  db: Db,
+  userId: string,
+): Promise<readonly StoredComposition[]> {
+  const rows = await db
+    .select({
+      slug: schema.composition.slug,
+      name: schema.composition.name,
+      notes: schema.composition.notes,
+      createdAt: schema.composition.createdAt,
+    })
+    .from(schema.composition)
+    .where(eq(schema.composition.userId, userId));
+
+  return [...rows]
+    .sort((a: { createdAt: Date }, b: { createdAt: Date }) =>
+      b.createdAt.getTime() - a.createdAt.getTime(),
+    )
+    .map((row: { slug: string; name: string; notes: unknown }) => ({
+      slug: row.slug,
+      name: row.name,
+      notes: Array.isArray(row.notes) ? (row.notes as PerfumeNote[]) : [],
+    }))
+    /*
+      ⚠️ Okurken doğrulanıyor: veriden bir nota çıkarsa ya da eski bir kayıt
+      bozuksa o kompozisyon listeden düşüyor, sayfa çökmüyor.
+    */
+    .filter((entry: StoredComposition) => compositionError(entry.notes) === null);
+}
+
+/**
+ * Kompozisyonu kaydeder.
+ *
+ * ⚠️ **Patron sınırı BURADA uygulanıyor, ekranda değil.** Ekrandaki sayaç bir
+ * kolaylık; bu satır kapı. Server Action'lar herkese açık uçlardır ve bu
+ * depoda bir kez öğrenilmiş bir ders.
+ */
+export async function saveComposition(
+  db: Db,
+  userId: string,
+  input: { name: string; notes: readonly PerfumeNote[] },
+): Promise<{ ok: true; slug: string } | { ok: false; error: ComposeError }> {
+  const name = input.name.trim().replace(/\s+/g, ' ').slice(0, COMPOSITION_NAME_MAX);
+  if (name.length === 0) return { ok: false, error: 'noName' };
+
+  const invalid = compositionError(input.notes);
+  if (invalid) return { ok: false, error: invalid };
+
+  const owner = await db
+    .select({ patron: schema.user.patron })
+    .from(schema.user)
+    .where(eq(schema.user.id, userId))
+    .limit(1);
+
+  if (owner.length === 0) return { ok: false, error: 'noSuchUser' as ComposeError };
+  if (!owner[0].patron && input.notes.length > FREE_COMPOSITION_NOTES) {
+    return { ok: false, error: 'needsPatron' };
+  }
+
+  const existing = await listCompositions(db, userId);
+  if (existing.length >= MAX_SAVED_COMPOSITIONS) return { ok: false, error: 'tooManySaved' };
+
+  const slug = uniqueSlug(name, existing.map((entry) => entry.slug));
+
+  await db.insert(schema.composition).values({
+    id: `${userId}:${slug}`.slice(0, 190),
+    userId,
+    slug,
+    name,
+    notes: input.notes,
+  });
+
+  return { ok: true, slug };
+}
+
+export async function deleteComposition(db: Db, userId: string, slug: string): Promise<void> {
+  await db
+    .delete(schema.composition)
+    .where(and(eq(schema.composition.userId, userId), eq(schema.composition.slug, slug)));
 }

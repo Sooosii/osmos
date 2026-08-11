@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import { PERFUMES } from '@/data/perfumes';
 
@@ -36,13 +36,21 @@ beforeAll(async () => {
   client = new PGlite();
   db = drizzle(client, { schema });
 
-  const sql = readFileSync('drizzle/0000_young_hellion.sql', 'utf8');
-  for (const statement of sql.split('--> statement-breakpoint')) {
-    if (statement.trim()) await client.exec(statement.trim());
+  /*
+    ⚠️ Bütün göçler sırayla koşuyor, yalnız ilki değil: yeni bir göç dosyası
+    eklendiğinde sınama onu kendiliğinden alıyor. Tek dosya adı yazılsaydı
+    şema sınamada eskide kalır ve fark ancak üretimde görünürdü.
+  */
+  for (const file of readdirSync('drizzle').filter((f) => f.endsWith('.sql')).sort()) {
+    const sql = readFileSync(`drizzle/${file}`, 'utf8');
+    for (const statement of sql.split('--> statement-breakpoint')) {
+      if (statement.trim()) await client.exec(statement.trim());
+    }
   }
 }, 60000);
 
 beforeEach(async () => {
+  await client.query('delete from composition');
   await client.query('delete from top_four');
   await client.query('delete from "user"');
 });
@@ -190,5 +198,94 @@ describe('top four yazma', () => {
     await makeUser('u2', 'u2@osmos.test');
     await store.appendToTopFour(db, 'u1', a);
     expect((await store.appendToTopFour(db, 'u2', a)).ok).toBe(true);
+  });
+});
+
+describe('kompozisyonlar', () => {
+  const note = (id: string, weight = 0.6) => ({ noteId: id, tier: 'heart' as const, weight });
+  const three = [note('oud'), note('iris'), note('bergamot')];
+  const four = [...three, note('vanilla')];
+
+  test('patron olmayan uce kadar kaydedebiliyor', async () => {
+    await makeUser('u1', 'u1@osmos.test');
+    const result = await store.saveComposition(db, 'u1', { name: 'Gece Inciri', notes: three });
+    expect(result).toEqual({ ok: true, slug: 'gece-inciri' });
+  });
+
+  test('⚠️ PATRON OLMAYAN DORDUNCU NOTAYI SUNUCUDA DA GECEMIYOR', async () => {
+    /*
+      Bu sınama işin kilidi. Ekrandaki sayaç bir kolaylık; Server Action'lar
+      herkese açık uçlardır ve istemci kodunu okuyan biri doğrudan çağırabilir.
+      Kapı burada olmazsa ücretli katman hiç yok demektir.
+    */
+    await makeUser('u1', 'u1@osmos.test');
+    const result = await store.saveComposition(db, 'u1', { name: 'Kacak', notes: four });
+    expect(result).toEqual({ ok: false, error: 'needsPatron' });
+
+    const rows = await client.query(`select count(*)::int as n from composition`);
+    expect(rows.rows[0].n).toBe(0);
+  });
+
+  test('patron dorduncuyu gecebiliyor', async () => {
+    await makeUser('u1', 'u1@osmos.test');
+    await client.query(`update "user" set patron = true where id = 'u1'`);
+    expect((await store.saveComposition(db, 'u1', { name: 'Dort', notes: four })).ok).toBe(true);
+  });
+
+  test('adsiz kompozisyon kaydedilmiyor', async () => {
+    await makeUser('u1', 'u1@osmos.test');
+    expect((await store.saveComposition(db, 'u1', { name: '   ', notes: three })).error).toBe(
+      'noName',
+    );
+  });
+
+  test('gecersiz kompozisyon kaydedilmiyor', async () => {
+    await makeUser('u1', 'u1@osmos.test');
+    expect((await store.saveComposition(db, 'u1', { name: 'Tek', notes: [note('oud')] })).error)
+      .toBe('tooFew');
+    expect(
+      (await store.saveComposition(db, 'u1', { name: 'Yok', notes: [note('yok'), note('iris')] }))
+        .error,
+    ).toBe('unknown');
+  });
+
+  test('ayni ad ikinci kez cakismiyor', async () => {
+    await makeUser('u1', 'u1@osmos.test');
+    await store.saveComposition(db, 'u1', { name: 'Gece', notes: three });
+    const second = await store.saveComposition(db, 'u1', { name: 'Gece', notes: three });
+    expect(second).toEqual({ ok: true, slug: 'gece-2' });
+  });
+
+  test('listeleme yeniden eskiye, silme calisiyor', async () => {
+    await makeUser('u1', 'u1@osmos.test');
+    await store.saveComposition(db, 'u1', { name: 'Bir', notes: three });
+    await client.query(`update composition set created_at = now() - interval '1 hour'`);
+    await store.saveComposition(db, 'u1', { name: 'Iki', notes: three });
+
+    const list = await store.listCompositions(db, 'u1');
+    expect(list.map((c: { name: string }) => c.name)).toEqual(['Iki', 'Bir']);
+
+    await store.deleteComposition(db, 'u1', 'bir');
+    expect((await store.listCompositions(db, 'u1')).map((c: { slug: string }) => c.slug)).toEqual([
+      'iki',
+    ]);
+  });
+
+  test('bozuk kayit listede sayfayi cokertmiyor, atlanıyor', async () => {
+    /* Veriden bir nota çıkarsa eski kompozisyon sessizce düşüyor. */
+    await makeUser('u1', 'u1@osmos.test');
+    await client.query(
+      `insert into composition (id, user_id, slug, name, notes) values ($1,$2,$3,$4,$5)`,
+      ['bozuk', 'u1', 'bozuk', 'Bozuk', JSON.stringify([{ noteId: 'yok', tier: 'heart', weight: 1 }])],
+    );
+    expect(await store.listCompositions(db, 'u1')).toEqual([]);
+  });
+
+  test('hesap silinince kompozisyonlar da gidiyor', async () => {
+    await makeUser('u1', 'u1@osmos.test');
+    await store.saveComposition(db, 'u1', { name: 'Gece', notes: three });
+    await client.query(`delete from "user" where id = 'u1'`);
+    const rows = await client.query(`select count(*)::int as n from composition`);
+    expect(rows.rows[0].n).toBe(0);
   });
 });

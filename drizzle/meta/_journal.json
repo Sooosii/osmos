@@ -8,6 +8,13 @@
       "when": 1786447387011,
       "tag": "0000_young_hellion",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786458589619,
+      "tag": "0001_sloppy_callisto",
+      "breakpoints": true
     }
   ]
 }

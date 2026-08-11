@@ -1,4 +1,4 @@
-import { boolean, integer, pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core';
+import { boolean, integer, jsonb, pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core';
 
 /**
  * Veritabanı şeması — sitenin ilk kalıcı hafızası.
@@ -47,6 +47,16 @@ export const user = pgTable('user', {
   hidden: boolean('hidden').notNull().default(false),
   /** Yeni parfüm e-postası için isteğe bağlı onay; Faz 3'ün listesini besliyor. */
   emailOptIn: boolean('email_opt_in').notNull().default(false),
+  /**
+   * Ücretli üyelik.
+   *
+   * ⚠️ Bugün **elle** çevriliyor; ödeme altyapısı (Lemon Squeezy webhook'u)
+   * trafik gelince aynı bayrağa bağlanacak. Sahibin kararı: sıfır ziyaretçi
+   * için vergi ve webhook kurmak yerine önce ekranların görülmesi. Ekranlar
+   * iki durumda da aynı kodu okuyor, o gün değişen tek şey bayrağı kimin
+   * çevirdiği.
+   */
+  patron: boolean('patron').notNull().default(false),
 });
 
 export const session = pgTable('session', {
@@ -121,5 +131,47 @@ export const topFour = pgTable(
   ],
 );
 
+/**
+ * Kullanıcının kendi kompozisyonu — Patron'un asıl sebebi.
+ *
+ * ⚠️ `notes` **jsonb** ve bu bilinçli: nota listesi kompozisyonun *kendisi*,
+ * sorgulanacak bir ilişki değil. Ayrı tablo her okumada bir birleştirme ve
+ * sıra derdi getirirdi. Top 4'te sıra ayrı sütunda çünkü orada sıra bir
+ * **iddia** ("birinci parfümüm"); burada nota sırası kompozisyonun içi.
+ *
+ * ⚠️ Okurken her zaman `compositionError` ile doğrulanıyor: veriden bir nota
+ * çıkarsa ya da eski bir kayıt bozuksa sayfa çökmesin.
+ *
+ * `(userId, slug)` benzersiz — adres `/u/ad/k/slug`.
+ */
+export const composition = pgTable(
+  'composition',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    slug: text('slug').notNull(),
+    name: text('name').notNull(),
+    /** `PerfumeNote[]` — `{ noteId, tier, weight }`. */
+    notes: jsonb('notes').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [unique('composition_user_slug').on(table.userId, table.slug)],
+);
+
 /** Profildeki tek satırın sınırı — sütun `text`, kapı uygulamada. */
 export const BIO_MAX = 80;
+
+/** Kompozisyon adının sınırı. */
+export const COMPOSITION_NAME_MAX = 40;
+
+/**
+ * Patron olmayanın kurabileceği en fazla nota.
+ *
+ * ⚠️ Sahibin kararı: *"insan denemeden ödemiyor."* Üç nota gerçek bir eğri ve
+ * gerçek bir konum veriyor — yani kişi aracın ne yaptığını görüyor, kilitli
+ * bir kapıya bakmıyor. Sınır **sunucuda da** uygulanıyor; ekrandaki sayaç
+ * kolaylık, kapı değil.
+ */
+export const FREE_COMPOSITION_NOTES = 3;

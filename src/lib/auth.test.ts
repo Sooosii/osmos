@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 
 /**
@@ -35,11 +35,18 @@ beforeAll(async () => {
   client = new PGlite();
   const db = drizzle(client, { schema });
 
-  /* Göç dosyası aynen koşuyor — şema sınamada uydurulmuyor. */
-  const sql = readFileSync('drizzle/0000_young_hellion.sql', 'utf8');
-  for (const statement of sql.split('--> statement-breakpoint')) {
-    const trimmed = statement.trim();
-    if (trimmed) await client.exec(trimmed);
+  /*
+    Göç dosyaları aynen ve SIRAYLA koşuyor — şema sınamada uydurulmuyor.
+    ⚠️ Tek dosya adı yazılmıyor: yeni bir göç eklendiğinde sınama onu
+    kendiliğinden alsın, yoksa şema burada eskide kalır ve fark ancak
+    üretimde görünür.
+  */
+  for (const file of readdirSync('drizzle').filter((f) => f.endsWith('.sql')).sort()) {
+    const sql = readFileSync(`drizzle/${file}`, 'utf8');
+    for (const statement of sql.split('--> statement-breakpoint')) {
+      const trimmed = statement.trim();
+      if (trimmed) await client.exec(trimmed);
+    }
   }
 
   auth = buildAuth(db);

@@ -142,6 +142,13 @@ function stripComments(lines: readonly string[]): string[] {
  *   · `src/data/**`    — nota ve parfüm verisi iki dilli kalıyor
  *   · `src/i18n/tr.ts` — bekleyen Türkçe sözlüğün evi
  *   · `*.test.ts`      — sınamaların kendi başlıkları
+ *   · `src/lib/composition-slug.ts` — ⚠️ **tek dosyalık, dar bir istisna.**
+ *     İçinde Türkçe harfler var ama ekran metni olarak değil: adresi
+ *     üretebilmek için Türkçe harfleri latin karşılığına çeviren bir eşleme
+ *     tablosu (`ç → c`). Tablo tanım gereği o harflerden oluşuyor. Klasör
+ *     muafiyeti verilmedi — bu depoda `src/data/**` muafiyeti bir kez ekran
+ *     metnini (`BAND_LABEL`) görünmeden geçirmişti; istisna ne kadar darsa
+ *     o kadar iyi.
  *   · `throw new Error(...)` satırları — geliştirici metni, ekran metni değil;
  *     gerekçesi kod yorumlarının Türkçe kalmasıyla aynı
  *
@@ -200,7 +207,12 @@ test('ekrana cikabilecek Turkce dize kalmadi', () => {
 
   for (const file of files) {
     const path = unix(file);
-    if (path.startsWith('src/data/') || path === 'src/i18n/tr.ts' || path.endsWith('.test.ts')) {
+    if (
+      path.startsWith('src/data/') ||
+      path === 'src/i18n/tr.ts' ||
+      path === 'src/lib/composition-slug.ts' ||
+      path.endsWith('.test.ts')
+    ) {
       continue;
     }
 
