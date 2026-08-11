@@ -6,7 +6,8 @@ import { eq } from 'drizzle-orm';
 import type { PerfumeNote } from '@/data/types';
 import { getDb, schema } from '@/db';
 import { getAuth, authReady } from './auth';
-import { listCompositions } from './profile-store';
+import { listCompositions, readShelf } from './profile-store';
+import { groupShelf, type GroupedShelf, type ShelfEntry } from './shelf';
 import { cleanTopFour } from './top-four';
 
 /**
@@ -48,6 +49,15 @@ export interface PublicProfile {
   /** Süslemeleri açan bayrak; ücretli üyelik. */
   readonly patron: boolean;
   readonly compositions: readonly { readonly slug: string; readonly name: string }[];
+  /**
+   * Üç raf, kimlik listeleri hâlinde.
+   *
+   * Profil sayfası bundan yalnızca üç sayı okuyor ama tamamı geliyor ve bu
+   * bilinçli: raf en fazla katalog boyunda (52 satır) ve aynı çağrı raf
+   * sayfasını da burun raporunu da besliyor. Ayrı bir "sayı" sorgusu açmak
+   * üç sayfa için üç ayrı yol demek olurdu.
+   */
+  readonly shelf: GroupedShelf;
 }
 
 /**
@@ -101,6 +111,17 @@ export const topFourOf = cache(async (userId: string): Promise<readonly string[]
 });
 
 /**
+ * Bir kullanıcının rafları — ham kayıtlar, gruplanmamış.
+ *
+ * `cache` şart: profil sayfası bunu profil üzerinden, künye ucu doğrudan
+ * çağırıyor ve bir çizimde ikisi de olabilir.
+ */
+export const shelfOf = cache(async (userId: string): Promise<readonly ShelfEntry[]> => {
+  if (!authReady()) return [];
+  return readShelf(getDb(), userId);
+});
+
+/**
  * Herkese açık profil — yoksa ya da **gizliyse** `null`.
  *
  * ⚠️ Gizli profil "gizli" sayfası değil `null` dönüyor; sayfa onu 404'e
@@ -134,6 +155,7 @@ export const publicProfile = cache(async (username: string): Promise<PublicProfi
     topFour: await topFourOf(found.id),
     /* Listede yalnızca ad ve adres; notalar kompozisyonun kendi sayfasında. */
     compositions: compositions.map((entry) => ({ slug: entry.slug, name: entry.name })),
+    shelf: groupShelf(await shelfOf(found.id)),
   };
 });
 

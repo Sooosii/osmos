@@ -9,6 +9,7 @@ import { dictFor, getDict, localeFor } from '@/i18n/dict';
 import { withLocale } from '@/i18n/locale';
 import { currentViewer, publicProfile } from '@/lib/dal';
 import { cardsFor } from '@/lib/perfume-cards';
+import { SHELF_KINDS } from '@/lib/shelf';
 import { normalizeUsername } from '@/lib/username';
 
 /**
@@ -60,6 +61,7 @@ export default async function ProfilePage({
   const viewer = await currentViewer();
   const isOwn = viewer?.username === profile.username;
   const cards = cardsFor(profile.topFour);
+  const shelfTotal = SHELF_KINDS.reduce((sum, kind) => sum + profile.shelf[kind].length, 0);
 
   return (
     <main className="min-h-dvh bg-[#050507] text-white">
@@ -149,6 +151,32 @@ export default async function ProfilePage({
               </div>
             )}
           </section>
+
+          {/*
+            Raflar — profilde yalnızca üç sayı, tamamı kendi sayfasında.
+
+            Sahibin kararı ("çok da ağzına kadar değil"): profil sade kalıyor.
+            Boşken satır HİÇ çizilmiyor; profillerin çoğunda raf boş olacak ve
+            boş bir başlık "burada bir eksik var" der.
+          */}
+          {shelfTotal > 0 ? (
+            <section className="mt-14">
+              <Link
+                href={withLocale(locale, `/u/${profile.username}/shelf`)}
+                className="group flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm font-light text-white/45 transition-colors hover:text-white/80"
+              >
+                <span className="text-xs tracking-[0.3em] text-white/50">{t.shelf.heading}</span>
+                {SHELF_KINDS.filter((kind) => profile.shelf[kind].length > 0).map((kind) => (
+                  <span key={kind} className="tabular-nums">
+                    {t.shelf.counts[kind](profile.shelf[kind].length)}
+                  </span>
+                ))}
+                <span aria-hidden="true" className="text-white/25 group-hover:text-white/60">
+                  →
+                </span>
+              </Link>
+            </section>
+          ) : null}
 
           {/*
             Kompozisyonlar — kişinin kendi kurdukları.
