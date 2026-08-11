@@ -205,4 +205,25 @@ describe('posta', () => {
   test('sunucuya kilitli', () => {
     expect(mail.startsWith("import 'server-only';")).toBe(true);
   });
+
+  test('davet acikken deneme adresinden gonderim sessiz kalmiyor', () => {
+    /*
+      ⚠️ Tehlikeli bileşim: `NEXT_PUBLIC_ACCOUNTS_ENABLED` açık ama `MAIL_FROM`
+      kurulmamış. O zaman davet herkese görünür, mektup ise Resend'in
+      paylaşımlı deneme adresinden gider — kayıt olan yabancı kilitlenir
+      (mektup ya 403 ile hiç gitmez ya da spam'e düşer). Bayrağı açıp
+      değişkeni kurmayı unutmak mümkün ve tamamen sessiz.
+
+      Fırlatmıyor bilerek: bugün sahibin kendi adresine posta çalışıyor ve
+      onu kırmak düzeltmeye çalıştığımız şeyden kötü olurdu. Günlüğe yazıyor.
+    */
+    expect(mail).toMatch(/NEXT_PUBLIC_ACCOUNTS_ENABLED/);
+    expect(mail).toMatch(/console\.warn/);
+    expect(mail).toContain('docs/posta-teslimat.md');
+  });
+
+  test('cevap adresi bos gonderilmiyor', () => {
+    /* Olmayan bir adresi varmış gibi göstermek, zayıf bir işaretten kötü. */
+    expect(mail).toMatch(/REPLY_TO \? \{ reply_to: REPLY_TO \} : \{\}/);
+  });
 });
