@@ -1,8 +1,16 @@
 # Affiliate başvuruları — ne, nereye, hangi metinle
 
-**Durum (2026-08-12):** alan adı alındı (`osmos.me`), satıcı satırı 34/52
-parfümde çalışıyor ama **hiçbiri komisyon getirmiyor**. Bu belge o boşluğu
-kapatmak için.
+**Durum (2026-08-12, güncellendi):** alan adı alındı (`osmos.me`), satıcı
+satırı artık **52/52 parfümde** çalışıyor (59 bağlantı) ama **hiçbiri komisyon
+getirmiyor**. Bu belge o boşluğu kapatmak için.
+
+⚠️ O turda ölçülen ve buraya bakan iki şey:
+**FragranceX ve Notino robota kapalı değil** — gerçek tarayıcıda açılıyorlar,
+yani panel geldiğinde derin bağlantı üretmek kolay olacak. Ve 59 bağlantının
+gerçek bileşimi: **markanın kendi mağazası 29**, **Luckyscent 26**,
+**Scent Split (dekant) 4**. Yani komisyon ihtimali olan tek kalem henüz
+hiçbiri — Luckyscent'in programı yok, marka mağazalarının çoğunda da yok,
+Scent Split ölçülmedi.
 
 ## ⚠️ Önce düzeltme: Luckyscent'in programı YOK
 
