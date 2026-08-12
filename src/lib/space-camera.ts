@@ -168,7 +168,7 @@ export interface ScreenPoint {
 }
 
 /** Konumu ve derinliği olan her şey — `SpaceMark` bunu karşılıyor. */
-interface Placed {
+export interface Placed {
   readonly x: number;
   readonly y: number;
   readonly depth: number;
@@ -347,6 +347,102 @@ export function focusOn(camera: Camera, point: Placed): Camera {
  * Kenara bakınca üstüne basılan nokta kazanıyor; hiçbirinin içinde değilsen
  * kenarı en yakın olan.
  */
+/**
+ * Sığdırmanın kenar payı (CSS px).
+ *
+ * Dikeyde daha geniş: seçili noktanın etiketi noktanın ÜSTÜNDE duruyor ve
+ * kenara yapışmış bir nokta etiketini ekran dışına taşırdı.
+ */
+const FIT_PAD_X = 48;
+const FIT_PAD_Y = 72;
+
+/*
+ * ⚠️ Burada bir zamanlar `FIT_MIN_SCALE = 1` vardı: "durgun ölçekte bulutun
+ * tamamı zaten ekranda, daha da uzaklaşmanın anlamı yok". Varsayım MASAÜSTÜ
+ * için doğru, telefon için YANLIŞ — portrede `PORTRAIT_FILL` bulutu bilerek
+ * taşırıyor, yani ölçek 1'de bulutun tamamı zaten ekranda değil.
+ *
+ * Ölçüldü (52 parfüm, 390×844): taban 1'ken üç parfümün komşuları hâlâ
+ * kadraja sığmıyordu — üçünün de ihtiyacı 1'in altındaydı. Taban kaldırıldı,
+ * sınırı `MIN_SCALE` veriyor.
+ */
+
+/**
+ * Seçilen noktayı ve komşularını AYNI kareye sığdırır.
+ *
+ * Sahip gördü: bir parfüme basınca "sadece çizgi görünüyor, parfümler bazen
+ * görünmüyor". Ölçüldü ve doğru çıktı — `focusOn` ölçeği `max(scale, 2.4)`e
+ * çıkarıyor; 390×844 telefonda bu, merkezin iki yanında yalnızca ~0.32 dünya
+ * birimi demek, oysa üç komşunun tipik yarı yayılımı ~0.35. Yani bağlantı
+ * çizgileri ekrandan çıkan noktalara gidiyordu.
+ *
+ * ⚠️ `focusOn`dan iki farkı var, ikisi de bilinçli:
+ *
+ * · **Ölçek düşebiliyor.** `focusOn`un "kullanıcı elle yakınlaştıysa seçim onu
+ *   geri çekmiyor" kuralı TEK noktalık bir soruya aitti; buradaki soru üç
+ *   komşuyu da kapsıyor ve sığmayan bir kare, fazla yaklaşmış bir kareden
+ *   kötüdür.
+ *
+ * · **Ham koordinata değil, EKRANA ULAŞAN ofsete bakıyor.** `centerOn` kamerayı
+ *   SEÇILI noktanın parallax'ına bölüyor, `worldToScreen` ise her noktayı KENDI
+ *   parallax'ıyla çarpıyor; aradaki artık `PAN_LIMIT × PARALLAX_RANGE` ≈ 0.22
+ *   dünya birimine kadar çıkıyor — komşu mesafesiyle aynı büyüklükte. Ham farkla
+ *   hesaplasaydık bir komşuyu yine ekran dışında bırakabilirdik.
+ *
+ * Bozuk durumlar: komşu yoksa ya da hepsi çakışıksa `focusOn` gibi davranıyor.
+ */
+export function fitTo(
+  camera: Camera,
+  focus: Placed,
+  others: readonly Placed[],
+  viewport: Viewport,
+): Camera {
+  /* Kırpılmış kamera üzerinden ölçülüyor ki uçtaki nokta bile dürüst çıksın. */
+  const base = centerOn(camera, focus);
+
+  let maxX = 0;
+  let maxY = 0;
+  for (const point of [focus, ...others]) {
+    const parallax = parallaxOf(point.depth);
+    maxX = Math.max(maxX, Math.abs(point.x - base.x * parallax));
+    maxY = Math.max(maxY, Math.abs(point.y - base.y * parallax));
+  }
+
+  /*
+    Pay görüntü alanından DÜŞÜLÜYOR, `MARGIN` büyütülmüyor: `pixelsPerUnit`
+    haritanın durgun ölçeğini tanımlıyor ve onu oynatmak bütün sayfayı
+    değiştirirdi (beş sınama tam olarak onu tutuyor).
+  */
+  const usableX = Math.max(viewport.width - FIT_PAD_X * 2, 1) / 2;
+  const usableY = Math.max(viewport.height - FIT_PAD_Y * 2, 1) / 2;
+
+  const unit = Math.min(
+    maxX > 0 ? usableX / maxX : Infinity,
+    maxY > 0 ? usableY / maxY : Infinity,
+  );
+
+  /* `pixelsPerUnit(v, s) === pixelsPerUnit(v, 1) * s` — beşinci sınamanın sözü. */
+  const wanted = Number.isFinite(unit) ? unit / pixelsPerUnit(viewport, 1) : FOCUS_SCALE;
+
+  return { ...base, scale: clamp(wanted, MIN_SCALE, FOCUS_SCALE) };
+}
+
+/** `fitTo`nun `SpaceMark` kısayolu — komşuları kimliklerinden çözüyor. */
+export function fitToMarks(
+  camera: Camera,
+  mark: SpaceMark,
+  byId: ReadonlyMap<string, SpaceMark>,
+  viewport: Viewport,
+): Camera {
+  const neighbours: Placed[] = [];
+  for (const id of mark.neighborIds) {
+    const neighbour = byId.get(id);
+    if (neighbour) neighbours.push(neighbour);
+  }
+
+  return fitTo(camera, mark, neighbours, viewport);
+}
+
 export function hitTest(
   marks: readonly SpaceMark[],
   sx: number,

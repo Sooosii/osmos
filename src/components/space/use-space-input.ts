@@ -4,7 +4,7 @@ import {
   type Camera,
   type Viewport,
   TOUCH_HIT_PADDING,
-  focusOn,
+  fitToMarks,
   hitTest,
   panBy,
   zoomAt,
@@ -620,11 +620,19 @@ export function useSpaceInput({
     // `DragState.downHit`te.
     const mark = drag.downHit;
 
-    // Yeni bir parfüme basmak kamerayı ona getiriyor: seçmek "bunu merak
-    // ettim" demek, kameranın karşılığı yaklaşmak. Zaten seçili olana tekrar
-    // basınca kamera oynamıyor — kullanıcı o sırada tutmaya hazırlanıyor
-    // olabilir, ayağının altından harita kaymasın.
-    if (mark && mark.id !== selectedRef.current) moveTo(focusOn(cameraRef.current, mark));
+    /*
+      Yeni bir parfüme basmak kamerayı ona getiriyor: seçmek "bunu merak ettim"
+      demek, kameranın karşılığı yaklaşmak. Zaten seçili olana tekrar basınca
+      kamera oynamıyor — kullanıcı o sırada tutmaya hazırlanıyor olabilir,
+      ayağının altından harita kaymasın.
+
+      ⚠️ `focusOn` DEĞIL `fitToMarks`: yalnız seçileni ortalayıp 2.4'e
+      yakınlaşmak, komşuları kadrajın dışında bırakıyordu ve ekranda hiçbir yere
+      gitmeyen çizgiler kalıyordu (52 parfümün yarısından çoğunda, ölçüldü).
+    */
+    if (mark && mark.id !== selectedRef.current) {
+      moveTo(fitToMarks(cameraRef.current, mark, markById, viewportRef.current));
+    }
 
     // Bir noktaya basmak onu HER ZAMAN seçiyor; seçiliye tekrar basmak kapatmıyor.
     // Kapatma açıkken kalabalık bölgede şöyle oluyordu: kullanıcı yandaki noktayı

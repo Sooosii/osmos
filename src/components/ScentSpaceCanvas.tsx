@@ -9,6 +9,7 @@ import {
   type Camera,
   type Viewport,
   centerOn,
+  fitToMarks,
   worldToScreen,
   boundsOf,
 } from '@/lib/space-camera';
@@ -514,7 +515,14 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     // olurdu ve onu temizleyecek bir `pointermove` hiç gelmezdi: etiket, sonraki
     // bütün seçimlerde bu parfümü göstermeye devam ederdi.
     select(mark.id);
-    moveTo(centerOn(cameraRef.current, mark));
+
+    /*
+      ⚠️ Burada eskiden `centerOn` vardı, yani klavyeyle gelen kişi ne
+      yakınlaşma alıyordu ne de komşuları kadrajda görüyordu — o an ölçek
+      neyse oydu. Dokunma yoluyla aynı işlev kullanılıyor artık: iki yol da
+      aynı kareyi gösteriyor.
+    */
+    moveTo(fitToMarks(cameraRef.current, mark, markById, viewportRef.current));
   };
 
   return (
