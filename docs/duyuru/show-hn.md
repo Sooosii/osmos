@@ -52,7 +52,7 @@ cümlelerinle, kendi sıranla yaz. Kısa olsun — 5-8 cümle yeter.
 
 **Teknik, HN'in gerçekten ilgisini çekecek kısım:**
 - Hesap sunucuda: benzerlik matrisi tarayıcıya hiç inmiyor.
-- 396 sayfa statik üretiliyor.
+- 510 sayfa statik üretiliyor.
 - Elle ayarlanmış her sayı bir sınamayla tutuluyor (yörünge geometrisi,
   tram eşikleri, etiket yerleşimi) — tarayıcıda ayarlandılar, kayarsa
   sınama kırılıyor.

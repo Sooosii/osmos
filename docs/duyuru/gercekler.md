@@ -1,6 +1,6 @@
 # Gerçekler — bütün duyuru metinlerinin kaynağı
 
-⚠️ **Buradaki her sayı koddan sayıldı** (yeniden sayım: 2026-08-12). Duyuruda bunların
+⚠️ **Buradaki her sayı koddan sayıldı** (son yeniden sayım: 2026-08-12, Show HN sabahı). Duyuruda bunların
 dışında bir rakam kullanma; "yüzlerce nota", "binlerce kombinasyon" gibi
 şişirmeler ilk yorumda çürütülür ve bütün gönderinin güvenilirliğini alır.
 Veri değişirse (parfüm eklenince) bu dosya yeniden sayılır.
@@ -14,8 +14,8 @@ Veri değişirse (parfüm eklenince) bu dosya yeniden sayılır.
 | Yıl aralığı | **1994–2025** |
 | Nota | **136** |
 | Parfüm başına ortalama nota | **9.4** |
-| Üretilen sayfa | **396** (iki dil dahil; hesap sayfaları hariç hepsi statik) |
-| Sınama | **498** |
+| Üretilen sayfa | **510** (iki dil dahil; hesap sayfaları hariç hepsi statik) |
+| Sınama | **520** |
 | Koku ailesi | **15** |
 | Karakter ekseni | **4** (sıcaklık, doku, temizlik, yakınlık) |
 
@@ -28,10 +28,14 @@ Veri değişirse (parfüm eklenince) bu dosya yeniden sayılır.
 - **Hesap sunucuda kalıyor.** Benzerlik matrisi ve izdüşüm tarayıcıya hiç
   inmiyor; istemciye yalnızca sonuç gidiyor (ad, renk, konum, derinlik).
 - **İki dilli**, İngilizce kökte, Türkçe `/tr` altında.
-- **Neredeyse tamamı statik.** 396 sayfa derlemede üretiliyor. İstek başına
+- **Neredeyse tamamı statik.** 510 sayfa derlemede üretiliyor. İstek başına
   çizilen tek şey kişiye ait olanlar: `/settings`, `/studio` ve `/u/...`.
 - **Tarayıcıdan üçüncü tarafa istek yok.** Tek sinyal sitenin kendi çerezsiz
   analitiği; giriş, raf ve kompozisyon uçlarının hepsi aynı köken.
+- **Her parfümde "nerede bulunur" satırı var** — 52/52, 59 bağlantı; hepsi
+  tek tek açılıp ürünün adı görülerek yazıldı, arama sayfası yok. (Yalnız
+  biri ürüne değil markanın kataloğuna gidiyor: o koku hiçbir yerde
+  satılmıyor, gerekçesi kodda yazılı.)
 - **Hesap isteğe bağlı.** Girişsiz gezinti hiçbir şey saklamıyor — çerez yok,
   hesap yok, takip yok.
 - **Renk = koku ailesi**, sitenin her yerinde aynı; birkaç sayfa sonra
