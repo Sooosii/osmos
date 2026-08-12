@@ -261,6 +261,29 @@ export const EN = {
       proximity: { label: 'Proximity — airborne to skin-close', low: 'AIR', high: 'SKIN' },
       openDetail: 'Two more axes: texture and proximity',
       closeDetail: 'Close the texture and proximity axes',
+      /*
+        Yardım metni — sahibin isteği: "anlamayanlar için, hepsini tek tek".
+
+        Eksen ADLARI burada tekrarlanmıyor, yukarıdaki dört `label` kullanılıyor.
+        Tek bir eksene iki ad takmak kullanıcıya iki ayrı şey varmış gibi
+        geliyor; aynı gerekçe `SpaceFeelSliders.tsx`te KADIFE↔KESKIN için de
+        yazılı. Her gövde iki ucu GERÇEK notalarla örnekliyor: soyut bir tarif
+        ("dokunma hissi") tek başına kimseye bir şey söylemiyor, "misk kadifemsi,
+        karabiber keskin" söylüyor.
+      */
+      help: {
+        open: 'What do these four axes mean?',
+        close: 'Close the explanation',
+        heading: 'FOUR AXES',
+        temperature:
+          'Whether the scent stands warm or cool. Spice, resin and vanilla read warm; citrus, mint and sea air read cool.',
+        cleanliness:
+          'Soap or skin. Linen and white musk sit on the clean side; oud, cumin and leather on the dirty one.',
+        texture:
+          'How the scent feels to the touch. Musk and iris are velvety; aldehydes and pepper are sharp.',
+        proximity:
+          'Where the scent stands. Citrus and marine notes drift in the air; amber and vanilla stay close to the skin.',
+      },
     },
   },
 
@@ -359,9 +382,21 @@ export const EN = {
     title: (name: string, brand: string) => `${name} — ${brand} · OSMOS`,
     fallbackDescription: (name: string, brand: string) => `${name}, ${brand}.`,
     frame: { family: 'FAMILY', year: 'YEAR', notes: 'NOTES' },
-    position: (index: number, total: number) =>
-      `PERFUME ${String(index).padStart(3, '0')}/${total}`,
-    sections: { evolution: 'EVOLUTION', notes: 'NOTES', neighbours: 'NEIGHBOURS' },
+    position: (index: number, total: number) => `PERFUME ${index}/${total}`,
+    sections: {
+      evolution: 'EVOLUTION',
+      character: 'CHARACTER',
+      notes: 'NOTES',
+      neighbours: 'NEIGHBOURS',
+    },
+    /*
+      Karakter bölümünün altyazısı. Iki şeyi birden söylüyor ve ikisi de
+      ölçülmüş: cetvel notalarınkiyle AYNI (yan yana okunabilsinler diye) ve
+      parfümün çubuğu notanınkinden hep kısa. Ikincisi bir kusur değil ölçünün
+      kendisi — sayılar `perfume-character.ts`te.
+    */
+    characterNote:
+      'The same ruler as the notes below, so the two can be read side by side. A blend always sits milder than what it is made of: no perfume reaches as far out as a single note can.',
     neighbourLabel: (name: string, count: number, list: string) =>
       `The ${count} perfumes closest to ${name}: ${list}.`,
     neighbourEntry: (name: string, percent: number) => `${name}, ${percent}%`,
@@ -381,7 +416,7 @@ export const EN = {
   note: {
     title: (name: string) => `${name} — note · OSMOS`,
     frame: { band: 'BAND', peak: 'PEAK', life: 'LIFE' },
-    position: (index: number, total: number) => `NOTE ${String(index).padStart(3, '0')}/${total}`,
+    position: (index: number, total: number) => `NOTE ${index}/${total}`,
     usage: (carriers: number, total: number) => `${carriers}/${total} PERFUMES`,
     carriersHeading: (count: number) => (count > 0 ? `IN ${count} PERFUMES` : 'IN NO PERFUME YET'),
     unused: (total: number) =>
@@ -424,6 +459,14 @@ export const EN = {
     /** Çizelgenin katman göstergesi — büyük harfli değil, cümle düzeni. */
     tiers: { top: 'Top', heart: 'Heart', base: 'Base' },
     timeLabel: 'Time',
+    /*
+      Duraklat/oynat düğmesinin yazısı. Düğmenin adı YAPACAĞI şeyi söylüyor
+      ("Pause" akarken), durumu değil — `aria-pressed`li bir düğmede ikisi
+      birden söylenirse ekran okuyucu "basılı: duraklat" der ve hangisi olduğu
+      belirsizleşir.
+    */
+    pause: 'PAUSE',
+    play: 'PLAY',
     disclaimer:
       'This chart is an estimate, not a measurement. It is modelled from the volatility of the notes; the real development shifts with temperature, skin and concentration.',
     signatureLabel: (name: string, notes: string) =>

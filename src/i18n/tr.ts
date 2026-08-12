@@ -205,6 +205,19 @@ export const TR: Dict = {
       },
       openDetail: 'Iki eksen daha: doku ve yakınlık',
       closeDetail: 'Doku ve yakınlık eksenlerini kapat',
+      help: {
+        open: 'Bu dört eksen ne demek?',
+        close: 'Açıklamayı kapat',
+        heading: 'DÖRT EKSEN',
+        temperature:
+          'Kokunun sıcak mı soğuk mu durduğu. Baharat, reçine ve vanilya sıcak; narenciye, nane ve deniz havası soğuk okunuyor.',
+        cleanliness:
+          'Sabun mu ten mi. Keten ve beyaz misk temiz tarafta; ud, kimyon ve deri kirli tarafta duruyor.',
+        texture:
+          'Kokunun dokunma hissi. Misk ve süsen kadifemsi; aldehitler ve karabiber keskin.',
+        proximity:
+          'Kokunun nerede durduğu. Narenciye ve deniz notaları havada dağılıyor; amber ve vanilya tene yapışıyor.',
+      },
     },
   },
 
@@ -275,8 +288,15 @@ export const TR: Dict = {
     title: (name, brand) => `${name} — ${brand} · OSMOS`,
     fallbackDescription: (name, brand) => `${name}, ${brand}.`,
     frame: { family: 'AILE', year: 'YIL', notes: 'NOTA' },
-    position: (index, total) => `PARFÜM ${String(index).padStart(3, '0')}/${total}`,
-    sections: { evolution: 'EVRIM', notes: 'NOTALAR', neighbours: 'KOMŞULAR' },
+    position: (index, total) => `PARFÜM ${index}/${total}`,
+    sections: {
+      evolution: 'EVRIM',
+      character: 'KARAKTER',
+      notes: 'NOTALAR',
+      neighbours: 'KOMŞULAR',
+    },
+    characterNote:
+      'Aşağıdaki notalarla aynı cetvel — ikisi yan yana okunabilsin diye. Bir karışım malzemesinden hep daha ılımlı durur: hiçbir parfüm tek bir notanın gidebildiği uca gitmiyor.',
     neighbourLabel: (name, count, list) =>
       `${name} parfümüne en çok benzeyen ${count} parfüm: ${list}.`,
     neighbourEntry: (name, percent) => `${name}, %${percent}`,
@@ -290,7 +310,7 @@ export const TR: Dict = {
   note: {
     title: (name) => `${name} — nota · OSMOS`,
     frame: { band: 'BANT', peak: 'TEPE', life: 'ÖMÜR' },
-    position: (index, total) => `NOTA ${String(index).padStart(3, '0')}/${total}`,
+    position: (index, total) => `NOTA ${index}/${total}`,
     usage: (carriers, total) => `${carriers}/${total} PARFÜM`,
     carriersHeading: (count) => (count > 0 ? `${count} PARFÜMDE` : 'HENÜZ HIÇBIR PARFÜMDE'),
     unused: (total) =>
@@ -324,6 +344,8 @@ export const TR: Dict = {
   chart: {
     tiers: { top: 'Üst', heart: 'Kalp', base: 'Dip' },
     timeLabel: 'Zaman',
+    pause: 'DURAKLAT',
+    play: 'OYNAT',
     disclaimer:
       'Bu çizelge bir tahmindir, ölçüm değil. Notaların uçuculuğundan modellenmiştir; gerçek gelişim sıcaklığa, tene ve konsantrasyona göre değişir.',
     signatureLabel: (name, notes) =>

@@ -1,13 +1,16 @@
 import { describe, expect, test } from 'vitest';
 import {
   CYCLE_MS,
+  MAX_STEP_MS,
   SIGNATURE_MAX_MINUTES,
   SLIDER_MAX_MINUTES,
+  advanceCycle,
   cycleProgress,
   formatDuration,
   minutesAt,
   morphAt,
   phaseLabel,
+  seekCycle,
 } from './evolution-loop';
 
 /**
@@ -165,5 +168,77 @@ describe('phaseLabel', () => {
     expect(phaseLabel(15)).toBe('Heart');
     expect(phaseLabel(119)).toBe('Heart');
     expect(phaseLabel(120)).toBe('Base');
+  });
+});
+
+describe('advanceCycle', () => {
+  test('geçen süreyi ekliyor', () => {
+    expect(advanceCycle(1000, 16)).toBe(1016);
+  });
+
+  test('sekme arkadan dönünce tek karede tur atlamıyor', () => {
+    // ⚠️ Ölçülen tuzak: iki kare arası dakikalar sürebiliyor.
+    expect(advanceCycle(0, 900_000)).toBe(MAX_STEP_MS);
+  });
+
+  test('negatif adım geri sarmıyor', () => {
+    expect(advanceCycle(500, -200)).toBe(500);
+  });
+
+  test('artan — hiçbir adımda geriye gitmiyor', () => {
+    let elapsed = 0;
+    for (let i = 0; i < 400; i += 1) {
+      const next = advanceCycle(elapsed, i % 7 === 0 ? 0 : 16.7);
+      expect(next).toBeGreaterThanOrEqual(elapsed);
+      elapsed = next;
+    }
+  });
+});
+
+describe('seekCycle', () => {
+  test('başa sürüklemek turun başı', () => {
+    expect(cycleProgress(seekCycle(0))).toBe(0);
+  });
+
+  test('gidiş dönüş: bırakılan yer okunan yer', () => {
+    for (let step = 0; step <= 100; step += 1) {
+      const asked = step / 100;
+      expect(cycleProgress(seekCycle(asked))).toBeCloseTo(asked, 4);
+    }
+  });
+
+  test('sonuna kadar sürüklemek 8 saati gösteriyor, sıfırı değil', () => {
+    /*
+      ⚠️ Kusurun kendisi. `cycleProgress` modla çalışıyor; kıl payı olmasaydı
+      tam 1 bir sonraki turun 0'ı olur, kaydıracın sağ ucu "ilk saniyeler"
+      yazardı.
+    */
+    const minutes = minutesAt(cycleProgress(seekCycle(1)), SIGNATURE_MAX_MINUTES);
+    expect(minutes).toBeGreaterThan(SIGNATURE_MAX_MINUTES - 1);
+    expect(minutes).toBeLessThanOrEqual(SIGNATURE_MAX_MINUTES);
+  });
+
+  test('aralık dışı değer kırpılıyor', () => {
+    expect(seekCycle(-3)).toBe(0);
+    expect(cycleProgress(seekCycle(9))).toBeGreaterThan(0.99);
+  });
+});
+
+describe('formatDuration — yuvarlama sınırları', () => {
+  test('turun sonu "8 saat", "7 saat 60 dakika" değil', () => {
+    // ⚠️ Ekranda görüldü: zaman çubuğu sağ uca sürüklenince yazan cümle buydu.
+    expect(formatDuration(minutesAt(cycleProgress(seekCycle(1)), SIGNATURE_MAX_MINUTES))).toBe(
+      '8 hours',
+    );
+  });
+
+  test('59.6 dakika bir saat, altmış dakika değil', () => {
+    expect(formatDuration(59.6)).toBe('1 hour');
+  });
+
+  test('hiçbir dakikada 60 yazmıyor — sıfırdan 12 saate kadar taranarak', () => {
+    for (let minutes = 1; minutes <= SLIDER_MAX_MINUTES; minutes += 0.37) {
+      expect(formatDuration(minutes)).not.toMatch(/\b60 minutes\b/);
+    }
   });
 });

@@ -9,10 +9,11 @@ import {
   type Camera,
   type Viewport,
   centerOn,
+  fitToMarks,
   worldToScreen,
   boundsOf,
 } from '@/lib/space-camera';
-import { drawSpace } from '@/lib/space-draw';
+import { drawSpace, type RailState } from '@/lib/space-draw';
 import { prefersReducedMotion } from '@/lib/motion';
 import { useCanvasSize } from '@/components/space/use-canvas-size';
 import { type EntryState, HOLD_DURATION, NO_ENTRY } from '@/lib/space-entry';
@@ -202,6 +203,26 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
    * `performance.now()`, tek tüketici çizim döngüsü.
    */
   const holdRef = useRef<{ markId: string; startedAt: number } | null>(null);
+
+  /**
+   * Sıcaklık rayı — seçili noktanın "bunun gibi ama daha sıcak" sorusu.
+   *
+   * Durumda değil ref'te: parmak sürerken her karede değişiyor ve React'in
+   * yeniden çizeceği bir metin yok. Kaydıraçların `feelTargetRef`i ile aynı
+   * sözleşme; yazan girdi yolu, okuyan çizim.
+   */
+  const railRef = useRef<RailState | null>(null);
+  const railWordsRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Raydan çıkan tarif — kaydıraçların topuklarını oraya taşıyan tek yol.
+   *
+   * Durumda çünkü kaydıraçlar KONTROLSÜZ: `defaultValue` yalnızca doğdukları
+   * anda okunuyor, yani topuğun yeni yere gitmesi için grubun yeniden doğması
+   * gerek. Ray yalnızca parmak kalkınca buraya yazıyor.
+   */
+  const [appliedFeel, setAppliedFeel] = useState<FeelTarget | null>(null);
+
   const navigatingRef = useRef(false);
   const [entryHint, setEntryHint] = useState(false);
   const [entryProgress, setEntryProgress] = useState(0);
@@ -372,6 +393,13 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
   */
   useShelfRings(shelvedRef, requestDraw);
 
+  /** Topuğa dokunuldu: ray tarifi artık geçerli değil. */
+  const clearRail = useCallback(() => {
+    railRef.current = null;
+    setAppliedFeel(null);
+    requestDraw();
+  }, [requestDraw]);
+
   const input = useSpaceInput({
     marks,
     markById,
@@ -382,6 +410,8 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     selectedRef,
     entryRef,
     holdRef,
+    railRef,
+    setAppliedFeel,
     navigatingRef,
     approach,
     select,
@@ -445,7 +475,25 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
       entry: entryRef.current,
       feel: feelTargetRef.current,
       shelved: shelvedRef.current,
+      rail: railRef.current,
     });
+
+    /*
+      Rayın uç sözcükleri: yalnız parmak dururken görünüyor, konumu rayın
+      geometrisinden geliyor. Genişlik rayın tamamı, yani COOL sol uçta,
+      WARM sağ uçta duruyor.
+    */
+    const railWords = railWordsRef.current;
+    const railGeometry = railRef.current?.geometry ?? null;
+    if (railWords) {
+      if (railGeometry) {
+        railWords.style.transform = `translate(${railGeometry.centerX - railGeometry.half}px, ${railGeometry.centerY + 14}px)`;
+        railWords.style.width = `${railGeometry.half * 2}px`;
+        railWords.style.opacity = '1';
+      } else {
+        railWords.style.opacity = '0';
+      }
+    }
 
     // Etiket tuvale değil üstüne bindirilmiş HTML'e çiziliyor: punto haritanın
     // ölçeğinden bağımsız kalıyor, yakınlaşınca metin büyümüyor. Konumu burada,
@@ -514,11 +562,33 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     // olurdu ve onu temizleyecek bir `pointermove` hiç gelmezdi: etiket, sonraki
     // bütün seçimlerde bu parfümü göstermeye devam ederdi.
     select(mark.id);
-    moveTo(centerOn(cameraRef.current, mark));
+
+    /*
+      ⚠️ Burada eskiden `centerOn` vardı, yani klavyeyle gelen kişi ne
+      yakınlaşma alıyordu ne de komşuları kadrajda görüyordu — o an ölçek
+      neyse oydu. Dokunma yoluyla aynı işlev kullanılıyor artık: iki yol da
+      aynı kareyi gösteriyor.
+    */
+    moveTo(fitToMarks(cameraRef.current, mark, markById, viewportRef.current));
   };
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    /*
+      ⚠️ Üç dokunma kuralı burada, `<body>`de DEĞİL.
+
+      Sahip telefonda gördü: bir noktaya basılı tutunca "sayfada bir şeyi
+      kopyalayacakmış gibi her yer mavi oluyor". Sebebi ölçüldü — depoda
+      `touch-action: none` dışında dokunmayla ilgili tek bir kural yoktu.
+      `touch-action` kaydırmayı ve yakınlaşmayı durduruyor ama işletim
+      sisteminin metin seçimini, büyütecini ve callout menüsünü DURDURMUYOR.
+      Seçim de tuvale değil çevresindeki metinlere yapışıyor (`h1.sr-only`,
+      giriş cümlesi, küratör satırı) — "her yer" tam olarak o.
+
+      Kök sarmalayıcıda duruyor çünkü nota, künye ve gizlilik sayfaları düz
+      metin ve seçilebilir kalmalı. `touch-none` tuvalde kalıyor: kaplamada
+      gerçek bir `<input type=range>` ve düğmeler var.
+    */
+    <div className="relative h-full w-full select-none overflow-hidden [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none]">
       {/*
         Erişilebilirlik ağacından çıkarılıyor: tuval oraya adsız, boş bir grafik
         olarak düşüyordu. Aynı bilginin gezilebilir karşılığı aşağıdaki liste;
@@ -531,8 +601,17 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
         onPointerDown={input.onPointerDown}
         onPointerMove={input.onPointerMove}
         onPointerUp={input.onPointerUp}
-        onPointerCancel={input.onPointerUp}
+        onPointerCancel={input.onPointerCancel}
         onPointerLeave={() => setHovered(null)}
+        /*
+          ⚠️ Bağlam menüsü bastırılıyor ve bu süs değil: basılı tutup girme
+          620 ms sürüyor, Android Chrome'un kendi basılı tutması ~500 ms'de
+          ateşliyor. Bastırılmasaydı sistem menüsü her seferinde önce çıkar ve
+          o hareket Android'de hiç ulaşılamaz olurdu. Bedeli haritada sağ tık
+          "resmi kaydet" — tuval zaten `aria-hidden`, gerçek içerik aşağıdaki
+          listede.
+        */
+        onContextMenu={(event) => event.preventDefault()}
       />
 
       <SpaceOverlays
@@ -542,6 +621,9 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
         feelRef={feelRef}
         switchRef={switchRef}
         feelTargetRef={feelTargetRef}
+        appliedFeel={appliedFeel}
+        railWordsRef={railWordsRef}
+        onSlide={clearRail}
         requestDraw={requestDraw}
         labelled={labelled}
         selectedLine={selected?.line ?? null}

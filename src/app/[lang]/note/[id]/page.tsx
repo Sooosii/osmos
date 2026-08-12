@@ -5,7 +5,6 @@ import { PERFUMES } from '@/data/perfumes';
 import { buildNotePage } from '@/lib/note-marks';
 import { NoteOrbit } from '@/components/NoteOrbit';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
-import { DitherBackdrop } from '@/components/DitherBackdrop';
 import { NoteMeasures } from '@/components/NoteMeasures';
 import type { Dict } from '@/i18n/en';
 import { getDict, localeFor, say } from '@/i18n/dict';
@@ -127,16 +126,12 @@ export default async function NotePage({
   return (
     <main className="min-h-dvh bg-[#050507] text-white">
       {/*
-        Arka plan: notanın kendi fiziğinden beslenen hareketli tram alanı.
-        Uçuculuk dalganın hızını, ömür yayılmasını sürüyor — her nota sayfası
-        farklı görünüyor. Gerekçe ve reddedilen kaynak `dither-field.ts`te.
+        ⚠️ Zemin bilerek çıplak: burada notanın fiziğinden beslenen hareketli bir
+        tram alanı vardı, sahip ekranda gördü ve kaldırttı — sürekli oynayan bir
+        arka plan göz yoruyor, sayfanın okunmasını zorlaştırıyor. Ölçüler,
+        yörünge ve tepedeki ışık duruyor; giden yalnız en arkadaki alan.
+        Ders `dither-field.ts` başlığında.
       */}
-      <DitherBackdrop
-        color={page.color}
-        peakMinutes={note.volatility.peakMinutes}
-        halfLifeMinutes={note.volatility.halfLifeMinutes}
-      />
-
       {/*
         Aile rengi tepede ince bir ışık olarak duruyor — parfüm sayfasının deseni.
         Fotoğraf yok; rengin kendisi notanın tek görsel imzası.
