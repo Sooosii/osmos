@@ -1,7 +1,7 @@
 # Satıcı Boşlukları — Tasarım
 
 Tarih: 2026-08-12 · Sahip yönü seçti ("veri boşlukları"), yoğunluk kararını
-verdi ("bağla, ikisini de")
+verdi ("bağla, ikisini de"), sonra boşluğu kapattırdı ("yeri boş kalmasın")
 
 ## Sorun
 
@@ -23,7 +23,10 @@ için sahibin tarayıcısına hiç dokunulmadı — ve iş yine yapıldı.
 
 ## Sonuç
 
-**34/52 → 47/52 · 42 → 54 bağlantı.** 13 yeni satır, hepsi tek tek açıldı.
+**34/52 → 52/52 · 42 → 59 bağlantı.** 18 yeni satır, hepsi tek tek açıldı.
+
+İki turda yapıldı: önce normal satıcılar (13), sonra sahip "yeri boş kalmasın"
+deyince kalan 5 (aşağıda).
 
 ### Bulundu (13)
 
@@ -68,27 +71,69 @@ satıyor. Sahibe üç seçenekle soruldu, cevap: **"bağla, ikisini de"**.
 Gerekçe her iki parfümün **verisinin yanına** yazıldı; bu bir gözden kaçma
 değil, tartılmış karar — bir gün "yanlış ürün" diye silinmesin.
 
-### Yazılmadı (5) — arandı, yok
+### İkinci tur: normal satıcıda olmayan 5
 
-Bu bölüm asıl çıktı: aynı iş bir daha yapılmasın.
+Sahip "yeri boş kalmasın, reklam olmasa da olur" dedi. Doğru cevap dolgu
+değil **dekant** çıktı: üretimden düşmüş bir kokuyu gerçek bir insan zaten
+oradan buluyor.
 
-- **`serge-lutens-tubereuse-criminelle`** — markanın US mağazası 234 ürün,
-  EU mağazası 280 ürün; ikisinde de "tubereuse/criminelle" geçen tek ürün yok.
-  Luckyscent Serge Lutens'i **hiç taşımıyor** (marka dizininde yok, `/brands/
-  serge-lutens` 404). FragranceX'te marka var ama 9 ürün, bu değil.
-- **`m-micallef-gntonic`** — markanın alan adı bulunamadı:
-  `micallef-parfums.com` çözülmüyor, `parfums-micallef.com` bağlantıyı
-  reddediyor, `micallef.fr` **parfümle ilgisi olmayan bir Linux blogu**.
-  FragranceX M. Micallef taşıyor (15 ürün) ama GNTONIC yok.
-- **`city-rhythm-miami-tropical-confessions`** — Luckyscent'in marka dizininde
-  "City Rhythm" **yazıyor** ama bağlantısı (`/brands/city-rhythm`) **404**:
-  dizin bayat. `cityrhythm.com` ise bir orkestra/parti grubu, parfüm markası
-  değil.
-- **`royal-crown-nocturna`** — `royalcrown.it` kökü bozuk bir yönlendirmeye
-  düşüyor ("Supplied countryName is invalid"). Luckyscent ve FragranceX
-  markayı taşımıyor.
-- **`aaron-terence-hughes-oud`** — markanın kendi Shopify mağazasında
-  **tek bir ürün** var (Gin Sling); Oud satılmıyor.
+**Scent Split** (9.981 ürünü tarandı) beşin **dördünü** taşıyor:
+
+| Parfüm | Adres |
+|---|---|
+| `serge-lutens-tubereuse-criminelle` | `/products/serge-lutens-tubereuse-criminelle-sample-decants` |
+| `m-micallef-gntonic` | `/products/m-micallef-gntonic-sample-decants` |
+| `city-rhythm-miami-tropical-confessions` | `/products/city-rhythm-miami-tropical-confessions-sample-decants` |
+| `royal-crown-nocturna` | `/products/royal-crown-nocturna-sample-decants` |
+
+⚠️ Satıcı adı **"Scent Split (decant)"** — sade "Scent Split" yazmak okura tam
+şişe bekletirdi. Sayfa zaten "Original bottle not included … Scent Split
+rebottles the genuine fragrance into smaller bottles" diyor. Adı sadeleştirmek
+bu satırı yanıltıcı yapar.
+
+⚠️ Tubéreuse Criminelle'in Scent Split sayfası **bağımsız bir doğrulama**
+verdi: "The retail bottle of this fragrance is currently unavailable" — yani
+markanın kataloğunda bulamayışımız gerçekten ürünün düşmesiymiş.
+
+⚠️ Kanonik ana bilgisayar **`www.scentsplit.com`**; `scentsplit.com` oraya
+yönleniyor. Veriye `www.`lu hâli yazıldı.
+
+### Neden bulunamadıkları — kayıt
+
+Aynı iş bir daha yapılmasın diye duruyor; hepsi ikinci turdan **önce** ölçüldü.
+
+- **Tubéreuse Criminelle** — Serge Lutens'in US (234 ürün) ve EU (280 ürün)
+  mağazalarında yok. Luckyscent markayı **hiç taşımıyor** (marka dizininde
+  yok, `/brands/serge-lutens` 404). FragranceX'te marka var ama 9 ürün.
+- **GNTONIC** — markanın alan adı bulunamadı: `micallef-parfums.com`
+  çözülmüyor, `parfums-micallef.com` bağlantıyı reddediyor, `micallef.fr`
+  **parfümle ilgisi olmayan bir Linux blogu**. FragranceX 15 ürün taşıyor,
+  bu değil.
+- **Miami Tropical Confessions** — Luckyscent'in marka dizininde "City Rhythm"
+  **yazıyor** ama bağlantısı (`/brands/city-rhythm`) **404**: dizin bayat.
+  `cityrhythm.com` ise bir orkestra/parti grubu.
+- **Nocturna** — `royalcrown.it` kökü bozuk bir yönlendirmeye düşüyor
+  ("Supplied countryName is invalid").
+- **ATH Oud** — aşağıda, ayrı bir durum.
+
+### `aaron-terence-hughes-oud` — sahip kararı, sitenin en zayıf halkası
+
+Oud **hiçbir yerde satılmıyor**: Scent Split, The Perfumed Court (2.671),
+MicroPerfumes (1.672), Luckyscent, FragranceX, Bloom Perfumery — hiçbirinde
+marka bile geçmiyor. Markanın kendi Shopify mağazasında **tek ürün** var
+(Gin Sling) ve o da **tükenmiş**.
+
+Sahibe üç seçenek sunuldu (dürüst bir cümle · markanın sitesi · boş bırak) ve
+uyarı açıkça yazıldı: *"ziyaretçi tıklar, aradığını bulamaz."* Sahip yine de
+**markanın kendi sitesini** seçti. Karar uygulandı.
+
+Adres kökü değil **ürün listesi** (`/collections/all`): kök bir tanıtım
+sayfası, liste markanın elindeki her şeyi tek bakışta gösteriyor — ziyaretçi
+"Oud yok"u hemen anlıyor. Kök ayrıca aşağıdaki ana sayfa kapısına takılırdı ve
+**kapı bu tek parfüm için gevşetilmedi**.
+
+⚠️ Bu, sitedeki tek "ürüne gitmeyen" satıcı bağlantısı. Gerekçe verinin yanına
+da yazıldı. Marka uyanırsa ürün sayfasıyla değiştirilecek.
 
 ## Yeni kapı: ana sayfa bağlantısı reddediliyor
 
@@ -123,5 +168,7 @@ yani o alanın kaynağı sağlam.
 ## Doğrulama
 
 - `npm test` — 47 dosya, **512 sınama** yeşil (yenisiyle birlikte)
+- Çalışan sunucuda gözle: bağlantı kazanan künyede satır çiziliyor
+  (`rel="sponsored nofollow noopener"`), iki dilde de
 - `npm run lint` — sessiz
 - `npm run build` — **510 sayfa 510 kaldı**; satıcı alanı rota üretmiyor

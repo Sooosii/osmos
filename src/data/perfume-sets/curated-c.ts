@@ -204,6 +204,17 @@ export const CURATED_C: readonly Perfume[] = [
       { noteId: 'white-musk', tier: 'base', weight: 0.4 },
       { noteId: 'vanilla', tier: 'base', weight: 0.3 },
     ],
+    /*
+      ⚠️ **Dekant, tam şişe değil** — ve satıcı adında bu yüzden yazıyor.
+      Bu parfüm hiçbir normal satıcıda yok (gerekçeler
+      `docs/superpowers/specs/2026-08-12-satici-bosluklari-design.md`te);
+      Scent Split gerçek şişeyi küçük şişelere aktarıp satıyor. Sahip
+      "yeri boş kalmasın" dedi, ama okur tam şişe beklemesin diye ad
+      "(decant)" taşıyor. Adı sadeleştirmek bu satırı yanıltıcı yapar.
+    */
+    retailers: [
+      { name: 'Scent Split (decant)', url: 'https://www.scentsplit.com/products/serge-lutens-tubereuse-criminelle-sample-decants' },
+    ],
   },
   {
     id: 'van-cleef-moonlight-patchouli',

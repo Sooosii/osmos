@@ -169,6 +169,17 @@ export const CURATED_F: readonly Perfume[] = [
       { noteId: 'sandalwood', tier: 'base', weight: 0.5 },
       { noteId: 'amber-accord', tier: 'base', weight: 0.4 },
     ],
+    /*
+      ⚠️ **Dekant, tam şişe değil** — ve satıcı adında bu yüzden yazıyor.
+      Bu parfüm hiçbir normal satıcıda yok (gerekçeler
+      `docs/superpowers/specs/2026-08-12-satici-bosluklari-design.md`te);
+      Scent Split gerçek şişeyi küçük şişelere aktarıp satıyor. Sahip
+      "yeri boş kalmasın" dedi, ama okur tam şişe beklemesin diye ad
+      "(decant)" taşıyor. Adı sadeleştirmek bu satırı yanıltıcı yapar.
+    */
+    retailers: [
+      { name: 'Scent Split (decant)', url: 'https://www.scentsplit.com/products/m-micallef-gntonic-sample-decants' },
+    ],
   },
   {
     id: 'imaginary-authors-every-storm-a-serenade',
