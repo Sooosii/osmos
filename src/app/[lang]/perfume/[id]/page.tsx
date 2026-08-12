@@ -3,7 +3,9 @@ import { notFound } from 'next/navigation';
 import { PERFUMES } from '@/data/perfumes';
 import { dominantFamily, getFamily } from '@/data/families';
 import { familyVector } from '@/lib/similarity';
+import { characterOf } from '@/lib/perfume-character';
 import { AddToTopFour } from '@/components/AddToTopFour';
+import { CharacterAxes } from '@/components/CharacterAxes';
 import { EvolutionSignature } from '@/components/EvolutionSignature';
 import { Neighbors } from '@/components/Neighbors';
 import { PerfumeNotes } from '@/components/PerfumeNotes';
@@ -285,6 +287,28 @@ export default async function PerfumePage({
               {t.perfume.sections.evolution}
             </h2>
             <EvolutionSignature perfume={perfume} />
+          </section>
+
+          {/*
+            Karakter — "peki bu nasıl bir şey?"
+
+            Sahip yakaladı: notaların dört ekseni vardı, parfümlerin yoktu.
+            Hesap aslında hep vardı (`characterVector`, uzayın izdüşümünü ve
+            burun raporunu o sürüyor); eksik olan tek şey burada GÖSTERİLMESİydi.
+
+            Yeri bilerek notaların HEMEN ÜSTÜ: aynı cetvelle çizilmiş iki blok
+            alt alta duruyor ve okur "parfüm şurada, malzemeleri şurada" diye
+            bakabiliyor. Evrimden sonra geliyor çünkü sıra "nasıl hareket eder"
+            → "nasıl bir şeydir" → "neyden yapılmış".
+          */}
+          <section className="pt-20">
+            <h2 className="mb-4 text-xs tracking-[0.3em] text-white/50">
+              {t.perfume.sections.character}
+            </h2>
+            <p className="mb-8 max-w-prose text-sm font-light leading-relaxed text-white/40">
+              {t.perfume.characterNote}
+            </p>
+            <CharacterAxes character={characterOf(perfume)} color={color} t={t} />
           </section>
 
           {/*

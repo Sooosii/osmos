@@ -289,7 +289,14 @@ export const TR: Dict = {
     fallbackDescription: (name, brand) => `${name}, ${brand}.`,
     frame: { family: 'AILE', year: 'YIL', notes: 'NOTA' },
     position: (index, total) => `PARFÜM ${index}/${total}`,
-    sections: { evolution: 'EVRIM', notes: 'NOTALAR', neighbours: 'KOMŞULAR' },
+    sections: {
+      evolution: 'EVRIM',
+      character: 'KARAKTER',
+      notes: 'NOTALAR',
+      neighbours: 'KOMŞULAR',
+    },
+    characterNote:
+      'Aşağıdaki notalarla aynı cetvel — ikisi yan yana okunabilsin diye. Bir karışım malzemesinden hep daha ılımlı durur: hiçbir parfüm tek bir notanın gidebildiği uca gitmiyor.',
     neighbourLabel: (name, count, list) =>
       `${name} parfümüne en çok benzeyen ${count} parfüm: ${list}.`,
     neighbourEntry: (name, percent) => `${name}, %${percent}`,

@@ -383,7 +383,20 @@ export const EN = {
     fallbackDescription: (name: string, brand: string) => `${name}, ${brand}.`,
     frame: { family: 'FAMILY', year: 'YEAR', notes: 'NOTES' },
     position: (index: number, total: number) => `PERFUME ${index}/${total}`,
-    sections: { evolution: 'EVOLUTION', notes: 'NOTES', neighbours: 'NEIGHBOURS' },
+    sections: {
+      evolution: 'EVOLUTION',
+      character: 'CHARACTER',
+      notes: 'NOTES',
+      neighbours: 'NEIGHBOURS',
+    },
+    /*
+      Karakter bölümünün altyazısı. Iki şeyi birden söylüyor ve ikisi de
+      ölçülmüş: cetvel notalarınkiyle AYNI (yan yana okunabilsinler diye) ve
+      parfümün çubuğu notanınkinden hep kısa. Ikincisi bir kusur değil ölçünün
+      kendisi — sayılar `perfume-character.ts`te.
+    */
+    characterNote:
+      'The same ruler as the notes below, so the two can be read side by side. A blend always sits milder than what it is made of: no perfume reaches as far out as a single note can.',
     neighbourLabel: (name: string, count: number, list: string) =>
       `The ${count} perfumes closest to ${name}: ${list}.`,
     neighbourEntry: (name: string, percent: number) => `${name}, ${percent}%`,
