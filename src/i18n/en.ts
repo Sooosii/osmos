@@ -261,6 +261,29 @@ export const EN = {
       proximity: { label: 'Proximity — airborne to skin-close', low: 'AIR', high: 'SKIN' },
       openDetail: 'Two more axes: texture and proximity',
       closeDetail: 'Close the texture and proximity axes',
+      /*
+        Yardım metni — sahibin isteği: "anlamayanlar için, hepsini tek tek".
+
+        Eksen ADLARI burada tekrarlanmıyor, yukarıdaki dört `label` kullanılıyor.
+        Tek bir eksene iki ad takmak kullanıcıya iki ayrı şey varmış gibi
+        geliyor; aynı gerekçe `SpaceFeelSliders.tsx`te KADIFE↔KESKIN için de
+        yazılı. Her gövde iki ucu GERÇEK notalarla örnekliyor: soyut bir tarif
+        ("dokunma hissi") tek başına kimseye bir şey söylemiyor, "misk kadifemsi,
+        karabiber keskin" söylüyor.
+      */
+      help: {
+        open: 'What do these four axes mean?',
+        close: 'Close the explanation',
+        heading: 'FOUR AXES',
+        temperature:
+          'Whether the scent stands warm or cool. Spice, resin and vanilla read warm; citrus, mint and sea air read cool.',
+        cleanliness:
+          'Soap or skin. Linen and white musk sit on the clean side; oud, cumin and leather on the dirty one.',
+        texture:
+          'How the scent feels to the touch. Musk and iris are velvety; aldehydes and pepper are sharp.',
+        proximity:
+          'Where the scent stands. Citrus and marine notes drift in the air; amber and vanilla stay close to the skin.',
+      },
     },
   },
 

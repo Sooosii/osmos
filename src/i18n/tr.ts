@@ -205,6 +205,19 @@ export const TR: Dict = {
       },
       openDetail: 'Iki eksen daha: doku ve yakınlık',
       closeDetail: 'Doku ve yakınlık eksenlerini kapat',
+      help: {
+        open: 'Bu dört eksen ne demek?',
+        close: 'Açıklamayı kapat',
+        heading: 'DÖRT EKSEN',
+        temperature:
+          'Kokunun sıcak mı soğuk mu durduğu. Baharat, reçine ve vanilya sıcak; narenciye, nane ve deniz havası soğuk okunuyor.',
+        cleanliness:
+          'Sabun mu ten mi. Keten ve beyaz misk temiz tarafta; ud, kimyon ve deri kirli tarafta duruyor.',
+        texture:
+          'Kokunun dokunma hissi. Misk ve süsen kadifemsi; aldehitler ve karabiber keskin.',
+        proximity:
+          'Kokunun nerede durduğu. Narenciye ve deniz notaları havada dağılıyor; amber ve vanilya tene yapışıyor.',
+      },
     },
   },
 

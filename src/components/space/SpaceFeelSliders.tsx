@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { type FeelTarget, NO_FEEL, hasFeel } from '@/lib/space-feel';
 import { formatFeel, parseFeel } from '@/lib/space-feel-url';
 import { useDict } from '@/i18n/LocaleProvider';
@@ -89,9 +89,19 @@ interface AxisProps {
   readonly start: number;
   /** Topuk bırakıldı — adres çubuğu burada tazeleniyor. */
   readonly onCommit: () => void;
+  /**
+   * Uç etiketinin sağ üstüne asılan düğme — yalnızca ilk eksende dolu.
+   *
+   * Düğme `absolute` DEĞİL, uç etiketinin içinde akıyor. Mutlak konumlandırma
+   * `EDGE_CLASS`in sabit genişliğine ikinci bir sayı daha ekler ve satır
+   * yüksekliği 16 px olduğu için ya rayın ya üstteki satırın üzerine binerdi.
+   * Etiketin içinde `align-super` ile "sağ üstte" duruyor ve sütun eğrilmiyor:
+   * en uzun uç VELVET (6 harf), yerini bu düğme almıyor.
+   */
+  readonly help?: ReactNode;
 }
 
-function Axis({ axis, label, low, high, onPick, start, onCommit }: AxisProps) {
+function Axis({ axis, label, low, high, onPick, start, onCommit, help }: AxisProps) {
   return (
     <div className="flex items-center gap-2">
       <span className={`${EDGE_CLASS} text-right`}>{low}</span>
@@ -124,7 +134,10 @@ function Axis({ axis, label, low, high, onPick, start, onCommit }: AxisProps) {
         />
       </span>
 
-      <span className={EDGE_CLASS}>{high}</span>
+      <span className={EDGE_CLASS}>
+        {high}
+        {help}
+      </span>
     </div>
   );
 }
@@ -174,6 +187,16 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
    * uzay gösterirdi — `toggleDetail`in kaçındığı şeyin ta kendisi.
    */
   const [detailed, setDetailed] = useState(false);
+
+  /**
+   * Yardım açık mı?
+   *
+   * "…" ile bağı yok: biri eksen ekliyor, öbürü var olanları anlatıyor. Sahibin
+   * isteği açıkça "hepsini tek tek" olduğu için gizli iki eksen kapalıyken de
+   * dördü birden anlatılıyor — açıklamayı görmek için önce paneli açmak
+   * gerekseydi, açmayı bilmeyene hiçbir şey anlatılmamış olurdu.
+   */
+  const [helping, setHelping] = useState(false);
 
   /**
    * Bir ekseni tazeler — ve o ekseni "sormuyorum"dan "şunu soruyorum"a geçirir.
@@ -277,6 +300,8 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
     setDetailed(!detailed);
   }, [detailed, targetRef, requestDraw, commit]);
 
+  const toggleHelp = useCallback(() => setHelping((open) => !open), []);
+
   /**
    * Topuğun doğacağı yer.
    *
@@ -284,6 +309,19 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
    * topuğun durduğu yer (`update`in yorumu). Adresten değer geldiyse topuk
    * oraya oturuyor ve gördüğün yer ile tarif aynı şeyi söylüyor.
    */
+  /*
+    Yardım satırları. Başlıklar ekran okuyucuya giden `label`ların ta kendisi:
+    aynı eksene ikinci bir ad takılmıyor ve sözcük tek yerde duruyor.
+
+    Sıra ekrandakiyle aynı — sıcaklık, temizlik, sonra "…" ile gelen ikisi.
+  */
+  const HELP_ROWS = [
+    { key: 'temperature', title: WORDS.temperature.label, body: WORDS.help.temperature },
+    { key: 'cleanliness', title: WORDS.cleanliness.label, body: WORDS.help.cleanliness },
+    { key: 'texture', title: WORDS.texture.label, body: WORDS.help.texture },
+    { key: 'proximity', title: WORDS.proximity.label, body: WORDS.help.proximity },
+  ];
+
   const startOf = (axis: number) => {
     const value = initial[axis];
     return value === null || value === undefined ? MIDDLE : Math.round(value * STEPS);
@@ -305,6 +343,19 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
         onPick={update}
         start={startOf(0)}
         onCommit={commit}
+        help={
+          <button
+            type="button"
+            onClick={toggleHelp}
+            aria-expanded={helping}
+            aria-label={helping ? WORDS.help.close : WORDS.help.open}
+            /* Odak halkası ve yuvarlak gövde "…" düğmesinden birebir: uzayda
+               tıklanabilir olan her şey aynı dili konuşuyor. */
+            className="ml-1 rounded-full px-1 py-0.5 align-super text-[9px] leading-none text-white/40 transition-colors hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
+          >
+            ?
+          </button>
+        }
       />
       <Axis
         axis={2}
@@ -388,6 +439,47 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
           …
         </button>
       </div>
+
+      {/*
+        Açıklama panelin ALTINDA açılıyor, ortada bir kart olarak değil: harita
+        görünür kalsın diye. Okurken kaydıracı sürüklemek, sürüklerken açıklamayı
+        okumak mümkün — bir kartta ikisi de mümkün değildi.
+
+        Etiket sütunu burada YOK: metin proz, dört karakterlik bir girinti
+        panelin dörtte birini yerdi. Hiza yerine ince bir çizgi ayırıyor.
+
+        `max-h` + kaydırma telefon için: dört gövde 390 px'lik bir ekranda
+        kaydıraçların altına sığmıyor.
+
+        ⚠️ Perde tarayıcıda ölçülerek eklendi. Masaüstünde sol sütun boş siyah
+        ve metin zaten okunuyordu; 390 px'lik ekranda bulut metnin ARKASINDAN
+        geçiyor ve renkli noktalar cümleleri yiyor. Perde siyah üstünde
+        görünmüyor (siyah üstüne siyah), yalnızca nokta olan yerde çalışıyor.
+        Sağ kenarda sertçe bitmesin diye son 48 px'te eriyor — kart değil,
+        haritanın kendi kenar sönümüyle aynı dil.
+      */}
+      {helping ? (
+        <div
+          className="-mr-12 mt-1 flex max-h-[46vh] flex-col gap-3 overflow-y-auto pb-5 pr-12"
+          style={{
+            background:
+              'linear-gradient(to right, rgba(0,0,0,0.9), rgba(0,0,0,0.9) calc(100% - 48px), rgba(0,0,0,0))',
+          }}
+        >
+          {/* Ayırıcı çizgi başlıkta: perde sağa taşıyor, çizgi metin sütununda
+              kalsın diye. Kutuya verilseydi haritanın üstüne sarkardı. */}
+          <p className="border-t border-white/10 pt-3 text-[10px] tracking-[0.3em] text-white/50">
+            {WORDS.help.heading}
+          </p>
+
+          {HELP_ROWS.map((row) => (
+            <div key={row.key} className="flex flex-col gap-1">
+              <p className="text-[10px] tracking-[0.15em] text-white/60">{row.title}</p>
+              <p className="text-[11px] leading-[1.7] text-white/45">{row.body}</p>
+            </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
