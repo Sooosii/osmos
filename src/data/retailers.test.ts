@@ -56,4 +56,32 @@ describe('satici baglantilari', () => {
       }
     }
   });
+
+  test('ana sayfaya baglanmiyor — yolun kendisi urunu gostermeli', () => {
+    /*
+      ⚠️ 2026-08-12'de eklendi, arama kapısının kardeşi. Markanın ana sayfasına
+      giden bir bağlantı arama sayfası kadar işe yaramaz: ziyaretçi parfümü
+      yine kendi bulmak zorunda kalır, üstelik bu sefer sitenin "buldum" dediğine
+      güvenerek tıklamıştır.
+
+      O turda ölçülen üç tuzak bu kapıyı gerektirdi: `artisanparfumeur.com` kökü
+      ülke seçimi dayatıyor, `royalcrown.it` kökü bozuk bir yönlendirmeye
+      düşüyor, `micallef.fr` ise parfümle hiç ilgisi olmayan bir siteye ait.
+      Üçü de "200 döndü" diye yazılabilirdi.
+
+      Bilerek dar tutuldu: kategori/koleksiyon kalıbı aranmıyor. Shopify'ın
+      `/collections/<x>/products/<y>` biçimi meşru bir ürün adresi ve bir
+      "kategori" süzgeci onu yanlışlıkla reddederdi.
+    */
+    for (const perfume of PERFUMES) {
+      for (const retailer of perfume.retailers ?? []) {
+        const { pathname } = new URL(retailer.url);
+
+        expect(
+          pathname.replace(/\/+$/, ''),
+          `${perfume.id} → ${retailer.name}: ana sayfa adresi (${retailer.url})`,
+        ).not.toBe('');
+      }
+    }
+  });
 });

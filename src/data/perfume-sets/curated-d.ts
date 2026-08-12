@@ -132,6 +132,9 @@ export const CURATED_D: readonly Perfume[] = [
       { noteId: 'vanilla', tier: 'base', weight: 0.4 },
       { noteId: 'labdanum', tier: 'base', weight: 0.4 },
     ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/les-jeux-sont-faits-by-jovoy-paris' },
+    ],
   },
   {
     // Lavs'ın eksik komşusu. Lavs tütsünün soğuk-taş hâli, bu ısıtılmış hâli;
@@ -155,6 +158,9 @@ export const CURATED_D: readonly Perfume[] = [
       { noteId: 'vanilla', tier: 'base', weight: 0.6 },
       { noteId: 'benzoin', tier: 'base', weight: 0.4 },
       { noteId: 'white-musk', tier: 'base', weight: 0.4 },
+    ],
+    retailers: [
+      { name: 'Jo Malone London', url: 'https://www.jomalone.com/product/25946/110447/colognes/myrrh-tonka-cologne-intense' },
     ],
   },
   {

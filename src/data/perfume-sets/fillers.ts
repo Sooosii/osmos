@@ -142,6 +142,9 @@ export const FILLERS: readonly Perfume[] = [
       { noteId: 'labdanum', tier: 'base', weight: 0.4 },
       { noteId: 'vanilla', tier: 'base', weight: 0.3 },
     ],
+    retailers: [
+      { name: 'Serge Lutens', url: 'https://sergelutens.com/products/musc-koublai-khan' },
+    ],
   },
   {
     // Kirli ucun eksik üçüncüsü. MAAI ile Muscs Koublaï Khân arasında bir yere
