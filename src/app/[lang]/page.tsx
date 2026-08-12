@@ -81,7 +81,18 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             üstüne binerdi. İkisi artık tek bir sütunda, akışla diziliyor.
           */}
           <div>
-            <p className="text-xs tracking-[0.3em] text-white/50">{t.site.name}</p>
+            {/*
+              Sayfanın tek başlığı. Görünen bir şey değişmiyor — Tailwind'in
+              preflight'ı `h1`in punto ve kalınlığını sıfırlıyor, biçimi zaten
+              sınıflar veriyor.
+
+              ⚠️ Ölçüldü (2026-08-12): sitenin kapısında **hiç başlık yoktu**
+              (`h1` 0, hiçbir düzeyde başlık yok). Ekran okuyucuyla gelen biri
+              için sayfa gövdesiz bir metin yığınıydı. Görünmez bir `sr-only`
+              başlık eklemek yerine ekranda zaten duran ad başlık yapıldı:
+              gören ve görmeyen aynı şeyi okuyor.
+            */}
+            <h1 className="text-xs tracking-[0.3em] text-white/50">{t.site.name}</h1>
             <p className="mt-3 max-w-[15rem] text-xs leading-relaxed text-white/50">
               {t.space.intro(PERFUMES.length)}
             </p>
