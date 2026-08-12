@@ -110,6 +110,19 @@ const RADIUS_ZOOM_EXPONENT = 0.5;
 /** Vuruş alanı çizimden bu kadar geniş — dokunmatikte 7 px'lik nokta ıskalanıyor. */
 const HIT_PADDING = 8;
 
+/**
+ * Parmağın payı.
+ *
+ * 8 px imleç için ölçülmüştü; parmağın temas alanı bir imlecin ucu değil.
+ * En küçük nokta 3.4 px yarıçapla çiziliyor, yani dokunma hedefi 18 px payla
+ * ~43 px çapa çıkıyor — platformların istediği 44 px'in sınırında.
+ *
+ * ⚠️ Geniş pay hangi noktanın kazandığını DEĞIŞTIRMIYOR: kazanan
+ * `distance - radius` ile seçiliyor, yani pay yalnızca aday kümesini büyütüyor.
+ * Üst üste binen iki noktada yine yakın olan kazanıyor.
+ */
+export const TOUCH_HIT_PADDING = 18;
+
 export interface Camera {
   /** Ekranın ortasına denk gelen dünya noktası (parallax'sız taban düzlemde). */
   readonly x: number;
@@ -340,6 +353,7 @@ export function hitTest(
   sy: number,
   camera: Camera,
   viewport: Viewport,
+  padding: number = HIT_PADDING,
 ): SpaceMark | null {
   let best: SpaceMark | null = null;
   let bestScore = Infinity;
@@ -348,7 +362,7 @@ export function hitTest(
     const { sx: mx, sy: my } = worldToScreen(mark, camera, viewport);
     const distance = Math.hypot(sx - mx, sy - my);
     const radius = markRadius(mark.depth, camera.scale);
-    if (distance > radius + HIT_PADDING) continue;
+    if (distance > radius + padding) continue;
 
     const score = distance - radius;
     if (score < bestScore) {

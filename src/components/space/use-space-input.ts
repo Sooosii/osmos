@@ -1,6 +1,21 @@
 import { useCallback, useEffect, useRef, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import type { SpaceMark } from '@/data/types';
-import { type Camera, type Viewport, focusOn, hitTest, panBy, zoomAt } from '@/lib/space-camera';
+import {
+  type Camera,
+  type Viewport,
+  TOUCH_HIT_PADDING,
+  focusOn,
+  hitTest,
+  panBy,
+  zoomAt,
+} from '@/lib/space-camera';
+import {
+  type Probe,
+  beginProbe,
+  inheritedProbe,
+  isTap,
+  moveProbe,
+} from '@/lib/space-gesture';
 import {
   type EntryState,
   NO_ENTRY,
@@ -32,6 +47,8 @@ export interface SpaceInput {
   readonly onPointerDown: (event: ReactPointerEvent<HTMLCanvasElement>) => void;
   readonly onPointerMove: (event: ReactPointerEvent<HTMLCanvasElement>) => void;
   readonly onPointerUp: (event: ReactPointerEvent<HTMLCanvasElement>) => void;
+  /** ⚠️ `onPointerUp` ile aynı şey DEĞİL; gerekçe `handlePointerCancel`da. */
+  readonly onPointerCancel: (event: ReactPointerEvent<HTMLCanvasElement>) => void;
 }
 
 /**
@@ -69,9 +86,6 @@ interface SpaceInputOptions {
   readonly requestDraw: () => void;
 }
 
-/** Bu kadar pikselden fazla kaydırıldıysa parmak kalkışı tıklama sayılmıyor. */
-const CLICK_SLOP = 4;
-
 /** Tekerlek hassasiyeti. Üstel çünkü yakınlaşma çarpımsal: her tık aynı oranı ekler. */
 const WHEEL_SENSITIVITY = 0.0015;
 
@@ -84,12 +98,26 @@ interface PointerPosition {
   readonly y: number;
 }
 
-/** Süren sürükleme. `moved` toplam yol — dokunuş mu sürükleme mi buradan anlaşılıyor. */
+/**
+ * Süren sürükleme.
+ *
+ * Dokunuş mu sürükleme mi kararını `probe` taşıyor (`space-gesture.ts`);
+ * `lastX/lastY` kaydırmanın kare farkı için duruyor.
+ */
 interface DragState {
   readonly id: number;
   readonly lastX: number;
   readonly lastY: number;
-  readonly moved: number;
+  readonly probe: Probe;
+  /**
+   * Parmağın **indiği** anda altındaki nokta.
+   *
+   * ⚠️ Seçim artık kalkış anında yeniden aranmıyor. Sebebi ölçüldü: eşik
+   * altındaki hareket bile kamerayı kaydırıyordu, yani parmak kalktığında
+   * altındaki nokta artık basılan nokta değildi. Kaydırma eşiğe kadar
+   * ertelendi ama karar yine de basma anına ait olmalı — dokunulan şey odur.
+   */
+  readonly downHit: SpaceMark | null;
 }
 
 export function useSpaceInput({
@@ -159,6 +187,15 @@ export function useSpaceInput({
   const touchCountRef = useRef(0);
   const lastTouchEndRef = useRef(0);
 
+
+  /**
+   * Vuruş payı — parmak için geniş, imleç için dar.
+   *
+   * `pointerType` boş gelirse (bazı tarayıcılarda oluyor) parmak varsayılıyor:
+   * geniş pay imleçte de zarar vermiyor, dar pay parmakta ıskalatıyor.
+   */
+  const hitPadding = (event: ReactPointerEvent<HTMLCanvasElement>) =>
+    event.pointerType === 'mouse' ? undefined : TOUCH_HIT_PADDING;
 
   /** Tuvalin sol üst köşesine göre imleç konumu. */
   const localPoint = useCallback((clientX: number, clientY: number) => {
@@ -411,12 +448,6 @@ export function useSpaceInput({
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
     if (pointersRef.current.size === 1) {
-      dragRef.current = {
-        id: event.pointerId,
-        lastX: event.clientX,
-        lastY: event.clientY,
-        moved: 0,
-      };
 
       /*
        * Basılı tutma yalnızca ZATEN SEÇİLİ noktada başlıyor.
@@ -433,7 +464,16 @@ export function useSpaceInput({
        * "şuna geç", "buna gir" değil. Seçimi `handlePointerUp` yapıyor.
        */
       const { sx, sy } = localPoint(event.clientX, event.clientY);
-      const under = hitTest(marks, sx, sy, cameraRef.current, viewportRef.current);
+      const under = hitTest(marks, sx, sy, cameraRef.current, viewportRef.current, hitPadding(event));
+
+      dragRef.current = {
+        id: event.pointerId,
+        lastX: event.clientX,
+        lastY: event.clientY,
+        probe: beginProbe(event.clientX, event.clientY, event.pointerType),
+        downHit: under,
+      };
+
       const selectedMark = selectedRef.current
         ? (markById.get(selectedRef.current) ?? null)
         : null;
@@ -494,21 +534,34 @@ export function useSpaceInput({
     const drag = dragRef.current;
     if (!drag) return;
 
-    const dx = event.clientX - drag.lastX;
-    const dy = event.clientY - drag.lastY;
-    dragRef.current = {
-      ...drag,
-      lastX: event.clientX,
-      lastY: event.clientY,
-      moved: drag.moved + Math.hypot(dx, dy),
-    };
+    const wasIdle = drag.probe.latch === 'none';
+    const probe = moveProbe(drag.probe, event.clientX, event.clientY, false);
 
-    // Parmak kaydıysa bu bir sürükleme; tutma niyeti bitti. Eşik tıklamayla
-    // aynı (`CLICK_SLOP`) — el titremesi iptal etmesin, gezinme etsin.
-    if (holdRef.current && dragRef.current && dragRef.current.moved > CLICK_SLOP) {
+    dragRef.current = { ...drag, lastX: event.clientX, lastY: event.clientY, probe };
+
+    // Parmak gerçekten kaydıysa bu bir sürükleme; tutma niyeti bitti.
+    if (holdRef.current && probe.latch !== 'none') {
       holdRef.current = null;
       entryRef.current = NO_ENTRY;
     }
+
+    /*
+      ⚠️ Eşiğin altında harita KIMILDAMIYOR. Eskiden her `pointermove` kamerayı
+      kaydırıyordu; dokunmak isteyen parmağın titremesi haritayı birkaç piksel
+      oynatıyor ve basılan noktanın altından kaydırıyordu. Sessiz bir kusurdu:
+      seçim tutuyorsa bile yanlış noktayı seçiyordu.
+    */
+    if (probe.latch === 'none') {
+      requestDraw();
+      return;
+    }
+
+    /*
+      Kilidin düştüğü kare: eşiğe kadar biriken hareket bir defada uygulanıyor,
+      yoksa sürükleme o kadar geriden başlar ve harita parmağın altında kayar.
+    */
+    const dx = wasIdle ? event.clientX - probe.startX : event.clientX - drag.lastX;
+    const dy = wasIdle ? event.clientY - probe.startY : event.clientY - drag.lastY;
 
     cameraRef.current = panBy(cameraRef.current, dx, dy, viewportRef.current);
     requestDraw();
@@ -547,9 +600,13 @@ export function useSpaceInput({
       // kaydırmaya devam etmek en yaygın el hareketlerinden biri.
       if (pointers.size === 1) {
         const [[id, position]] = [...pointers.entries()];
-        // `moved` eşiğin üstünde başlıyor: bu bir el hareketinin devamı, dokunuş
-        // değil. Sıfırdan başlasaydı parmağı kaldırmak seçim açardı.
-        dragRef.current = { id, lastX: position.x, lastY: position.y, moved: CLICK_SLOP + 1 };
+        dragRef.current = {
+          id,
+          lastX: position.x,
+          lastY: position.y,
+          probe: inheritedProbe(position.x, position.y, event.pointerType),
+          downHit: null,
+        };
       }
       return;
     }
@@ -557,10 +614,11 @@ export function useSpaceInput({
 
     // Sürükleyip bırakmak seçim açmasın: harita gezdirilirken elin altındaki
     // nokta seçilirse kullanıcı istemediği bir şeyi seçmiş olur.
-    if (drag.moved > CLICK_SLOP) return;
+    if (!isTap(drag.probe)) return;
 
-    const { sx, sy } = localPoint(event.clientX, event.clientY);
-    const mark = hitTest(marks, sx, sy, cameraRef.current, viewportRef.current);
+    // Basma anındaki nokta — kalkış anında yeniden aranmıyor, gerekçe
+    // `DragState.downHit`te.
+    const mark = drag.downHit;
 
     // Yeni bir parfüme basmak kamerayı ona getiriyor: seçmek "bunu merak
     // ettim" demek, kameranın karşılığı yaklaşmak. Zaten seçili olana tekrar
@@ -576,7 +634,34 @@ export function useSpaceInput({
   };
 
 
+  /**
+   * Işaretçi iptal edildi.
+   *
+   * ⚠️ Bu eskiden doğrudan `handlePointerUp`a bağlıydı ve gizli bir kusurdu:
+   * iOS kendi basılı-tutma davranışını başlattığında `pointercancel` atıyor,
+   * parmak da kımıldamamış oluyor — yani olay dokunuş yolundan geçip
+   * **seçim yapıyordu.** Kullanıcının niyeti dokunmak değildi ve sistem
+   * hareketi zaten elinden almıştı.
+   *
+   * Iptal edilen hareket bir karar değil: her şey temizleniyor, hiçbir şey
+   * seçilmiyor.
+   */
+  const handlePointerCancel = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    approachDragRef.current = null;
+    pointersRef.current.delete(event.pointerId);
+    pinchRef.current = null;
+    dragRef.current = null;
+
+    if (holdRef.current) {
+      holdRef.current = null;
+      entryRef.current = NO_ENTRY;
+    }
+
+    requestDraw();
+  };
+
   return {
+    onPointerCancel: handlePointerCancel,
     onPointerDown: handlePointerDown,
     onPointerMove: handlePointerMove,
     onPointerUp: handlePointerUp,

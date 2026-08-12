@@ -518,7 +518,22 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
   };
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    /*
+      ⚠️ Üç dokunma kuralı burada, `<body>`de DEĞİL.
+
+      Sahip telefonda gördü: bir noktaya basılı tutunca "sayfada bir şeyi
+      kopyalayacakmış gibi her yer mavi oluyor". Sebebi ölçüldü — depoda
+      `touch-action: none` dışında dokunmayla ilgili tek bir kural yoktu.
+      `touch-action` kaydırmayı ve yakınlaşmayı durduruyor ama işletim
+      sisteminin metin seçimini, büyütecini ve callout menüsünü DURDURMUYOR.
+      Seçim de tuvale değil çevresindeki metinlere yapışıyor (`h1.sr-only`,
+      giriş cümlesi, küratör satırı) — "her yer" tam olarak o.
+
+      Kök sarmalayıcıda duruyor çünkü nota, künye ve gizlilik sayfaları düz
+      metin ve seçilebilir kalmalı. `touch-none` tuvalde kalıyor: kaplamada
+      gerçek bir `<input type=range>` ve düğmeler var.
+    */
+    <div className="relative h-full w-full select-none overflow-hidden [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none]">
       {/*
         Erişilebilirlik ağacından çıkarılıyor: tuval oraya adsız, boş bir grafik
         olarak düşüyordu. Aynı bilginin gezilebilir karşılığı aşağıdaki liste;
@@ -531,8 +546,17 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
         onPointerDown={input.onPointerDown}
         onPointerMove={input.onPointerMove}
         onPointerUp={input.onPointerUp}
-        onPointerCancel={input.onPointerUp}
+        onPointerCancel={input.onPointerCancel}
         onPointerLeave={() => setHovered(null)}
+        /*
+          ⚠️ Bağlam menüsü bastırılıyor ve bu süs değil: basılı tutup girme
+          620 ms sürüyor, Android Chrome'un kendi basılı tutması ~500 ms'de
+          ateşliyor. Bastırılmasaydı sistem menüsü her seferinde önce çıkar ve
+          o hareket Android'de hiç ulaşılamaz olurdu. Bedeli haritada sağ tık
+          "resmi kaydet" — tuval zaten `aria-hidden`, gerçek içerik aşağıdaki
+          listede.
+        */
+        onContextMenu={(event) => event.preventDefault()}
       />
 
       <SpaceOverlays
