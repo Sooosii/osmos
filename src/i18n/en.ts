@@ -459,6 +459,14 @@ export const EN = {
     /** Çizelgenin katman göstergesi — büyük harfli değil, cümle düzeni. */
     tiers: { top: 'Top', heart: 'Heart', base: 'Base' },
     timeLabel: 'Time',
+    /*
+      Duraklat/oynat düğmesinin yazısı. Düğmenin adı YAPACAĞI şeyi söylüyor
+      ("Pause" akarken), durumu değil — `aria-pressed`li bir düğmede ikisi
+      birden söylenirse ekran okuyucu "basılı: duraklat" der ve hangisi olduğu
+      belirsizleşir.
+    */
+    pause: 'PAUSE',
+    play: 'PLAY',
     disclaimer:
       'This chart is an estimate, not a measurement. It is modelled from the volatility of the notes; the real development shifts with temperature, skin and concentration.',
     signatureLabel: (name: string, notes: string) =>

@@ -58,6 +58,49 @@ export function cycleProgress(elapsedMs: number): number {
 }
 
 /**
+ * Bir karede yutulabilecek en uzun süre.
+ *
+ * Sekme arka plana atılıp geri gelince iki kare arası dakikalar sürebiliyor;
+ * sınır olmasaydı imza tek karede turun ortasına sıçrardı. `dt` ile sürmenin
+ * ikinci kazancı da burada: eskiden zaman `performance.now() - start` idi ve
+ * bu tuzağa hiç kapanamıyordu, çünkü geçen süre hesaplanmıyordu, ölçülüyordu.
+ */
+export const MAX_STEP_MS = 50;
+
+/**
+ * Saati bir kare ilerletir.
+ *
+ * ⚠️ Geçen süre artık bir SAYI, `start` kapanışında saklı bir an değil.
+ * Duraklatmanın mümkün olmasının tek sebebi bu: durdurulan şey yalnızca
+ * `requestAnimationFrame` olsaydı, geri başlatınca saat aradaki bütün süreyi
+ * bir anda yutar ve imza ileri sıçrardı.
+ */
+export function advanceCycle(elapsedMs: number, dtMs: number): number {
+  return elapsedMs + Math.min(Math.max(dtMs, 0), MAX_STEP_MS);
+}
+
+/**
+ * Sağ uçtaki kıl payı.
+ *
+ * `cycleProgress` bir turu MODLA buluyor, yani tam bir tur sonraki turun
+ * sıfırı demek. Kaydıraç sonuna kadar sürüklendiğinde 8 saat değil 0 dakika
+ * görünürdü — sürüklemenin bütün amacı olan "sonunda ne oluyor" sorusu tam da
+ * orada cevapsız kalırdı.
+ */
+const CYCLE_EDGE = 1e-6;
+
+/**
+ * Kaydıracın yerinden saat — 0 turun başı, 1 turun sonu.
+ *
+ * Aralık dışı değer kırpılıyor: kaydıraç `min`/`max` ile zaten sınırlı ama
+ * fonksiyon adresten ya da klavyeden gelen bir değere de dayanmalı.
+ */
+export function seekCycle(progress: number): number {
+  const clamped = Math.min(Math.max(progress, 0), 1);
+  return Math.min(clamped, 1 - CYCLE_EDGE) * CYCLE_MS;
+}
+
+/**
  * İlerlemeden dakika — logaritmik.
  *
  * Aralık **varsayılansız** bir parametre: çağıran hangi zaman ölçeğinde olduğunu
@@ -116,10 +159,21 @@ export function formatDuration(
   words: typeof EN.duration = EN.duration,
 ): string {
   if (minutes < 1) return words.firstSeconds;
-  if (minutes < 60) return words.minutes(Math.round(minutes));
 
-  const hours = Math.floor(minutes / 60);
-  const rest = Math.round(minutes % 60);
+  /*
+    ⚠️ Önce YUVARLA, sonra böl. Tersi ekranda yakalandı: 479.99 dakikada
+    `floor(479.99 / 60)` 7, `round(479.99 % 60)` 60 veriyor ve yazı
+    "7 saat 60 dakika" oluyordu. Turun sonu tam oraya düşüyor, yani zaman
+    çubuğunun sağ ucu kalıcı olarak o cümleyi gösteriyordu.
+
+    Aynı hata küçük tarafta da vardı: 59.6 dakika "60 dakika" yazıyordu,
+    "1 saat" değil.
+  */
+  const total = Math.round(minutes);
+  if (total < 60) return words.minutes(total);
+
+  const hours = Math.floor(total / 60);
+  const rest = total % 60;
   return rest === 0 ? words.hours(hours) : words.hoursMinutes(hours, rest);
 }
 

@@ -1,16 +1,20 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { getNote } from '@/data/notes';
 import { FAMILY_ORDER, dominantFamily, getFamily } from '@/data/families';
 import { intensityAt } from '@/lib/evolution';
+import { prefersReducedMotion } from '@/lib/motion';
 import {
   SIGNATURE_MAX_MINUTES,
+  SLIDER_STEPS,
+  advanceCycle,
   cycleProgress,
   formatDuration,
   minutesAt,
   morphAt,
   phaseLabel,
+  seekCycle,
 } from '@/lib/evolution-loop';
 import type { Perfume, ScentFamily, Volatility } from '@/data/types';
 import { useDict, useLocale } from '@/i18n/LocaleProvider';
@@ -32,9 +36,12 @@ import { say } from '@/i18n/dict';
  * kural. Burada React yalnızca iskeleti bir kez kuruyor; her kare `d`, `opacity`
  * ve metin içeriği ref üzerinden DOM'a yazılıyor.
  *
- * Erişilebilirlik notu: `prefers-reduced-motion` ayrımı **bilerek yok** —
- * kullanıcı kararı. Bilinçli bir ödün; hareketin büyük alanlı bir kayma değil
- * çubuk uzunluğu değişimi olması riski sınırlıyor.
+ * Erişilebilirlik notu: `prefers-reduced-motion` ayrımı eskiden **bilerek
+ * yoktu** ("kullanıcı kararı"). O karar devrildi ve gerekçesi duraklat
+ * düğmesinin kendisi: karar alındığında ekranda durduracak bir şey yoktu, yani
+ * seçenek "hareket" ya da "hiç"ti ve hiç, ölçünün kendisini gizliyordu. Artık
+ * üçüncü bir hâl var — duran ama sürülebilen imza — ve tercihini bildirmiş
+ * kullanıcıya doğru açılış o. Oynat bir dokunuş uzakta.
  */
 
 /** SVG'nin iç koordinat genişliği; ekranda `width:100%` ile esniyor. */
@@ -205,6 +212,24 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
   const valueRefs = useRef<(SVGTextElement | null)[]>([]);
   const phaseRef = useRef<HTMLSpanElement>(null);
   const durationRef = useRef<HTMLSpanElement>(null);
+  const sliderRef = useRef<HTMLInputElement>(null);
+
+  /**
+   * Turun başından beri geçen süre (ms).
+   *
+   * Durumda değil ref'te: her kare değişiyor ve React'in yeniden çizeceği bir
+   * şey yok — kaydıraçların `valuesRef`i ile aynı sözleşme.
+   */
+  const elapsedRef = useRef(0);
+
+  /**
+   * Akıyor mu?
+   *
+   * ⚠️ Bu durumda, ref'te değil: düğmenin yazısı buna bağlı ve döngünün
+   * kurulup sökülmesi de. Duraklatınca `requestAnimationFrame` hiç
+   * çağrılmıyor, son kare ekranda kalıyor.
+   */
+  const [running, setRunning] = useState(true);
 
   /** Sabit satır bilgisi — parfüm değişmedikçe yeniden hesaplanmıyor. */
   const rows = useMemo<readonly SignatureRow[]>(
@@ -261,10 +286,15 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
     [curves, geometry],
   );
 
-  useEffect(() => {
-    const start = performance.now();
-    let frame = requestAnimationFrame(function step(now: number) {
-      const progress = cycleProgress(now - start);
+  /**
+   * Tek bir karenin çizimi.
+   *
+   * Döngüden ayrıldı çünkü artık iki çağıranı var: akan kareler ve kaydıraç.
+   * Duraklatılmışken topuğu sürüklemek de bir kare çizmek demek; aynı yazımları
+   * ikinci kez yazsaydık ikisi bir gün birbirinden ayrılırdı.
+   */
+  const paint = useCallback(
+    (progress: number) => {
       const morph = morphAt(progress);
       const minutes = minutesAt(progress, SIGNATURE_MAX_MINUTES);
 
@@ -308,13 +338,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
         }
       }
 
-      frame = requestAnimationFrame(step);
-    });
-
-    // Sökülürken kareyi iptal et. `ScentSpaceCanvas.tsx`'in temizleme etkisi aynı tuzağı
-    // anlatıyor: iptal edilmeyen kare, bileşen geri geldiğinde "zaten kare
-    // bekliyor" sanılıp döngüyü kilitliyor.
-    return () => cancelAnimationFrame(frame);
+    },
     /*
       ⚠️ `t` bağımlılıkta ve bu şart. Sözlüksüz çağrıldıklarında `phaseLabel` ve
       `formatDuration` **varsayılan İngilizceye** düşüyor: Türkçe sayfada ilk
@@ -323,7 +347,75 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
       kaynakta Türkçe metin yok, çalışma anında İngilizce metin var. Ekranda
       görülerek bulundu (erişilebilirlik turu, 2026-08-10).
     */
-  }, [rows, curves, geometry, t]);
+    [rows, curves, geometry, t],
+  );
+
+  useEffect(() => {
+    // Duraklatılmışken de bir kare: topuk yeni yere kondu, ekran onu göstersin.
+    paint(cycleProgress(elapsedRef.current));
+
+    // Duraklatıldığında hiç kare istenmiyor. Boşa dönen bir döngü telefonda
+    // sayfa açık kaldığı sürece pil yakardı; `DitherBackdrop` da aynı kararı
+    // vermişti (bir kare çiz, sonra dur).
+    if (!running) return;
+
+    let last = performance.now();
+    let frame = requestAnimationFrame(function step(now: number) {
+      elapsedRef.current = advanceCycle(elapsedRef.current, now - last);
+      last = now;
+
+      const progress = cycleProgress(elapsedRef.current);
+      paint(progress);
+
+      /*
+        Topuk akan zamanı izliyor — ama kullanıcı ona dokunmuşken DEĞİL.
+        Odaktayken yazsaydık klavyeyle sürüklemek imkânsız olurdu: her ok
+        tuşundan sonraki kare topuğu geri alırdı.
+      */
+      const slider = sliderRef.current;
+      if (slider && document.activeElement !== slider) {
+        slider.value = String(Math.round(progress * SLIDER_STEPS));
+      }
+
+      frame = requestAnimationFrame(step);
+    });
+
+    // Sökülürken kareyi iptal et. `ScentSpaceCanvas.tsx`'in temizleme etkisi aynı tuzağı
+    // anlatıyor: iptal edilmeyen kare, bileşen geri geldiğinde "zaten kare
+    // bekliyor" sanılıp döngüyü kilitliyor.
+    return () => cancelAnimationFrame(frame);
+  }, [paint, running]);
+
+  /*
+    Hareket azaltılmışsa duraklatılmış başlıyor.
+
+    ⚠️ Render sırasında DEĞİL etkide okunuyor: `window.matchMedia` sunucuda yok
+    ve ilk çizim sunucuyla istemcide farklı çıkarsa React hidrasyonu kırıyor —
+    aynı tuzak `SpaceFeelSliders.tsx`te bir kez ölçülüp yazılmıştı. Bir karelik
+    hareket görünmüyor; imza zaten yavaş açılıyor.
+  */
+  useEffect(() => {
+    if (prefersReducedMotion()) setRunning(false);
+  }, []);
+
+  const toggle = useCallback(() => setRunning((on) => !on), []);
+
+  /**
+   * Topuk sürüklendi — saat oraya taşınıyor.
+   *
+   * ⚠️ Sürüklemek **duraklatıyor.** Akarken sürüklemek iki elin aynı topuza
+   * yapışması demek: bıraktığın kare bir sonraki karede kayıp gider ve "üçüncü
+   * saatte ne var" sorusu yine cevapsız kalırdı — düğmenin varlık sebebi de o
+   * soruydu.
+   */
+  const handleSeek = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      elapsedRef.current = seekCycle(Number(event.target.value) / SLIDER_STEPS);
+      setRunning(false);
+      paint(cycleProgress(elapsedRef.current));
+    },
+    [paint],
+  );
 
   return (
     <div className="w-full">
@@ -396,6 +488,44 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
           </g>
         ))}
       </svg>
+
+      {/*
+        Duraklat + zaman çubuğu.
+
+        Sahibin sözü: "tamam güzel de zor anlaşılıyor". Imza 12 saniyede hem
+        zamanı hem biçimi çeviriyor ve bakan kişi ikisini birden takip etmeye
+        çalışıyordu; durduramadığı için de bir kareye odaklanamıyordu.
+
+        Tek bir çubuk yetiyor çünkü `progress` ikisini de sürüyor: dakika
+        (`minutesAt`) ve biçim (`morphAt`). Iki ayrı denetim, aslında tek olan
+        bir şeyi iki şeymiş gibi gösterirdi.
+
+        Kaydıracın biçimi `/evolution`daki çizelgeden birebir: sitede aynı işi
+        yapan iki denetim aynı görünmeli.
+      */}
+      <div className="mt-5 flex items-center gap-4">
+        <button
+          type="button"
+          onClick={toggle}
+          /* `py-3` süs değil: yazı 10 px, dokunma hedefi 44 px'e bu şekilde çıkıyor. */
+          className="shrink-0 rounded-full px-2 py-3 text-[10px] tracking-[0.18em] text-white/50 transition-colors hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
+        >
+          {running ? t.chart.pause : t.chart.play}
+        </button>
+
+        <input
+          ref={sliderRef}
+          type="range"
+          min={0}
+          max={SLIDER_STEPS}
+          step={1}
+          defaultValue={0}
+          autoComplete="off"
+          onChange={handleSeek}
+          aria-label={t.chart.timeLabel}
+          className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/15 accent-white"
+        />
+      </div>
 
       {/*
         Renk = aile. Katman göstergesi (Üst/Kalp/Dip) burada YOK: imzada renk

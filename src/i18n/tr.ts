@@ -344,6 +344,8 @@ export const TR: Dict = {
   chart: {
     tiers: { top: 'Üst', heart: 'Kalp', base: 'Dip' },
     timeLabel: 'Zaman',
+    pause: 'DURAKLAT',
+    play: 'OYNAT',
     disclaimer:
       'Bu çizelge bir tahmindir, ölçüm değil. Notaların uçuculuğundan modellenmiştir; gerçek gelişim sıcaklığa, tene ve konsantrasyona göre değişir.',
     signatureLabel: (name, notes) =>
