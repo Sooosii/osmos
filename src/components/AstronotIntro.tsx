@@ -18,6 +18,17 @@ import {
   rowsFor,
 } from '@/lib/astronot-tram';
 import { prefersReducedMotion } from '@/lib/motion';
+import {
+  type Drop,
+  HANDOFF_MS,
+  coverAt,
+  dropAlpha,
+  emitPuff,
+  hissTotal,
+  mistBudget,
+  nozzleCell,
+  stepMist,
+} from '@/lib/atomizer-mist';
 import { useDict } from '@/i18n/LocaleProvider';
 
 /**
@@ -52,51 +63,68 @@ import { useDict } from '@/i18n/LocaleProvider';
  */
 
 /**
- * Astronot — tram için tonlandırılmış figür.
+ * Atomizör — tram için tonlandırılmış figür.
  *
- * Duruş sahibin taslağından türedi; siluete astronotu astronot yapan
- * parçalar eklendi (kollar + eldivenler, ayrık çanta kanatları, bacaklar,
- * botlar — "daha çok benzesin"). Dolgular düz beyaz değil gradyan: tram
- * noktalarının boyu bu tonlardan doğuyor. Vizördeki parıltı kara yüzeyin
- * üstünde tek ışık — kaskın "cam" olduğunu o söylüyor.
+ * Sahibin getirdiği referans: siyah zemin üzerinde eski bir parfüm şişesi,
+ * puarı sıkılmış, ağzından ince bir sis çıkıyor. Astronot buraya kadar
+ * kapının bekçisiydi; artık kapıda sitenin kendi nesnesi duruyor.
+ *
+ * ⚠️ **Örnekleyicinin dayattığı yazım kuralları** (`sampleCells`, 88×51
+ * ızgara, hücre 2.27 × 3.92 SVG birimi):
+ *
+ *   · Dolgular **beyaz + opaklık**, renk değil — parlaklık `alfa × kırmızı`
+ *     okunuyor, renkli bir dolgu bütün tonunu kaybederdi.
+ *   · `fill="black"` DELIK açıyor (astronotun vizör hilesi). Şişenin içindeki
+ *     sıvı bununla oyuluyor: camın "dolu" görünmesi o boşluktan geliyor.
+ *   · Ton aralığı 0.15–0.95; üstü `boostLuma`nın tavanına yapışıp düzleşiyor.
+ *   · Yatay öge ≥5 birim, **dikey öge ≥8 birim.** Bağlayıcı olan ikincisi:
+ *     boru, kordon ve bilezikler yatay ögeler ve örneklenen şey YÜKSEKLIKLERI.
+ *     Bu yüzden hepsinin `stroke-width`i 9'dan küçük değil.
+ *   · `filter`/`mask` yok — veri URI'siyle yüklenen bir görselde tutarsız
+ *     çalışıyorlar ve 88 sütuna inen bir ızgarada zaten hiçbir şey kazandırmazlardı.
+ *   · **Yatay çizgiye gradyan verilmiyor.** Ölçüldü: boru (`M114 68 H166`) düz
+ *     bir yatay yol, yani sınırlayıcı kutusunun yüksekliği SIFIR; varsayılan
+ *     `objectBoundingBox` gradyanı orada çöküyor ve çizgi hiç çizilmiyordu.
+ *     Ekranda uç havada duruyor, şişeyle arasında boşluk kalıyordu.
+ *
+ * ⚠️ **Ağız, üst yarının en sağındaki şey olmak zorunda.** Sisin çıktığı nokta
+ * elle yazılmıyor, ızgaradan türetiliyor (`nozzleCell`); tek şart bu. Uç üçgeni
+ * `x > 170`de ve `y ≈ 70`te duruyor, yani başka hiçbir parça oraya girmemeli.
  */
-const ASTRONOT_SVG = `<svg width="600" height="600" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+const ATOMIZER_SVG = `<svg width="600" height="600" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="kask" cx="0.38" cy="0.3" r="0.85">
-      <stop offset="0" stop-color="white" stop-opacity="0.95"/>
-      <stop offset="0.5" stop-color="white" stop-opacity="0.55"/>
-      <stop offset="1" stop-color="white" stop-opacity="0.2"/>
-    </radialGradient>
-    <linearGradient id="govde" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="white" stop-opacity="0.6"/>
-      <stop offset="1" stop-color="white" stop-opacity="0.26"/>
+    <linearGradient id="sise" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="white" stop-opacity="0.62"/>
+      <stop offset="1" stop-color="white" stop-opacity="0.24"/>
     </linearGradient>
     <linearGradient id="yan" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="white" stop-opacity="0.5"/>
       <stop offset="1" stop-color="white" stop-opacity="0.18"/>
     </linearGradient>
+    <radialGradient id="puar" cx="0.35" cy="0.32" r="0.8">
+      <stop offset="0" stop-color="white" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="white" stop-opacity="0.28"/>
+    </radialGradient>
     <radialGradient id="parla" cx="0.5" cy="0.5" r="0.5">
       <stop offset="0" stop-color="white" stop-opacity="0.85"/>
       <stop offset="1" stop-color="white" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <rect x="54" y="100" width="14" height="52" rx="4" fill="url(#yan)"/>
-  <rect x="132" y="100" width="14" height="52" rx="4" fill="url(#yan)"/>
-  <path d="M70 100 Q48 118 46 142" fill="none" stroke="url(#govde)" stroke-width="8" stroke-linecap="round"/>
-  <path d="M130 100 Q152 118 154 142" fill="none" stroke="url(#govde)" stroke-width="8" stroke-linecap="round"/>
-  <circle cx="46" cy="146" r="6" fill="white" fill-opacity="0.6"/>
-  <circle cx="154" cy="146" r="6" fill="white" fill-opacity="0.6"/>
-  <path d="M70 102 Q70 94 78 94 L122 94 Q130 94 130 102 L132 144 Q132 152 124 152 L76 152 Q68 152 68 144 Z" fill="url(#govde)" stroke="white" stroke-opacity="0.75" stroke-width="3"/>
-  <rect x="88" y="106" width="24" height="18" rx="3" fill="black" fill-opacity="0.45"/>
-  <line x1="92" y1="112" x2="108" y2="112" stroke="white" stroke-width="2" stroke-opacity="0.9"/>
-  <line x1="92" y1="117" x2="108" y2="117" stroke="white" stroke-width="2" stroke-opacity="0.9"/>
-  <rect x="78" y="152" width="17" height="34" rx="6" fill="url(#govde)" stroke="white" stroke-opacity="0.7" stroke-width="3"/>
-  <rect x="105" y="152" width="17" height="34" rx="6" fill="url(#govde)" stroke="white" stroke-opacity="0.7" stroke-width="3"/>
-  <rect x="76" y="182" width="21" height="12" rx="5" fill="white" fill-opacity="0.55"/>
-  <rect x="103" y="182" width="21" height="12" rx="5" fill="white" fill-opacity="0.55"/>
-  <circle cx="100" cy="58" r="38" fill="url(#kask)" stroke="white" stroke-opacity="0.9" stroke-width="4"/>
-  <path d="M74 62 Q74 40 100 40 Q126 40 126 62 Q126 82 100 82 Q74 82 74 62" fill="black"/>
-  <ellipse cx="88" cy="52" rx="14" ry="9" fill="url(#parla)"/>
+
+  <path d="M46 104 Q30 108 26 128" fill="none" stroke="url(#yan)" stroke-width="9" stroke-linecap="round"/>
+  <ellipse cx="44" cy="132" rx="27" ry="23" fill="url(#puar)" stroke="white" stroke-opacity="0.7" stroke-width="3"/>
+  <path d="M34 152 L32 168" stroke="white" stroke-opacity="0.45" stroke-width="6" stroke-linecap="round"/>
+  <path d="M44 155 L44 171" stroke="white" stroke-opacity="0.45" stroke-width="6" stroke-linecap="round"/>
+  <path d="M54 152 L56 168" stroke="white" stroke-opacity="0.45" stroke-width="6" stroke-linecap="round"/>
+
+  <path d="M62 122 Q56 96 82 92 L118 92 Q144 96 138 122 L138 168 Q138 182 122 182 L78 182 Q62 182 62 168 Z" fill="url(#sise)" stroke="white" stroke-opacity="0.75" stroke-width="3"/>
+  <path d="M66 132 L134 132 L134 166 Q134 178 122 178 L78 178 Q66 178 66 166 Z" fill="black"/>
+  <ellipse cx="78" cy="112" rx="10" ry="22" fill="url(#parla)"/>
+
+  <rect x="88" y="74" width="24" height="20" fill="url(#yan)"/>
+  <rect x="82" y="62" width="36" height="14" rx="3" fill="white" fill-opacity="0.7"/>
+  <path d="M114 68 H166" stroke="white" stroke-opacity="0.55" stroke-width="10" stroke-linecap="round"/>
+  <path d="M162 62 L184 68 L162 74 Z" fill="white" fill-opacity="0.9"/>
 </svg>`;
 
 interface Cell {
@@ -152,6 +180,7 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
   const bgRef = useRef<HTMLCanvasElement | null>(null);
   const figRef = useRef<HTMLCanvasElement | null>(null);
   const hintRef = useRef<HTMLParagraphElement | null>(null);
+  const mistRef = useRef<HTMLCanvasElement | null>(null);
   const [leaving, setLeaving] = useState(false);
   const [gone, setGone] = useState(false);
 
@@ -171,11 +200,21 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
     const bg = bgRef.current;
     const fig = figRef.current;
     const hint = hintRef.current;
-    if (!overlay || !bg || !fig || !hint) return;
+    const mist = mistRef.current;
+    if (!overlay || !bg || !fig || !hint || !mist) return;
 
     const bgCtx = bg.getContext('2d');
     const figCtx = fig.getContext('2d');
-    if (!bgCtx || !figCtx) return;
+    const mistCtx = mist.getContext('2d');
+    if (!bgCtx || !figCtx || !mistCtx) return;
+
+    /* Sisin durumu; hiçbiri React'e girmiyor, hepsi bu efektin ömrü kadar. */
+    const drops: Drop[] = [];
+    let sprayStart: number | null = null;
+    let handedOff = false;
+    let emitted = 0;
+    let nozzle: { readonly col: number; readonly row: number } | null = null;
+    let budget = 0;
 
     const rows = rowsFor(COLS);
     const figW = COLS * CELL_W;
@@ -289,6 +328,85 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
       }
     };
 
+    /*
+      Sis tuvali arka planla aynı ölçüde ve aynı yere çapalı: zerreler ekranın
+      her yerine gidebiliyor, figürün 616×612'lik kutusuna sığmıyorlar.
+    */
+    const setupMist = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const box = visibleBox();
+      mist.style.left = `${box.x}px`;
+      mist.style.top = `${box.y}px`;
+      mist.style.width = `${Math.round(box.w)}px`;
+      mist.style.height = `${Math.round(box.h)}px`;
+      mist.width = Math.round(box.w * dpr);
+      mist.height = Math.round(box.h * dpr);
+      mistCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      budget = mistBudget(box.w, box.h, !window.matchMedia('(pointer: fine)').matches);
+    };
+
+    /**
+     * Tek bir zerre lekesi, kurulumda bir kez üretiliyor.
+     *
+     * ⚠️ Zerre başına `createRadialGradient` kurmak kareyi öldürüyor: 640
+     * degrade, saniyede altmış kez. `CursorGlitter` aynı sebeple `lighter`
+     * kullanıyor ama orada zerre 420 ve leke yok. Burada tek bir sprite
+     * üretilip `drawImage` ile ölçekleniyor.
+     */
+    const sprite = document.createElement('canvas');
+    sprite.width = 64;
+    sprite.height = 64;
+    const spriteCtx = sprite.getContext('2d');
+    if (spriteCtx) {
+      const gradient = spriteCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      // Sıcak beyaz. Renk YOK: bu sitede renk aile demek (`glitter.ts`).
+      gradient.addColorStop(0, 'rgba(232, 224, 208, 1)');
+      gradient.addColorStop(1, 'rgba(232, 224, 208, 0)');
+      spriteCtx.fillStyle = gradient;
+      spriteCtx.fillRect(0, 0, 64, 64);
+    }
+
+    /** Figürün mantıksal koordinatını ekran koordinatına çeviren ölçek. */
+    const figScale = () => (fig.getBoundingClientRect().width || figW) / figW;
+
+    /**
+     * Ağzın o karedeki ekran koordinatı.
+     *
+     * Figür nefes alıyor (`bobOffset`), yani ağız da oynuyor: sis sabit bir
+     * noktadan çıksaydı püskürtme şişeden kopuk görünürdü.
+     */
+    const nozzlePoint = (tMs: number) => {
+      const box = visibleBox();
+      const scale = figScale();
+      const fx = ((nozzle?.col ?? COLS - 1) + 0.5) * CELL_W;
+      const fy = ((nozzle?.row ?? 0) + 0.5) * CELL_H + (still ? 0 : bobOffset(tMs));
+      return {
+        x: box.w / 2 + (fx - figW / 2) * scale,
+        y: box.h / 2 + (fy - figH / 2) * scale,
+      };
+    };
+
+    const drawMist = () => {
+      mistCtx.clearRect(0, 0, mist.width, mist.height);
+      // Toplamalı harmanlama: üst üste binen zerreler yoğunlaşıyor, kesişmiyor.
+      mistCtx.globalCompositeOperation = 'lighter';
+
+      for (const drop of drops) {
+        mistCtx.globalAlpha = dropAlpha(drop) * 0.14;
+        mistCtx.drawImage(
+          sprite,
+          drop.x - drop.radius,
+          drop.y - drop.radius,
+          drop.radius * 2,
+          drop.radius * 2,
+        );
+      }
+
+      mistCtx.globalAlpha = 1;
+      mistCtx.globalCompositeOperation = 'source-over';
+    };
+
     const still = prefersReducedMotion();
     let raf = 0;
     let timer = 0;
@@ -327,6 +445,7 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
       placeChrome(); // figürün CSS boyu burada belirleniyor — setupFig ondan okuyor
       setupBg();
       setupFig();
+      setupMist();
     };
 
     setupAll();
@@ -349,29 +468,95 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
       cells = sampleCells(image, COLS, rows);
 
       if (still) {
-        // Hareket istemeyene tek durağan kare; kapı duvara dönüşmesin diye
-        // kendiliğinden çekiliyor — perde de aynı tercihte kısa oynuyor.
+        /*
+          Hareket istemeyene tek durağan kare; kapı duvara dönüşmesin diye
+          kendiliğinden çekiliyor — perde de aynı tercihte kısa oynuyor.
+          Sis yok: 640 zerrelik bir bulut, o tercihin tam olarak istemediği şey.
+
+          ⚠️ Burada `setLeaving` DOĞRUDAN çağrılıyordu ve sessiz bir kusurdu:
+          `onLeaving` hiç ateşlenmiyor, dolayısıyla `acilisiIsaretle`
+          çalışmıyordu. Hareket azaltılmış bir cihazda kapı **her dönüşte**
+          yeniden açılıyordu. `handOff` ikisini birden yapıyor.
+        */
         drawBg(0);
         drawFig(0);
-        timer = window.setTimeout(() => setLeaving(true), 1600);
+        timer = window.setTimeout(handOff, 1600);
         return;
       }
 
+      nozzle = nozzleCell(cells, COLS, rows);
+
+      let last = performance.now();
       const loop = (tMs: number) => {
+        const dtMs = Math.min(tMs - last, 50);
+        last = tMs;
+
         drawBg(tMs);
-        drawFig(tMs);
+
+        if (sprayStart === null) {
+          drawFig(tMs);
+        } else {
+          const elapsed = performance.now() - sprayStart;
+
+          // Figür kendi sisinin içinde eriyor — ayrı bir solma yok.
+          figCtx.globalAlpha = 1 - coverAt(elapsed);
+          drawFig(tMs);
+          figCtx.globalAlpha = 1;
+
+          /*
+            "Şu ana kadar kaç zerre çıkmış olmalıydı?" — anlık hız değil birikim.
+            Kaç kare geçtiğinin önemi yok; tek bir kare bile tıslamanın tamamını
+            doğurabiliyor. Gerekçe `hissTotal`da: kare hızı düşük olduğunda
+            220 ms'lik pencere iki karenin arasına düşüyordu ve kapı sissiz
+            açılıyordu (tarayıcıda ölçüldü).
+          */
+          const born = Math.floor(hissTotal(elapsed, budget) - emitted);
+          if (born > 0) {
+            emitted += born;
+            emitPuff(drops, { origin: nozzlePoint(tMs), count: born, scale: figScale() });
+          }
+
+          stepMist(drops, dtMs);
+          drawMist();
+
+          if (elapsed >= HANDOFF_MS) handOff();
+        }
+
         raf = requestAnimationFrame(loop);
       };
       raf = requestAnimationFrame(loop);
     };
-    image.src = `data:image/svg+xml,${encodeURIComponent(ASTRONOT_SVG)}`;
+    image.src = `data:image/svg+xml,${encodeURIComponent(ATOMIZER_SVG)}`;
 
-    // Katman tıklanamaz olduğu için olaylar window'dan dinleniyor; hepsi
-    // tuvale de uğruyor, yani uğurlama yaklaşmayı geciktirmiyor. `onLeaving`
-    // burada ateşleniyor: perde, astronot daha solarken alta kurulsun.
-    const leave = () => {
+    /*
+      Katman tıklanamaz olduğu için olaylar window'dan dinleniyor; hepsi tuvale
+      de uğruyor, yani uğurlama yaklaşmayı geciktirmiyor.
+
+      Uğurlama artık iki parçalı: hareket **tıslamayı** başlatıyor, perde
+      `HANDOFF_MS` sonra devralıyor. `onLeaving` o anda ateşleniyor, yani perde
+      hâlâ opak — üstelik eskisinden daha opak, çünkü ekranı sis kaplamış
+      oluyor. `Acilis.tsx`in beklediği sözleşme (perde, katman solmaya
+      başlamadan ÖNCE altta kurulu olsun) daha da sağlam duruyor.
+
+      ⚠️ `{ once: true }` yalnızca ATEŞLENEN dinleyiciyi söküyor. Tekerlekten
+      sonra gelen bir tuş `leave`i ikinci kez çağırıyor; eskiden zararsızdı
+      (iki kez `setLeaving`), sisle birlikte püskürtmeyi baştan başlatırdı.
+      Kilit bu yüzden.
+    */
+    const handOff = () => {
+      if (handedOff) return;
+      handedOff = true;
       setLeaving(true);
       onLeavingRef.current?.();
+    };
+
+    const leave = () => {
+      if (sprayStart !== null) return;
+      sprayStart = performance.now();
+
+      // Kareler hiç başlamadıysa (SVG yüklenmedi ya da hareket azaltılmış)
+      // çizecek sis de yok: uğurlama doğrudan.
+      if (still || nozzle === null) handOff();
     };
     window.addEventListener('wheel', leave, { once: true, passive: true });
     window.addEventListener('scroll', leave, { once: true, passive: true });
@@ -432,6 +617,7 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
         (`ScentSpaceCanvas`), oradaki gerçek yol `SpaceKeyboardList`.
       */}
       <canvas ref={bgRef} aria-hidden="true" className="absolute" />
+
       <canvas
         ref={figRef}
         aria-hidden="true"
@@ -447,6 +633,17 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
         bağımsız. Aynı karar parfüm künyesinde de yazılı; sitede CSS
         `uppercase` artık hiç kullanılmıyor ve bunu bir sınama denetliyor.
       */}
+      {/*
+        Sis tuvali figürün ÜSTÜNDE: püskürtme atomizörün önünden geçiyor.
+
+        ⚠️ Kendi kapanan yazılmak zorunda. Erişilebilirlik sınaması tuval
+        etiketlerini kendi kapanan biçimiyle arıyor; açık-kapalı yazılsaydı
+        eşleşme ilgisiz işaretlemeye kadar sürüklenir ve sınama anlaşılmaz bir
+        yerde kırılırdı. (Bu yorumda etiketin kendisi örnek olarak bile
+        yazılamıyor — sınama onu da gerçek sanıyor, ölçüldü.)
+      */}
+      <canvas ref={mistRef} aria-hidden="true" className="absolute" />
+
       <p
         ref={hintRef}
         className="absolute -translate-x-1/2 text-[0.6875rem] tracking-[0.3em] whitespace-nowrap text-white/20 [text-indent:0.3em]"
