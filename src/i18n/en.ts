@@ -251,6 +251,7 @@ export const EN = {
      * yapılıyor, CSS ile: `pointer: coarse`.
      */
     entryHintTouch: 'KEEP SWIPING',
+    heading: 'Scent space',
     keyboardList: 'Scent space — go to a perfume',
     perfumeLink: (name: string) => `${name} page`,
     sliders: {
