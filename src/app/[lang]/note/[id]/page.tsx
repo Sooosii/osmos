@@ -150,13 +150,23 @@ export default async function NotePage({
       <ScreenFrame
         nav={
           <nav className="flex items-center gap-3 text-[10px] tracking-[0.3em] text-white/50">
-            <Link href={withLocale(locale, '/')} className="transition-colors hover:text-white">
+            <Link
+              href={withLocale(locale, '/')}
+              /* Cerceve baglantisi: onden getirilmiyor, gerekce `LangSwitch`te. */
+              prefetch={false}
+              className="transition-colors hover:text-white"
+            >
               {t.site.name}
             </Link>
             <span aria-hidden="true" className="text-white/20">
               ·
             </span>
-            <Link href={withLocale(locale, '/notes')} className="transition-colors hover:text-white">
+            <Link
+              href={withLocale(locale, '/notes')}
+              /* Cerceve baglantisi: onden getirilmiyor, gerekce `LangSwitch`te. */
+              prefetch={false}
+              className="transition-colors hover:text-white"
+            >
               {t.nav.notes}
             </Link>
           </nav>

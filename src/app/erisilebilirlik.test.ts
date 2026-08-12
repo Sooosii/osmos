@@ -75,14 +75,26 @@ describe('her sayfanin govdesi', () => {
     }
   });
 
-  test('kapida bir baslik var', () => {
+  test('kapida bir baslik var ve Suspense DISINDA', () => {
     /*
-      ⚠️ Sitenin en çok görülen sayfasında **hiç başlık yoktu** (hiçbir
-      düzeyde). Görünmez bir başlık eklenmedi: ekranda zaten duran ad `h1`
-      yapıldı, yani gören ve görmeyen aynı şeyi okuyor. `p`ye geri
-      çevrilirse sayfa yine başlıksız kalır.
+      ⚠️ Bu sınama iki kez ölçülerek yazıldı.
+
+      ① Sitenin en çok görülen sayfasında hiç başlık yoktu, hiçbir düzeyde.
+      ② İlk onarım tarayıcıda doğru görünüyordu ama üretim derlemesinin
+         `en.html`inde başlık **yine yoktu**: uzay `useSearchParams` okuduğu
+         için o alt ağaç statik üretimde istemciye erteleniyor. Yani başlık
+         `Suspense`in içine konursa ancak hidrasyondan sonra doğuyor.
+
+      Sıra bu yüzden sınanıyor: başlık sınırdan ÖNCE gelmezse hata sessizce
+      geri döner — tarayıcıda hâlâ doğru görünür, yalnız ham HTML boş kalır.
     */
-    expect(read('src/app/[lang]/page.tsx')).toMatch(/<h1[\s>]/);
+    const source = read('src/app/[lang]/page.tsx');
+    const heading = source.indexOf('<h1');
+    const boundary = source.indexOf('<Suspense');
+
+    expect(heading).toBeGreaterThan(-1);
+    expect(boundary).toBeGreaterThan(-1);
+    expect(heading).toBeLessThan(boundary);
   });
 });
 

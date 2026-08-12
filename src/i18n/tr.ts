@@ -191,6 +191,7 @@ export const TR: Dict = {
       yapıştır değil, dilin kendi cevabı.
     */
     entryHintTouch: 'KAYDIRMAYA DEVAM ET',
+    heading: 'Koku uzayı',
     keyboardList: 'Koku uzayı — parfüme git',
     perfumeLink: (name) => `${name} sayfası`,
     sliders: {

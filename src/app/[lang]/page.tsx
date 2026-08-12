@@ -51,6 +51,21 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
      */
     <main className="fixed inset-0 overflow-hidden bg-black text-white">
       {/*
+        Sayfanın başlığı — görünmez, ve `Suspense`in DIŞINDA.
+
+        ⚠️ İki kez ölçüldü (2026-08-12). Önce: kapıda **hiç başlık yoktu**,
+        hiçbir düzeyde. Sonra ekranda zaten duran ad `h1` yapıldı ve tarayıcıda
+        doğru göründü — ama üretim derlemesinin `en.html`inde **yine yoktu**.
+        Sebep aşağıdaki sınır: uzay `useSearchParams` okuduğu için o alt ağaç
+        statik üretimde istemciye erteleniyor, yani içine konan başlık ancak
+        hidrasyondan sonra doğuyor.
+
+        Bu yüzden başlık kabukta. Görünmez olması bir ödün değil: görünen ad
+        yaklaşma sahnesi bitene kadar zaten ekranda yok, yani "gören ve
+        görmeyen aynı şeyi okusun" burada zaten kurulamıyordu.
+      */}
+      <h1 className="sr-only">{t.space.heading}</h1>
+      {/*
         Suspense şart, süs değil. Uzay `?mark=` parametresini okuyor
         (`useSearchParams`) ve o kanca, sınır olmadan bütün sayfayı istemci
         tarafına düşürüyor: üretim derlemesi "/" sayfasını önceden üretemeyip
@@ -81,18 +96,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             üstüne binerdi. İkisi artık tek bir sütunda, akışla diziliyor.
           */}
           <div>
-            {/*
-              Sayfanın tek başlığı. Görünen bir şey değişmiyor — Tailwind'in
-              preflight'ı `h1`in punto ve kalınlığını sıfırlıyor, biçimi zaten
-              sınıflar veriyor.
-
-              ⚠️ Ölçüldü (2026-08-12): sitenin kapısında **hiç başlık yoktu**
-              (`h1` 0, hiçbir düzeyde başlık yok). Ekran okuyucuyla gelen biri
-              için sayfa gövdesiz bir metin yığınıydı. Görünmez bir `sr-only`
-              başlık eklemek yerine ekranda zaten duran ad başlık yapıldı:
-              gören ve görmeyen aynı şeyi okuyor.
-            */}
-            <h1 className="text-xs tracking-[0.3em] text-white/50">{t.site.name}</h1>
+            <p className="text-xs tracking-[0.3em] text-white/50">{t.site.name}</p>
             <p className="mt-3 max-w-[15rem] text-xs leading-relaxed text-white/50">
               {t.space.intro(PERFUMES.length)}
             </p>

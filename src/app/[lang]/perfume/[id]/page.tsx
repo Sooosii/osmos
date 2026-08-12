@@ -163,7 +163,12 @@ export default async function PerfumePage({
               `?mark=` uzayın o parfümü seçili açması için. Tarayıcının geri tuşu
               da aynı yere düşüyor; iki yol tek davranışta buluşuyor.
             */}
-            <Link href={`${withLocale(locale, '/')}?mark=${perfume.id}`} className="transition-colors hover:text-white">
+            <Link
+              href={`${withLocale(locale, '/')}?mark=${perfume.id}`}
+              /* Çerçeve bağlantısı: önden getirilmiyor, gerekçe `LangSwitch`te. */
+              prefetch={false}
+              className="transition-colors hover:text-white"
+            >
               OSMOS
             </Link>
             <span aria-hidden="true" className="text-white/20">
@@ -171,6 +176,8 @@ export default async function PerfumePage({
             </span>
             <Link
               href={withLocale(locale, '/notes')}
+              /* Çerçeve bağlantısı: önden getirilmiyor, gerekçe `LangSwitch`te. */
+              prefetch={false}
               className="transition-colors hover:text-white"
             >
               {t.nav.notes}
