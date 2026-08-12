@@ -53,6 +53,9 @@ export const CURATED_F: readonly Perfume[] = [
       { noteId: 'vanilla', tier: 'base', weight: 0.6 },
       { noteId: 'vetiver', tier: 'base', weight: 0.4 },
     ],
+    retailers: [
+      { name: 'MiN New York', url: 'https://min.com/product/long-board/' },
+    ],
   },
   {
     id: 'floraiku-gong',
@@ -133,6 +136,9 @@ export const CURATED_F: readonly Perfume[] = [
       { noteId: 'cinnamon', tier: 'base', weight: 0.3 },
       { noteId: 'sandalwood', tier: 'base', weight: 0.4 },
     ],
+    retailers: [
+      { name: "L'Artisan Parfumeur", url: 'https://www.artisanparfumeur.com/us/en_US/p/mandarina-corsica-eau-de-parfum-100ml--000000000065173424' },
+    ],
   },
   {
     id: 'm-micallef-gntonic',
@@ -162,6 +168,17 @@ export const CURATED_F: readonly Perfume[] = [
       { noteId: 'vetiver', tier: 'base', weight: 0.5 },
       { noteId: 'sandalwood', tier: 'base', weight: 0.5 },
       { noteId: 'amber-accord', tier: 'base', weight: 0.4 },
+    ],
+    /*
+      ⚠️ **Dekant, tam şişe değil** — ve satıcı adında bu yüzden yazıyor.
+      Bu parfüm hiçbir normal satıcıda yok (gerekçeler
+      `docs/superpowers/specs/2026-08-12-satici-bosluklari-design.md`te);
+      Scent Split gerçek şişeyi küçük şişelere aktarıp satıyor. Sahip
+      "yeri boş kalmasın" dedi, ama okur tam şişe beklemesin diye ad
+      "(decant)" taşıyor. Adı sadeleştirmek bu satırı yanıltıcı yapar.
+    */
+    retailers: [
+      { name: 'Scent Split (decant)', url: 'https://www.scentsplit.com/products/m-micallef-gntonic-sample-decants' },
     ],
   },
   {
@@ -202,6 +219,9 @@ export const CURATED_F: readonly Perfume[] = [
       { noteId: 'rose', tier: 'heart', weight: 0.8 },
       { noteId: 'cocoa', tier: 'heart', weight: 0.6 },
       { noteId: 'sandalwood', tier: 'base', weight: 1.0 },
+    ],
+    retailers: [
+      { name: 'Serge Lutens', url: 'https://sergelutens.com/products/santal-majuscule-eau-de-parfum-spray' },
     ],
   },
   {

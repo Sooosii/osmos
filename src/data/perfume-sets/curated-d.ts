@@ -69,6 +69,28 @@ export const CURATED_D: readonly Perfume[] = [
       { noteId: 'amber-accord', tier: 'base', weight: 0.4 },
       { noteId: 'white-musk', tier: 'base', weight: 0.3 },
     ],
+    /*
+      ⚠️ **Bu satır ürünün kendisine GİTMİYOR — sahip bilerek böyle istedi**
+      (2026-08-12, "yeri boş kalmasın"). Uyarı iletildi ve karar tekrarlandı.
+
+      Oud hiçbir yerde satılmıyor: Scent Split (9.981 ürün), The Perfumed
+      Court (2.671), MicroPerfumes (1.672), Luckyscent (386 marka),
+      FragranceX ve Bloom Perfumery — hiçbirinde marka bile geçmiyor.
+      Markanın kendi mağazasında **tek ürün** var (Gin Sling) ve o da
+      tükenmiş; marka uykuda görünüyor.
+
+      Adres kökü değil **ürün listesi**: kök bir tanıtım sayfası, liste ise
+      markanın elindeki her şeyi tek bakışta gösteriyor — ziyaretçi "Oud yok"
+      olduğunu hemen anlıyor. Kök ayrıca `retailers.test.ts`in ana sayfa
+      kapısına takılırdı; kapı bu tek parfüm için gevşetilmedi.
+
+      ⚠️ Marka uyanır ve Oud'u satmaya başlarsa bu adres ürün sayfasıyla
+      değiştirilecek. O güne kadar sitenin "nerede bulunur" sözünün en zayıf
+      halkası burası.
+    */
+    retailers: [
+      { name: 'Aaron Terence Hughes', url: 'https://aaronterencehughes.com/collections/all' },
+    ],
   },
   {
     // Küratör tarifi: aşırı meyveli, temiz, yazlık, eşsiz. Adında oud geçiyor
@@ -132,6 +154,9 @@ export const CURATED_D: readonly Perfume[] = [
       { noteId: 'vanilla', tier: 'base', weight: 0.4 },
       { noteId: 'labdanum', tier: 'base', weight: 0.4 },
     ],
+    retailers: [
+      { name: 'Luckyscent', url: 'https://www.luckyscent.com/products/les-jeux-sont-faits-by-jovoy-paris' },
+    ],
   },
   {
     // Lavs'ın eksik komşusu. Lavs tütsünün soğuk-taş hâli, bu ısıtılmış hâli;
@@ -155,6 +180,9 @@ export const CURATED_D: readonly Perfume[] = [
       { noteId: 'vanilla', tier: 'base', weight: 0.6 },
       { noteId: 'benzoin', tier: 'base', weight: 0.4 },
       { noteId: 'white-musk', tier: 'base', weight: 0.4 },
+    ],
+    retailers: [
+      { name: 'Jo Malone London', url: 'https://www.jomalone.com/product/25946/110447/colognes/myrrh-tonka-cologne-intense' },
     ],
   },
   {

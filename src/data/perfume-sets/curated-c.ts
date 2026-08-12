@@ -32,6 +32,9 @@ export const CURATED_C: readonly Perfume[] = [
       { noteId: 'cedar', tier: 'base', weight: 0.4 },
       { noteId: 'white-musk', tier: 'base', weight: 0.3 },
     ],
+    retailers: [
+      { name: 'Frédéric Malle', url: 'https://www.fredericmalle.com/product/19566/50181/parfums/bigarade-concentree/by-jean-claude-ellena' },
+    ],
   },
   {
     id: 'penhaligons-sartorial',
@@ -201,6 +204,17 @@ export const CURATED_C: readonly Perfume[] = [
       { noteId: 'white-musk', tier: 'base', weight: 0.4 },
       { noteId: 'vanilla', tier: 'base', weight: 0.3 },
     ],
+    /*
+      ⚠️ **Dekant, tam şişe değil** — ve satıcı adında bu yüzden yazıyor.
+      Bu parfüm hiçbir normal satıcıda yok (gerekçeler
+      `docs/superpowers/specs/2026-08-12-satici-bosluklari-design.md`te);
+      Scent Split gerçek şişeyi küçük şişelere aktarıp satıyor. Sahip
+      "yeri boş kalmasın" dedi, ama okur tam şişe beklemesin diye ad
+      "(decant)" taşıyor. Adı sadeleştirmek bu satırı yanıltıcı yapar.
+    */
+    retailers: [
+      { name: 'Scent Split (decant)', url: 'https://www.scentsplit.com/products/serge-lutens-tubereuse-criminelle-sample-decants' },
+    ],
   },
   {
     id: 'van-cleef-moonlight-patchouli',
@@ -223,6 +237,18 @@ export const CURATED_C: readonly Perfume[] = [
       { noteId: 'labdanum', tier: 'base', weight: 0.4 },
       { noteId: 'vanilla', tier: 'base', weight: 0.4 },
       { noteId: 'cedar', tier: 'base', weight: 0.3 },
+    ],
+    /*
+      ⚠️ **Yoğunluk uyuşmuyor ve bilerek böyle** (sahip karar verdi, 2026-08-12).
+      Künye 2016 EDP'sinin; Van Cleef bugün yalnızca **Moonlight Patchouli
+      Le Parfum** satıyor ve sayfası bunu açıkça "reinvented ... more intense
+      version" diye tanıtıyor. Özgün EDP markanın kataloğundan düşmüş
+      (Collection Extraordinaire'in 24 ürünü tarandı), Luckyscent Van Cleef'ten
+      yalnızca iki koku taşıyor, FragranceX markayı hiç taşımıyor. Bağlantı
+      duruyor çünkü alternatifi hiç cevap vermemek.
+    */
+    retailers: [
+      { name: 'Van Cleef & Arpels', url: 'https://www.vancleefarpels.com/us/en/collections/fragrances/collection-extraordinaire/vcarpgr000---moonlight-patchouli-le-parfum.html' },
     ],
   },
 ] as const;

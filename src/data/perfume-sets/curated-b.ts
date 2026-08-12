@@ -35,6 +35,19 @@ export const CURATED_B: readonly Perfume[] = [
       { noteId: 'sandalwood', tier: 'base', weight: 0.5 },
       { noteId: 'beeswax', tier: 'base', weight: 0.3 },
     ],
+    /*
+      ⚠️ **Yoğunluk uyuşmuyor ve bilerek böyle** (sahip karar verdi, 2026-08-12).
+      Yukarıdaki künye 2021 EDP'sinin; Guerlain bugün o isimle yalnızca
+      **Vanille Planifolia Extrait 21** satıyor (US ve uluslararası mağazada
+      aynı ürün kodu, P014754). Bağlantı yine de duruyor çünkü markanın kendi
+      ana sayfası ona sadece "L'Art & La Matière VANILLE PLANIFOLIA" diyor —
+      yani ziyaretçinin "nerede bulunur" sorusunun gerçek cevabı bu sayfa.
+      FragranceX Guerlain taşıyor (28 ürün) ama Planifolia yok; başka bir
+      seçenek ölçülmedi. Bu bir gözden kaçma DEĞİL, tartılmış bir karar.
+    */
+    retailers: [
+      { name: 'Guerlain', url: 'https://www.guerlain.com/us/en-us/p/lart-la-matiere-vanille-planifolia-extrait-21-extract-P014754.html' },
+    ],
   },
   {
     // Küratör yönü: önce vanilya, sonra tuz. Etraftaki tatlı-meyveli yaz
@@ -201,6 +214,17 @@ export const CURATED_B: readonly Perfume[] = [
       { noteId: 'sugar', tier: 'base', weight: 0.5 },
       { noteId: 'white-musk', tier: 'base', weight: 0.5 },
       { noteId: 'sandalwood', tier: 'base', weight: 0.3 },
+    ],
+    /*
+      ⚠️ **Dekant, tam şişe değil** — ve satıcı adında bu yüzden yazıyor.
+      Bu parfüm hiçbir normal satıcıda yok (gerekçeler
+      `docs/superpowers/specs/2026-08-12-satici-bosluklari-design.md`te);
+      Scent Split gerçek şişeyi küçük şişelere aktarıp satıyor. Sahip
+      "yeri boş kalmasın" dedi, ama okur tam şişe beklemesin diye ad
+      "(decant)" taşıyor. Adı sadeleştirmek bu satırı yanıltıcı yapar.
+    */
+    retailers: [
+      { name: 'Scent Split (decant)', url: 'https://www.scentsplit.com/products/city-rhythm-miami-tropical-confessions-sample-decants' },
     ],
   },
   {

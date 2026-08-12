@@ -61,6 +61,9 @@ export const CURATED_A: readonly Perfume[] = [
       { noteId: 'patchouli', tier: 'base', weight: 0.5 },
       { noteId: 'labdanum', tier: 'base', weight: 0.4 },
     ],
+    retailers: [
+      { name: 'Dior', url: 'https://www.dior.com/en_us/beauty/products/oud-ispahan-Y0909280.html' },
+    ],
   },
   {
     id: 'diptyque-philosykos',
@@ -285,6 +288,9 @@ export const CURATED_A: readonly Perfume[] = [
       { noteId: 'benzoin', tier: 'base', weight: 0.6 },
       { noteId: 'tonka', tier: 'base', weight: 0.5 },
       { noteId: 'labdanum', tier: 'base', weight: 0.4 },
+    ],
+    retailers: [
+      { name: 'Argos', url: 'https://argosfragrances.com/products/argos-triumph-of-bacchus-perfume' },
     ],
   },
 ] as const;

@@ -42,6 +42,9 @@ export const CURATED_E: readonly Perfume[] = [
       { noteId: 'sandalwood', tier: 'base', weight: 0.4 },
       { noteId: 'tonka', tier: 'base', weight: 0.3 },
     ],
+    retailers: [
+      { name: 'Argos', url: 'https://argosfragrances.com/products/argos-pour-femme-perfume' },
+    ],
   },
   {
     // Küratör: "Madagaskar vanilyası, sonradan yoğunlaşan; açılışından sonuna
@@ -72,6 +75,17 @@ export const CURATED_E: readonly Perfume[] = [
       { noteId: 'tonka', tier: 'base', weight: 0.4 },
       { noteId: 'benzoin', tier: 'base', weight: 0.3 },
       { noteId: 'sandalwood', tier: 'base', weight: 0.3 },
+    ],
+    /*
+      ⚠️ **Dekant, tam şişe değil** — ve satıcı adında bu yüzden yazıyor.
+      Bu parfüm hiçbir normal satıcıda yok (gerekçeler
+      `docs/superpowers/specs/2026-08-12-satici-bosluklari-design.md`te);
+      Scent Split gerçek şişeyi küçük şişelere aktarıp satıyor. Sahip
+      "yeri boş kalmasın" dedi, ama okur tam şişe beklemesin diye ad
+      "(decant)" taşıyor. Adı sadeleştirmek bu satırı yanıltıcı yapar.
+    */
+    retailers: [
+      { name: 'Scent Split (decant)', url: 'https://www.scentsplit.com/products/royal-crown-nocturna-sample-decants' },
     ],
   },
   {
@@ -166,6 +180,9 @@ export const CURATED_E: readonly Perfume[] = [
       { noteId: 'white-musk', tier: 'base', weight: 0.6 },
       { noteId: 'ambergris', tier: 'base', weight: 0.4 },
       { noteId: 'sandalwood', tier: 'base', weight: 0.3 },
+    ],
+    retailers: [
+      { name: "Parfums d'Elmar", url: 'https://parfumsdelmar.com/products/yaringa' },
     ],
   },
   {
