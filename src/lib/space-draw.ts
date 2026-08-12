@@ -1,6 +1,7 @@
 import type { SpaceMark } from '@/data/types';
 import { type Camera, type Viewport, markRadius, worldToScreen } from './space-camera';
-import { type FeelTarget, feelAnchor, feelMatch, hasFeel } from './space-feel';
+import { FEEL_REACH, type FeelTarget, feelAnchor, feelMatch, hasFeel } from './space-feel';
+import { RAIL_REACH, type Rail, railFeel, railOffset, railX } from './space-rail';
 
 /**
  * Koku Uzayı'nın çizimi — tuval, veri ve kamera girer, resim çıkar.
@@ -116,6 +117,28 @@ export interface SpaceScene {
    * yol açardı.
    */
   readonly shelved: ReadonlySet<string>;
+  /**
+   * Seçili noktanın sıcaklık rayı — "bunun gibi, ama daha sıcak".
+   *
+   * ⚠️ `markAlpha`daki **"seçim kazanır"** kuralının tek istisnası, ve
+   * gerekçesi kuralın kendisiyle aynı: kaydıraç GENIŞ bir soru, seçim DAR bir
+   * soru ve geniş olan darın cevabını söndüremez. Ray üçüncü bir hâl —
+   * **dar sorudan TÜREYEN** bir soru. Cevabı da haritanın tamamı olmak
+   * zorunda, yoksa "bunun gibi ama daha sıcak" diye bir şey söylenemez.
+   * O yüzden ray sürerken vurgu sönümü kalkıyor ve komşu çizgileri çekiliyor.
+   *
+   * `geometry` yalnız parmak dururken dolu: bırakınca ray ekrandan kalkıyor,
+   * tarif kalıyor. Kalıcı bir ray çizilmiyor — sürekli duran bir çizgi
+   * seçimin kendisini gürültüye boğardı.
+   */
+  readonly rail: RailState | null;
+}
+
+export interface RailState {
+  readonly markId: string;
+  /** Sorulan sıcaklık, 0…1. */
+  readonly value: number;
+  readonly geometry: Rail | null;
 }
 
 /**
@@ -188,19 +211,28 @@ function markAlpha(mark: SpaceMark, dimmed: boolean, nearness: number | null): n
   return DIM_ALPHA + (full - DIM_ALPHA) * nearness;
 }
 
-function drawMark(
-  ctx: CanvasRenderingContext2D,
-  mark: SpaceMark,
-  scene: SpaceScene,
-  dimmed: boolean,
-  anchor: number,
-  responding: boolean,
-) {
-  const { sx, sy } = worldToScreen(mark, scene.camera, scene.viewport);
+/** Bir karede bütün noktalar için ortak olan; nokta başına değişen tek şey `offsetX`. */
+interface Pass {
+  readonly dimmed: boolean;
+  readonly anchor: number;
+  /** Sorulan tarif; `null` "kimse bir şey sormuyor". */
+  readonly asked: FeelTarget | null;
+  readonly reach: number;
+  /** Rayda sürüklenen noktanın ekran kayması; öbürlerinde 0. */
+  readonly offsetX: number;
+}
+
+function drawMark(ctx: CanvasRenderingContext2D, mark: SpaceMark, scene: SpaceScene, pass: Pass) {
+  const placed = worldToScreen(mark, scene.camera, scene.viewport);
+  const sx = placed.sx + pass.offsetX;
+  const sy = placed.sy;
+  const dimmed = pass.dimmed;
   const active = mark.id === scene.hoveredId || mark.id === scene.selectedId;
 
-  // `null` "kaydıraç konuşmuyor" demek; 0…1 ise tarife uyum derecesi.
-  const nearness = responding ? feelMatch(mark.feel, scene.feel, anchor) : null;
+  // `null` "kimse bir şey sormuyor" demek; 0…1 ise tarife uyum derecesi.
+  const nearness = pass.asked
+    ? feelMatch(mark.feel, pass.asked, pass.anchor, pass.reach)
+    : null;
   const lift = nearness ?? 0;
 
   const radius =
@@ -341,6 +373,37 @@ function drawEntry(ctx: CanvasRenderingContext2D, mark: SpaceMark, scene: SpaceS
   }
 }
 
+/** Rayın rengi ve kalınlığı — bağlantı çizgisiyle aynı dil. */
+const RAIL_COLOR = 'rgba(255,255,255,0.22)';
+const RAIL_TICK = 7;
+
+/**
+ * Sıcaklık rayı: ince bir çizgi ve iki uç çentiği.
+ *
+ * COOL/WARM sözcükleri burada YAZILMIYOR — onlar HTML, kaplamada duruyor.
+ * Tuvale metin yazmak sözlüğü bu modüle sokardı; aynı karar seçili noktanın
+ * etiketinde de verilmişti.
+ */
+function drawRail(ctx: CanvasRenderingContext2D, rail: Rail) {
+  const left = railX(rail, 0);
+  const right = railX(rail, 1);
+
+  ctx.strokeStyle = RAIL_COLOR;
+  ctx.lineWidth = 1;
+
+  ctx.beginPath();
+  ctx.moveTo(left, rail.centerY);
+  ctx.lineTo(right, rail.centerY);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(left, rail.centerY - RAIL_TICK);
+  ctx.lineTo(left, rail.centerY + RAIL_TICK);
+  ctx.moveTo(right, rail.centerY - RAIL_TICK);
+  ctx.lineTo(right, rail.centerY + RAIL_TICK);
+  ctx.stroke();
+}
+
 export function drawSpace(ctx: CanvasRenderingContext2D, scene: SpaceScene) {
   // Zemin opak: temizlemeye gerek yok, üstüne yazıyor.
   drawBackground(ctx, scene.viewport);
@@ -349,11 +412,20 @@ export function drawSpace(ctx: CanvasRenderingContext2D, scene: SpaceScene) {
     ? (scene.marks.find((mark) => mark.id === scene.selectedId) ?? null)
     : null;
 
-  // Seçim varken yalnızca o parfüm ve komşuları tam parlaklıkta kalıyor —
-  // harita bir anda "şu, şuna benziyor" cümlesine dönüşüyor.
-  const highlighted = selected ? new Set([selected.id, ...selected.neighborIds]) : null;
+  /*
+    Seçim varken yalnızca o parfüm ve komşuları tam parlaklıkta kalıyor —
+    harita bir anda "şu, şuna benziyor" cümlesine dönüşüyor.
 
-  if (selected) drawLinks(ctx, selected, scene);
+    Ray sürerken bu kalkıyor: soru artık "bu neye benziyor" değil, "bunun gibi
+    ama daha sıcak ne var" ve cevabı haritanın tamamı. Komşu çizgileri de
+    çekiliyor, yoksa ekran iki farklı soruya birden cevap veriyormuş gibi olur.
+  */
+  const railing = scene.rail !== null;
+  const highlighted =
+    selected && !railing ? new Set([selected.id, ...selected.neighborIds]) : null;
+
+  if (selected && !railing) drawLinks(ctx, selected, scene);
+  if (scene.rail?.geometry) drawRail(ctx, scene.rail.geometry);
 
   /*
    * Giriş ilerledikçe sönük noktalar çizilmiyor.
@@ -372,19 +444,38 @@ export function drawSpace(ctx: CanvasRenderingContext2D, scene: SpaceScene) {
    * Kaydıraca dokunulmadıysa hiç hesaplanmıyor — dizi bile kurulmuyor. Sık olan
    * durum bu ve uzayın açılış karesi de buraya düşüyor.
    */
-  // Kaydıraç ancak seçim yokken konuşuyor — gerekçesi `markAlpha`da.
-  const responding = scene.selectedId === null && hasFeel(scene.feel);
-  const anchor = responding
+  /*
+    Sorulan tarif üç yerden gelebiliyor ve sırası önemli:
+      ① ray — seçili noktadan türetilen soru, her şeyin önünde
+      ② kaydıraçlar — ancak seçim YOKKEN, gerekçesi `markAlpha`da
+      ③ hiçbiri
+  */
+  const asked: FeelTarget | null = scene.rail
+    ? railFeel(scene.rail.value)
+    : scene.selectedId === null && hasFeel(scene.feel)
+      ? scene.feel
+      : null;
+
+  const reach = scene.rail ? RAIL_REACH : FEEL_REACH;
+  const anchor = asked
     ? feelAnchor(
         scene.marks.map((mark) => mark.feel),
-        scene.feel,
+        asked,
       )
     : 0;
+
+  const dragging = scene.rail?.geometry ? scene.rail : null;
 
   for (const mark of scene.marks) {
     const dimmed = highlighted !== null && !highlighted.has(mark.id);
     if (dimmed && skipDimmed) continue;
-    drawMark(ctx, mark, scene, dimmed, anchor, responding);
+
+    const offsetX =
+      dragging && dragging.geometry && mark.id === dragging.markId
+        ? railOffset(dragging.geometry, dragging.value)
+        : 0;
+
+    drawMark(ctx, mark, scene, { dimmed, anchor, asked, reach, offsetX });
   }
 
   // Giriş lekesi en son: noktaların da bağlantıların da ÜSTÜNÜ örtüyor.

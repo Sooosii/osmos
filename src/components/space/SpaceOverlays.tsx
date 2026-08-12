@@ -38,6 +38,18 @@ interface SpaceOverlaysProps {
   readonly switchRef: RefObject<HTMLDivElement | null>;
   /** Kaydıraçların yazdığı tarif; çizim döngüsü okuyor. */
   readonly feelTargetRef: RefObject<FeelTarget>;
+  /** Raydan gelen tarif — topukları oraya taşıyor. */
+  readonly appliedFeel: FeelTarget | null;
+  /**
+   * Rayın uç sözcükleri (COOL / WARM).
+   *
+   * ⚠️ Tuvale değil HTML'e yazılıyor — punto haritanın ölçeğinden bağımsız
+   * kalsın diye; etiket katmanıyla aynı karar. Sözlük de böylece çizim
+   * modülüne girmiyor.
+   */
+  readonly railWordsRef: RefObject<HTMLDivElement | null>;
+  /** Topuğa dokunuldu: ray tarifi düşüyor. */
+  readonly onSlide: () => void;
   readonly requestDraw: () => void;
   /** Etikette yazan parfüm: üstüne gelinen, yoksa seçili. */
   readonly labelled: SpaceMark | null;
@@ -56,6 +68,9 @@ export function SpaceOverlays({
   feelRef,
   switchRef,
   feelTargetRef,
+  appliedFeel,
+  railWordsRef,
+  onSlide,
   requestDraw,
   labelled,
   selectedLine,
@@ -103,7 +118,12 @@ export function SpaceOverlays({
           ref={feelRef}
           className="pointer-events-auto w-[19rem] max-w-[calc(100vw-3rem)] opacity-0 transition-opacity duration-700"
         >
-          <SpaceFeelSliders targetRef={feelTargetRef} requestDraw={requestDraw} />
+          <SpaceFeelSliders
+            targetRef={feelTargetRef}
+            requestDraw={requestDraw}
+            applied={appliedFeel}
+            onSlide={onSlide}
+          />
         </div>
       </div>
 
@@ -167,6 +187,24 @@ export function SpaceOverlays({
             {labelled?.brand ?? ''}
           </p>
         </div>
+      </div>
+
+      {/*
+        Rayın uçları. Konumu her karede çizimle birlikte yazılıyor; sözcükler
+        kaydıraçlarınkiyle AYNI sözlük anahtarından geliyor — tek eksene iki ad
+        takılmıyor.
+      */}
+      <div
+        ref={railWordsRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute left-0 top-0 flex justify-between opacity-0 transition-opacity duration-150"
+      >
+        <span className="text-[10px] tracking-[0.15em] text-white/45">
+          {t.space.sliders.temperature.low}
+        </span>
+        <span className="text-[10px] tracking-[0.15em] text-white/45">
+          {t.space.sliders.temperature.high}
+        </span>
       </div>
 
       {/* Küratör cümlesi yalnızca seçimde — fare gezdirirken alt metin sürekli

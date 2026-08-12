@@ -151,9 +151,23 @@ interface SpaceFeelSlidersProps {
    */
   readonly targetRef: RefObject<FeelTarget>;
   readonly requestDraw: () => void;
+  /**
+   * Dışarıdan gelen tarif — sıcaklık rayından.
+   *
+   * ⚠️ Topuklar kontrolsüz (`defaultValue`), yani yeni bir tarif ancak grup
+   * YENIDEN DOĞARSA topuğa yansıyor. Aşağıdaki `key` bunun için değer taşıyor.
+   */
+  readonly applied: FeelTarget | null;
+  /** Topuğa dokunuldu — ray tarifi artık geçerli değil. */
+  readonly onSlide: () => void;
 }
 
-export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersProps) {
+export function SpaceFeelSliders({
+  targetRef,
+  requestDraw,
+  applied,
+  onSlide,
+}: SpaceFeelSlidersProps) {
   /*
     Dört eksenin sözcükleri; nota sayfasındaki ölçümle aynı kaynaktan.
 
@@ -215,9 +229,12 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
     (axis: number, value: number) => {
       valuesRef.current[axis] = value;
       targetRef.current = [...valuesRef.current];
+      // Topuğa dokunmak rayın tarifini düşürüyor: iki kaynak aynı anda
+      // konuşursa hangisinin cevabına bakıldığı belirsizleşir.
+      onSlide();
       requestDraw();
     },
-    [targetRef, requestDraw],
+    [targetRef, requestDraw, onSlide],
   );
 
   /*
@@ -302,6 +319,27 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
 
   const toggleHelp = useCallback(() => setHelping((open) => !open), []);
 
+  /*
+    Raydan gelen tarif yürürlüğe giriyor.
+
+    ⚠️ Aynı `set-state-in-effect` gerekçesi: kaynak DIŞARIDA (çizim döngüsünün
+    ref'i) ve türetilebilir değil. `applied` yalnızca parmak kalkınca
+    değişiyor, yani bu etki sürükleme boyunca hiç çalışmıyor.
+  */
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (applied === null) return;
+
+    valuesRef.current = [...applied];
+    targetRef.current = applied;
+    setInitial(applied);
+    setDetailed(DETAIL_AXES.some((axis) => applied[axis] !== null));
+    commit();
+    requestDraw();
+  }, [applied, targetRef, requestDraw, commit]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+
   /**
    * Topuğun doğacağı yer.
    *
@@ -334,7 +372,7 @@ export function SpaceFeelSliders({ targetRef, requestDraw }: SpaceFeelSlidersPro
       yeniden doğmak zorunda, yoksa tarif yürürlükte olur ama topuklar ortada
       durur — gördüğün yer ile tarif farklı şeyler söylerdi.
     */
-    <div key={hasFeel(initial) ? 'adresten' : 'bos'} className="flex flex-col gap-2.5">
+    <div key={formatFeel(initial) ?? 'bos'} className="flex flex-col gap-2.5">
       <Axis
         axis={0}
         label={WORDS.temperature.label}

@@ -13,7 +13,7 @@ import {
   worldToScreen,
   boundsOf,
 } from '@/lib/space-camera';
-import { drawSpace } from '@/lib/space-draw';
+import { drawSpace, type RailState } from '@/lib/space-draw';
 import { prefersReducedMotion } from '@/lib/motion';
 import { useCanvasSize } from '@/components/space/use-canvas-size';
 import { type EntryState, HOLD_DURATION, NO_ENTRY } from '@/lib/space-entry';
@@ -203,6 +203,26 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
    * `performance.now()`, tek tüketici çizim döngüsü.
    */
   const holdRef = useRef<{ markId: string; startedAt: number } | null>(null);
+
+  /**
+   * Sıcaklık rayı — seçili noktanın "bunun gibi ama daha sıcak" sorusu.
+   *
+   * Durumda değil ref'te: parmak sürerken her karede değişiyor ve React'in
+   * yeniden çizeceği bir metin yok. Kaydıraçların `feelTargetRef`i ile aynı
+   * sözleşme; yazan girdi yolu, okuyan çizim.
+   */
+  const railRef = useRef<RailState | null>(null);
+  const railWordsRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Raydan çıkan tarif — kaydıraçların topuklarını oraya taşıyan tek yol.
+   *
+   * Durumda çünkü kaydıraçlar KONTROLSÜZ: `defaultValue` yalnızca doğdukları
+   * anda okunuyor, yani topuğun yeni yere gitmesi için grubun yeniden doğması
+   * gerek. Ray yalnızca parmak kalkınca buraya yazıyor.
+   */
+  const [appliedFeel, setAppliedFeel] = useState<FeelTarget | null>(null);
+
   const navigatingRef = useRef(false);
   const [entryHint, setEntryHint] = useState(false);
   const [entryProgress, setEntryProgress] = useState(0);
@@ -373,6 +393,13 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
   */
   useShelfRings(shelvedRef, requestDraw);
 
+  /** Topuğa dokunuldu: ray tarifi artık geçerli değil. */
+  const clearRail = useCallback(() => {
+    railRef.current = null;
+    setAppliedFeel(null);
+    requestDraw();
+  }, [requestDraw]);
+
   const input = useSpaceInput({
     marks,
     markById,
@@ -383,6 +410,8 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     selectedRef,
     entryRef,
     holdRef,
+    railRef,
+    setAppliedFeel,
     navigatingRef,
     approach,
     select,
@@ -446,7 +475,25 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
       entry: entryRef.current,
       feel: feelTargetRef.current,
       shelved: shelvedRef.current,
+      rail: railRef.current,
     });
+
+    /*
+      Rayın uç sözcükleri: yalnız parmak dururken görünüyor, konumu rayın
+      geometrisinden geliyor. Genişlik rayın tamamı, yani COOL sol uçta,
+      WARM sağ uçta duruyor.
+    */
+    const railWords = railWordsRef.current;
+    const railGeometry = railRef.current?.geometry ?? null;
+    if (railWords) {
+      if (railGeometry) {
+        railWords.style.transform = `translate(${railGeometry.centerX - railGeometry.half}px, ${railGeometry.centerY + 14}px)`;
+        railWords.style.width = `${railGeometry.half * 2}px`;
+        railWords.style.opacity = '1';
+      } else {
+        railWords.style.opacity = '0';
+      }
+    }
 
     // Etiket tuvale değil üstüne bindirilmiş HTML'e çiziliyor: punto haritanın
     // ölçeğinden bağımsız kalıyor, yakınlaşınca metin büyümüyor. Konumu burada,
@@ -574,6 +621,9 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
         feelRef={feelRef}
         switchRef={switchRef}
         feelTargetRef={feelTargetRef}
+        appliedFeel={appliedFeel}
+        railWordsRef={railWordsRef}
+        onSlide={clearRail}
         requestDraw={requestDraw}
         labelled={labelled}
         selectedLine={selected?.line ?? null}

@@ -194,13 +194,24 @@ export function feelMatch(
   feel: readonly number[],
   target: FeelTarget,
   anchor: number,
+  /**
+   * Cevabın genişliği.
+   *
+   * ⚠️ Varsayılan geçince mevcut her çağrı ve her sınama harfi harfine aynı
+   * kalıyor. Seçenek tek eksenli tarifler için açıldı: `distanceTo` sorulan
+   * eksenlerin ORTALAMASINI alıyor, yani tek eksende uzaklık doğrudan
+   * `|Δsıcaklık|`a düşüyor ve 0.7 neredeyse bütün haritayı yakıyor. Sıcaklık
+   * rayının kendi genişliği `space-rail.ts`te ve orada 52 parfüm üzerinde
+   * ölçüldü.
+   */
+  reach: number = FEEL_REACH,
 ): number {
   // Hiçbir eksen sorulmadıysa cevap yok: her nokta tam yakınlıkta, uzay olduğu gibi.
   if (!hasFeel(target)) return 1;
 
   const behind = distanceTo(feel, target) - anchor;
-  if (behind >= FEEL_REACH) return 0;
+  if (behind >= reach) return 0;
 
   // En yakın nokta için `behind` 0; kayan nokta artığı eksiye düşerse kırpılıyor.
-  return (1 - Math.max(behind, 0) / FEEL_REACH) ** FEEL_CURVE;
+  return (1 - Math.max(behind, 0) / reach) ** FEEL_CURVE;
 }

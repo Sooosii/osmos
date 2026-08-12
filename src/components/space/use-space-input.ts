@@ -25,6 +25,9 @@ import {
   holdTargetHit,
 } from '@/lib/space-entry';
 import { dragDelta } from '@/lib/space-approach';
+import type { RailState } from '@/lib/space-draw';
+import type { FeelTarget } from '@/lib/space-feel';
+import { type Rail, makeRail, railFeel, railValue } from '@/lib/space-rail';
 import type { ApproachScene } from './use-approach-scene';
 
 /**
@@ -75,6 +78,16 @@ interface SpaceInputOptions {
    * bildiriyor — `cueRef`/`introRef` ile aynı sözleşme.
    */
   readonly holdRef: RefObject<{ markId: string; startedAt: number } | null>;
+  /** Sıcaklık rayı — yazan burası, okuyan çizim. */
+  readonly railRef: RefObject<RailState | null>;
+  /**
+   * Raydan çıkan tarif kaydıraçlara bildiriliyor.
+   *
+   * ⚠️ Yalnızca parmak KALKINCA, kare başına değil: her karede yazsaydık dört
+   * `<input>` saniyede altmış kez yeniden doğar, odak çalınır ve kare bütçesi
+   * biterdi. Sürerken ekranı `railRef` + `requestDraw` sürüyor.
+   */
+  readonly setAppliedFeel: (target: FeelTarget | null) => void;
   readonly navigatingRef: RefObject<boolean>;
   readonly approach: ApproachScene;
   readonly select: (id: string | null) => void;
@@ -137,6 +150,8 @@ export function useSpaceInput({
   setEntryHint,
   setEntryProgress,
   holdRef,
+  railRef,
+  setAppliedFeel,
   navigatingRef,
   requestDraw,
 }: SpaceInputOptions): SpaceInput {
@@ -186,6 +201,17 @@ export function useSpaceInput({
    */
   const touchCountRef = useRef(0);
   const lastTouchEndRef = useRef(0);
+
+  /**
+   * Basılan noktanın rayı — parmak indiği anda kuruluyor, kilit düşene kadar
+   * bekliyor.
+   *
+   * Basma anında kurulmak zorunda: rayın ortası "noktanın kendi sıcaklığı
+   * parmağın altına düşsün" diye çözülüyor (`makeRail`), yani başlangıç
+   * konumunu bilmesi gerek. Kilit düştükten sonra kurulsaydı nokta ilk
+   * hareketle zıplardı.
+   */
+  const railArmRef = useRef<Rail | null>(null);
 
 
   /**
@@ -479,12 +505,28 @@ export function useSpaceInput({
         : null;
       const overNeighbour = under !== null && under.id !== selectedMark?.id;
 
-      if (
-        selectedMark &&
+      /*
+        Ray ve basılı tutma AYNI koşulda kollanıyor ve bu bilinçli: ikisi de
+        "zaten seçili olan noktanın üstündeyim" demek. Ayrıştıran şey hareket —
+        kımıldamazsan girersin, yatay sürüklersen ray. Aynı anda ateşlenemezler:
+        kilit düştüğü karede tutma iptal ediliyor.
+      */
+      const armed =
+        selectedMark !== null &&
         !overNeighbour &&
-        holdEnabledFor(selectedMark.id) &&
-        holdTargetHit(selectedMark, sx, sy, cameraRef.current, viewportRef.current)
-      ) {
+        holdTargetHit(selectedMark, sx, sy, cameraRef.current, viewportRef.current);
+
+      if (armed && selectedMark) {
+        railArmRef.current = makeRail(
+          selectedMark.id,
+          selectedMark.feel[0],
+          sx,
+          sy,
+          viewportRef.current.width,
+        );
+      }
+
+      if (armed && selectedMark && holdEnabledFor(selectedMark.id)) {
         holdRef.current = { markId: selectedMark.id, startedAt: performance.now() };
         requestDraw();
       }
@@ -535,7 +577,7 @@ export function useSpaceInput({
     if (!drag) return;
 
     const wasIdle = drag.probe.latch === 'none';
-    const probe = moveProbe(drag.probe, event.clientX, event.clientY, false);
+    const probe = moveProbe(drag.probe, event.clientX, event.clientY, railArmRef.current !== null);
 
     dragRef.current = { ...drag, lastX: event.clientX, lastY: event.clientY, probe };
 
@@ -553,6 +595,20 @@ export function useSpaceInput({
     */
     if (probe.latch === 'none') {
       requestDraw();
+      return;
+    }
+
+    /*
+      Ray: kamera DONUYOR ve nokta parmağın altında kayıyor. React'e hiçbir şey
+      yazılmıyor — ekranı `railRef` ve çizim döngüsü sürüyor.
+    */
+    if (probe.latch === 'rail') {
+      const geometry = railArmRef.current;
+      if (geometry) {
+        const { sx } = localPoint(event.clientX, event.clientY);
+        railRef.current = { markId: geometry.markId, value: railValue(geometry, sx), geometry };
+        requestDraw();
+      }
       return;
     }
 
@@ -589,6 +645,19 @@ export function useSpaceInput({
     if (holdRef.current) {
       holdRef.current = null;
       entryRef.current = NO_ENTRY;
+      requestDraw();
+    }
+
+    /*
+      Ray bırakıldı: nokta gerçek yerine dönüyor (`geometry: null`), tarif
+      ekranda kalıyor. Bırakma bir KARAR — kaydıraçlar da bu anda haberdar
+      ediliyor ve adres çubuğu onlar tarafından tazeleniyor.
+    */
+    const railed = railRef.current;
+    railArmRef.current = null;
+    if (railed?.geometry) {
+      railRef.current = { ...railed, geometry: null };
+      setAppliedFeel(railFeel(railed.value));
       requestDraw();
     }
 
@@ -634,6 +703,16 @@ export function useSpaceInput({
       moveTo(fitToMarks(cameraRef.current, mark, markById, viewportRef.current));
     }
 
+    /*
+      Yeni bir seçim (ya da boşluğa basıp seçimi bırakmak) rayı da siliyor:
+      ray seçili noktadan TÜREYEN bir soruydu, kaynağı değişince cevabı da
+      geçersiz.
+    */
+    if (mark?.id !== selectedRef.current) {
+      railRef.current = null;
+      setAppliedFeel(null);
+    }
+
     // Bir noktaya basmak onu HER ZAMAN seçiyor; seçiliye tekrar basmak kapatmıyor.
     // Kapatma açıkken kalabalık bölgede şöyle oluyordu: kullanıcı yandaki noktayı
     // hedefliyor, vuruş seçili olana denk geliyor ve ekrandaki her şey kayboluyordu
@@ -656,6 +735,10 @@ export function useSpaceInput({
    */
   const handlePointerCancel = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     approachDragRef.current = null;
+
+    // Iptal edilen bir sürükleme karar değil: ray hiç olmamış gibi kalkıyor.
+    railArmRef.current = null;
+    if (railRef.current?.geometry) railRef.current = null;
     pointersRef.current.delete(event.pointerId);
     pinchRef.current = null;
     dragRef.current = null;

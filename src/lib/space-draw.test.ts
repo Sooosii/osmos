@@ -80,6 +80,14 @@ function scene(shelved: ReadonlySet<string>, selectedId: string | null = null): 
     entry: NO_ENTRY,
     feel: NO_FEEL,
     shelved,
+    /*
+      ⚠️ Ray bu sınamalarda hep kapalı ve bu bilerek: dört sınama da `stroke()`
+      çağrılarını SAYIYOR, biri `strokes[0]`ı okuyor. Ray açıkken çizilen
+      hairline diziyi kaydırırdı. Yani "ray yalnız parmak dururken çiziliyor"
+      kuralı burada da tutuluyor — kalıcı bir ray eklenirse bu sınamalar önce
+      kırılır, sessizce geçmez.
+    */
+    rail: null,
   };
 }
 
