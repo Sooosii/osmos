@@ -275,7 +275,7 @@ export const TR: Dict = {
     title: (name, brand) => `${name} — ${brand} · OSMOS`,
     fallbackDescription: (name, brand) => `${name}, ${brand}.`,
     frame: { family: 'AILE', year: 'YIL', notes: 'NOTA' },
-    position: (index, total) => `PARFÜM ${String(index).padStart(3, '0')}/${total}`,
+    position: (index, total) => `PARFÜM ${index}/${total}`,
     sections: { evolution: 'EVRIM', notes: 'NOTALAR', neighbours: 'KOMŞULAR' },
     neighbourLabel: (name, count, list) =>
       `${name} parfümüne en çok benzeyen ${count} parfüm: ${list}.`,
@@ -290,7 +290,7 @@ export const TR: Dict = {
   note: {
     title: (name) => `${name} — nota · OSMOS`,
     frame: { band: 'BANT', peak: 'TEPE', life: 'ÖMÜR' },
-    position: (index, total) => `NOTA ${String(index).padStart(3, '0')}/${total}`,
+    position: (index, total) => `NOTA ${index}/${total}`,
     usage: (carriers, total) => `${carriers}/${total} PARFÜM`,
     carriersHeading: (count) => (count > 0 ? `${count} PARFÜMDE` : 'HENÜZ HIÇBIR PARFÜMDE'),
     unused: (total) =>

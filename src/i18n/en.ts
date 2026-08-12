@@ -359,8 +359,7 @@ export const EN = {
     title: (name: string, brand: string) => `${name} — ${brand} · OSMOS`,
     fallbackDescription: (name: string, brand: string) => `${name}, ${brand}.`,
     frame: { family: 'FAMILY', year: 'YEAR', notes: 'NOTES' },
-    position: (index: number, total: number) =>
-      `PERFUME ${String(index).padStart(3, '0')}/${total}`,
+    position: (index: number, total: number) => `PERFUME ${index}/${total}`,
     sections: { evolution: 'EVOLUTION', notes: 'NOTES', neighbours: 'NEIGHBOURS' },
     neighbourLabel: (name: string, count: number, list: string) =>
       `The ${count} perfumes closest to ${name}: ${list}.`,
@@ -381,7 +380,7 @@ export const EN = {
   note: {
     title: (name: string) => `${name} — note · OSMOS`,
     frame: { band: 'BAND', peak: 'PEAK', life: 'LIFE' },
-    position: (index: number, total: number) => `NOTE ${String(index).padStart(3, '0')}/${total}`,
+    position: (index: number, total: number) => `NOTE ${index}/${total}`,
     usage: (carriers: number, total: number) => `${carriers}/${total} PERFUMES`,
     carriersHeading: (count: number) => (count > 0 ? `IN ${count} PERFUMES` : 'IN NO PERFUME YET'),
     unused: (total: number) =>
