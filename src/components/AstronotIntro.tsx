@@ -377,6 +377,21 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
     window.addEventListener('scroll', leave, { once: true, passive: true });
     window.addEventListener('pointerdown', leave, { once: true });
 
+    /*
+     * ⚠️ **Kapının klavye anahtarı — ölçülmüş bir hatadan doğdu (2026-08-12).**
+     *
+     * Uğurlama yalnızca tekerlek, kaydırma ve işaretçiye bağlıydı. Faresiz
+     * gezen biri için üçü de yok: uzay `fixed inset-0 overflow-hidden`, yani
+     * Tab ile odak gezdirmek sayfayı kaydırmıyor da. Tarayıcıda denendi —
+     * Tab, sonra Enter: odak alttaki listeye geçiyor (içerik erişilebilir,
+     * katman `pointer-events-none`) ama perde **tam opaklıkta duruyordu**.
+     * Yani gören ama fare kullanmayan biri astronotun arkasında kalıyordu.
+     *
+     * Herhangi bir tuş yetiyor; diğer üçü gibi ayrım yapmıyor. Değiştirici
+     * tuşlar da uğurluyor — "buradayım" demenin her hâli kapıyı açmalı.
+     */
+    window.addEventListener('keydown', leave, { once: true });
+
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(timer);
@@ -386,6 +401,7 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
       window.removeEventListener('wheel', leave);
       window.removeEventListener('scroll', leave);
       window.removeEventListener('pointerdown', leave);
+      window.removeEventListener('keydown', leave);
     };
   }, [gone]);
 
@@ -409,8 +425,18 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
       className="pointer-events-none fixed inset-0 z-70 bg-black transition-opacity duration-700 ease-out"
       style={{ opacity: leaving ? 0 : 1 }}
     >
-      <canvas ref={bgRef} className="absolute" />
-      <canvas ref={figRef} className="absolute -translate-x-1/2 -translate-y-1/2" />
+      {/*
+        İki tuval de saf süs: biri dokulu zemin, biri astronot. Adsız bir
+        tuval ekran okuyucuda anlamsız bir gürültü — `aria-hidden` ile hiç
+        duyurulmuyorlar. Aynı politika uzayın tuvalinde de var
+        (`ScentSpaceCanvas`), oradaki gerçek yol `SpaceKeyboardList`.
+      */}
+      <canvas ref={bgRef} aria-hidden="true" className="absolute" />
+      <canvas
+        ref={figRef}
+        aria-hidden="true"
+        className="absolute -translate-x-1/2 -translate-y-1/2"
+      />
       {/*
         Perdedeki ipucuyla aynı söz ve aynı ton. "Başka bir şey olmasın"ın
         istisnası — işaretsiz bir tam ekran, kapı değil duvar olurdu.

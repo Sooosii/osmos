@@ -79,7 +79,7 @@ export default async function SpaceDraft({ params }: { params: Promise<{ lang: s
   );
 
   return (
-    <div className="min-h-screen bg-[#0A0A0C] px-6 py-16 text-white sm:px-12">
+    <main className="min-h-screen bg-[#0A0A0C] px-6 py-16 text-white sm:px-12">
       <div className="mx-auto max-w-4xl">
         <p className="mb-2 text-xs tracking-[0.3em] text-white/50">{t.site.name}</p>
         <h1 className="text-3xl font-light tracking-tight">{t.draft.spaceHeading}</h1>
@@ -146,6 +146,6 @@ export default async function SpaceDraft({ params }: { params: Promise<{ lang: s
           ))}
         </ul>
       </div>
-    </div>
+    </main>
   );
 }

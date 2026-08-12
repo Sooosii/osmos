@@ -215,9 +215,21 @@ export function Studio({ notes, freeLimit, isPatron, signedIn, nameMax, cards }:
           </p>
         ) : (
           <div className="space-y-2">
+            {/*
+              ⚠️ `aria-label` şart, süs değil (ölçüldü 2026-08-12): kutunun
+              tek adı `placeholder`dı ve o, yazmaya başlayınca kayboluyor —
+              ekran okuyucu kullanan biri alanın ne olduğunu bir daha
+              duyamıyordu. Sitedeki tek adsız denetim buydu; giriş ve ayar
+              formlarının hepsi zaten etiketli.
+
+              Görünür bir etiket eklenmedi: kutu zaten "NOTES" başlığının
+              altında ve tek alan; ekrana ikinci bir söz koymak sayfanın
+              sessizliğini bozardı. Ad, `placeholder`la aynı cümle.
+            */}
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
+              aria-label={t.studio.search}
               placeholder={t.studio.search}
               className={field}
             />
