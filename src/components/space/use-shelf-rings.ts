@@ -1,4 +1,5 @@
 import { useEffect, type RefObject } from 'react';
+import { useSession } from '@/lib/auth-client';
 import type { ShelfEntry } from '@/lib/shelf';
 
 /**
@@ -25,7 +26,29 @@ export function useShelfRings(
   shelvedRef: RefObject<ReadonlySet<string>>,
   requestDraw: () => void,
 ): void {
+  /*
+   * ⚠️ **Girişsizken istek hiç gidilmiyor — ölçüldü** (2026-08-12, üretim
+   * derlemesi). Bu kanca `/api/shelf`i koşulsuz çağırıyordu: girişi olmayan
+   * ziyaretçi de, bugün olduğu gibi giriş daveti kapalıyken **herkes** de.
+   * Yani ana sayfayı açan her insan boş bir cevap için bir sunucu çağrısı ve
+   * bir hız-sınırı sorgusu harcıyordu. Künyedeki `ShelfPicker` bu denetimi
+   * baştan beri yapıyordu; eksik olan yalnız burasıydı.
+   *
+   * ⚠️ **`useSession` ikinci bir istek AÇMIYOR** — ölçüldü: künye sayfasında
+   * üç ayrı bileşen (`SignInLink`, `ShelfPicker`, `AddToTopFour`) bu kancayı
+   * kullanıyor ve ağda `/api/auth/get-session` **bir kez** görünüyor;
+   * better-auth oturumu bileşenler arasında paylaşıyor. Yani bu denetim
+   * bedava, sadece bir isteği siliyor.
+   *
+   * `isPending` sırasında beklemek şart: oturum çözülmeden "girişsiz" saymak
+   * girişli kişinin halkalarını hiç çizmemek olurdu.
+   */
+  const { data, isPending } = useSession();
+  const signedIn = Boolean(data?.user);
+
   useEffect(() => {
+    if (isPending || !signedIn) return;
+
     let alive = true;
 
     void (async () => {
@@ -50,5 +73,5 @@ export function useShelfRings(
     return () => {
       alive = false;
     };
-  }, [shelvedRef, requestDraw]);
+  }, [shelvedRef, requestDraw, isPending, signedIn]);
 }

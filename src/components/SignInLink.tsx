@@ -60,6 +60,8 @@ export function SignInLink({ className = '' }: { readonly className?: string }) 
   return (
     <Link
       href={href}
+      /* Çerçevenin geri kalanıyla aynı karar; gerekçe `LangSwitch`te. */
+      prefetch={false}
       className={`text-[9px] tracking-[0.18em] text-white/50 transition-colors hover:text-white/70 ${className}`}
     >
       {label}

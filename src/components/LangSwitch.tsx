@@ -47,6 +47,24 @@ export function LangSwitch({ className = '' }: { readonly className?: string }) 
           ) : (
             <Link
               href={switchPath(pathname, '', locale)}
+              /*
+                ⚠️ **Çerçevede önden getirme kapalı — ölçüldü** (2026-08-12,
+                üretim derlemesi). Next görüş alanındaki her bağlantıyı önden
+                getiriyor; künye sayfasında bunun faturası **20 istek / 34 KB**tı
+                ve tamamı çerçeveye gidiyordu: `/notes` 6, dil anahtarı 6,
+                `/` 4, `/signin` 4 kez. Aynı adres birden çok kez, çünkü Next
+                ayrı önbellek anahtarlarıyla ayrı ayrı soruyor.
+
+                Okurun asıl yolu olan komşu bağlantıları o listede **hiç
+                yoktu** — yani bütçenin yüzde yüzü, nadiren tıklanan dört
+                bağlantıya harcanıyordu.
+
+                Nota dizininde verilen kararın aynısı (`notes/page.tsx`).
+                Bedeli: ilk tıklamada sayfa hazır beklemiyor. Dil değiştirmek
+                bir oturumda en fazla bir kez yapılıyor; hazır bekletmeye
+                değmez. Geri istenirse tek prop.
+              */
+              prefetch={false}
               hrefLang={locale}
               onClick={(event) => {
                 if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) {
