@@ -27,6 +27,7 @@ import {
   hissTotal,
   mistBudget,
   mistScale,
+  sprayAngle,
   nozzleCell,
   stepMist,
 } from '@/lib/atomizer-mist';
@@ -263,7 +264,15 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
         çözülecek yerde derinleşirdi.
       */
       const cssW = Math.min(0.82 * Math.min(box.w, box.h), 640);
-      fig.style.left = `${box.x + box.w / 2}px`;
+
+      /*
+        ⚠️ Figür ortada DEĞİL, %45'te duruyor. Ağız figürün sağ ucunda ve
+        püskürtme sağa gidiyor; tam ortada dururken sisin yayılacak yeri
+        kalmıyordu — dar ekranda zerrelerin yarısı ölçüldüğü gibi görünmeden
+        ekranı terk ediyordu. Sahibin getirdiği referans fotoğrafın kadrajı da
+        böyle: nesne solda, püskürtme sağdaki boşluğa.
+      */
+      fig.style.left = `${box.x + box.w * 0.45}px`;
       fig.style.top = `${box.y + box.h / 2}px`;
       fig.style.width = `${cssW}px`;
       hint.style.left = `${box.x + box.w / 2}px`;
@@ -377,9 +386,6 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
       spriteCtx.fillRect(0, 0, 64, 64);
     }
 
-    /** Figürün mantıksal koordinatını ekran koordinatına çeviren ölçek. */
-    const figScale = () => (fig.getBoundingClientRect().width || figW) / figW;
-
     /**
      * Sisin ölçeği — figürün ızgarasından DEĞİL ekrandan geliyor.
      *
@@ -396,13 +402,21 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
      * noktadan çıksaydı püskürtme şişeden kopuk görünürdü.
      */
     const nozzlePoint = (tMs: number) => {
+      /*
+        ⚠️ Konum figürün GERÇEK kutusundan okunuyor, yerleşim hesabı burada
+        tekrarlanmıyor. Bir kez tekrarlandı ve hemen ısırdı: `placeChrome`
+        figürü ortadan %45'e kaydırınca burası hâlâ ortayı varsayıyordu ve sis
+        ağzın 60 px sağından çıkıyordu — tarayıcıda çekilip görüldü. Tek kaynak
+        `getBoundingClientRect`, iki hesap bir daha ayrılamaz.
+      */
+      const rect = fig.getBoundingClientRect();
       const box = visibleBox();
-      const scale = figScale();
+      const scale = (rect.width || figW) / figW;
       const fx = ((nozzle?.col ?? COLS - 1) + 0.5) * CELL_W;
       const fy = ((nozzle?.row ?? 0) + 0.5) * CELL_H + (still ? 0 : bobOffset(tMs));
       return {
-        x: box.w / 2 + (fx - figW / 2) * scale,
-        y: box.h / 2 + (fy - figH / 2) * scale,
+        x: rect.left - box.x + fx * scale,
+        y: rect.top - box.y + fy * scale,
       };
     };
 
@@ -413,12 +427,13 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
 
       for (const drop of drops) {
         /*
-          ⚠️ Zerre başına opaklık ölçülerek kondu. Toplamalı harmanlamada
-          ekranın bir noktası ~10 zerreyle örtülüyor; 0.2'de çekirdek beyaza
-          doyup leke oluyordu, 0.11'de bulut kalıyor. Sayılar `mistBudget`in
-          başlığındaki tabloda.
+          ⚠️ Zerre başına opaklık ölçülerek kondu ve zerreler küçülünce
+          YÜKSELDI. Şişmiş lekeler döneminde bir nokta ~10 zerreyle örtülüyordu
+          ve 0.2 bile çekirdeği beyaza doyuruyordu; parçacık boyunda üst üste
+          binme 1'in altına indi, yani her zerre kendi başına görünmek zorunda.
+          0.11'de tutam neredeyse görünmezdi (tarayıcıda çekilip bakıldı).
         */
-        mistCtx.globalAlpha = dropAlpha(drop) * 0.11;
+        mistCtx.globalAlpha = dropAlpha(drop) * 0.5;
         mistCtx.drawImage(
           sprite,
           drop.x - drop.radius,
@@ -538,7 +553,13 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
           const born = Math.floor(hissTotal(elapsed, budget) - emitted);
           if (born > 0) {
             emitted += born;
-            emitPuff(drops, { origin: nozzlePoint(tMs), count: born, scale: mistUnit });
+            const origin = nozzlePoint(tMs);
+            emitPuff(drops, {
+              origin,
+              count: born,
+              scale: mistUnit,
+              angle: sprayAngle(origin.x, visibleBox().w),
+            });
           }
 
           stepMist(drops, dtMs);

@@ -18,6 +18,7 @@ import {
   mistBudget,
   mistScale,
   nozzleCell,
+  sprayAngle,
   stepMist,
 } from './atomizer-mist';
 
@@ -231,12 +232,13 @@ describe('mistBudget', () => {
     }
   });
 
-  test('TELEFONDA DA GORULUYOR — taban gercekten devrede', () => {
+  test('telefonda görülecek kadar zerre var', () => {
     /*
-      ⚠️ Sahip telefonda sisi hiç göremedi. Alan hesabı 390×844'te 150 zerre
-      veriyordu; taban 240'a çıkarıldı ve bu sınama onu tutuyor.
+      ⚠️ Sahip telefonda sisi hiç göremedi. O gün alan hesabı 390×844'te 150
+      zerre veriyordu; bölen düşürülünce 329'a çıktı. Taban artık yalnız daha
+      küçük ekranlarda devreye giriyor — karar alanın.
     */
-    expect(mistBudget(390, 844, true)).toBe(MIN_DROPS);
+    expect(mistBudget(390, 844, true)).toBeGreaterThan(300);
     expect(mistBudget(320, 568, true)).toBe(MIN_DROPS);
   });
 });
@@ -283,5 +285,33 @@ describe('nozzleCell', () => {
     expect(fallback.col).toBeLessThan(88);
     expect(fallback.row).toBeGreaterThanOrEqual(0);
     expect(fallback.row).toBeLessThan(51);
+  });
+});
+
+describe('sprayAngle', () => {
+  test('geniş ekranda koni olduğu gibi — yana gidiyor', () => {
+    // Ağzın sağında ekranın yarısı var: dokunulmuyor.
+    expect(sprayAngle(700, 1440)).toBeCloseTo(SPRAY_ANGLE, 6);
+  });
+
+  test('DAR EKRANDA YUKARI ÇEVRILIYOR — kırpılan sis kusuru', () => {
+    /*
+      ⚠️ Telefonda çekilip görüldü: ağız sağ kenara dayanıyor ve sis daha
+      doğmadan kırpılıyordu. Sağa yer yoksa boş olan yer yukarısı.
+    */
+    const dar = sprayAngle(309, 390);
+    expect(dar).toBeLessThan(SPRAY_ANGLE);
+    expect(dar).toBeGreaterThan(-Math.PI / 2);
+  });
+
+  test('ağız tam kenardayken en dik, ama dikey ekseni geçmiyor', () => {
+    const kenar = sprayAngle(390, 390);
+    expect(kenar).toBeLessThan(sprayAngle(309, 390));
+    expect(kenar).toBeGreaterThan(-Math.PI / 2);
+  });
+
+  test('bozuk girdi patlatmıyor', () => {
+    expect(Number.isFinite(sprayAngle(100, 0))).toBe(true);
+    expect(Number.isFinite(sprayAngle(-50, 390))).toBe(true);
   });
 });

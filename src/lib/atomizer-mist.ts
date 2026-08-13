@@ -38,20 +38,29 @@ export interface Drop {
 }
 
 /** Ekranda aynı anda duracak en fazla zerre. */
-export const MAX_DROPS = 900;
+export const MAX_DROPS = 1800;
 
 /**
  * En seyrek sis — küçük ekranda bile bu kadarı çıkıyor.
  *
- * ⚠️ Taban ölçülerek yükseldi: sahip telefonda sisi **hiç göremedi.** Alan
- * hesabı 390×844'te 150 zerre veriyordu ve o kadarı, küçülmüş yarıçaplarla
- * birlikte görünmez kalıyordu.
+ * ⚠️ Taban ölçülerek ayarlandı. Önce yükseltildi (sahip telefonda sisi hiç
+ * göremiyordu), sonra zerreler parçacık boyuna inince geri çekildi: dar
+ * ekranda ağzın sağında zaten az yer var ve fazla zerre orada yayılamayıp
+ * yumak oluyor. Alan hesabı 390×844'te 329 veriyor, taban artık onun altında
+ * kalıyor ve karar alana bırakılıyor.
  */
-export const MIN_DROPS = 240;
+export const MIN_DROPS = 300;
 
-/** Koninin yarı açısı (rad) ve ekseni — sağa, hafif yukarı. */
-export const CONE_SPREAD = 0.42;
-export const SPRAY_ANGLE = -0.18;
+/**
+ * Koninin yarı açısı (rad) ve ekseni — sağa, yukarı doğru.
+ *
+ * ⚠️ Koni genişledi ve ekseni yukarı çevrildi. Sebebi iki tane: sahip "çok
+ * içiçe bir bulut" dedi — dar koni zerreleri aynı yola dizip üst üste
+ * bindiriyordu; bir de dar ekranda ağız zaten sağ kenarda, boş olan yer
+ * YUKARISI.
+ */
+export const CONE_SPREAD = 0.55;
+export const SPRAY_ANGLE = -0.34;
 
 /** Tek tıslamanın süresi ve tepe anı (ms). */
 export const HISS_MS = 220;
@@ -69,11 +78,13 @@ export const SPRAY_MS = 2400;
 /**
  * Sisin yukarı çekilişi (px/s²) — "buhar" okuması bundan geliyor.
  *
- * ⚠️ 26'dan yükseltildi. Telefonda ölçüldü: ağız zaten ekranın sağ kenarına
- * yakın duruyor ve sağa giden zerreler görünmeden dışarı çıkıyordu. Yükselen
- * bir bulut, boş olan yere — yukarıya — doğru açılıyor.
+ * ⚠️ 26'dan iki kez yükseltildi ve ikisi de telefonda ölçüldü. Ağız ekranın
+ * sağ kenarına yakın duruyor: sağa giden zerreler görünmeden dışarı çıkıyor,
+ * yani genişleyecek yer YUKARISI — üstelik telefon ekranı uzun. 58'de tutam
+ * hâlâ 55×70 px'lik bir yumaktı; sürüklenme yükselişi de sönümlediği için
+ * (uçuş hızı ≈ RISE/sürüklenme) sayı yeterince büyük olmalı.
  */
-const RISE = 58;
+const RISE = 160;
 
 function clamp01(value: number): number {
   return Math.min(Math.max(value, 0), 1);
@@ -82,6 +93,8 @@ function clamp01(value: number): number {
 export interface PuffOptions {
   readonly origin: { readonly x: number; readonly y: number };
   readonly count: number;
+  /** Koninin ekseni; verilmezse `SPRAY_ANGLE`. Gerekçe `sprayAngle`da. */
+  readonly angle?: number;
   /**
    * Ekran ölçeği — yarıçapı, büyümeyi ve **hızı** birden sürüyor.
    *
@@ -113,8 +126,21 @@ export function emitPuff(drops: Drop[], options: PuffOptions): void {
       Düz dağılımda püskürtme, sis değil açılmış bir yelpaze gibi görünüyordu.
     */
     const spread = ((random() + random()) / 2 - 0.5) * 2 * CONE_SPREAD;
-    const angle = SPRAY_ANGLE + spread;
-    const speed = (220 + random() * 520) * scale;
+    const angle = (options.angle ?? SPRAY_ANGLE) + spread;
+    /*
+      ⚠️ Hız 220–740'tan düşürüldü. Zerrenin kat ettiği yol kabaca
+      `hız / sürüklenme`; eski değerlerle bu 260 px ediyordu ve 390 px'lik bir
+      ekranda ağızdan çıkan parçacıkların yarısı ölçüldü — görünmeden dışarı
+      çıkıyorlardı. Şimdi tutam ağzın yanında kalıp yükseliyor.
+    */
+    /*
+      ⚠️ Hız KAREYLE dağılıyor, düz değil: `r * r` çoğu zerreyi yavaş tarafta
+      topluyor, birkaçını uzağa fırlatıyor. Düz dağılımda hepsi kabaca aynı
+      mesafede duruyor ve tutam sıkı bir yumağa dönüşüyordu — sahibin
+      "çok içiçe bulut" dediği şey. Kuyruklu bir tutam, hem daha seyrek hem
+      daha canlı.
+    */
+    const speed = (110 + 820 * random() ** 2) * scale;
 
     drops.push({
       x: options.origin.x,
@@ -123,15 +149,28 @@ export function emitPuff(drops: Drop[], options: PuffOptions): void {
       vy: Math.sin(angle) * speed,
       age: 0,
       life: 900 + random() * 1400,
-      radius: (5 + random() * 8) * scale,
-      growth: (55 + random() * 90) * scale,
+      /*
+        ⚠️ **Zerre büyümüyor, bulut AÇILIYOR.**
+
+        Sahip ekranda gördü: "çok yapay bi toz birikimi var gibi, onu
+        parçacıklar hâline getir." Sebebi buradaydı — yarıçap 5'ten başlayıp
+        saniyede 55–145 px büyüyordu, yani 1.5 saniyede 200 px'lik lekelere
+        dönüşüyor ve üst üste binip tek bir bulanık kütle oluyorlardı.
+
+        Gerçek bir püskürtmede zerre şişmiyor; bulut, zerrelerin birbirinden
+        UZAKLAŞMASIYLA açılıyor. Genişleme artık hız dağılımından ve
+        türbülanstan geliyor, yarıçaptan değil: her zerre kendi başına
+        görünen bir parçacık olarak kalıyor.
+      */
+      radius: (1.1 + random() * 3) * scale,
+      growth: (1.2 + random() * 3.5) * scale,
       /*
         ⚠️ Sürüklenme 1.4–2.6'dan yükseltildi. Zerrenin kat ettiği yol kabaca
         `hız / sürüklenme`; eski değerlerle bu 250 px ediyordu ve 390 px'lik bir
         ekranda ağızdan çıkan sis doğruca dışarı gidiyordu. Yüksek sürüklenme
         jeti hemen yavaşlatıp BULUTA çeviriyor — gerçek bir atomizör de öyle.
       */
-      drag: 2.8 + random() * 2.2,
+      drag: 1.8 + random() * 1.4,
       swirl: random() * 90,
       swirlW: 0.0012 + random() * 0.0026,
       phase: random() * Math.PI * 2,
@@ -278,8 +317,33 @@ export function coverAt(elapsedMs: number): number {
  * beyaza doyup leke oluyordu.
  */
 export function mistBudget(width: number, height: number, coarse: boolean): number {
-  const raw = Math.round((width * height) / 2200) * (coarse ? 0.75 : 1);
+  const raw = Math.round((width * height) / 700) * (coarse ? 0.7 : 1);
   return Math.round(Math.min(Math.max(raw, MIN_DROPS), MAX_DROPS));
+}
+
+/**
+ * Ağzın sağında bu kadar yer varsa koni olduğu gibi kalıyor (ekran payı).
+ */
+const ROOM_ENOUGH = 0.35;
+
+/** Yer kalmadığında koninin yukarı çevrileceği en büyük açı (rad). */
+const TILT_MAX = 0.7;
+
+/**
+ * Püskürtmenin ekseni — ağzın sağında kalan yere göre.
+ *
+ * ⚠️ Telefonda çekilip görüldü: figür ekranın çoğunu kapladığı için ağız sağ
+ * kenara dayanıyor ve sis daha doğmadan kırpılıyordu — köşede küçük bir leke.
+ * Sağa yer yoksa boş olan yer YUKARISI, üstelik telefon ekranı uzun. Geniş
+ * ekranda hiçbir şey değişmiyor: koni referans fotoğraftaki gibi yana gidiyor.
+ *
+ * Figürü küçültmek de bir çözümdü ve reddedildi: sahip figürün okunmasını
+ * ayrıca istemişti, küçültmek onu geri bozardı.
+ */
+export function sprayAngle(nozzleX: number, viewportWidth: number): number {
+  const room = viewportWidth > 0 ? (viewportWidth - nozzleX) / viewportWidth : 1;
+  const tight = 1 - Math.min(Math.max(room, 0) / ROOM_ENOUGH, 1);
+  return SPRAY_ANGLE - tight * TILT_MAX;
 }
 
 /**
