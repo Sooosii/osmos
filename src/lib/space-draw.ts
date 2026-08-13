@@ -191,16 +191,22 @@ function markAlpha(mark: SpaceMark, dimmed: boolean, nearness: number | null): n
   const full = ALPHA_BASE + mark.depth * ALPHA_RANGE;
 
   /*
-   * ⚠️ Seçim kazanır: kaydıraç sönmesi yalnızca seçim YOKKEN uygulanıyor.
+   * ⚠️ **"Seçim kazanır" kuralı DEVRILDI** (sahibin ekranında, 2026-08-13).
    *
-   * İki soru farklı ölçekte. Kaydıraç geniş bir soru ("şuna benzer bir şey"),
-   * seçim dar bir soru ("bu neye benziyor"). Bir noktaya basmak dar soruya
-   * geçmek demek ve cevabı seçili + komşuları; kaydıraç tarifi o cevabın üstüne
-   * binseydi komşulardan bazıları tarife uzak diye sönerdi — yani harita "bu
-   * ona benziyor" derken aynı anda "ama bak sönük" derdi. Boşluğa basıp seçim
-   * kalkınca geniş soru geri geliyor.
+   * Eski kural: kaydıraç sönmesi yalnızca seçim YOKKEN uygulanıyordu. Gerekçesi
+   * şuydu ve hâlâ doğru: kaydıraç geniş bir soru ("şuna benzer bir şey"), seçim
+   * dar bir soru ("bu neye benziyor"); geniş olan darın cevabının üstüne
+   * binseydi harita "bu ona benziyor" derken aynı anda "ama bak sönük" derdi.
+   *
+   * Kaçırdığı şey, kullanıcının gördüğüydü: bir parfüm seçtikten sonra dört
+   * kaydıraç da **hiçbir şey yapmıyordu.** Sürüklüyorsun, harita kımıldamıyor.
+   * Hiçbir şey yapmayan bir denetim, kusurlu bir cevaptan kötüdür.
+   *
+   * Yeni denge `drawSpace`te kuruluyor: tarif konuşurken vurgu sönümü kalkıyor
+   * (yani "ama bak sönük" çelişkisi doğmuyor), seçili nokta tarifin sönümünden
+   * muaf, komşu çizgileri duruyor.
    */
-  // Kaydıraç konuşmuyorsa (seçim var ya da hiçbir eksen sorulmamış) tam parlaklık.
+  // Tarif yoksa ya da bu nokta muafsa tam parlaklık.
   if (nearness === null) return full;
 
   /*
@@ -214,6 +220,15 @@ function markAlpha(mark: SpaceMark, dimmed: boolean, nearness: number | null): n
 /** Bir karede bütün noktalar için ortak olan; nokta başına değişen tek şey `offsetX`. */
 interface Pass {
   readonly dimmed: boolean;
+  /**
+   * Kenar sönümünün dışında mı?
+   *
+   * ⚠️ Eskiden `selectedId !== null && !dimmed` diye yerinde hesaplanıyordu ve
+   * tarif kaydıraçlara açılınca sessizce bozuluyordu: vurgu kalkınca hiçbir
+   * nokta `dimmed` olmuyor, yani seçim varken HERKES kenar sönümünün dışına
+   * çıkıyordu. Muafiyet vurgu kuralına ait, seçime değil.
+   */
+  readonly exempt: boolean;
   readonly anchor: number;
   /** Sorulan tarif; `null` "kimse bir şey sormuyor". */
   readonly asked: FeelTarget | null;
@@ -240,9 +255,8 @@ function drawMark(ctx: CanvasRenderingContext2D, mark: SpaceMark, scene: SpaceSc
     (active ? ACTIVE_GROWTH : 0) +
     lift * FEEL_GROWTH;
 
-  // Seçim varken vurgulanan noktalar sönümün dışında kalıyor.
-  const exempt = scene.selectedId !== null && !dimmed;
-  const fade = exempt ? 1 : edgeFade(sx, sy, scene.viewport);
+  // Vurgulanan noktalar sönümün dışında kalıyor; gerekçe `Pass.exempt`te.
+  const fade = pass.exempt ? 1 : edgeFade(sx, sy, scene.viewport);
   if (fade === 0) return;
 
   const alpha = markAlpha(mark, dimmed, nearness) * fade;
@@ -413,17 +427,35 @@ export function drawSpace(ctx: CanvasRenderingContext2D, scene: SpaceScene) {
     : null;
 
   /*
+    Sorulan tarif — ① ray, ② kaydıraçlar, ③ hiçbiri.
+
+    ⚠️ Buradaki ② eskiden `scene.selectedId === null` şartına bağlıydı ve o şart
+    SAHIBIN EKRANINDA DEVRILDI: bir parfüm seçiliyken dört kaydıraç da susuyordu,
+    kullanıcı topuğu sürüklüyor ve haritada hiçbir şey olmuyordu. Eski gerekçe
+    ("kaydıraç geniş bir soru, seçim dar bir soru; geniş olan darın cevabını
+    söndüremez") yanlış değildi ama daha büyük bir doğruyu kaçırıyordu:
+    **hiçbir şey yapmayan bir denetim, yanlış cevaptan kötüdür.**
+  */
+  const asked: FeelTarget | null = scene.rail
+    ? railFeel(scene.rail.value)
+    : hasFeel(scene.feel)
+      ? scene.feel
+      : null;
+
+  /*
     Seçim varken yalnızca o parfüm ve komşuları tam parlaklıkta kalıyor —
     harita bir anda "şu, şuna benziyor" cümlesine dönüşüyor.
 
-    Ray sürerken bu kalkıyor: soru artık "bu neye benziyor" değil, "bunun gibi
-    ama daha sıcak ne var" ve cevabı haritanın tamamı. Komşu çizgileri de
-    çekiliyor, yoksa ekran iki farklı soruya birden cevap veriyormuş gibi olur.
+    ⚠️ Tarif konuşurken bu vurgu KALKIYOR, çünkü ekranda iki ayrı soru birden
+    cevaplanamaz. Cevabı tarif veriyor; seçim etiketini, küratör cümlesini ve
+    komşu çizgilerini korumaya devam ediyor. Sönük bir komşuya giden çizgi hâlâ
+    bir şey söylüyor: "bu ona benziyor, ama senin sorduğun şey değil."
   */
   const railing = scene.rail !== null;
   const highlighted =
-    selected && !railing ? new Set([selected.id, ...selected.neighborIds]) : null;
+    selected && asked === null ? new Set([selected.id, ...selected.neighborIds]) : null;
 
+  // Ray sürerken çizgiler çekiliyor: ray zaten seçili noktadan türeyen bir soru.
   if (selected && !railing) drawLinks(ctx, selected, scene);
   if (scene.rail?.geometry) drawRail(ctx, scene.rail.geometry);
 
@@ -444,18 +476,6 @@ export function drawSpace(ctx: CanvasRenderingContext2D, scene: SpaceScene) {
    * Kaydıraca dokunulmadıysa hiç hesaplanmıyor — dizi bile kurulmuyor. Sık olan
    * durum bu ve uzayın açılış karesi de buraya düşüyor.
    */
-  /*
-    Sorulan tarif üç yerden gelebiliyor ve sırası önemli:
-      ① ray — seçili noktadan türetilen soru, her şeyin önünde
-      ② kaydıraçlar — ancak seçim YOKKEN, gerekçesi `markAlpha`da
-      ③ hiçbiri
-  */
-  const asked: FeelTarget | null = scene.rail
-    ? railFeel(scene.rail.value)
-    : scene.selectedId === null && hasFeel(scene.feel)
-      ? scene.feel
-      : null;
-
   const reach = scene.rail ? RAIL_REACH : FEEL_REACH;
   const anchor = asked
     ? feelAnchor(
@@ -475,7 +495,22 @@ export function drawSpace(ctx: CanvasRenderingContext2D, scene: SpaceScene) {
         ? railOffset(dragging.geometry, dragging.value)
         : 0;
 
-    drawMark(ctx, mark, scene, { dimmed, anchor, asked, reach, offsetX });
+    /*
+      ⚠️ Seçili nokta tarifin sönümünün DIŞINDA. Sönseydi ekran kendi kendisiyle
+      çelişirdi: etiket onu gösteriyor, küratör cümlesi ondan bahsediyor ve
+      kullanıcı ona bakarken kayboluyor. Ray da bu muafiyeti kullanıyor —
+      sürüklenen nokta parmağın altında sönmüyor.
+    */
+    const spared = asked !== null && mark.id === scene.selectedId;
+
+    drawMark(ctx, mark, scene, {
+      dimmed,
+      exempt: highlighted !== null && !dimmed,
+      anchor,
+      asked: spared ? null : asked,
+      reach,
+      offsetX,
+    });
   }
 
   // Giriş lekesi en son: noktaların da bağlantıların da ÜSTÜNÜ örtüyor.

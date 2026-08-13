@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { SpaceMark } from '@/data/types';
 import { drawSpace, type SpaceScene } from '@/lib/space-draw';
-import { NO_FEEL } from '@/lib/space-feel';
+import { type FeelTarget, NO_FEEL } from '@/lib/space-feel';
 import { NO_ENTRY } from '@/lib/space-entry';
 
 /**
@@ -132,5 +132,61 @@ describe('raf halkasi', () => {
     drawSpace(ctx, scene(new Set(['a'])));
     /* Yarıçap, en büyük nokta yarıçapından da büyük olmalı. */
     expect(strokes[0].radius).toBeGreaterThan(4);
+  });
+});
+
+describe('tarif seçim varken de konuşuyor', () => {
+  /*
+    ⚠️ Sahibin ekranında bulunan kusur: bir parfüm seçtikten sonra dört kaydıraç
+    da hiçbir şey yapmıyordu. Sürüklüyorsun, harita kımıldamıyor.
+
+    Ölçü nokta dolgusundan değil RAF HALKASINDAN okunuyor (`fakeContext` yalnız
+    `stroke` kaydediyor): halkanın opaklığı noktanınkinden türüyor, yani sönen
+    nokta sönük halka veriyor.
+
+    Fikstür ayrı kuruluyor çünkü yukarıdaki iki nokta AYNI `feel`i taşıyor —
+    hiçbir tarif onları birbirinden ayıramaz. Burada 'a' soğuk, 'b' sıcak ve
+    'a', 'b'nin komşusu: yani eski kuralda seçim 'b' iken 'a' vurgulanıp tam
+    parlaklıkta kalıyordu.
+  */
+  const cold = { ...mark('a', -0.2), feel: [0, 0.5, 0.5, 0.5] as const };
+  const warm = { ...mark('b', 0.2), feel: [1, 0.5, 0.5, 0.5] as const, neighborIds: ['a'] };
+  const warmAsked: FeelTarget = [1, null, null, null];
+
+  /*
+    ⚠️ SON `stroke` okunuyor, ilki değil. `drawLinks` mark döngüsünden ÖNCE
+    çalışıyor; seçim varken `strokes[0]` komşu çizgisi oluyor ve onun opaklığı
+    sabit (`LINK_COLOR`). Ilk yazımda tam bu yüzden 0.28 ölçülüp sınama
+    yanıltıcı biçimde kırıldı.
+  */
+  function ringAlpha(selectedId: string | null, feel: FeelTarget) {
+    const { ctx, strokes } = fakeContext();
+    drawSpace(ctx, {
+      ...scene(new Set(['a']), selectedId),
+      marks: [cold, warm],
+      feel,
+    });
+    return alphaOf(strokes[strokes.length - 1].style);
+  }
+
+  test('KUSURUN KENDISI: seçim varken kaydıraç konuşuyor', () => {
+    // 'a' seçilinin komşusu — eski kuralda tarif ne sorarsa sorsun parlaktı.
+    expect(ringAlpha('b', warmAsked)).toBeLessThan(ringAlpha('b', NO_FEEL));
+  });
+
+  test('seçim yokkenki cevapla aynı', () => {
+    // Tarifin cevabı seçimden etkilenmiyor: 'a' iki durumda da aynı sönüklükte.
+    expect(ringAlpha('b', warmAsked)).toBeCloseTo(ringAlpha(null, warmAsked), 6);
+  });
+
+  test('seçili noktanın kendisi sönmüyor', () => {
+    // Halka bu kez seçili noktada; tarif tam tersini sorsa bile parlak kalıyor.
+    const son = (feel: FeelTarget) => {
+      const { ctx, strokes } = fakeContext();
+      drawSpace(ctx, { ...scene(new Set(['b']), 'b'), marks: [cold, warm], feel });
+      return alphaOf(strokes[strokes.length - 1].style);
+    };
+
+    expect(son([0, null, null, null])).toBeCloseTo(son(NO_FEEL), 6);
   });
 });
