@@ -93,38 +93,41 @@ import { useDict } from '@/i18n/LocaleProvider';
  */
 const ATOMIZER_SVG = `<svg width="600" height="600" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="sise" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="white" stop-opacity="0.62"/>
-      <stop offset="1" stop-color="white" stop-opacity="0.24"/>
+    <linearGradient id="cam" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="white" stop-opacity="0.30"/>
+      <stop offset="0.32" stop-color="white" stop-opacity="0.68"/>
+      <stop offset="0.7" stop-color="white" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="white" stop-opacity="0.22"/>
     </linearGradient>
-    <linearGradient id="yan" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="white" stop-opacity="0.5"/>
-      <stop offset="1" stop-color="white" stop-opacity="0.18"/>
-    </linearGradient>
-    <radialGradient id="puar" cx="0.35" cy="0.32" r="0.8">
-      <stop offset="0" stop-color="white" stop-opacity="0.75"/>
-      <stop offset="1" stop-color="white" stop-opacity="0.28"/>
+    <radialGradient id="puar" cx="0.34" cy="0.3" r="0.82">
+      <stop offset="0" stop-color="white" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="white" stop-opacity="0.26"/>
     </radialGradient>
     <radialGradient id="parla" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="white" stop-opacity="0.85"/>
+      <stop offset="0" stop-color="white" stop-opacity="0.9"/>
       <stop offset="1" stop-color="white" stop-opacity="0"/>
     </radialGradient>
   </defs>
 
-  <path d="M46 104 Q30 108 26 128" fill="none" stroke="url(#yan)" stroke-width="9" stroke-linecap="round"/>
-  <ellipse cx="44" cy="132" rx="27" ry="23" fill="url(#puar)" stroke="white" stroke-opacity="0.7" stroke-width="3"/>
-  <path d="M34 152 L32 168" stroke="white" stroke-opacity="0.45" stroke-width="6" stroke-linecap="round"/>
-  <path d="M44 155 L44 171" stroke="white" stroke-opacity="0.45" stroke-width="6" stroke-linecap="round"/>
-  <path d="M54 152 L56 168" stroke="white" stroke-opacity="0.45" stroke-width="6" stroke-linecap="round"/>
+  <g transform="translate(0,-11)">
+  <path d="M84 74 C62 82 38 98 29 116" fill="none" stroke="white" stroke-opacity="0.42" stroke-width="6" stroke-linecap="round"/>
+  <ellipse cx="28" cy="139" rx="21" ry="20" fill="url(#puar)" stroke="white" stroke-opacity="0.62" stroke-width="2.5"/>
+  <path d="M20 157 L18 173" stroke="white" stroke-opacity="0.4" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M28 160 L28 177" stroke="white" stroke-opacity="0.4" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M36 157 L38 173" stroke="white" stroke-opacity="0.4" stroke-width="4.5" stroke-linecap="round"/>
 
-  <path d="M62 122 Q56 96 82 92 L118 92 Q144 96 138 122 L138 168 Q138 182 122 182 L78 182 Q62 182 62 168 Z" fill="url(#sise)" stroke="white" stroke-opacity="0.75" stroke-width="3"/>
-  <path d="M66 132 L134 132 L134 166 Q134 178 122 178 L78 178 Q66 178 66 166 Z" fill="black"/>
-  <ellipse cx="78" cy="112" rx="10" ry="22" fill="url(#parla)"/>
+  <path d="M88 96 C70 104 62 126 64 148 C66 172 82 187 105 187 C128 187 144 172 146 148 C148 126 140 104 122 96 Z" fill="url(#cam)" stroke="white" stroke-opacity="0.72" stroke-width="2.5"/>
+  <path d="M67 140 C69 168 84 181 105 181 C126 181 141 168 143 140 Z" fill="black"/>
+  <path d="M84 102 C77 120 75 132 76 142" fill="none" stroke="white" stroke-opacity="0.26" stroke-width="3"/>
+  <path d="M105 99 C103 118 103 128 104 140" fill="none" stroke="white" stroke-opacity="0.2" stroke-width="3"/>
+  <path d="M126 102 C133 120 135 132 134 142" fill="none" stroke="white" stroke-opacity="0.2" stroke-width="3"/>
+  <ellipse cx="82" cy="120" rx="8" ry="18" fill="url(#parla)"/>
 
-  <rect x="88" y="74" width="24" height="20" fill="url(#yan)"/>
-  <rect x="82" y="62" width="36" height="14" rx="3" fill="white" fill-opacity="0.7"/>
-  <path d="M114 68 H166" stroke="white" stroke-opacity="0.55" stroke-width="10" stroke-linecap="round"/>
-  <path d="M162 62 L184 68 L162 74 Z" fill="white" fill-opacity="0.9"/>
+  <rect x="93" y="76" width="24" height="22" fill="white" fill-opacity="0.38"/>
+  <rect x="86" y="63" width="38" height="14" rx="2" fill="white" fill-opacity="0.72"/>
+  <path d="M118 58 H176" stroke="white" stroke-opacity="0.5" stroke-width="9" stroke-linecap="round"/>
+  <path d="M170 50 L192 58 L170 66 Z" fill="white" fill-opacity="0.95"/>
+  </g>
 </svg>`;
 
 interface Cell {
@@ -253,7 +256,12 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
 
     const placeChrome = () => {
       const box = visibleBox();
-      const cssW = Math.min(0.74 * Math.min(box.w, box.h), 560);
+      /*
+        ⚠️ 0.74/560'tan büyütüldü. Izgara 88'den 120 sütuna çıkınca hücre
+        küçüldü; figür aynı boyda kalsaydı harfler iğneleşir, "yapay" şikâyeti
+        çözülecek yerde derinleşirdi.
+      */
+      const cssW = Math.min(0.82 * Math.min(box.w, box.h), 640);
       fig.style.left = `${box.x + box.w / 2}px`;
       fig.style.top = `${box.y + box.h / 2}px`;
       fig.style.width = `${cssW}px`;

@@ -38,8 +38,19 @@ export const FONT_SIZE = 12;
 export const CELL_W = 7;
 export const CELL_H = 12;
 
-/** Izgara genişliği (hücre). 88×7 = 616px — telefonda CSS küçültüyor. */
-export const COLS = 88;
+/**
+ * Izgara genişliği (hücre). 120×7 = 840px — telefonda CSS küçültüyor.
+ *
+ * ⚠️ 88'den çıkarıldı ve sebebi ölçülmüş bir şikâyet: atomizör "çok yapay
+ * duruyor, ilk başta hiç anlaşılmıyor bile". 88 sütunda bir hücre 2.27 × 3.92
+ * SVG birimi ediyordu, yani şişenin yuvarlaklığı ve camın yivleri hücrenin
+ * altında kalıp düz bir kutuya çöküyordu. 120'de hücre 1.67 × 2.86 — aynı
+ * alana %36 daha çok hücre, eğri bir kenar artık eğri okunuyor.
+ *
+ * Figürün ekrandaki boyu da bununla birlikte büyüdü (`placeChrome`): hücre
+ * küçülürken figür büyümeseydi harfler iğneleşirdi.
+ */
+export const COLS = 120;
 
 /**
  * Kare bir kaynağın oranını koruyan satır sayısı.
