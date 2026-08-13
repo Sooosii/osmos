@@ -6,6 +6,7 @@ import {
   HISS_MS,
   HISS_PEAK_MS,
   MAX_DROPS,
+  MIN_DROPS,
   SPRAY_ANGLE,
   SPRAY_MS,
   type Drop,
@@ -15,6 +16,7 @@ import {
   emitPuff,
   hissTotal,
   mistBudget,
+  mistScale,
   nozzleCell,
   stepMist,
 } from './atomizer-mist';
@@ -223,10 +225,36 @@ describe('mistBudget', () => {
     ]) {
       const fine = mistBudget(w, h, false);
       const coarse = mistBudget(w, h, true);
-      expect(fine).toBeGreaterThanOrEqual(160);
+      expect(fine).toBeGreaterThanOrEqual(MIN_DROPS);
       expect(fine).toBeLessThanOrEqual(MAX_DROPS);
       expect(coarse).toBeLessThanOrEqual(fine);
     }
+  });
+
+  test('TELEFONDA DA GORULUYOR — taban gercekten devrede', () => {
+    /*
+      ⚠️ Sahip telefonda sisi hiç göremedi. Alan hesabı 390×844'te 150 zerre
+      veriyordu; taban 240'a çıkarıldı ve bu sınama onu tutuyor.
+    */
+    expect(mistBudget(390, 844, true)).toBe(MIN_DROPS);
+    expect(mistBudget(320, 568, true)).toBe(MIN_DROPS);
+  });
+});
+
+describe('mistScale', () => {
+  test('küçük ekranda küçülüyor ama görünmezliğe inmiyor', () => {
+    expect(mistScale(390, 844)).toBeGreaterThanOrEqual(0.7);
+    expect(mistScale(320, 568)).toBeGreaterThanOrEqual(0.7);
+  });
+
+  test('büyük ekranda leke olmuyor', () => {
+    expect(mistScale(3840, 2160)).toBeLessThanOrEqual(1.2);
+  });
+
+  test('IZGARADAN BAGIMSIZ — ekranla büyüyor, hücreyle değil', () => {
+    // ⚠️ Kusurun kendisi: ölçek `cssW / figW` idi ve `COLS` 88 → 120 olunca
+    // sessizce %27 küçüldü.
+    expect(mistScale(1440, 900)).toBeGreaterThan(mistScale(390, 844));
   });
 });
 

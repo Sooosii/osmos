@@ -38,7 +38,16 @@ export interface Drop {
 }
 
 /** Ekranda aynı anda duracak en fazla zerre. */
-export const MAX_DROPS = 640;
+export const MAX_DROPS = 900;
+
+/**
+ * En seyrek sis — küçük ekranda bile bu kadarı çıkıyor.
+ *
+ * ⚠️ Taban ölçülerek yükseldi: sahip telefonda sisi **hiç göremedi.** Alan
+ * hesabı 390×844'te 150 zerre veriyordu ve o kadarı, küçülmüş yarıçaplarla
+ * birlikte görünmez kalıyordu.
+ */
+export const MIN_DROPS = 240;
 
 /** Koninin yarı açısı (rad) ve ekseni — sağa, hafif yukarı. */
 export const CONE_SPREAD = 0.42;
@@ -57,8 +66,14 @@ export const HANDOFF_MS = 700;
 /** Son zerrenin de öldüğü an (ms). */
 export const SPRAY_MS = 2400;
 
-/** Sisin yukarı çekilişi (px/s²) — "buhar" okuması bundan geliyor. */
-const RISE = 26;
+/**
+ * Sisin yukarı çekilişi (px/s²) — "buhar" okuması bundan geliyor.
+ *
+ * ⚠️ 26'dan yükseltildi. Telefonda ölçüldü: ağız zaten ekranın sağ kenarına
+ * yakın duruyor ve sağa giden zerreler görünmeden dışarı çıkıyordu. Yükselen
+ * bir bulut, boş olan yere — yukarıya — doğru açılıyor.
+ */
+const RISE = 58;
 
 function clamp01(value: number): number {
   return Math.min(Math.max(value, 0), 1);
@@ -67,7 +82,13 @@ function clamp01(value: number): number {
 export interface PuffOptions {
   readonly origin: { readonly x: number; readonly y: number };
   readonly count: number;
-  /** Ekran ölçeği: aynı püskürtme telefonda da aynı okunsun. */
+  /**
+   * Ekran ölçeği — yarıçapı, büyümeyi ve **hızı** birden sürüyor.
+   *
+   * ⚠️ Hız eskiden ölçeklenmiyordu ve bu bir kusurdu: 220–740 px/s, 390 px
+   * genişliğindeki bir telefonda ekranı yarım saniyede geçmek demek. Sis
+   * görünmeden dağılıyordu. Püskürtmenin tamamı ekranla orantılı olmak zorunda.
+   */
   readonly scale?: number;
   readonly random?: () => number;
 }
@@ -93,7 +114,7 @@ export function emitPuff(drops: Drop[], options: PuffOptions): void {
     */
     const spread = ((random() + random()) / 2 - 0.5) * 2 * CONE_SPREAD;
     const angle = SPRAY_ANGLE + spread;
-    const speed = 220 + random() * 520;
+    const speed = (220 + random() * 520) * scale;
 
     drops.push({
       x: options.origin.x,
@@ -102,9 +123,15 @@ export function emitPuff(drops: Drop[], options: PuffOptions): void {
       vy: Math.sin(angle) * speed,
       age: 0,
       life: 900 + random() * 1400,
-      radius: (2.5 + random() * 4) * scale,
-      growth: (26 + random() * 46) * scale,
-      drag: 1.4 + random() * 1.2,
+      radius: (5 + random() * 8) * scale,
+      growth: (55 + random() * 90) * scale,
+      /*
+        ⚠️ Sürüklenme 1.4–2.6'dan yükseltildi. Zerrenin kat ettiği yol kabaca
+        `hız / sürüklenme`; eski değerlerle bu 250 px ediyordu ve 390 px'lik bir
+        ekranda ağızdan çıkan sis doğruca dışarı gidiyordu. Yüksek sürüklenme
+        jeti hemen yavaşlatıp BULUTA çeviriyor — gerçek bir atomizör de öyle.
+      */
+      drag: 2.8 + random() * 2.2,
       swirl: random() * 90,
       swirlW: 0.0012 + random() * 0.0026,
       phase: random() * Math.PI * 2,
@@ -132,11 +159,15 @@ export function stepMist(drops: Drop[], dtMs: number): void {
     const ay =
       Math.sin(drop.age * drop.swirlW * 1.31 + drop.phase * 1.7) * drop.swirl * 0.7 - RISE;
 
-    drop.vx += ax * dt;
-    drop.vy += ay * dt;
-
-    drop.vx -= drop.vx * drop.drag * dt;
-    drop.vy -= drop.vy * drop.drag * dt;
+    /*
+      ⚠️ Sürüklenme TAM ÇÖZÜMLE uygulanıyor (`exp(-drag·dt)`), `v -= v·drag·dt`
+      ile değil. Ikincisi açık Euler ve sürüklenme sertleştikçe `dt`ye duyarlı
+      hâle geliyor: sınama tam bu yüzden kırıldı (60 Hz ile 120 Hz arasında
+      %2.07 fark). Üstel sönüm `dt`den bağımsız ve zaten fiziğin doğrusu.
+    */
+    const decay = Math.exp(-drop.drag * dt);
+    drop.vx = (drop.vx + ax * dt) * decay;
+    drop.vy = (drop.vy + ay * dt) * decay;
 
     drop.x += drop.vx * dt;
     drop.y += drop.vy * dt;
@@ -228,10 +259,42 @@ export function coverAt(elapsedMs: number): number {
  *
  * Kaba işaretçide (telefon) düşüyor: aynı sayıda zerre orada hem gereksiz
  * (ekran küçük) hem pahalı. Arka plandaki nokta alanı da ekranla ölçekleniyor.
+ *
+ * ⚠️ **Yoğunluk ölçülerek ayarlandı** (2026-08-13). Sahip telefonda sisi hiç
+ * göremedi, masaüstünde "az" buldu. Ölçü, ekrana düşen ortalama toplamalı
+ * opaklık — "mürekkep"; toplamalı harmanlamada 1.0 civarı beyaza doyma demek.
+ * Sis modülü Node'da gerçek sayılarla sürülüp ölçüldü:
+ *
+ *   an        telefon (390×844)   masaüstü (1440×900)
+ *   önce      0.015 (görünmez)    0.036 (soluk)
+ *   256 ms    0.04                0.05
+ *   512 ms    0.06                0.10
+ *   **768 ms  0.07 ← tepe         0.11 ← tepe**
+ *   1280 ms   0.04                0.07
+ *   1792 ms   0.01                0.01
+ *
+ * Yani telefonda ~4.5, masaüstünde ~3 kat yoğunlaştı. Daha ileri gidilmedi:
+ * zerre başına opaklık 0.2'yken bulutun çekirdeği (~10 kat üst üste binme)
+ * beyaza doyup leke oluyordu.
  */
 export function mistBudget(width: number, height: number, coarse: boolean): number {
-  const raw = Math.round((width * height) / 3400) * (coarse ? 0.55 : 1);
-  return Math.round(Math.min(Math.max(raw, 160), MAX_DROPS));
+  const raw = Math.round((width * height) / 2200) * (coarse ? 0.75 : 1);
+  return Math.round(Math.min(Math.max(raw, MIN_DROPS), MAX_DROPS));
+}
+
+/**
+ * Zerrelerin ekrana göre boyu.
+ *
+ * ⚠️ Bu ölçek eskiden figürün IZGARA oranından geliyordu (`cssW / figW`) ve
+ * ızgara 88'den 120 sütuna çıkınca sessizce %27 küçüldü — telefonda zerreler
+ * bir pikselin altına indi ve sis görünmez oldu. Ölçü artık ızgaraya değil
+ * **ekrana** bağlı: sisin işi okunmak, hücre saymak değil.
+ *
+ * Taban 0.7: küçük ekranda orantılı küçülmek doğru ama görünmezliğe kadar
+ * gitmemeli. Tavan 1.2: büyük ekranda zerre lekeye dönüşmesin.
+ */
+export function mistScale(width: number, height: number): number {
+  return Math.min(Math.max(Math.min(width, height) / 800, 0.7), 1.2);
 }
 
 export interface SampledCell {

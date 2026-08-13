@@ -26,6 +26,7 @@ import {
   emitPuff,
   hissTotal,
   mistBudget,
+  mistScale,
   nozzleCell,
   stepMist,
 } from '@/lib/atomizer-mist';
@@ -352,6 +353,7 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
       mistCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       budget = mistBudget(box.w, box.h, !window.matchMedia('(pointer: fine)').matches);
+      mistUnit = mistScale(box.w, box.h);
     };
 
     /**
@@ -379,6 +381,15 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
     const figScale = () => (fig.getBoundingClientRect().width || figW) / figW;
 
     /**
+     * Sisin ölçeği — figürün ızgarasından DEĞİL ekrandan geliyor.
+     *
+     * ⚠️ Burada `figScale()` kullanılıyordu ve ızgara 88'den 120 sütuna çıkınca
+     * bölen 616'dan 840'a büyüyüp ölçeği sessizce %27 küçülttü. Sahip telefonda
+     * sisi hiç göremedi. Gerekçe `mistScale`de.
+     */
+    let mistUnit = 1;
+
+    /**
      * Ağzın o karedeki ekran koordinatı.
      *
      * Figür nefes alıyor (`bobOffset`), yani ağız da oynuyor: sis sabit bir
@@ -401,7 +412,13 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
       mistCtx.globalCompositeOperation = 'lighter';
 
       for (const drop of drops) {
-        mistCtx.globalAlpha = dropAlpha(drop) * 0.14;
+        /*
+          ⚠️ Zerre başına opaklık ölçülerek kondu. Toplamalı harmanlamada
+          ekranın bir noktası ~10 zerreyle örtülüyor; 0.2'de çekirdek beyaza
+          doyup leke oluyordu, 0.11'de bulut kalıyor. Sayılar `mistBudget`in
+          başlığındaki tabloda.
+        */
+        mistCtx.globalAlpha = dropAlpha(drop) * 0.11;
         mistCtx.drawImage(
           sprite,
           drop.x - drop.radius,
@@ -521,7 +538,7 @@ export function AstronotIntro({ onLeaving }: AstronotIntroProps) {
           const born = Math.floor(hissTotal(elapsed, budget) - emitted);
           if (born > 0) {
             emitted += born;
-            emitPuff(drops, { origin: nozzlePoint(tMs), count: born, scale: figScale() });
+            emitPuff(drops, { origin: nozzlePoint(tMs), count: born, scale: mistUnit });
           }
 
           stepMist(drops, dtMs);
