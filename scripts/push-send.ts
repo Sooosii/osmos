@@ -1,11 +1,20 @@
 import webpush from 'web-push';
+import { createHash } from 'node:crypto';
 import { PERFUMES } from '../src/data/perfumes';
-import { pushMessage, type PushMessage } from '../src/lib/push-payload';
+import { pushDigestMessage, type PushMessage } from '../src/lib/push-payload';
+import { waitUntilPerfumeIsLive } from '../src/lib/push-deploy';
+import { broadcastPush, type PushDeliveryResult } from '../src/lib/push-broadcast';
 import {
   announcedIds,
   deleteSubscription,
   listSubscriptions,
   markAnnounced,
+  clearDigestDelivery,
+  deliveredDigestEndpoints,
+  markDigestDelivered,
+  activeDigestBatch,
+  clearActiveDigestBatch,
+  setActiveDigestBatch,
 } from '../src/lib/push-store';
 import type { StoredSubscription } from '../src/lib/push-subscription';
 
@@ -48,40 +57,21 @@ function requireEnv(name: string): string {
 }
 
 /** Gönderim sonucu: kayıt ya yaşıyor ya push servisi "artık yok" dedi. */
-async function send(sub: StoredSubscription, message: PushMessage): Promise<'alive' | 'dead'> {
+async function send(sub: StoredSubscription, message: PushMessage): Promise<PushDeliveryResult> {
   try {
     await webpush.sendNotification(
       { endpoint: sub.endpoint, keys: sub.keys },
       JSON.stringify(message),
     );
-    return 'alive';
+    return 'sent';
   } catch (error) {
     const status = (error as { statusCode?: number }).statusCode;
     /* 404/410 push servisinin sözleşmesi: abonelik öldü, kayıt budanır. */
     if (status === 404 || status === 410) return 'dead';
     /* Geçici hata (5xx, ağ) — kayıt kalır, bir sonraki turda tekrar denenir. */
     console.error(`gönderilemedi (${status ?? 'ağ'}): ${sub.endpoint.slice(0, 60)}…`);
-    return 'alive';
+    return 'retryable';
   }
-}
-
-/** Her yeni parfüm × her canlı abone; ölen kayıt anında budanır. */
-async function broadcast(
-  subs: readonly StoredSubscription[],
-  messageFor: (sub: StoredSubscription) => PushMessage,
-): Promise<{ sent: number; pruned: number }> {
-  let sent = 0;
-  let pruned = 0;
-  for (const sub of subs) {
-    const result = await send(sub, messageFor(sub));
-    if (result === 'dead') {
-      await deleteSubscription(sub.endpoint);
-      pruned += 1;
-    } else {
-      sent += 1;
-    }
-  }
-  return { sent, pruned };
 }
 
 async function main(): Promise<void> {
@@ -105,11 +95,11 @@ async function main(): Promise<void> {
     const subs = await listSubscriptions();
     console.log(`deneme gönderimi: ${subs.length} abone`);
     if (dryRun) return;
-    const { sent, pruned } = await broadcast(subs, () => ({
+    const { sent, pruned } = await broadcastPush(subs, () => ({
       title: 'OSMOS',
       body: testMessage,
       url: '/',
-    }));
+    }), { send, remove: deleteSubscription });
     console.log(`gitti: ${sent} · budandı: ${pruned}`);
     return;
   }
@@ -124,28 +114,82 @@ async function main(): Promise<void> {
     return;
   }
 
-  const fresh = PERFUMES.filter((perfume) => !announced.has(perfume.id));
-  if (fresh.length === 0) {
-    console.log('yeni parfüm yok');
+  const initiallyFresh = PERFUMES.filter((perfume) => !announced.has(perfume.id));
+  if (dryRun) {
+    console.log(
+      initiallyFresh.length === 0
+        ? 'yeni parfüm yok'
+        : `yeni: ${initiallyFresh.map((perfume) => perfume.id).join(', ')}`,
+    );
     return;
   }
 
-  console.log(`yeni: ${fresh.map((perfume) => perfume.id).join(', ')}`);
-  if (dryRun) return;
+  const perfumeById = new Map(PERFUMES.map((perfume) => [perfume.id, perfume]));
+  let processedBatch = false;
 
-  let subs = await listSubscriptions();
-  console.log(`${subs.length} abone`);
+  while (true) {
+    const latestAnnounced = await announcedIds();
+    const remaining = PERFUMES.filter((perfume) => !latestAnnounced.has(perfume.id));
+    let active = await activeDigestBatch();
 
-  for (const perfume of fresh) {
-    const { sent, pruned } = await broadcast(subs, (sub) => pushMessage(perfume, sub.lang));
-    console.log(`${perfume.id}: gitti ${sent} · budandı ${pruned}`);
-    if (pruned > 0) {
-      /* Budanan kayıt sonraki parfümde tekrar denenmesin. */
-      subs = await listSubscriptions();
+    if (active && active.perfumeIds.every((id) => latestAnnounced.has(id))) {
+      await clearDigestDelivery(active.id);
+      await clearActiveDigestBatch();
+      active = null;
     }
-  }
 
-  await markAnnounced(fresh.map((perfume) => perfume.id));
+    if (!active && remaining.length === 0) {
+      console.log(processedBatch ? 'bütün yeni batchler tamamlandı' : 'yeni parfüm yok');
+      return;
+    }
+
+    if (!active) {
+      const perfumeIds = remaining.map((perfume) => perfume.id);
+      active = {
+        id: createHash('sha256').update(perfumeIds.join('\0')).digest('hex'),
+        perfumeIds,
+      };
+      await setActiveDigestBatch(active);
+    }
+
+    const fresh = active.perfumeIds.map((id) => {
+      const perfume = perfumeById.get(id);
+      if (!perfume) throw new Error(`Aktif push batchinde katalogda olmayan kimlik var: ${id}`);
+      if (latestAnnounced.has(id)) {
+        throw new Error(`Aktif push batchi kısmen duyurulmuş durumda: ${id}`);
+      }
+      return perfume;
+    });
+
+    console.log(`batch ${active.id.slice(0, 8)}: ${fresh.map((perfume) => perfume.id).join(', ')}`);
+    const publicSiteUrl = requireEnv('PUSH_PUBLIC_SITE_URL');
+    console.log(`canlı yayın bekleniyor: ${fresh[0].id}`);
+    await waitUntilPerfumeIsLive({ baseUrl: publicSiteUrl, perfume: fresh[0] });
+
+    const subs = await listSubscriptions();
+    console.log(`${subs.length} abone`);
+    const alreadySent = await deliveredDigestEndpoints(active.id);
+    const { sent, pruned, retryable, skipped } = await broadcastPush(
+      subs,
+      (sub) => pushDigestMessage(fresh, sub.lang),
+      {
+        send,
+        remove: deleteSubscription,
+        alreadySent,
+        recordSent: (endpoint) => markDigestDelivered(active.id, endpoint),
+      },
+    );
+    console.log(`${fresh.length} parfümlük özet: gitti ${sent} · önce teslim ${skipped} · budandı ${pruned} · yeniden denenecek ${retryable}`);
+
+    if (retryable > 0) {
+      throw new Error(`${retryable} geçici gönderim hatası var — kimlikler duyurulmuş işaretlenmedi`);
+    }
+
+    await markAnnounced(active.perfumeIds);
+    await clearDigestDelivery(active.id);
+    await clearActiveDigestBatch();
+    processedBatch = true;
+  }
 }
 
 main().catch((error: unknown) => {

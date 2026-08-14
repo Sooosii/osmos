@@ -2,6 +2,11 @@ import type { Note } from './types';
 import { TOP_NOTES } from './note-sets/top';
 import { HEART_NOTES } from './note-sets/heart';
 import { BASE_NOTES } from './note-sets/base';
+import {
+  EXPANSION_BASE_NOTES,
+  EXPANSION_HEART_NOTES,
+  EXPANSION_TOP_NOTES,
+} from './note-sets/expansion';
 
 /**
  * Nota veritabanı — toplayıcı.
@@ -12,7 +17,14 @@ import { BASE_NOTES } from './note-sets/base';
  *
  * Her notanın üç özelliği farklı bir gösterimi sürüyor — ayrıntı: types.ts
  */
-export const NOTES: readonly Note[] = [...TOP_NOTES, ...HEART_NOTES, ...BASE_NOTES];
+export const NOTES: readonly Note[] = [
+  ...TOP_NOTES,
+  ...EXPANSION_TOP_NOTES,
+  ...HEART_NOTES,
+  ...EXPANSION_HEART_NOTES,
+  ...BASE_NOTES,
+  ...EXPANSION_BASE_NOTES,
+];
 
 const NOTE_BY_ID = new Map<string, Note>();
 for (const note of NOTES) {
@@ -39,8 +51,11 @@ export type NoteBand = 'top' | 'heart' | 'base';
 
 const BAND_BY_ID = new Map<string, NoteBand>([
   ...TOP_NOTES.map((note) => [note.id, 'top'] as const),
+  ...EXPANSION_TOP_NOTES.map((note) => [note.id, 'top'] as const),
   ...HEART_NOTES.map((note) => [note.id, 'heart'] as const),
+  ...EXPANSION_HEART_NOTES.map((note) => [note.id, 'heart'] as const),
   ...BASE_NOTES.map((note) => [note.id, 'base'] as const),
+  ...EXPANSION_BASE_NOTES.map((note) => [note.id, 'base'] as const),
 ]);
 
 export function noteBand(id: string): NoteBand {
@@ -62,9 +77,9 @@ export function noteBand(id: string): NoteBand {
 
 /** Bandlar, dizinde göründükleri sırayla. */
 export const BANDS: readonly { readonly band: NoteBand; readonly notes: readonly Note[] }[] = [
-  { band: 'top', notes: TOP_NOTES },
-  { band: 'heart', notes: HEART_NOTES },
-  { band: 'base', notes: BASE_NOTES },
+  { band: 'top', notes: [...TOP_NOTES, ...EXPANSION_TOP_NOTES] },
+  { band: 'heart', notes: [...HEART_NOTES, ...EXPANSION_HEART_NOTES] },
+  { band: 'base', notes: [...BASE_NOTES, ...EXPANSION_BASE_NOTES] },
 ];
 
 export function getNote(id: string): Note {

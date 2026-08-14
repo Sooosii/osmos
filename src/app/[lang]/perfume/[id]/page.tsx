@@ -66,7 +66,7 @@ export const dynamicParams = false;
 /*
   Tam bileşim döndürülüyor (`{ lang, id }`), yalnızca `{ id }` değil. İç içe
   biçim de çalışıyor ama bu hâli tek başına okunabilir ve derlemede sayı
-  doğrulanabilir: 77 × 2.
+  doğrulanabilir: 150 × 2.
 */
 export function generateStaticParams() {
   return LOCALES.flatMap((lang) => PERFUMES.map((perfume) => ({ lang, id: perfume.id })));

@@ -5,6 +5,12 @@ import {
   deleteSubscription,
   listSubscriptions,
   markAnnounced,
+  clearDigestDelivery,
+  deliveredDigestEndpoints,
+  markDigestDelivered,
+  activeDigestBatch,
+  clearActiveDigestBatch,
+  setActiveDigestBatch,
   saveSubscription,
   storeReady,
   __clearMemoryStore,
@@ -53,6 +59,22 @@ describe('bellek yolu (env yokken, uretim disi)', () => {
     const ids = await announcedIds();
     expect(ids).toEqual(new Set(['a', 'b']));
   });
+
+  test('toplu bildirim teslim ilerlemesini saklar ve temizler', async () => {
+    expect(await deliveredDigestEndpoints('batch-a')).toEqual(new Set());
+    await markDigestDelivered('batch-a', SUB.endpoint);
+    expect(await deliveredDigestEndpoints('batch-a')).toEqual(new Set([SUB.endpoint]));
+    await clearDigestDelivery('batch-a');
+    expect(await deliveredDigestEndpoints('batch-a')).toEqual(new Set());
+  });
+
+  test('aktif batch manifestini sonraki koşu için saklar', async () => {
+    expect(await activeDigestBatch()).toBeNull();
+    await setActiveDigestBatch({ id: 'batch-a', perfumeIds: ['one', 'two'] });
+    expect(await activeDigestBatch()).toEqual({ id: 'batch-a', perfumeIds: ['one', 'two'] });
+    await clearActiveDigestBatch();
+    expect(await activeDigestBatch()).toBeNull();
+  });
 });
 
 describe('redis yolu (env varken)', () => {
@@ -91,6 +113,33 @@ describe('redis yolu (env varken)', () => {
     await markAnnounced(['a']);
     expect(JSON.parse(String(calls[0]?.init.body))).toEqual(['HDEL', 'push:subs', SUB.endpoint]);
     expect(JSON.parse(String(calls[1]?.init.body))).toEqual(['SADD', 'push:announced', 'a']);
+  });
+
+  test('toplu teslim ilerlemesi ayrı Redis kümesinde tutulur', async () => {
+    const calls = stubRedis(1);
+    await markDigestDelivered('batch-a', SUB.endpoint);
+    await clearDigestDelivery('batch-a');
+
+    expect(JSON.parse(String(calls[0]?.init.body))).toEqual([
+      'SADD',
+      'push:delivery:batch-a',
+      SUB.endpoint,
+    ]);
+    expect(JSON.parse(String(calls[1]?.init.body))).toEqual(['DEL', 'push:delivery:batch-a']);
+  });
+
+  test('aktif batch manifesti Redis SET ve DEL kullanır', async () => {
+    const calls = stubRedis('OK');
+    const batch = { id: 'batch-a', perfumeIds: ['one', 'two'] };
+    await setActiveDigestBatch(batch);
+    await clearActiveDigestBatch();
+
+    expect(JSON.parse(String(calls[0]?.init.body))).toEqual([
+      'SET',
+      'push:delivery:active',
+      JSON.stringify(batch),
+    ]);
+    expect(JSON.parse(String(calls[1]?.init.body))).toEqual(['DEL', 'push:delivery:active']);
   });
 
   test('listeleme HGETALL duz dizisini cozuyor, bozuk kaydi atliyor', async () => {

@@ -24,6 +24,12 @@ import { memoryAllowed, redisCommand, redisTarget, type RedisTarget } from './re
 
 const SUBS_KEY = 'push:subs';
 const ANNOUNCED_KEY = 'push:announced';
+const ACTIVE_DIGEST_KEY = 'push:delivery:active';
+
+export interface ActiveDigestBatch {
+  readonly id: string;
+  readonly perfumeIds: readonly string[];
+}
 
 /** Uç bunu 503'e çevirir; depo yokken tarayıcıya yarım söz verilmez. */
 export function storeReady(): boolean {
@@ -39,11 +45,15 @@ const redis = redisCommand;
 
 const memorySubs = new Map<string, StoredSubscription>();
 const memoryAnnounced = new Set<string>();
+const memoryDigestDeliveries = new Map<string, Set<string>>();
+let memoryActiveDigest: ActiveDigestBatch | null = null;
 
 /** Yalnızca sınamalar için — bellek yolu sınamalar arasında sızmasın. */
 export function __clearMemoryStore(): void {
   memorySubs.clear();
   memoryAnnounced.clear();
+  memoryDigestDeliveries.clear();
+  memoryActiveDigest = null;
 }
 
 function requireTarget(): RedisTarget | null {
@@ -112,4 +122,77 @@ export async function markAnnounced(ids: readonly string[]): Promise<void> {
     return;
   }
   await redis(target, ['SADD', ANNOUNCED_KEY, ...ids]);
+}
+
+function digestDeliveryKey(batchId: string): string {
+  return `push:delivery:${batchId}`;
+}
+
+export async function deliveredDigestEndpoints(batchId: string): Promise<ReadonlySet<string>> {
+  const target = requireTarget();
+  if (!target) return new Set(memoryDigestDeliveries.get(batchId) ?? []);
+  const members = (await redis(target, ['SMEMBERS', digestDeliveryKey(batchId)])) as readonly string[];
+  return new Set(members);
+}
+
+export async function markDigestDelivered(batchId: string, endpoint: string): Promise<void> {
+  const target = requireTarget();
+  if (!target) {
+    const delivered = memoryDigestDeliveries.get(batchId) ?? new Set<string>();
+    delivered.add(endpoint);
+    memoryDigestDeliveries.set(batchId, delivered);
+    return;
+  }
+  await redis(target, ['SADD', digestDeliveryKey(batchId), endpoint]);
+}
+
+export async function clearDigestDelivery(batchId: string): Promise<void> {
+  const target = requireTarget();
+  if (!target) {
+    memoryDigestDeliveries.delete(batchId);
+    return;
+  }
+  await redis(target, ['DEL', digestDeliveryKey(batchId)]);
+}
+
+function parseActiveDigestBatch(value: unknown): ActiveDigestBatch | null {
+  if (value === null) return null;
+  if (typeof value !== 'string') throw new Error('Aktif push batch manifesti dize değil');
+  const parsed: unknown = JSON.parse(value);
+  if (
+    typeof parsed !== 'object' ||
+    parsed === null ||
+    !('id' in parsed) ||
+    typeof parsed.id !== 'string' ||
+    !('perfumeIds' in parsed) ||
+    !Array.isArray(parsed.perfumeIds) ||
+    !parsed.perfumeIds.every((id) => typeof id === 'string')
+  ) {
+    throw new Error('Aktif push batch manifesti bozuk');
+  }
+  return { id: parsed.id, perfumeIds: parsed.perfumeIds };
+}
+
+export async function activeDigestBatch(): Promise<ActiveDigestBatch | null> {
+  const target = requireTarget();
+  if (!target) return memoryActiveDigest;
+  return parseActiveDigestBatch(await redis(target, ['GET', ACTIVE_DIGEST_KEY]));
+}
+
+export async function setActiveDigestBatch(batch: ActiveDigestBatch): Promise<void> {
+  const target = requireTarget();
+  if (!target) {
+    memoryActiveDigest = { id: batch.id, perfumeIds: [...batch.perfumeIds] };
+    return;
+  }
+  await redis(target, ['SET', ACTIVE_DIGEST_KEY, JSON.stringify(batch)]);
+}
+
+export async function clearActiveDigestBatch(): Promise<void> {
+  const target = requireTarget();
+  if (!target) {
+    memoryActiveDigest = null;
+    return;
+  }
+  await redis(target, ['DEL', ACTIVE_DIGEST_KEY]);
 }

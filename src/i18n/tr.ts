@@ -39,6 +39,21 @@ export const TR: Dict = {
     blocked: 'Tarayıcı bildirimleri engelliyor',
     pushTitle: 'OSMOS',
     pushBody: (name, brand) => `Haritaya yeni parfüm girdi: ${name} — ${brand}`,
+    pushDigest: (count) => `${count} yeni parfüm üç koku uzayına yerleşti.`,
+  },
+
+  search: {
+    trigger: 'ARA',
+    aria: 'Parfüm ara',
+    heading: 'PARFÜM DIZINI',
+    close: 'Aramayı kapat',
+    placeholder: 'Ad, marka ya da nota',
+    prompt: 'Bir parfüm, marka ya da koku maddesi yaz.',
+    loading: 'Dizin okunuyor…',
+    empty: 'Katalogda eşleşen parfüm yok.',
+    error: 'Dizin okunamadı.',
+    retry: 'YENIDEN DENE',
+    notes: 'NOTALAR',
   },
 
   account: {
@@ -112,7 +127,7 @@ export const TR: Dict = {
       add: 'dörtlüme ekle',
       added: 'dörtlünde',
       remove: 'çıkar',
-      search: '77 parfüm içinde ara',
+      search: '150 parfüm içinde ara',
       noMatch: 'Eşleşen yok.',
       full: 'Sınır dört — birini değiştir.',
       errors: {
@@ -139,9 +154,9 @@ export const TR: Dict = {
   studio: {
     title: 'Kur · OSMOS',
     heading: 'Kendi parfümünü kur',
-    lede: 'Notaları seç, her birinin sesini ayarla, şeklin oluşmasını izle. Katalogdaki 77 parfümle aynı ölçüyle okunuyor.',
+    lede: 'Notaları seç, her birinin sesini ayarla, şeklin oluşmasını izle. Katalogdaki 150 parfümle aynı ölçüyle okunuyor.',
     notes: 'NOTALAR',
-    search: '148 nota içinde ara',
+    search: '158 nota içinde ara',
     weight: 'Ne kadar yüksek',
     curve: 'NASIL AÇILIYOR',
     nearest: 'HARITADA EN YAKINLAR',

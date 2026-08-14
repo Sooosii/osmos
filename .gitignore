@@ -49,6 +49,7 @@ next-env.d.ts
 # Tek tek ad yazmak bırakıldı — köke düşen her görsel geçici oluyor ve her yeni
 # adlandırma (Screenshot_…, Item Not Found…) listeye bir satır daha ekletiyordu.
 /.playwright-mcp/
+/tmp/
 /*.png
 /*.jpeg
 /*.jpg

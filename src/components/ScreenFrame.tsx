@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { LangSwitch } from './LangSwitch';
 import { NotifyControl } from './NotifyControl';
 import { SignInLink } from './SignInLink';
+import { PerfumeSearch } from './PerfumeSearch';
 
 /**
  * Ekran çerçevesi — sayfanın etrafına geçen ince HUD.
@@ -136,6 +137,7 @@ export function ScreenFrame({ children, nav, readouts, status, tail }: ScreenFra
             çözülene kadar kendini hiç çizmiyor.
           */}
           <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+            <PerfumeSearch />
             <SignInLink />
             <NotifyControl />
             <LangSwitch />

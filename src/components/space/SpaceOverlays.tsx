@@ -5,6 +5,7 @@ import { useDict } from '@/i18n/LocaleProvider';
 import { LangSwitch } from '@/components/LangSwitch';
 import { NotifyControl } from '@/components/NotifyControl';
 import { SignInLink } from '@/components/SignInLink';
+import { PerfumeSearch } from '@/components/PerfumeSearch';
 import { SpaceFeelSliders } from './SpaceFeelSliders';
 
 /** Uzayın tuval üstü metin, etiket ve erişilebilir kontrolleri. */
@@ -154,6 +155,7 @@ export function SpaceOverlays({
 
       {/* Meta kontroller — sağ üst: oturum, bildirim ve dil. */}
       <div className="pointer-events-auto absolute right-6 top-6 flex items-center gap-3 sm:right-10 sm:top-10">
+        <PerfumeSearch />
         <SignInLink />
         <NotifyControl />
         <LangSwitch />

@@ -28,6 +28,12 @@ on:
         required: false
         type: string
 
+# Push ve elle çalıştırma aynı singleton batch manifestini kullanıyor. İkinci
+# koşu birinciyi iptal etmez; bitmesini bekler ve ardından güncel durumu okur.
+concurrency:
+  group: push-notify
+  cancel-in-progress: false
+
 jobs:
   gonder:
     runs-on: ubuntu-latest
@@ -50,3 +56,5 @@ jobs:
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
           KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
+          # Özel alan adı geldiğinde Repository variable olarak değiştirilebilir.
+          PUSH_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://osmos-three.vercel.app' }}

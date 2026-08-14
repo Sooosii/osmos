@@ -46,6 +46,21 @@ export const EN = {
     blocked: 'Notifications are blocked in this browser',
     pushTitle: 'OSMOS',
     pushBody: (name: string, brand: string) => `New perfume on the map: ${name} — ${brand}`,
+    pushDigest: (count: number) => `${count} new perfumes joined the map across three scent spaces.`,
+  },
+
+  search: {
+    trigger: 'SEARCH',
+    aria: 'Search perfumes',
+    heading: 'PERFUME INDEX',
+    close: 'Close search',
+    placeholder: 'Name, house, or note',
+    prompt: 'Type a perfume, house, or material.',
+    loading: 'Reading the index…',
+    empty: 'No perfume found in the catalogue.',
+    error: 'The index could not be read.',
+    retry: 'TRY AGAIN',
+    notes: 'NOTES',
   },
 
   /**
@@ -148,7 +163,7 @@ export const EN = {
       add: 'add to my top four',
       added: 'in your top four',
       remove: 'remove',
-      search: 'Search the 77 perfumes',
+      search: 'Search the 150 perfumes',
       noMatch: 'Nothing matches.',
       full: 'Four is the limit — replace one instead.',
       errors: {
@@ -192,9 +207,9 @@ export const EN = {
   studio: {
     title: 'Compose · OSMOS',
     heading: 'Compose your own',
-    lede: 'Choose notes, set how loud each one is, and watch the thing take shape. It is read with the same measure as the 77 in the catalogue.',
+    lede: 'Choose notes, set how loud each one is, and watch the thing take shape. It is read with the same measure as the 150 in the catalogue.',
     notes: 'NOTES',
-    search: 'Search the 148 notes',
+    search: 'Search the 158 notes',
     weight: 'How loud',
     curve: 'HOW IT UNFOLDS',
     nearest: 'CLOSEST ON THE MAP',

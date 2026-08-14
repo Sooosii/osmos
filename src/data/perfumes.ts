@@ -8,6 +8,9 @@ import { CURATED_E } from './perfume-sets/curated-e';
 import { CURATED_F } from './perfume-sets/curated-f';
 import { FILLERS } from './perfume-sets/fillers';
 import { SPACE_2_PERFUMES } from './perfume-sets/space-2';
+import { SPACE_2_ADDITIONS } from './perfume-sets/space-2-additions';
+import { SPACE_3_A } from './perfume-sets/space-3-a';
+import { SPACE_3_B } from './perfume-sets/space-3-b';
 import {
   buildPerfumeSpaces,
   findPerfumeSpaceId,
@@ -32,7 +35,14 @@ const LEGACY_PERFUMES: readonly Perfume[] = [
   ...FILLERS,
 ];
 
-export const PERFUME_SPACES = buildPerfumeSpaces(LEGACY_PERFUMES, SPACE_2_PERFUMES);
+const EXPANSION_PERFUMES: readonly Perfume[] = [
+  ...SPACE_2_PERFUMES,
+  ...SPACE_2_ADDITIONS,
+  ...SPACE_3_A,
+  ...SPACE_3_B,
+];
+
+export const PERFUME_SPACES = buildPerfumeSpaces(LEGACY_PERFUMES, EXPANSION_PERFUMES);
 export const PERFUMES: readonly Perfume[] = PERFUME_SPACES.flatMap((space) => space.perfumes);
 
 const PERFUME_BY_ID = new Map<string, Perfume>();

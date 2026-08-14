@@ -28,3 +28,18 @@ export function pushMessage(
     url: withLocale(locale, `/perfume/${perfume.id}`),
   };
 }
+
+export function pushDigestMessage(
+  perfumes: readonly Pick<Perfume, 'id' | 'name' | 'brand'>[],
+  locale: Locale,
+): PushMessage {
+  if (perfumes.length === 0) throw new Error('En az bir parfüm gerekli');
+  if (perfumes.length === 1) return pushMessage(perfumes[0], locale);
+
+  const t = getDict(locale);
+  return {
+    title: t.notify.pushTitle,
+    body: t.notify.pushDigest(perfumes.length),
+    url: withLocale(locale, '/'),
+  };
+}

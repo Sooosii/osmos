@@ -160,6 +160,11 @@ export interface Perfume {
   readonly name: string;
   readonly brand: string;
   /**
+   * Aramada kabul edilen eski, kısa veya kullanıcının verdiği yazımlar.
+   * Künyede her zaman `name` içindeki kanonik ad gösterilir.
+   */
+  readonly aliases?: readonly string[];
+  /**
    * Çıkış yılı — katalogdaki her parfümde zorunlu.
    *
    * `?` bilerek yok: künye ancak bütün veri tamken yayınlanır kararı verildi ve

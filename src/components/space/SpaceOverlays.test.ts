@@ -43,4 +43,5 @@ test('uzay kapidan sonra ikinci bir yaklasma esigi olmadan hazir cizilir', () =>
   expect(html).toContain('aria-live="polite"');
   expect(html).toContain('aria-label="Next scent space"');
   expect(html).toContain('aria-label="Previous scent space"');
+  expect(html).toContain('aria-label="Search perfumes"');
 });
