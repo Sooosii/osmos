@@ -46,8 +46,7 @@ export function rankOf(levels: readonly number[]): number[] {
  * Satırları hedeflerine doğru süzer.
  *
  * ⚠️ Üstel yaklaşma (`1 - exp(-dt / TAU)`), kare başına sabit bir adım DEĞIL:
- * sabit adım 120 Hz'lik ekranda iki kat hızlı süzülürdü. Aynı ders
- * `atomizer-mist.ts`te ölçülmüştü ve orada bir kusura yol açmıştı.
+ * sabit adım 120 Hz'lik ekranda iki kat hızlı süzülürdü.
  *
  * Hedefi hiç aşmıyor: `k` her zaman 0…1 arasında, yani yeni yer ikisinin
  * arasında bir yerde. Aşsaydı satırlar yerine oturmadan önce sekerdi.

@@ -1,4 +1,4 @@
-export const TAKIMYILDIZ_SCROLL_SCREENS = 2.2;
+export const TAKIMYILDIZ_SCROLL_SCREENS = 0.9;
 
 function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
@@ -20,14 +20,11 @@ export function takimyildizIlerlemesi(
 
 export function takimyildizFazlari(progress: number) {
   const value = clamp01(progress);
-  const squeezeIn = smoothRange(value, 0.3, 0.46);
-  const squeezeOut = smoothRange(value, 0.46, 0.66);
 
   return {
-    assemble: smoothRange(value, 0.02, 0.3),
-    squeeze: squeezeIn * (1 - squeezeOut),
-    mist: smoothRange(value, 0.34, 0.52) * (1 - smoothRange(value, 0.76, 0.96)),
-    dissolve: smoothRange(value, 0.6, 1),
-    reveal: smoothRange(value, 0.77, 1),
+    hint: 1 - smoothRange(value, 0, 0.18),
+    gather: smoothRange(value, 0.12, 0.48),
+    release: smoothRange(value, 0.42, 0.86),
+    reveal: smoothRange(value, 0.52, 1),
   };
 }

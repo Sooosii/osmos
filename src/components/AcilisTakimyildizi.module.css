@@ -1,0 +1,125 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  overflow: hidden;
+  cursor: ns-resize;
+  background: rgb(3 3 5 / var(--opening-root-bg, 1));
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.invitation {
+  position: absolute;
+  bottom: clamp(2rem, 7vh, 4.5rem);
+  left: 50%;
+  display: grid;
+  justify-items: center;
+  gap: 0.85rem;
+  width: min(90vw, 32rem);
+  color: rgb(238 232 223 / 78%);
+  font-family: var(--font-sans), sans-serif;
+  font-size: clamp(0.78rem, 1.05vw, 0.86rem);
+  font-weight: 450;
+  letter-spacing: 0.19em;
+  line-height: 1.5;
+  text-align: center;
+  pointer-events: none;
+  opacity: var(--opening-hint, 1);
+  transform: translateX(-50%);
+  transition: opacity 160ms linear;
+}
+
+.touchHint {
+  display: none;
+}
+
+.gesture {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 2.4rem;
+  overflow: visible;
+  background: linear-gradient(to bottom, rgb(238 232 223 / 8%), rgb(238 232 223 / 68%));
+}
+
+.gesture::after {
+  position: absolute;
+  bottom: -0.05rem;
+  left: -0.19rem;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-right: 1px solid rgb(238 232 223 / 72%);
+  border-bottom: 1px solid rgb(238 232 223 / 72%);
+  content: '';
+  transform: rotate(45deg);
+  animation: invitation-drift 1.8s ease-in-out infinite;
+}
+
+.skip {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip:focus-visible {
+  top: 1.25rem;
+  right: 1.25rem;
+  width: auto;
+  height: auto;
+  padding: 0.72rem 0.9rem;
+  clip: auto;
+  clip-path: none;
+  color: #f2ece4;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  white-space: normal;
+  background: rgb(5 5 7 / 92%);
+  border: 1px solid rgb(242 236 228 / 58%);
+  border-radius: 999px;
+  outline: 2px solid #f2ece4;
+  outline-offset: 3px;
+}
+
+@media (pointer: coarse) {
+  .root {
+    cursor: default;
+  }
+
+  .scrollHint {
+    display: none;
+  }
+
+  .touchHint {
+    display: inline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gesture::after {
+    animation: none;
+  }
+}
+
+@keyframes invitation-drift {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translateY(-0.22rem) rotate(45deg);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(0.2rem) rotate(45deg);
+  }
+}

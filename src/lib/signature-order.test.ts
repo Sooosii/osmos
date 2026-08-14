@@ -49,7 +49,7 @@ describe('settleRows', () => {
   });
 
   test('KARE HIZINDAN BAGIMSIZ — 60 Hz ile 120 Hz aynı yere varıyor', () => {
-    // ⚠️ `atomizer-mist`in dersi: kare başına sabit adım 120 Hz'de iki kat hızlı.
+    // ⚠️ Kare başına sabit adım 120 Hz'de iki kat hızlı olur.
     let slow = [0];
     let fast = [0];
     for (let i = 0; i < 60; i += 1) slow = settleRows(slow, [4], 16);

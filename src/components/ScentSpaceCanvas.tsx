@@ -8,6 +8,7 @@ import type { SpaceMark } from '@/data/types';
 import {
   type Camera,
   type Viewport,
+  INITIAL_CAMERA,
   centerOn,
   fitToMarks,
   worldToScreen,
@@ -18,12 +19,18 @@ import { prefersReducedMotion } from '@/lib/motion';
 import { useCanvasSize } from '@/components/space/use-canvas-size';
 import { type EntryState, HOLD_DURATION, NO_ENTRY } from '@/lib/space-entry';
 import { type FeelTarget, NO_FEEL } from '@/lib/space-feel';
-import { START_SCALE } from '@/lib/space-approach';
-import { useApproachScene } from '@/components/space/use-approach-scene';
 import { useSpaceInput } from '@/components/space/use-space-input';
 import { useShelfRings } from '@/components/space/use-shelf-rings';
 import { SpaceOverlays } from '@/components/space/SpaceOverlays';
 import { SpaceKeyboardList } from '@/components/space/SpaceKeyboardList';
+import {
+  adjacentSpaceId,
+  resolveSpaceId,
+  searchForPerfume,
+  searchForSpace,
+  warpFrame,
+} from '@/lib/space-navigation';
+import { drawSpaceWarp } from '@/lib/space-warp';
 
 /**
  * Koku Uzayı — sitenin ana ekranı.
@@ -39,7 +46,6 @@ import { SpaceKeyboardList } from '@/components/space/SpaceKeyboardList';
  * noktası, yanında parçalar:
  *
  *   space/use-canvas-size    ölçü + cihaz piksel oranı
- *   space/use-approach-scene yaklaşma sahnesinin ömrü
  *   space/use-space-input    işaretçi · sürükleme · sıkıştırma · tutma · tekerlek
  *   space/SpaceOverlays      etiket · ipucu · giriş metni · küratör cümlesi · şerit
  *   space/SpaceKeyboardList  klavye ve ekran okuyucu yolu
@@ -62,8 +68,22 @@ interface Animation {
   readonly start: number;
 }
 
-interface ScentSpaceCanvasProps {
+interface SpaceScene {
+  readonly id: number;
   readonly marks: readonly SpaceMark[];
+}
+
+interface SpaceWarp {
+  readonly targetId: number;
+  readonly direction: -1 | 1;
+  readonly start: number;
+  swapped: boolean;
+}
+
+const EMPTY_MARKS: readonly SpaceMark[] = [];
+
+interface ScentSpaceCanvasProps {
+  readonly spaces: readonly SpaceScene[];
   /**
    * Varışta yerine yerleşen giriş metni — başlık ve tarif.
    *
@@ -83,23 +103,25 @@ function lerpCamera(from: Camera, to: Camera, t: number): Camera {
   };
 }
 
-export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
+export function ScentSpaceCanvas({ spaces, children }: ScentSpaceCanvasProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   // Bir yıldıza tıklayınca gidilen yer sayfanın dilinde kalmalı; öneksiz
   // yazılsaydı Türkçe uzaydan İngilizce parfüm sayfasına düşülürdü.
   const locale = useLocale();
 
+  const activeSpaceId = resolveSpaceId(
+    spaces,
+    searchParams.get('space'),
+    searchParams.get('mark'),
+  );
+  const activeSpace = spaces.find((space) => space.id === activeSpaceId) ?? spaces[0];
+  const marks = activeSpace?.marks ?? EMPTY_MARKS;
+  const previousSpaceId = adjacentSpaceId(spaces, activeSpaceId, -1);
+  const nextSpaceId = adjacentSpaceId(spaces, activeSpaceId, 1);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const labelRef = useRef<HTMLDivElement>(null);
-  // Yaklaşma sahnesinin tutunduğu iki katman. Sahnenin durumu `useApproachScene`
-  // içinde, DOM'u burada: opaklıklarını o kanca doğrudan yazıyor.
-  const cueRef = useRef<HTMLDivElement>(null);
-  const introRef = useRef<HTMLDivElement>(null);
-  const feelRef = useRef<HTMLDivElement>(null);
-  // Dil değiştiricinin katmanı; kaydıraçlarla aynı ömrü paylaşıyor.
-  const switchRef = useRef<HTMLDivElement>(null);
-
   /**
    * Sinestezi kaydıraçlarının tarifi — kaydıraçlar yazıyor, çizim okuyor.
    *
@@ -122,16 +144,8 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
    */
   const shelvedRef = useRef<ReadonlySet<string>>(new Set());
 
-  /*
-   * Kamera yaklaşmanın başladığı yerde doğuyor, `INITIAL_CAMERA`'da değil.
-   *
-   * Sahnenin çalışmayacağı durumlar (adres `?mark=` taşıyor, hareket azaltılmış,
-   * sahne bu oturumda görülmüş) ancak tarayıcıda anlaşılıyor — `sessionStorage`
-   * ve `matchMedia` sunucuda yok. O yüzden varsayılan "sahne var"; iptal kararı
-   * `useApproachScene` içindeki etkide veriliyor. İlk boyanma etkilerden sonra
-   * olduğu için atlayanlar uzak kareyi hiç görmüyor, sıçrama olmuyor.
-   */
-  const cameraRef = useRef<Camera>({ x: 0, y: 0, scale: START_SCALE });
+  // Kare-dizisi kapısı tamamlandığında uzay doğrudan etkileşimli başlangıç kamerasındadır.
+  const cameraRef = useRef<Camera>(INITIAL_CAMERA);
   // Bulut sınırları `marks` değişmedikçe sabit; ölçüyü yeniden boyutlandırma
   // geri çağrısı okuyor, o yüzden ref'te — yoksa her ölçüde yeniden kurulurdu.
   const bounds = useMemo(() => boundsOf(marks), [marks]);
@@ -155,6 +169,9 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
   const viewportRef = useRef<Viewport>({ width: 0, height: 0, ...bounds });
   const frameRef = useRef<number | null>(null);
   const animationRef = useRef<Animation | null>(null);
+  const warpRef = useRef<SpaceWarp | null>(null);
+  const displayedSpaceIdRef = useRef(activeSpaceId);
+  const [isWarping, setIsWarping] = useState(false);
 
   const markById = useMemo(() => new Map(marks.map((mark) => [mark.id, mark])), [marks]);
 
@@ -250,6 +267,105 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     });
   }, []);
 
+  useEffect(() => {
+    viewportRef.current = { ...viewportRef.current, ...bounds };
+    requestDraw();
+  }, [bounds, requestDraw]);
+
+  const setDisplayedSpace = useCallback(
+    (spaceId: number, selectedMarkId: string | null = null) => {
+      const space = spaces.find((candidate) => candidate.id === spaceId);
+      if (!space) return;
+
+      displayedSpaceIdRef.current = spaceId;
+      const nextBounds = boundsOf(space.marks);
+      boundsRef.current = nextBounds;
+      viewportRef.current = { ...viewportRef.current, ...nextBounds };
+      const mark = selectedMarkId
+        ? (space.marks.find((candidate) => candidate.id === selectedMarkId) ?? null)
+        : null;
+      cameraRef.current = mark ? centerOn(INITIAL_CAMERA, mark) : INITIAL_CAMERA;
+      requestDraw();
+    },
+    [requestDraw, spaces],
+  );
+
+  const resetTransientSpaceState = useCallback((selectedMarkId: string | null = null) => {
+    selectedRef.current = selectedMarkId;
+    hoveredRef.current = null;
+    setSelectedId(selectedMarkId);
+    setHoveredId(null);
+    entryRef.current = NO_ENTRY;
+    holdRef.current = null;
+    railRef.current = null;
+    feelTargetRef.current = NO_FEEL;
+    animationRef.current = null;
+    navigatingRef.current = false;
+    setAppliedFeel(null);
+    setEntryHint(false);
+    setEntryProgress(0);
+    requestDraw();
+  }, [requestDraw]);
+
+  const navigateSpace = useCallback(
+    (targetId: number) => {
+      if (targetId === activeSpaceId || warpRef.current) return;
+
+      const direction: -1 | 1 = targetId > activeSpaceId ? 1 : -1;
+      resetTransientSpaceState();
+
+      if (prefersReducedMotion()) {
+        setDisplayedSpace(targetId);
+        window.history.pushState(
+          null,
+          '',
+          `${window.location.pathname}${searchForSpace(
+            new URLSearchParams(searchParams.toString()),
+            targetId,
+          )}`,
+        );
+        requestDraw();
+        return;
+      }
+
+      warpRef.current = {
+        targetId,
+        direction,
+        start: performance.now(),
+        swapped: false,
+      };
+      setIsWarping(true);
+      requestDraw();
+    },
+    [
+      activeSpaceId,
+      requestDraw,
+      resetTransientSpaceState,
+      searchParams,
+      setDisplayedSpace,
+    ],
+  );
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const targetSpaceId = resolveSpaceId(spaces, params.get('space'), params.get('mark'));
+      const targetSpace = spaces.find((space) => space.id === targetSpaceId);
+      const requestedMarkId = params.get('mark');
+      const selectedMarkId =
+        requestedMarkId && targetSpace?.marks.some((mark) => mark.id === requestedMarkId)
+          ? requestedMarkId
+          : null;
+
+      warpRef.current = null;
+      setIsWarping(false);
+      resetTransientSpaceState(selectedMarkId);
+      setDisplayedSpace(targetSpaceId, selectedMarkId);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [resetTransientSpaceState, setDisplayedSpace, spaces]);
+
   /**
    * Parfüm sayfasına geçiş — önce adres, sonra gezinme.
    *
@@ -272,10 +388,14 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
         uzayda bir noktaya girip geri dönen kişi sessizce İngilizce uzayda
         bulurdu kendini — geri tuşu dili değiştirmemeli.
       */
-      window.history.replaceState(null, '', `${withLocale(locale, '/')}?mark=${id}`);
+      window.history.replaceState(
+        null,
+        '',
+        `${withLocale(locale, '/')}${searchForPerfume(activeSpaceId, id)}`,
+      );
       router.push(withLocale(locale, `/perfume/${id}`));
     },
-    [router, locale],
+    [router, locale, activeSpaceId],
   );
 
 
@@ -306,26 +426,6 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     },
     [requestDraw, router, locale],
   );
-
-  /*
-   * ⚠️ Yaklaşma sahnesi burada, `?mark=` etkisinin ÜSTÜNDE kuruluyor ve sıra
-   * kritik. Kancanın "sahne çalışsın mı?" etkisi iptal kararında kamerayı
-   * `INITIAL_CAMERA`'ya (ölçek 1) alıyor; hemen aşağıdaki `?mark=` etkisi ise
-   * `centerOn` ile ölçeği koruyarak ortalıyor. React etkileri bildirim sırasına
-   * göre çalıştığı için ters sırada ortalama, yaklaşmanın 0.14'lük ölçeğiyle
-   * yapılır ve parfüm sayfasından dönen göz uzayı minicik görürdü.
-   *
-   * Yani bu çağrı aşağı kaydırılamaz. Gerekçenin tamamı `use-approach-scene.ts`te.
-   */
-  const approach = useApproachScene({
-    canvasRef,
-    cameraRef,
-    cueRef,
-    introRef,
-    feelRef,
-    switchRef,
-    requestDraw,
-  });
 
   /**
    * `/?mark=<id>` ile dönüş — parfüm sayfasından geri gelen göz.
@@ -387,9 +487,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
   useCanvasSize({ canvasRef, viewportRef, boundsRef, requestDraw });
 
   /*
-    Raf halkaları — ilk boyamadan sonra iniyor, sayfa statik kalıyor.
-    Yaklaşma sahnesi ~2.6 saniye sürdüğü için istek o sırada tamamlanıyor;
-    halkalar sahne biterken yerinde oluyor, görünür bir sıçrama yok.
+    Raf halkaları ilk boyamadan sonra iner; geldiklerinde yalnız tuval yeniden çizilir.
   */
   useShelfRings(shelvedRef, requestDraw);
 
@@ -413,7 +511,6 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     railRef,
     setAppliedFeel,
     navigatingRef,
-    approach,
     select,
     setHovered,
     moveTo,
@@ -425,17 +522,44 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
-    const viewport = viewportRef.current;
+    let viewport = viewportRef.current;
     if (!canvas || viewport.width === 0) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const now = performance.now();
+    const warp = warpRef.current;
+    const currentWarpFrame = warp ? warpFrame(now - warp.start) : null;
+    const displayedMarks =
+      spaces.find((space) => space.id === displayedSpaceIdRef.current)?.marks ?? marks;
+    const frameMarks =
+      warp && currentWarpFrame?.showTarget
+        ? (spaces.find((space) => space.id === warp.targetId)?.marks ?? marks)
+        : displayedMarks;
+    if (warp && currentWarpFrame?.showTarget && !warp.swapped) {
+      warp.swapped = true;
+      displayedSpaceIdRef.current = warp.targetId;
+      cameraRef.current = INITIAL_CAMERA;
+      const targetBounds = boundsOf(frameMarks);
+      boundsRef.current = targetBounds;
+      viewport = { ...viewport, ...targetBounds };
+      viewportRef.current = viewport;
+      window.history.pushState(
+        null,
+        '',
+        `${window.location.pathname}${searchForSpace(
+          new URLSearchParams(window.location.search),
+          warp.targetId,
+        )}`,
+      );
+    }
+
     // Kamera yolculuk hâlindeyse önce bir adım ilerlet. Döngü kendi kendini
     // besliyor: animasyon bitene kadar yeni kare istiyor, sonra susuyor.
     const animation = animationRef.current;
     if (animation) {
-      const progress = Math.min((performance.now() - animation.start) / FOCUS_DURATION, 1);
+      const progress = Math.min((now - animation.start) / FOCUS_DURATION, 1);
       const eased = 1 - (1 - progress) ** 3;
       cameraRef.current = lerpCamera(animation.from, animation.to, eased);
       if (progress >= 1) animationRef.current = null;
@@ -455,10 +579,10 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
      */
     const hold = holdRef.current;
     const holdComplete =
-      hold !== null && performance.now() - hold.startedAt >= HOLD_DURATION;
+      hold !== null && now - hold.startedAt >= HOLD_DURATION;
 
     if (hold) {
-      const held = Math.min((performance.now() - hold.startedAt) / HOLD_DURATION, 1);
+      const held = Math.min((now - hold.startedAt) / HOLD_DURATION, 1);
       entryRef.current = { markId: hold.markId, progress: held };
     }
 
@@ -467,7 +591,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 
     drawSpace(ctx, {
-      marks,
+      marks: frameMarks,
       camera: cameraRef.current,
       viewport,
       selectedId: selectedRef.current,
@@ -477,6 +601,20 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
       shelved: shelvedRef.current,
       rail: railRef.current,
     });
+
+    if (warp && currentWarpFrame) {
+      drawSpaceWarp(
+        ctx,
+        viewport.width,
+        viewport.height,
+        currentWarpFrame.progress,
+        warp.direction,
+      );
+      if (currentWarpFrame.done) {
+        warpRef.current = null;
+        setIsWarping(false);
+      }
+    }
 
     /*
       Rayın uç sözcükleri: yalnız parmak dururken görünüyor, konumu rayın
@@ -528,8 +666,8 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
     }
 
     // Tutma sürerken de kare istiyoruz: halka dolmalı.
-    if (animationRef.current || holdRef.current) requestDraw();
-  }, [marks, markById, requestDraw, enterPerfume]);
+    if (animationRef.current || holdRef.current || warpRef.current) requestDraw();
+  }, [spaces, marks, markById, requestDraw, enterPerfume]);
 
   useEffect(() => {
     drawRef.current = draw;
@@ -553,11 +691,6 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
 
   /** Klavye yolu: odaklanılan parfüm seçiliyor ve kamera üstüne gidiyor. */
   const focusMark = (mark: SpaceMark) => {
-    // Klavye sahneyi bitiriyor. Yaklaşma tekerleğe bağlı; tekerleği olmayan biri
-    // için sahneyi geçecek bir hareket yok ve kapı yüzüne kapanırdı. Sekme ile
-    // bir parfüme uzanmak zaten "içeri girdim" demek.
-    approach.finish();
-
     // Burada hover'a dokunulmuyor. Dokunulsaydı fare olmayan bir yolla ayarlanmış
     // olurdu ve onu temizleyecek bir `pointermove` hiç gelmezdi: etiket, sonraki
     // bütün seçimlerde bu parfümü göstermeye devam ederdi.
@@ -588,7 +721,11 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
       metin ve seçilebilir kalmalı. `touch-none` tuvalde kalıyor: kaplamada
       gerçek bir `<input type=range>` ve düğmeler var.
     */
-    <div className="relative h-full w-full select-none overflow-hidden [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none]">
+    <div
+      inert={isWarping ? true : undefined}
+      aria-busy={isWarping}
+      className="relative h-full w-full select-none overflow-hidden [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none]"
+    >
       {/*
         Erişilebilirlik ağacından çıkarılıyor: tuval oraya adsız, boş bir grafik
         olarak düşüyordu. Aynı bilginin gezilebilir karşılığı aşağıdaki liste;
@@ -597,7 +734,9 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        className="h-full w-full cursor-grab touch-none active:cursor-grabbing"
+        className={`h-full w-full cursor-grab touch-none active:cursor-grabbing ${
+          isWarping ? 'pointer-events-none' : ''
+        }`}
         onPointerDown={input.onPointerDown}
         onPointerMove={input.onPointerMove}
         onPointerUp={input.onPointerUp}
@@ -615,11 +754,7 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
       />
 
       <SpaceOverlays
-        introRef={introRef}
-        cueRef={cueRef}
         labelRef={labelRef}
-        feelRef={feelRef}
-        switchRef={switchRef}
         feelTargetRef={feelTargetRef}
         appliedFeel={appliedFeel}
         railWordsRef={railWordsRef}
@@ -629,6 +764,13 @@ export function ScentSpaceCanvas({ marks, children }: ScentSpaceCanvasProps) {
         selectedLine={selected?.line ?? null}
         entryHint={entryHint}
         entryProgress={entryProgress}
+        spaceId={activeSpaceId}
+        spaceCount={spaces.length}
+        spacePerfumeCount={marks.length}
+        previousSpaceId={previousSpaceId}
+        nextSpaceId={nextSpaceId}
+        isWarping={isWarping}
+        onNavigateSpace={navigateSpace}
       >
         {children}
       </SpaceOverlays>

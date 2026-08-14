@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { PERFUMES } from '@/data/perfumes';
+import { PERFUMES, getPerfumeSpaceId } from '@/data/perfumes';
 import { dominantFamily, getFamily } from '@/data/families';
 import { familyVector } from '@/lib/similarity';
 import { characterOf } from '@/lib/perfume-character';
@@ -14,6 +14,7 @@ import { ShelfPicker } from '@/components/ShelfPicker';
 import { getDict, localeFor, say } from '@/i18n/dict';
 import { LOCALES, withLocale } from '@/i18n/locale';
 import { pageAlternates } from '@/lib/site-url';
+import { searchForPerfume } from '@/lib/space-navigation';
 
 /**
  * Parfüm sayfası — yol haritasının ①, ②, ③ ve ④'ü. Tamamı.
@@ -36,9 +37,9 @@ import { pageAlternates } from '@/lib/site-url';
  * 3.16/5) ve kullanıcı garantiyi seçti. Karar geçmişi `lib/neighbor-orbit.ts`te.
  *
  * ④'ün öbür yarısı **künye** de geldi. Bir kez ertelenmişti: o günkü 44 parfümün
- * 23'ünde parfümör, 18'inde yıl yoktu. Veri elle tamamlandı; yıl artık 52/52 dolu
- * ve `types.ts` bunu zorunlu kılarak koruyor. Parfümör 49/52 — kalan üçünde satır
- * tek başına yıla düşüyor, gerekçeleri `types.ts`in `perfumer` alanında.
+ * 23'ünde parfümör, 18'inde yıl yoktu. Veri elle tamamlandı; yıl artık her kayıtta
+ * dolu ve `types.ts` bunu zorunlu kılarak koruyor. Marka parfümörü açıklamadığında
+ * satır tek başına yıla düşüyor; tahminle isim eklenmiyor.
  *
  * Renk uzaydaki noktanın renginden **türetilmiyor, aynı zincirden geliyor**:
  * `familyVector → dominantFamily → getFamily().color`. İkinci bir kaynak
@@ -65,7 +66,7 @@ export const dynamicParams = false;
 /*
   Tam bileşim döndürülüyor (`{ lang, id }`), yalnızca `{ id }` değil. İç içe
   biçim de çalışıyor ama bu hâli tek başına okunabilir ve derlemede sayı
-  doğrulanabilir: 52 × 2.
+  doğrulanabilir: 77 × 2.
 */
 export function generateStaticParams() {
   return LOCALES.flatMap((lang) => PERFUMES.map((perfume) => ({ lang, id: perfume.id })));
@@ -105,6 +106,7 @@ export default async function PerfumePage({
 
   const family = getFamily(dominantFamily(familyVector(perfume)));
   const color = family.color;
+  const spaceSearch = searchForPerfume(getPerfumeSpaceId(perfume.id), perfume.id);
 
   /*
     Çerçevedeki üçü de parfümün künyesi (`ScreenFrame.tsx`: uydurma sayı yok).
@@ -166,7 +168,7 @@ export default async function PerfumePage({
               da aynı yere düşüyor; iki yol tek davranışta buluşuyor.
             */}
             <Link
-              href={`${withLocale(locale, '/')}?mark=${perfume.id}`}
+              href={`${withLocale(locale, '/')}${spaceSearch}`}
               /* Çerçeve bağlantısı: önden getirilmiyor, gerekçe `LangSwitch`te. */
               prefetch={false}
               className="transition-colors hover:text-white"
@@ -213,9 +215,9 @@ export default async function PerfumePage({
               İsmin hemen altında duruyor çünkü künye kimliğin parçası: adı okuyan
               göz burnu ve yılı da alıp sonra cümleye geçiyor.
 
-              `perfumer` yoksa satır tek başına yıla düşüyor ve bu bilinçli. 52'nin
-              üçünde parfümör yok; hangileri ve neden, `types.ts`in `perfumer`
-              alanında yazıyor — "bilinmiyor" yazmak da uydurmak da reddedildi.
+              `perfumer` yoksa satır tek başına yıla düşüyor ve bu bilinçli.
+              Marka ürüne özgü bir isim açıklamadığında "bilinmiyor" yazmak da
+              uydurmak da reddedildi.
             */}
             <p className="mt-4 text-sm font-light text-white/50">
               {perfume.perfumer ? `${perfume.perfumer}, ` : ''}
@@ -226,7 +228,7 @@ export default async function PerfumePage({
               ("kesin künyede", 2026-08-11). Parfümör satırından bir ton daha
               sönük: künyenin parçası ama kimliğin değil.
 
-              Veri yoksa satır yok — 52 sayfanın retailers'ı boş olanı bugünkü
+              Veri yoksa satır yok — retailers'ı boş olan sayfa bugünkü
               hâlinde duruyor.
 
               ⚠️ `rel="sponsored"` pazarlık dışı: komisyonlu bağlantının arama
@@ -366,7 +368,7 @@ export default async function PerfumePage({
             ) : null}
             <p>
               <Link
-                href={`${withLocale(locale, '/')}?mark=${perfume.id}`}
+                href={`${withLocale(locale, '/')}${spaceSearch}`}
                 className="text-sm font-light text-white/50 transition-colors hover:text-white/80"
               >
                 {t.nav.backToSpace}

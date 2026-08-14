@@ -160,7 +160,7 @@ export interface Perfume {
   readonly name: string;
   readonly brand: string;
   /**
-   * Çıkış yılı — zorunlu, 52'nin 52'sinde dolu.
+   * Çıkış yılı — katalogdaki her parfümde zorunlu.
    *
    * `?` bilerek yok: künye ancak bütün veri tamken yayınlanır kararı verildi ve
    * bunu derleme zamanında garanti eden tek yer burası. Sınamayla da olurdu ama
@@ -171,26 +171,10 @@ export interface Perfume {
   /**
    * Parfümör — isteğe bağlı, ve bu bir veri eksikliği değil.
    *
-   * 52'nin 49'unda dolu ve kalan üçü tek bir sebeple boş değil.
-   *
-   * İkisinde (`comptoir-sud-pacifique-vanille-abricot`, `spirit-of-dubai-ajyal`)
-   * marka burnu hiç açıklamadı; aranıp bulunamadığı için değil, açıklanmadığı
-   * için boş.
-   *
-   * Üçüncüsü (`min-new-york-long-board`) uzun süre "bakılmamış" diye duruyordu;
-   * **2026-08-10'da bakıldı ve bulunamadı.** Üç ayrı arama (marka adı + koleksiyon,
-   * marka + sık çalıştığı burun, nota listesiyle birlikte) hiçbir isim vermedi;
-   * Fragrantica, Parfumo, Basenotes ve markanın kendi sayfası doğrudan okumaya
-   * kapalı (HTTP 403). MiN New York'un kendi metni koleksiyon için yalnızca
-   * "Grasse'ta üretildi" diyor, burun adı vermiyor. Yani üçü de artık aynı
-   * yerde: **arandı, açıklanmamış.**
-   *
-   * ⚠️ Bu alan doldurulacaksa kaynak **markanın kendi yayını** olmalı. Parfüm
-   * veri tabanlarındaki burun bilgisi kullanıcı katkısı ve bu üç parfümde
-   * ortalıkta hiçbir kayıt yokken çıkan bir isim, doğrulanmış değil tahmindir.
-   *
-   * Künye o üç sayfada yalnızca yılı yazıyor — uydurma da yok, "bilinmiyor"
-   * yazısı da yok.
+   * Marka ürüne özgü bir isim yayımlamadığında alan boş kalır; veri tabanı
+   * tahminiyle doldurulmaz. Kaynak kararları ilgili `perfume-sets/` dosyasında
+   * tutulur. Künye bu kayıtlarda yalnızca yılı yazar — uydurma da yok,
+   * "bilinmiyor" satırı da yok.
    */
   readonly perfumer?: string;
   readonly notes: readonly PerfumeNote[];
@@ -243,7 +227,7 @@ export interface SpaceMark {
    * Adı bilerek `character` değil. `Character` ham veri ve nota başına duruyor;
    * bu, onun parfüm düzeyinde ortalanıp **gözlenen aralığa yayılmış** hâli. Aynı
    * adı vermek aynı sayılar sanılmasına yol açardı — buradaki 0.5 "nötr" değil,
-   * "52 parfümün ortası" demek.
+   * "kataloğun ortası" demek. Birden fazla uzay aynı global cetveli kullanır.
    *
    * Dördü de iniyor ama ekranda ikisi açık duruyor; doku ve yakınlık "…" ile
    * geliyor. Dördü de veride kalmaya ve benzerlik hesabını beslemeye devam

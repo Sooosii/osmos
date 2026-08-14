@@ -34,7 +34,6 @@ import { hostOf, shouldMoveToCanonical } from '@/lib/canonical-host';
  * kök varlık eklendiğinde buraya da yazılmazsa o adres 404 döner.
  */
 const ROOT_ASSETS: ReadonlySet<string> = new Set([
-  '/intro.js',
   '/robots.txt',
   '/sitemap.xml',
   /*

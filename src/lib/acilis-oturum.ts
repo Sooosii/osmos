@@ -1,12 +1,9 @@
 /**
  * Açılış kapısından bu oturumda geçildi mi — saf modül.
  *
- * Kapı (`Acilis`: astronot → perde) bir eşik, ve `use-approach-scene.ts`in
- * yazdığı kural burada da geçerli: *"sahne bir eşik, ama tanıdık bir yere dönen
- * için eşik yoktur."* O kural şimdiye kadar yalnızca `?mark=` ile işliyordu —
- * parfüm sayfası dönüş bağlantısında onu taşıyor, **nota sayfası düz `/`'e
- * dönüyor**. Sahip ekranda yakaladı: notadan uzaya dönünce kapı baştan
- * oynuyordu.
+ * Kare-dizisi kapısı bir eşik; tanıdık bir yere dönen için eşik yoktur.
+ * Parfüm sayfası dönüş adresi kimliği taşısa da nota sayfası düz `/`'e döner;
+ * bu yüzden karar URL ile değil oturumla taşınır.
  *
  * Bayrak adresle değil oturumla taşınıyor, çünkü dönüş yolu üç farklı yerden
  * geliyor (nota sayfası, parfüm sayfası, tarayıcının geri tuşu) ve hepsine ayrı
@@ -37,12 +34,8 @@ export interface SessionLike {
  * Safari "bütün çerezleri engelle" açıkken `window.sessionStorage`a **erişmek
  * bile** `SecurityError` fırlatıyor.
  *
- * `use-approach-scene.ts` çıplak çağırıyordu ama **kurulu bir tuzaktı, patlamış
- * bir mayın değil**: iki çağrı da `APPROACH_ONCE` sabitinin arkasındaydı ve o
- * sabit bugün `false`, yani satırlar hiç çalışmıyordu. Tehlike o sabiti bir gün
- * `true` yapanın hiçbir uyarı görmemesiydi — orası sitenin **giriş kapısı** ve
- * fırlayan bir hata kapıyı kırardı. Şimdi ikisi de bu güvenli yoldan geçiyor;
- * bir sınama da çıplak çağrıları denetliyor.
+ * Açılış kapısı bütün erişimi bu güvenli yoldan yapar; bir sınama da yeni bir
+ * çıplak çağrının sessizce eklenmesini engeller.
  */
 export function oturumOku(
   storage: SessionLike | null | undefined,

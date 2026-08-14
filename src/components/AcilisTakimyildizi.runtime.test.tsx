@@ -6,9 +6,20 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { AcilisTakimyildizi } from './AcilisTakimyildizi';
 
 const motion = vi.hoisted(() => ({ reduced: false }));
+const imageSources = vi.hoisted(() => [] as string[]);
 
 vi.mock('@/lib/motion', () => ({
   prefersReducedMotion: () => motion.reduced,
+}));
+
+vi.mock('@/i18n/LocaleProvider', () => ({
+  useDict: () => ({
+    openingGate: {
+      scrollHint: 'Scroll to awaken the scent',
+      touchHint: 'Swipe up to awaken the scent',
+      skip: 'Skip the opening and enter the scent space',
+    },
+  }),
 }));
 
 const gradient = { addColorStop: () => undefined };
@@ -17,16 +28,25 @@ const context = {
   beginPath: () => undefined,
   clearRect: () => undefined,
   createRadialGradient: () => gradient,
+  drawImage: () => undefined,
   fill: () => undefined,
   fillRect: () => undefined,
   fillStyle: '',
+  filter: 'none',
   globalAlpha: 1,
+  globalCompositeOperation: 'source-over',
   lineTo: () => undefined,
   lineWidth: 1,
   moveTo: () => undefined,
+  restore: () => undefined,
+  save: () => undefined,
+  scale: () => undefined,
   setTransform: () => undefined,
+  shadowBlur: 0,
+  shadowColor: '',
   stroke: () => undefined,
   strokeStyle: '',
+  translate: () => undefined,
 };
 
 let container: HTMLDivElement;
@@ -55,6 +75,7 @@ beforeEach(() => {
   (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean })
     .IS_REACT_ACT_ENVIRONMENT = true;
   motion.reduced = false;
+  imageSources.length = 0;
   frameId = 0;
   frames = new Map();
   maxPendingFrames = 0;
@@ -80,8 +101,17 @@ beforeEach(() => {
   vi.stubGlobal(
     'Image',
     class {
-      constructor() {
-        throw new Error('the constellation opening must not allocate images');
+      naturalHeight = 864;
+      naturalWidth = 1536;
+      onerror: null | (() => void) = null;
+      onload: null | (() => void) = null;
+
+      async decode() {
+        return undefined;
+      }
+
+      set src(value: string) {
+        imageSources.push(value);
       }
     },
   );
@@ -103,19 +133,43 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
-test('draws immediately with a 1.5 DPR cap and no image allocation', async () => {
+test('draws with a 1.5 DPR cap without allocating an image', async () => {
   await mount();
 
   const canvas = container.querySelector('canvas');
+  const gate = container.querySelector<HTMLElement>('[data-opening-gate]');
   expect(canvas?.width).toBe(2160);
   expect(canvas?.height).toBe(1350);
+  expect(imageSources).toEqual([]);
+  expect(gate?.style.getPropertyValue('--opening-root-bg')).toBe('0');
 });
 
-test('one RAF chain finishes a 2.2-screen wheel movement', async () => {
+test.each([
+  { deltaMode: 0, deltaY: 810, label: 'pixels' },
+  { deltaMode: 1, deltaY: 50.625, label: 'lines' },
+  { deltaMode: 2, deltaY: 0.9, label: 'pages' },
+])('one RAF chain normalizes $label into a 0.9-screen wheel movement', async ({
+  deltaMode,
+  deltaY,
+}) => {
   const { onEngage, onComplete } = await mount();
   const gate = container.querySelector<HTMLElement>('[data-opening-gate]');
 
-  act(() => gate?.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: 2200 })));
+  act(() =>
+    gate?.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaMode, deltaY })),
+  );
+  act(() => flushQueuedFrames(100));
+
+  expect(maxPendingFrames).toBe(1);
+  expect(onEngage).toHaveBeenCalledTimes(1);
+  expect(onComplete).toHaveBeenCalledTimes(1);
+});
+
+test('accessible skip uses the same single completion path', async () => {
+  const { onEngage, onComplete } = await mount();
+  const skip = container.querySelector<HTMLButtonElement>('button');
+
+  act(() => skip?.click());
   act(() => flushQueuedFrames(100));
 
   expect(maxPendingFrames).toBe(1);
@@ -130,4 +184,5 @@ test('reduced motion completes without scheduling animation', async () => {
   expect(maxPendingFrames).toBe(0);
   expect(onEngage).not.toHaveBeenCalled();
   expect(onComplete).toHaveBeenCalledTimes(1);
+  expect(imageSources).toEqual([]);
 });

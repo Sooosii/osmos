@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { PERFUMES, getPerfume } from '@/data/perfumes';
+import { PERFUMES, PERFUME_SPACES, getPerfume, getPerfumeSpaceId } from '@/data/perfumes';
 import { similarity } from '@/lib/similarity';
 import { SHARED_NOTE_LIMIT, SIMILAR_COUNT, sharedNotes, similarTo } from '@/lib/similar';
 
@@ -89,5 +89,13 @@ describe('similarTo', () => {
 
   test('kararli — ayni girdi ayni liste', () => {
     expect(similarTo(anchor.id)).toEqual(list);
+  });
+
+  test('neighbours stay inside the perfume space', () => {
+    const secondSpacePerfume = PERFUME_SPACES[1].perfumes[0];
+    const secondSpaceList = similarTo(secondSpacePerfume.id);
+
+    expect(secondSpaceList).toHaveLength(SIMILAR_COUNT);
+    expect(secondSpaceList.every((entry) => getPerfumeSpaceId(entry.perfumeId) === 2)).toBe(true);
   });
 });

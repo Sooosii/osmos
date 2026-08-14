@@ -148,7 +148,7 @@ export const EN = {
       add: 'add to my top four',
       added: 'in your top four',
       remove: 'remove',
-      search: 'Search the 52 perfumes',
+      search: 'Search the 77 perfumes',
       noMatch: 'Nothing matches.',
       full: 'Four is the limit — replace one instead.',
       errors: {
@@ -192,9 +192,9 @@ export const EN = {
   studio: {
     title: 'Compose · OSMOS',
     heading: 'Compose your own',
-    lede: 'Choose notes, set how loud each one is, and watch the thing take shape. It is read with the same measure as the 52 on the map.',
+    lede: 'Choose notes, set how loud each one is, and watch the thing take shape. It is read with the same measure as the 77 in the catalogue.',
     notes: 'NOTES',
-    search: 'Search the 136 notes',
+    search: 'Search the 148 notes',
     weight: 'How loud',
     curve: 'HOW IT UNFOLDS',
     nearest: 'CLOSEST ON THE MAP',
@@ -254,6 +254,10 @@ export const EN = {
     heading: 'Scent space',
     keyboardList: 'Scent space — go to a perfume',
     perfumeLink: (name: string) => `${name} page`,
+    navigation: 'Move between scent spaces',
+    position: (current: number, total: number) => `SPACE ${current} / ${total}`,
+    previous: 'Previous scent space',
+    next: 'Next scent space',
     sliders: {
       temperature: { label: 'Temperature — cool to warm', low: 'COOL', high: 'WARM' },
       cleanliness: { label: 'Cleanliness — dirty to clean', low: 'DIRTY', high: 'CLEAN' },
@@ -524,7 +528,62 @@ export const EN = {
     strong: (word: string) => `distinctly ${word}`,
   },
 
+  openingGate: {
+    scrollHint: 'Scroll to awaken the scent',
+    touchHint: 'Swipe up to awaken the scent',
+    skip: 'Skip the opening and enter the scent space',
+  },
+
   /** Doğrulama ekranları — sahip kalmalarına karar verdi. */
+  openingDirections: {
+    title: 'Opening directions — OSMOS',
+    description: 'Three light, theme-native directions for the OSMOS opening.',
+    back: '← back to OSMOS',
+    labMark: 'OPENING LAB / 01',
+    kicker: 'Opening directions',
+    heading: 'The opening should not feel like a film from another site.',
+    diagnosis:
+      'The current sequence carries 240 frames and a bright studio world. The result is heavy on the first scroll and foreign when it meets the OSMOS space.',
+    rule: 'New rule: one signature motion, black ground, no feeling of waiting.',
+    liveDraft: 'LIVE SKETCH',
+    recommended: 'My recommendation',
+    facts: { speed: 'SPEED', character: 'ATTITUDE', tradeoff: 'TRADE-OFF' },
+    choose: 'Choose this direction',
+    chosen: 'This direction is selected',
+    idleStatus: 'Choose a direction; the live opening changes only after your decision.',
+    selectedStatus: (title: string) =>
+      `${title} selected. The choice is marked only in this sketch; the live opening has not changed.`,
+    directions: {
+      constellation: {
+        title: 'Scent Constellation',
+        eyebrow: 'Point → object → space',
+        description:
+          'OSMOS points draw the outline of a vintage atomizer. One squeeze releases them into the stars of the main map.',
+        performance: '<100 KB visual load',
+        character: 'Strongest theme match',
+        tradeoff: 'Deliberately gives up photographic realism.',
+      },
+      obsidian: {
+        title: 'Obsidian Atomizer',
+        eyebrow: 'Black glass / brass light',
+        description:
+          'Keeps the atomizer idea and drops the studio background. Metal glints pull the bottle from darkness before it dissolves into space.',
+        performance: 'Target 0.5–1.2 MB',
+        character: 'The object stays central',
+        tradeoff: 'Needs a small set of treated images.',
+      },
+      threshold: {
+        title: 'Quiet Threshold',
+        eyebrow: 'A one-breath transition',
+        description:
+          'A single scent drop trembles in the dark. Its circular wave opens to reveal the OSMOS space already beneath it.',
+        performance: '<60 KB visual load',
+        character: 'Fastest and calmest',
+        tradeoff: 'Less narrative, more restraint.',
+      },
+    },
+  },
+
   draft: {
     /*
       Sekme başlıkları. Doğrulama ekranlarının ikisi de kök düzenin düz

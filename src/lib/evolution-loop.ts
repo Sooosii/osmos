@@ -1,7 +1,7 @@
 /**
  * Evrim imzasının saati.
  *
- * `space-approach.ts` ile aynı sözleşme: React, DOM, SVG bilmiyor — tek başına
+ * Saf animasyon modülleriyle aynı sözleşme: React, DOM, SVG bilmiyor — tek başına
  * okunup sınanabiliyor. Ekranda hiç durmadan dönen animasyonun tamamı bu
  * dosyadaki üç sayıdan ibaret; bileşenin işi yalnızca çizmek.
  *
