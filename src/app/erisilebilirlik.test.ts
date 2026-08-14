@@ -29,23 +29,27 @@ describe('acilis kapisi', () => {
       denendi: odak alttaki listeye geçiyor ama katman tam opaklıkta duruyordu.
 
       Bu satır kalkarsa hata sessizce geri gelir: içerik yine erişilebilir
-      görünür; yalnızca ekranda siyah atomizer katmanı durur.
+      görünür (katman `pointer-events-none`), yalnızca ekranda siyah bir
+      astronot durur.
     */
-    const source = read('src/components/AcilisObsidyen.tsx');
+    const source = read('src/components/AcilisTakimyildizi.tsx');
 
     expect(source).toContain("window.addEventListener('keydown', onKeyDown, true)");
     expect(source).toContain("window.removeEventListener('keydown', onKeyDown, true)");
   });
 
-  test('dekoratif atomizer duyurulmuyor', () => {
+  test('sus tuvalleri duyurulmuyor', () => {
     /*
-      Atomizer ve sisi saf süs; açılış kökü ekran okuyucu ağacından saklanmalı.
+      Zemin ve astronot saf süs; adsız bir tuval ekran okuyucuda anlamsız bir
+      gürültü. Uzayın tuvalinde aynı politika zaten vardı, açılışta yoktu.
     */
-    const source = read('src/components/AcilisObsidyen.tsx');
+    const source = read('src/components/AcilisTakimyildizi.tsx');
+    const canvases = source.match(/<canvas[\s\S]*?\/>/g) ?? [];
 
-    expect(source).toContain('data-opening-gate="true"');
-    expect(source).toContain('aria-hidden="true"');
-    expect(source).not.toContain('<canvas');
+    expect(canvases.length).toBeGreaterThan(0);
+    for (const canvas of canvases) {
+      expect(canvas, canvas.slice(0, 60)).toContain('aria-hidden="true"');
+    }
   });
 
   test('kapi acikken alttaki uzay etkilesim ve erisilebilirlik agacina kapali', () => {

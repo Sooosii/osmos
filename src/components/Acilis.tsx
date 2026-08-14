@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { acilisiIsaretle, acilistanGecildi, oturumDeposu } from '@/lib/acilis-oturum';
 import { prefersReducedMotion } from '@/lib/motion';
-import { AcilisObsidyen } from './AcilisObsidyen';
+import { AcilisTakimyildizi } from './AcilisTakimyildizi';
 
 function setSpaceLocked(locked: boolean) {
   const shell = document.getElementById('osmos-space-shell');
@@ -21,7 +21,7 @@ function setSpaceLocked(locked: boolean) {
  * Ana sayfanın kapı bekçisi.
  *
  * Sunucu oturum deposunu göremediği için ilk karede sessiz siyah bir karar yüzeyi
- * basılır. İstemci depoyu okuduktan sonra ilk ziyaretçiye obsidyen atomizer, dönene ise
+ * basılır. İstemci depoyu okuduktan sonra ilk ziyaretçiye takımyıldızı, dönene ise
  * doğrudan uzay gösterilir; böylece dönüşte `0%` durumu bir kareliğine parlamaz.
  */
 export function Acilis() {
@@ -51,7 +51,7 @@ export function Acilis() {
   if (!showOpening) return null;
 
   return (
-    <AcilisObsidyen
+    <AcilisTakimyildizi
       onEngage={() => acilisiIsaretle(oturumDeposu())}
       onComplete={() => {
         setSpaceLocked(false);
