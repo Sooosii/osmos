@@ -167,7 +167,7 @@ export function PerfumeSearch() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t.search.placeholder}
-            className="h-16 min-w-0 flex-1 bg-transparent font-sans text-lg text-white outline-none placeholder:text-white/25 sm:text-xl"
+            className="osmos-search-input h-16 min-w-0 flex-1 bg-transparent font-sans text-lg text-white outline-none placeholder:text-white/25 sm:text-xl"
           />
           <span aria-hidden="true" className="hidden text-[9px] tracking-[0.16em] text-white/25 sm:block">
             ESC

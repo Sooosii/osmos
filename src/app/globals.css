@@ -5,6 +5,13 @@
   background-size: 3px 3px;
 }
 
+/* The search field is already framed by its panel row; don't add a second box on focus. */
+.osmos-search-input:focus,
+.osmos-search-input:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /*
  * OSMOS koyu bir site; açık tema yok, olmayacak da.
  *
