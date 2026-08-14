@@ -32,10 +32,10 @@ describe('acilis kapisi', () => {
       görünür (katman `pointer-events-none`), yalnızca ekranda siyah bir
       astronot durur.
     */
-    const source = read('src/components/AstronotIntro.tsx');
+    const source = read('src/components/AcilisTakimyildizi.tsx');
 
-    expect(source).toContain("window.addEventListener('keydown', leave");
-    expect(source).toContain("window.removeEventListener('keydown', leave)");
+    expect(source).toContain("window.addEventListener('keydown', onKeyDown, true)");
+    expect(source).toContain("window.removeEventListener('keydown', onKeyDown, true)");
   });
 
   test('sus tuvalleri duyurulmuyor', () => {
@@ -43,13 +43,25 @@ describe('acilis kapisi', () => {
       Zemin ve astronot saf süs; adsız bir tuval ekran okuyucuda anlamsız bir
       gürültü. Uzayın tuvalinde aynı politika zaten vardı, açılışta yoktu.
     */
-    const source = read('src/components/AstronotIntro.tsx');
+    const source = read('src/components/AcilisTakimyildizi.tsx');
     const canvases = source.match(/<canvas[\s\S]*?\/>/g) ?? [];
 
     expect(canvases.length).toBeGreaterThan(0);
     for (const canvas of canvases) {
       expect(canvas, canvas.slice(0, 60)).toContain('aria-hidden="true"');
     }
+  });
+
+  test('kapi acikken alttaki uzay etkilesim ve erisilebilirlik agacina kapali', () => {
+    const page = read('src/app/[lang]/page.tsx');
+    const gate = read('src/components/Acilis.tsx');
+
+    expect(page).toContain('id="osmos-space-shell"');
+    expect(page).toContain('className="absolute inset-0"');
+    expect(page).toContain('inert');
+    expect(page).toContain('aria-hidden="true"');
+    expect(gate).toContain("removeAttribute('inert')");
+    expect(gate).toContain("removeAttribute('aria-hidden')");
   });
 });
 
