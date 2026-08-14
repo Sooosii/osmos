@@ -6,8 +6,8 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { ACILIS_SEEN_KEY, oturumDeposu, oturumOku, oturumYaz } from '@/lib/acilis-oturum';
 import { Acilis } from './Acilis';
 
-vi.mock('./AcilisTakimyildizi', () => ({
-  AcilisTakimyildizi: () => <div data-opening-gate="true" />,
+vi.mock('./AcilisObsidyen', () => ({
+  AcilisObsidyen: () => <div data-opening-gate="true" data-opening-kind="obsidyen" />,
 }));
 
 let reduceMotion = false;
@@ -55,7 +55,7 @@ test('ilk ziyarette resim yuklemeden hafif acilis kapisini kurar', async () => {
     await Promise.resolve();
   });
 
-  expect(container.querySelector('[data-opening-gate]')).not.toBeNull();
+  expect(container.querySelector('[data-opening-kind="obsidyen"]')).not.toBeNull();
 });
 
 test('ayni oturumda kapidan donen kisinin uzay kilidini acar', async () => {
