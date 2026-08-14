@@ -24,11 +24,9 @@ import {
   holdEnabledFor,
   holdTargetHit,
 } from '@/lib/space-entry';
-import { dragDelta } from '@/lib/space-approach';
 import type { RailState } from '@/lib/space-draw';
 import type { FeelTarget } from '@/lib/space-feel';
 import { type Rail, makeRail, railFeel, railValue } from '@/lib/space-rail';
-import type { ApproachScene } from './use-approach-scene';
 
 /**
  * Uzayın girdi yolları — işaretçi, sürükleme, sıkıştırma, basılı tutma, tekerlek.
@@ -37,10 +35,6 @@ import type { ApproachScene } from './use-approach-scene';
  * (`pointersRef`, `dragRef`, `pinchRef`, `holdRef`, `navigatingRef`) ve hiçbiri
  * dışarıda başka bir anlam taşımıyor. Çizim döngüsünün girdiyi bilmesine,
  * girdinin de çizimin nasıl yapıldığını bilmesine gerek yok.
- *
- * ⚠️ Yaklaşma sürerken bütün yollar `approach.isActive()` kapısından erken
- * dönüyor. Zevk meselesi değil, ölçünün getirdiği zorunluluk — gerekçe
- * `onPointerDown`'un üstünde yazılı.
  *
  * ⚠️ `'use client'` bilerek yok — modül yalnızca istemci bileşeninden import
  * ediliyor, sınırı `ScentSpaceCanvas.tsx` çiziyor.
@@ -75,7 +69,7 @@ interface SpaceInputOptions {
    * Sebebi tutma saatinin çizim döngüsünde işlemesi: tek saat `performance.now()`,
    * tek tüketici o döngü. Ayrı bir zamanlayıcı kurulsaydı halka bir hızda dolar,
    * geçiş başka anda tetiklenirdi. Saati okuyan `draw` olduğu için ref'i de o
-   * bildiriyor — `cueRef`/`introRef` ile aynı sözleşme.
+   * bildiriyor; çizim ve girdi aynı saati paylaşır.
    */
   readonly holdRef: RefObject<{ markId: string; startedAt: number } | null>;
   /** Sıcaklık rayı — yazan burası, okuyan çizim. */
@@ -89,7 +83,6 @@ interface SpaceInputOptions {
    */
   readonly setAppliedFeel: (target: FeelTarget | null) => void;
   readonly navigatingRef: RefObject<boolean>;
-  readonly approach: ApproachScene;
   readonly select: (id: string | null) => void;
   readonly setHovered: (id: string | null) => void;
   readonly moveTo: (target: Camera) => void;
@@ -142,7 +135,6 @@ export function useSpaceInput({
   animationRef,
   selectedRef,
   entryRef,
-  approach,
   select,
   setHovered,
   moveTo,
@@ -157,14 +149,6 @@ export function useSpaceInput({
 }: SpaceInputOptions): SpaceInput {
   const pointersRef = useRef(new Map<number, PointerPosition>());
 
-  /**
-   * Yaklaşma sahnesini süren parmak.
-   *
-   * Sahne sürerken uzayın öbür bütün işaretçi yolları kapalı, o yüzden bu ref
-   * onlarla karışmıyor ve ayrı duruyor. `pointersRef` gibi burada doğuyor:
-   * dışarıdan kimse okumuyor.
-   */
-  const approachDragRef = useRef<{ id: number; lastY: number } | null>(null);
   const dragRef = useRef<DragState | null>(null);
   const pinchRef = useRef<number | null>(null);
 
@@ -266,10 +250,6 @@ export function useSpaceInput({
 
       const delta = event.deltaMode === 1 ? event.deltaY * LINE_HEIGHT : event.deltaY;
 
-      // Yaklaşma sürerken tekerlek yalnızca sahneye ait — `zoomAt` da giriş
-      // `advance`'ı da hiç çalışmıyor. Gerekçesi `consumeWheel`'in üstünde.
-      if (approach.consumeWheel(delta)) return;
-
       const { sx, sy } = localPoint(event.clientX, event.clientY);
       cameraRef.current = zoomAt(
         cameraRef.current,
@@ -343,7 +323,7 @@ export function useSpaceInput({
 
     const onTouchStart = (event: TouchEvent) => {
       touchCountRef.current = event.touches.length;
-      if (approach.isActive() || event.touches.length < 2) return;
+      if (event.touches.length < 2) return;
 
       touchPinchRef.current = { gap: touchGap(event.touches), ...touchMid(event.touches) };
       animationRef.current = null;
@@ -430,7 +410,6 @@ export function useSpaceInput({
     };
   }, [
     animationRef,
-    approach,
     cameraRef,
     canvasRef,
     holdRef,
@@ -445,30 +424,7 @@ export function useSpaceInput({
     setEntryProgress,
     viewportRef,
   ]);
-  /*
-   * Yaklaşma sürerken işaretçi yolları kapalı — sürükleme, tıklama, üstüne gelme.
-   *
-   * Zevk meselesi değil, ölçünün getirdiği bir zorunluluk: ölçek 0.14'te nokta
-   * yarıçapı `(3.4 + depth·4.6) · 0.14^0.5` ≈ 1.3–3 piksel. `hitTest`'in payı 8
-   * piksel, yani o mesafede "isabetli tıklama" diye bir şey yok — olabilecek tek
-   * şey, kullanıcının hangisi olduğunu göremediği bir parfüme yanlışlıkla düşmesi.
-   *
-   * Eşiğin eşik olmasının da tek yolu bu: sahnede yalnızca ileri gidilebiliyor.
-   */
   const handlePointerDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    if (approach.isActive()) {
-      /*
-        Sahne sürerken parmağın tek işi var: yaklaştırmak. Seçim, sürükleme ve
-        tutma başlamıyor — eşiğin eşik olmasının yolu bu.
-
-        Öncesinde burada yalnızca `return` vardı ve sonucu ölçüldü: telefondan
-        gelen kimse kapıyı geçemiyordu, çünkü sahneyi ilerleten tek işaret
-        tekerlekti.
-      */
-      event.currentTarget.setPointerCapture(event.pointerId);
-      approachDragRef.current = { id: event.pointerId, lastY: event.clientY };
-      return;
-    }
     animationRef.current = null;
     event.currentTarget.setPointerCapture(event.pointerId);
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
@@ -542,18 +498,6 @@ export function useSpaceInput({
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    if (approach.isActive()) {
-      const drag = approachDragRef.current;
-      if (!drag || drag.id !== event.pointerId) return;
-
-      // Fark adım adım okunuyor, başlangıçtan değil: tekerlek de her olayda
-      // kendi adımını veriyor ve `consumeWheel` birikimi kendisi tutuyor.
-      const dy = event.clientY - drag.lastY;
-      drag.lastY = event.clientY;
-      approach.consumeWheel(dragDelta(dy));
-      return;
-    }
-
     // Dokunma yolu sıkıştırmayı yürütüyorsa işaretçi yolu hiç karışmıyor.
     if (touchPinchRef.current !== null) return;
 
@@ -624,18 +568,6 @@ export function useSpaceInput({
   };
 
   const handlePointerUp = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    /*
-      Yaklaşma sürüklemesi elde kaldıysa parmak kalkınca biter — sahne o
-      sürüklemeyle tamamlanmış olsa bile. Yalnızca `isActive()`e bakmak yetmez:
-      sürükleme sahneyi bitirdiği anda bayrak düşüyor ve bu olay uzayın normal
-      yollarına, yarım kalmış bir işaretçi durumuyla düşerdi.
-    */
-    if (approachDragRef.current) {
-      approachDragRef.current = null;
-      return;
-    }
-    if (approach.isActive()) return;
-
     const pointers = pointersRef.current;
     pointers.delete(event.pointerId);
     if (pointers.size < 2) pinchRef.current = null;
@@ -734,8 +666,6 @@ export function useSpaceInput({
    * seçilmiyor.
    */
   const handlePointerCancel = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    approachDragRef.current = null;
-
     // Iptal edilen bir sürükleme karar değil: ray hiç olmamış gibi kalkıyor.
     railArmRef.current = null;
     if (railRef.current?.geometry) railRef.current = null;

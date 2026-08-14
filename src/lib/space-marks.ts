@@ -3,7 +3,7 @@ import { dominantFamily, getFamily } from '@/data/families';
 import { say } from '@/i18n/dict';
 import { DEFAULT_LOCALE, type Locale } from '@/i18n/locale';
 import { characterVector, familyVector, nearestNeighbors, projectToSpace } from './similarity';
-import { normalizeAxis } from './space-feel';
+import { normalizeAxisAgainst } from './space-feel';
 
 /**
  * Parfüm listesinden çizilmeye hazır nokta listesi.
@@ -34,6 +34,7 @@ const AXIS_COUNT = 4;
 export function buildMarks(
   perfumes: readonly Perfume[],
   locale: Locale = DEFAULT_LOCALE,
+  options: { readonly feelUniverse?: readonly Perfume[] } = {},
 ): readonly SpaceMark[] {
   const points = projectToSpace(perfumes);
   const pointById = new Map(points.map((point) => [point.perfumeId, point]));
@@ -44,8 +45,14 @@ export function buildMarks(
    * Gerekçenin tamamı `space-feel.ts`in `normalizeAxis`inde.
    */
   const characters = perfumes.map((perfume) => characterVector(perfume));
+  const universeCharacters = (options.feelUniverse ?? perfumes).map((perfume) =>
+    characterVector(perfume),
+  );
   const axes = Array.from({ length: AXIS_COUNT }, (_, axis) =>
-    normalizeAxis(characters.map((character) => character[axis])),
+    normalizeAxisAgainst(
+      characters.map((character) => character[axis]),
+      universeCharacters.map((character) => character[axis]),
+    ),
   );
 
   return perfumes.map((perfume, index) => {

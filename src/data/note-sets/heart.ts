@@ -733,4 +733,103 @@ export const HEART_NOTES: readonly Note[] = [
       tr: 'Yanmış odun ve eski deri. Paletin en sert dokusu — tadılabilen bir duman.',
     },
   },
+  {
+    id: 'heliotrope',
+    name: { en: 'Heliotrope', tr: 'Heliotrop' },
+    families: { floral: 0.8, gourmand: 0.5 },
+    volatility: { peakMinutes: 35, halfLifeMinutes: 260 },
+    character: { temperature: 0.4, texture: -0.7, cleanliness: 0.4, proximity: 0.4 },
+    description: {
+      en: 'Powdered almond and pale petals — sweetness blurred into a soft violet haze.',
+      tr: 'Pudralı badem ve soluk taç yapraklar — yumuşak mor bir sise karışan tatlılık.',
+    },
+  },
+  {
+    id: 'date',
+    name: { en: 'Date', tr: 'Hurma' },
+    families: { fruity: 0.7, gourmand: 0.8 },
+    volatility: { peakMinutes: 35, halfLifeMinutes: 260 },
+    character: { temperature: 0.7, texture: -0.2, cleanliness: -0.3, proximity: 0.6 },
+    description: {
+      en: 'Dark, sticky fruit with a caramel edge — sweetness already halfway to resin.',
+      tr: 'Karamel kenarlı, koyu ve yapışkan meyve — reçineye yarı yolda varmış bir tatlılık.',
+    },
+  },
+  {
+    id: 'night-blooming-cereus',
+    name: { en: 'Queen of the Night', tr: 'Gecenin kraliçesi' },
+    families: { floral: 1.0, green: 0.2 },
+    volatility: { peakMinutes: 30, halfLifeMinutes: 210 },
+    character: { temperature: 0.3, texture: -0.4, cleanliness: 0.2, proximity: 0.2 },
+    description: {
+      en: 'A nocturnal cactus flower — creamy white petals opening into cool air.',
+      tr: 'Gece açan bir kaktüs çiçeği — serin havaya açılan krem beyazı yapraklar.',
+    },
+  },
+  {
+    id: 'passionflower',
+    name: { en: 'Passionflower', tr: 'Çarkıfelek çiçeği' },
+    families: { floral: 0.8, fruity: 0.3, green: 0.2 },
+    volatility: { peakMinutes: 25, halfLifeMinutes: 190 },
+    character: { temperature: 0.2, texture: -0.2, cleanliness: 0.4, proximity: -0.1 },
+    description: {
+      en: 'Transparent tropical petals — floral first, with fruit flickering at the edge.',
+      tr: 'Şeffaf tropik taç yapraklar — önce çiçek, kenarında bir an görünen meyve.',
+    },
+  },
+  {
+    id: 'orchid',
+    name: { en: 'Orchid', tr: 'Orkide' },
+    families: { floral: 0.9, gourmand: 0.2 },
+    volatility: { peakMinutes: 35, halfLifeMinutes: 240 },
+    character: { temperature: 0.4, texture: -0.5, cleanliness: 0.5, proximity: 0.2 },
+    description: {
+      en: 'An abstract velvet flower — creamy, polished, and more imagined than botanical.',
+      tr: 'Soyut bir kadife çiçek — kremamsı, cilalı ve botanikten çok hayal edilmiş.',
+    },
+  },
+  {
+    id: 'myrtle',
+    name: { en: 'Myrtle', tr: 'Mersin' },
+    families: { aromatic: 0.7, green: 0.6, floral: 0.2 },
+    volatility: { peakMinutes: 22, halfLifeMinutes: 170 },
+    character: { temperature: -0.3, texture: 0.4, cleanliness: 0.6, proximity: -0.3 },
+    description: {
+      en: 'Cool Mediterranean leaves — eucalyptus brightness without the medicinal chill.',
+      tr: 'Serin Akdeniz yaprakları — tıbbi soğukluğu olmayan okaliptüs parlaklığı.',
+    },
+  },
+  {
+    id: 'hemp',
+    name: { en: 'Hemp Leaf', tr: 'Kenevir yaprağı' },
+    families: { green: 0.8, aromatic: 0.7, mossy: 0.3 },
+    volatility: { peakMinutes: 30, halfLifeMinutes: 240 },
+    character: { temperature: 0.0, texture: 0.7, cleanliness: -0.4, proximity: 0.0 },
+    description: {
+      en: 'Dry green leaves with a bitter, resinous shadow — herbal without smelling tidy.',
+      tr: 'Acı, reçineli gölgeli kuru yeşil yapraklar — düzenli kokmayan bir otsuluk.',
+    },
+  },
+  {
+    id: 'pistachio',
+    name: { en: 'Pistachio', tr: 'Antep fıstığı' },
+    families: { gourmand: 0.9, green: 0.2, woody: 0.2 },
+    volatility: { peakMinutes: 35, halfLifeMinutes: 300 },
+    character: { temperature: 0.5, texture: -0.5, cleanliness: 0.1, proximity: 0.5 },
+    description: {
+      en: 'Green nut and warm cream — savoury at the edge, confectionery at the centre.',
+      tr: 'Yeşil yemiş ve sıcak krema — kenarda tuzlu, merkezde şekerlemeye yakın.',
+    },
+  },
+  {
+    id: 'freesia',
+    name: { en: 'Freesia', tr: 'Frezya' },
+    families: { floral: 0.9, green: 0.3 },
+    volatility: { peakMinutes: 24, halfLifeMinutes: 170 },
+    character: { temperature: -0.2, texture: -0.3, cleanliness: 0.8, proximity: -0.4 },
+    description: {
+      en: 'Peppered clean petals — a bright floral that leaves almost no weight behind.',
+      tr: 'Biberli temiz taç yapraklar — ardında neredeyse hiç ağırlık bırakmayan parlak çiçek.',
+    },
+  },
 ] as const;

@@ -7,7 +7,7 @@
  * istiyorum" diyerek arayabilsin.
  *
  * Modül saf: sayı girer, sayı çıkar. Tuvali, React'i, veriyi tanımıyor —
- * `space-approach.ts` ve `neighbor-orbit.ts` ile aynı sözleşme.
+ * `neighbor-orbit.ts` ile aynı sözleşme.
  *
  * ⚠️ Burada **yakınlık** hesaplanıyor, opaklık değil. Yakınlığın opaklığa nasıl
  * çevrileceği çizimin işi ve orada kalıyor (`space-draw.ts`, `DIM_ALPHA`).
@@ -116,12 +116,16 @@ export const FEEL_CURVE = 3.2;
  * Viride ↔ Vanille Planifolia, temizlik Muscs Koublaï Khân ↔ Good Morning).
  * Bir dahaki eklemede yeniden ölçülmeli; garanti değil, gözlem.
  */
-export function normalizeAxis(values: readonly number[]): number[] {
+export function normalizeAxisAgainst(
+  values: readonly number[],
+  domain: readonly number[],
+): number[] {
   if (values.length === 0) return [];
+  if (domain.length === 0) return values.map(() => 0.5);
 
   let min = Infinity;
   let max = -Infinity;
-  for (const value of values) {
+  for (const value of domain) {
     if (value < min) min = value;
     if (value > max) max = value;
   }
@@ -133,6 +137,10 @@ export function normalizeAxis(values: readonly number[]): number[] {
   if (span < EPSILON) return values.map(() => 0.5);
 
   return values.map((value) => (value - min) / span);
+}
+
+export function normalizeAxis(values: readonly number[]): number[] {
+  return normalizeAxisAgainst(values, values);
 }
 
 /**

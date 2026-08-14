@@ -7,6 +7,12 @@ import { CURATED_D } from './perfume-sets/curated-d';
 import { CURATED_E } from './perfume-sets/curated-e';
 import { CURATED_F } from './perfume-sets/curated-f';
 import { FILLERS } from './perfume-sets/fillers';
+import { SPACE_2_PERFUMES } from './perfume-sets/space-2';
+import {
+  buildPerfumeSpaces,
+  findPerfumeSpaceId,
+  type PerfumeSpace,
+} from './perfume-spaces';
 
 /**
  * Parfüm veritabanı — toplayıcı.
@@ -16,7 +22,7 @@ import { FILLERS } from './perfume-sets/fillers';
  * sunuyor, böylece `@/data/perfumes` yolu ve `PERFUMES` / `getPerfume`
  * sözleşmesi değişmiyor.
  */
-export const PERFUMES: readonly Perfume[] = [
+const LEGACY_PERFUMES: readonly Perfume[] = [
   ...CURATED_A,
   ...CURATED_B,
   ...CURATED_C,
@@ -25,6 +31,9 @@ export const PERFUMES: readonly Perfume[] = [
   ...CURATED_F,
   ...FILLERS,
 ];
+
+export const PERFUME_SPACES = buildPerfumeSpaces(LEGACY_PERFUMES, SPACE_2_PERFUMES);
+export const PERFUMES: readonly Perfume[] = PERFUME_SPACES.flatMap((space) => space.perfumes);
 
 const PERFUME_BY_ID = new Map<string, Perfume>();
 for (const perfume of PERFUMES) {
@@ -62,4 +71,17 @@ export function getPerfume(id: string): Perfume {
     throw new Error(`Bilinmeyen parfüm: ${id}`);
   }
   return perfume;
+}
+
+export function getPerfumeSpaceId(id: string): number {
+  return getPerfumeSpace(id).id;
+}
+
+export function getPerfumeSpace(id: string): PerfumeSpace {
+  const spaceId = findPerfumeSpaceId(PERFUME_SPACES, id);
+  const space = PERFUME_SPACES.find((candidate) => candidate.id === spaceId);
+  if (!space) {
+    throw new Error(`Bilinmeyen parfüm: ${id}`);
+  }
+  return space;
 }

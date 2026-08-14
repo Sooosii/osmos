@@ -5,8 +5,10 @@ import { getNote } from '@/data/notes';
 import { FAMILY_ORDER, dominantFamily, getFamily } from '@/data/families';
 import { intensityAt } from '@/lib/evolution';
 import { prefersReducedMotion } from '@/lib/motion';
+import { rankOf, settleRows } from '@/lib/signature-order';
 import {
   SIGNATURE_MAX_MINUTES,
+  MAX_STEP_MS,
   SLIDER_STEPS,
   advanceCycle,
   cycleProgress,
@@ -167,12 +169,13 @@ function curveFor(row: SignatureRow, geometry: Geometry): readonly CurvePoint[] 
  */
 function pathFor(
   curve: readonly CurvePoint[],
-  index: number,
+  /** Satırın yeri — tam sayı değil, süzülme sırasında aradan geçiyor. */
+  position: number,
   morph: number,
   level: number,
   geometry: Geometry,
 ): string {
-  const y1 = rowY(index);
+  const y1 = rowY(position);
   let d = '';
 
   for (let j = 0; j < curve.length; j += 1) {
@@ -221,6 +224,14 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
    * şey yok — kaydıraçların `valuesRef`i ile aynı sözleşme.
    */
   const elapsedRef = useRef(0);
+
+  /**
+   * Satırların o andaki yeri — kesirli, çünkü yer değiştirme süzülerek oluyor.
+   *
+   * Boş başlıyor: `settleRows` eksik konumu hedefe eşit sayıyor, yani ilk kare
+   * sıçramadan doğru sıraya oturuyor.
+   */
+  const positionsRef = useRef<number[]>([]);
 
   /**
    * Akıyor mu?
@@ -294,16 +305,35 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
    * ikinci kez yazsaydık ikisi bir gün birbirinden ayrılırdı.
    */
   const paint = useCallback(
-    (progress: number) => {
+    (progress: number, dtMs: number, snap: boolean) => {
       const morph = morphAt(progress);
       const minutes = minutesAt(progress, SIGNATURE_MAX_MINUTES);
 
+      /*
+        Önce bütün yüzdeler, sonra sıra, sonra çizim.
+
+        Tek geçişte yapılamıyor: bir satırın nereye çizileceği ÖBÜR satırların
+        o andaki değerine bağlı. Sıra `rankOf`ta, süzülme `settleRows`ta —
+        ikisi de saf ve sınanıyor.
+      */
+      const levels = rows.map((row) => intensityAt(row.volatility, minutes) * row.weight);
+      const targets = rankOf(levels);
+
+      /*
+        ⚠️ Sürükleme ve duraklatma SIÇRATIYOR, süzmüyor. Zaman çubuğunu çekmek
+        zaten bir sıçrama; satırların arkadan yetişmesi "geri kaldı" gibi
+        okunurdu ve durdurulmuş bir karede hareket görmek tuhaf olurdu.
+      */
+      const positions = snap ? targets : settleRows(positionsRef.current, targets, dtMs);
+      positionsRef.current = positions;
+
       rows.forEach((row, index) => {
-        const level = intensityAt(row.volatility, minutes) * row.weight;
+        const level = levels[index];
+        const y = rowY(positions[index]) + 3;
 
         const path = pathRefs.current[index];
         if (path) {
-          path.setAttribute('d', pathFor(curves[index], index, morph, level, geometry));
+          path.setAttribute('d', pathFor(curves[index], positions[index], morph, level, geometry));
           path.setAttribute(
             'stroke-width',
             (STROKE_BASE + morph * STROKE_GROWTH).toFixed(2),
@@ -311,11 +341,15 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
         }
 
         const name = nameRefs.current[index];
-        if (name) name.setAttribute('opacity', labelOpacity(morph, 0.72));
+        if (name) {
+          name.setAttribute('opacity', labelOpacity(morph, 0.72));
+          name.setAttribute('y', y.toFixed(2));
+        }
 
         const value = valueRefs.current[index];
         if (value) {
           value.setAttribute('opacity', labelOpacity(morph, 0.5));
+          value.setAttribute('y', y.toFixed(2));
           // Yüzde her karede aynı yuvarlanmış değere düşebiliyor; aynı metni
           // tekrar yazmak gereksiz layout kirletiyordu (sahip: "hafif bir
           // takılma" fark etti) — değişmemişse dokunma.
@@ -352,7 +386,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
 
   useEffect(() => {
     // Duraklatılmışken de bir kare: topuk yeni yere kondu, ekran onu göstersin.
-    paint(cycleProgress(elapsedRef.current));
+    paint(cycleProgress(elapsedRef.current), 0, true);
 
     // Duraklatıldığında hiç kare istenmiyor. Boşa dönen bir döngü telefonda
     // sayfa açık kaldığı sürece pil yakardı; `DitherBackdrop` da aynı kararı
@@ -361,11 +395,17 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
 
     let last = performance.now();
     let frame = requestAnimationFrame(function step(now: number) {
+      /*
+        Aynı `dt` iki işi birden sürüyor: saatin ilerlemesi ve satırların
+        süzülmesi. `advanceCycle` sekme arkadan dönünce onu 50 ms'te sınırlıyor;
+        süzülme de aynı sınırdan geçsin ki satırlar tek karede takla atmasın.
+      */
+      const dtMs = Math.min(Math.max(now - last, 0), MAX_STEP_MS);
       elapsedRef.current = advanceCycle(elapsedRef.current, now - last);
       last = now;
 
       const progress = cycleProgress(elapsedRef.current);
-      paint(progress);
+      paint(progress, dtMs, false);
 
       /*
         Topuk akan zamanı izliyor — ama kullanıcı ona dokunmuşken DEĞİL.
@@ -412,7 +452,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
     (event: ChangeEvent<HTMLInputElement>) => {
       elapsedRef.current = seekCycle(Number(event.target.value) / SLIDER_STEPS);
       setRunning(false);
-      paint(cycleProgress(elapsedRef.current));
+      paint(cycleProgress(elapsedRef.current), 0, true);
     },
     [paint],
   );

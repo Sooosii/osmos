@@ -146,8 +146,8 @@ interface SpaceFeelSlidersProps {
   /**
    * Tarifin yazıldığı yer — çizim döngüsü buradan okuyor.
    *
-   * Ref'i **kurmuyoruz, alıyoruz**: `use-approach-scene` ve `use-canvas-size` ile
-   * aynı sözleşme. Yazan burası, okuyan çizim; sahibi ikisini de tanıyan tuval.
+   * Ref'i **kurmuyoruz, alıyoruz**: yazan burası, okuyan çizim; sahibi ikisini
+   * de tanıyan tuval.
    */
   readonly targetRef: RefObject<FeelTarget>;
   readonly requestDraw: () => void;
@@ -244,8 +244,8 @@ export function SpaceFeelSliders({
    * kendimiz yazıyoruz ve Next'in kancasıyla okusaydık her yazma bu ağacı
    * yeniden çizerdi — tuval kendini kurar, sahne başa dönerdi.
    *
-   * Bir karelik gecikme görünmüyor: kaydıraçlar yaklaşma sahnesi boyunca zaten
-   * ekranda değil.
+   * Adres yalnız bağlandıktan sonra okunabilir; bu, sunucu ve istemcinin ilk
+   * çıktısını aynı tutarak hidrasyon uyuşmazlığını önler.
    *
    * ⚠️ `react-hooks/set-state-in-effect` burada bilerek kapalı. Kuralın kaçındığı
    * şey türetilebilir durumu etkiyle senkronlamak; buradaki durum türetilemiyor,

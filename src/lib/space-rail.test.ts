@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { PERFUMES } from '../data/perfumes';
+import { PERFUMES, PERFUME_SPACES } from '../data/perfumes';
 import { buildMarks } from './space-marks';
 import { feelAnchor, feelMatch } from './space-feel';
 import {
@@ -94,7 +94,10 @@ describe('RAIL_REACH — 52 parfüm üzerinde ölçüldü', () => {
       elemeyen ray süs olur. Ölçü, rayın beş ayrı yerinde parlak (>0.5) ve
       dibe inmiş (=0) parfüm sayısı.
     */
-    const feels = buildMarks(PERFUMES).map((mark) => mark.feel);
+    for (const space of PERFUME_SPACES) {
+      const feels = buildMarks(space.perfumes, undefined, { feelUniverse: PERFUMES }).map(
+        (mark) => mark.feel,
+      );
 
     for (const value of [0, 0.25, 0.5, 0.75, 1]) {
       const asked = railFeel(value);
@@ -113,7 +116,8 @@ describe('RAIL_REACH — 52 parfüm üzerinde ölçüldü', () => {
 
       // Ama tümden söndürmemeli: uçlarda bile bir avuç parfüm yanıyor.
       expect(yanan, `yanan @ ${value}`).toBeGreaterThanOrEqual(4);
-      expect(yanan, `yanan @ ${value}`).toBeLessThanOrEqual(45);
+      expect(yanan, `yanan @ uzay ${space.id}, ${value}`).toBeLessThan(feels.length);
+    }
     }
   });
 });

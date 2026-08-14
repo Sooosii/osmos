@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
-import { PERFUMES } from '@/data/perfumes';
+import { PERFUMES, PERFUME_SPACES } from '@/data/perfumes';
 import { buildMarks } from '@/lib/space-marks';
-import { introPoints } from '@/lib/intro-points';
 import { ScentSpaceCanvas } from '@/components/ScentSpaceCanvas';
 import { Acilis } from '@/components/Acilis';
 import { CursorGlitter } from '@/components/CursorGlitter';
@@ -12,11 +11,10 @@ import { pageAlternates } from '@/lib/site-url';
  * Koku Uzayı — sitenin kapısı.
  *
  * Hesap burada, sunucuda: benzerlik matrisi ve izdüşüm istemciye hiç inmiyor,
- * tarayıcıya yalnızca 52 nokta gidiyor.
+ * tarayıcıya yalnızca iki hazır uzay sahnesi gidiyor; aynı anda en fazla 52 nokta çiziliyor.
  *
- * Uzay doğrudan açılmıyor; kapının üç adımı var (`Acilis`):
- * astronot (kaydırmayla uğurlanıyor) → perde (kendiliğinden, 2.6 sn) →
- * yaklaşma sahnesi (`space-approach.ts`, kamera 0.14'ten 1'e).
+ * Uzayın üstündeki tek kapı `Acilis`: atomizörün 240/120 karelik açılımı,
+ * kaydırmayla ilerler ve doğrudan etkileşimli uzaya bırakır.
  */
 /*
   Başlık ve tarif kök düzenden geliyor; buradaki tek iş hreflang. Sitemap aynı
@@ -34,7 +32,10 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
 
   // Küratör cümleleri sayfanın dilinde hesaplanıyor: nokta listesi sunucuda
   // kuruluyor ve istemciye hazır metin olarak iniyor.
-  const marks = buildMarks(PERFUMES, locale);
+  const spaces = PERFUME_SPACES.map((space) => ({
+    id: space.id,
+    marks: buildMarks(space.perfumes, locale, { feelUniverse: PERFUMES }),
+  }));
 
   return (
     /*
@@ -60,9 +61,8 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         statik üretimde istemciye erteleniyor, yani içine konan başlık ancak
         hidrasyondan sonra doğuyor.
 
-        Bu yüzden başlık kabukta. Görünmez olması bir ödün değil: görünen ad
-        yaklaşma sahnesi bitene kadar zaten ekranda yok, yani "gören ve
-        görmeyen aynı şeyi okusun" burada zaten kurulamıyordu.
+        Bu yüzden başlık kabukta: ham HTML'de de ekran okuyucunun ana sayfayı
+        adlandırabilmesi gerekiyor.
       */}
       <h1 className="sr-only">{t.space.heading}</h1>
       {/*
@@ -76,40 +76,32 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         tuval zaten ilk kareyi istemcide çiziyor, araya bir iskelet koymak
         yanıp sönen ikinci bir görüntü olurdu.
       */}
-      <Suspense fallback={null}>
-        {/*
-          Giriş metni tuvalin içine `children` olarak veriliyor, yanına kardeş
-          olarak değil. Sebebi görünürlük: metin yaklaşma sahnesi boyunca yok,
-          varışta yerine yerleşiyor — o kararı bilen tek yer tuval bileşeni.
-
-          Sunucu bileşeni olarak kalmaya devam ediyor: `children` istemcinin modül
-          grafiğine girmiyor, sunucuda üretilip hazır çıktı olarak geçiyor. Yani
-          `PERFUMES` hâlâ burada, sunucuda; tarayıcıya yalnızca bir sayı iniyor.
-        */}
-        <ScentSpaceCanvas marks={marks}>
+      <div id="osmos-space-shell" inert aria-hidden="true" className="absolute inset-0">
+        <Suspense fallback={null}>
           {/*
-            Konumlandırma yok — sol üst köşeyi `SpaceOverlays` kuruyor.
+            Giriş metni tuvalin içine `children` olarak veriliyor; konumunu ve
+            etkileşimli kontrollerle ortak düzenini `SpaceOverlays` kuruyor.
 
-            Eskiden burada `absolute left-6 top-6` vardı. Kaydıraçlar da aynı
-            köşeye gelince metnin altında durmaları gerekti ve bunu piksel
-            ofsetiyle yapmak kırılgandı: metin bir satır uzasa kaydıraçlar
-            üstüne binerdi. İkisi artık tek bir sütunda, akışla diziliyor.
+            Sunucu bileşeni olarak kalmaya devam ediyor: `children` istemcinin modül
+            grafiğine girmiyor, sunucuda üretilip hazır çıktı olarak geçiyor. Yani
+            `PERFUMES` hâlâ burada, sunucuda; tarayıcıya yalnızca bir sayı iniyor.
           */}
-          <div>
+          <ScentSpaceCanvas spaces={spaces}>
+            {/*
+              Konumlandırma yok — sol üst köşeyi `SpaceOverlays` kuruyor.
+
+              Eskiden burada `absolute left-6 top-6` vardı. Kaydıraçlar da aynı
+              köşeye gelince metnin altında durmaları gerekti ve bunu piksel
+              ofsetiyle yapmak kırılgandı: metin bir satır uzasa kaydıraçlar
+              üstüne binerdi. İkisi artık tek bir sütunda, akışla diziliyor.
+            */}
             <p className="text-xs tracking-[0.3em] text-white/50">{t.site.name}</p>
-            <p className="mt-3 max-w-[15rem] text-xs leading-relaxed text-white/50">
-              {t.space.intro(PERFUMES.length)}
-            </p>
-          </div>
-        </ScentSpaceCanvas>
-      </Suspense>
+          </ScentSpaceCanvas>
+        </Suspense>
+      </div>
 
-      {/*
-        Açılış — astronot + perde, sırayla (sahibin seçimi, 2026-08-10).
-
-        Suspense'in dışında: adres parametresiyle işi yok.
-      */}
-      <Acilis points={introPoints(marks)} />
+      {/* Açılış oturum ve hareket tercihlerini istemcide okur; adresle işi yok. */}
+      <Acilis />
 
       {/*
         İmleç tozu — sahibin isteği, yalnızca burada.

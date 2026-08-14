@@ -1,4 +1,4 @@
-import { PERFUMES } from '@/data/perfumes';
+import { getPerfumeSpace } from '@/data/perfumes';
 import { dominantFamily, getFamily } from '@/data/families';
 import { familyVector, nearestNeighbors, projectToSpace } from '@/lib/similarity';
 import { NeighborOrbit } from '@/components/NeighborOrbit';
@@ -40,12 +40,13 @@ function colorOf(perfume: Perfume): string {
 
 export function Neighbors({ perfume, lang }: NeighborsProps) {
   const t = dictFor(lang);
+  const perfumes = getPerfumeSpace(perfume.id).perfumes;
 
   const depths = new Map(
-    projectToSpace(PERFUMES).map((point) => [point.perfumeId, point.depth]),
+    projectToSpace(perfumes).map((point) => [point.perfumeId, point.depth]),
   );
 
-  const neighbors = nearestNeighbors(perfume, PERFUMES, NEIGHBOR_COUNT).map(
+  const neighbors = nearestNeighbors(perfume, perfumes, NEIGHBOR_COUNT).map(
     (entry) => ({
       id: entry.perfume.id,
       name: entry.perfume.name,

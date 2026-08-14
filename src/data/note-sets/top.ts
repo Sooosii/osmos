@@ -465,4 +465,15 @@ export const TOP_NOTES: readonly Note[] = [
       tr: 'Doğrudan bakınca kaybolan serin, sulu bir tatlılık.',
     },
   },
+  {
+    id: 'marigold',
+    name: { en: 'Tagetes', tr: 'Kadife çiçeği' },
+    families: { aromatic: 0.7, floral: 0.5, green: 0.4 },
+    volatility: { peakMinutes: 8, halfLifeMinutes: 75 },
+    character: { temperature: 0.3, texture: 0.5, cleanliness: -0.1, proximity: -0.3 },
+    description: {
+      en: 'Bitter petals and crushed leaves — a flower with the bite of green spice.',
+      tr: 'Acı taç yapraklar ve ezilmiş yapraklar — yeşil baharat keskinliğinde bir çiçek.',
+    },
+  },
 ] as const;

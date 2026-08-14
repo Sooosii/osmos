@@ -146,7 +146,6 @@ describe('kok varliklari', () => {
     const source = read('src/proxy.ts');
 
     for (const path of [
-      '/intro.js',
       '/robots.txt',
       '/sitemap.xml',
       '/icon',

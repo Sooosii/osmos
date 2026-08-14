@@ -359,4 +359,26 @@ export const BASE_NOTES: readonly Note[] = [
       tr: 'Aynı anda balina, deniz ve ten — nasıl olduysa sıcak kokan bir tuz.',
     },
   },
+  {
+    id: 'hinoki',
+    name: { en: 'Hinoki Wood', tr: 'Hinoki ağacı' },
+    families: { woody: 0.9, aromatic: 0.4, resinous: 0.2 },
+    volatility: { peakMinutes: 90, halfLifeMinutes: 540 },
+    character: { temperature: -0.2, texture: -0.1, cleanliness: 0.7, proximity: 0.2 },
+    description: {
+      en: 'Pale cypress wood and steam — dry grain made strangely calm and clean.',
+      tr: 'Soluk servi ağacı ve buhar — tuhaf biçimde sakin ve temizleşmiş kuru damarlar.',
+    },
+  },
+  {
+    id: 'palo-santo',
+    name: { en: 'Palo Santo', tr: 'Palo santo' },
+    families: { woody: 0.9, resinous: 0.5, aromatic: 0.2 },
+    volatility: { peakMinutes: 100, halfLifeMinutes: 600 },
+    character: { temperature: 0.5, texture: 0.1, cleanliness: 0.1, proximity: 0.4 },
+    description: {
+      en: 'Sweet sacred smoke — citrus peel, warm wood, and resin burned down to a glow.',
+      tr: 'Tatlı kutsal duman — köz hâline gelmiş narenciye kabuğu, sıcak odun ve reçine.',
+    },
+  },
 ] as const;

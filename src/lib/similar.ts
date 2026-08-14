@@ -1,4 +1,4 @@
-import { PERFUMES, getPerfume } from '@/data/perfumes';
+import { getPerfume, getPerfumeSpace } from '@/data/perfumes';
 import type { Perfume } from '@/data/types';
 import { similarity } from './similarity';
 
@@ -67,8 +67,9 @@ export function sharedNotes(a: Perfume, b: Perfume): readonly SharedNote[] {
  */
 export function similarTo(id: string, limit: number = SIMILAR_COUNT): readonly SimilarEntry[] {
   const perfume = getPerfume(id);
+  const candidates = getPerfumeSpace(id).perfumes;
 
-  return PERFUMES.filter((candidate) => candidate.id !== id)
+  return candidates.filter((candidate) => candidate.id !== id)
     .map((candidate) => ({
       perfumeId: candidate.id,
       score: similarity(perfume, candidate),

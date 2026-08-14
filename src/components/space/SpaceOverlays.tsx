@@ -1,6 +1,5 @@
-import type { ReactNode, RefObject } from 'react';
+import { useEffect, useRef, type ReactNode, type RefObject } from 'react';
 import type { SpaceMark } from '@/data/types';
-import { APPROACH_CUE } from '@/lib/space-approach';
 import type { FeelTarget } from '@/lib/space-feel';
 import { useDict } from '@/i18n/LocaleProvider';
 import { LangSwitch } from '@/components/LangSwitch';
@@ -8,34 +7,10 @@ import { NotifyControl } from '@/components/NotifyControl';
 import { SignInLink } from '@/components/SignInLink';
 import { SpaceFeelSliders } from './SpaceFeelSliders';
 
-/**
- * Uzayın üstüne binen katmanlar — giriş metni, yaklaşma ipucu, nokta etiketi,
- * küratör cümlesi ve giriş şeridi.
- *
- * Uzay tuvalinden çıkarıldı çünkü hepsi aynı işi yapıyor: tuvalin çizemediği
- * şeyleri gerçek metin olarak, tuvalin üstünde göstermek. Hiçbiri karar
- * vermiyor — ne çizileceğini, neyin görüneceğini yukarısı söylüyor; buranın işi
- * yalnızca yerleşim ve tipografi.
- *
- * Üç ref'i **kurmuyor, alıyor.** `introRef` ile `cueRef`'e yaklaşma sahnesi,
- * `labelRef`'e çizim döngüsü yazıyor — ikisi de kare başına ve React'i
- * beklemeden. Gerekçeleri `use-approach-scene.ts` ve `ScentSpaceCanvas`'ın
- * `draw`'ında.
- */
+/** Uzayın tuval üstü metin, etiket ve erişilebilir kontrolleri. */
 
 interface SpaceOverlaysProps {
-  readonly introRef: RefObject<HTMLDivElement | null>;
-  readonly cueRef: RefObject<HTMLDivElement | null>;
   readonly labelRef: RefObject<HTMLDivElement | null>;
-  /** Kaydıraç katmanı — görünürlüğünü yaklaşma sahnesi yazıyor. */
-  readonly feelRef: RefObject<HTMLDivElement | null>;
-  /**
-   * Dil değiştiricinin katmanı — görünürlüğünü yaklaşma sahnesi yazıyor.
-   *
-   * Kaydıraçlarla aynı muameleyi görüyor, giriş metniyle değil: içinde
-   * odaklanılabilir bir bağlantı var, yani opaklık tek başına yetmiyor.
-   */
-  readonly switchRef: RefObject<HTMLDivElement | null>;
   /** Kaydıraçların yazdığı tarif; çizim döngüsü okuyor. */
   readonly feelTargetRef: RefObject<FeelTarget>;
   /** Raydan gelen tarif — topukları oraya taşıyor. */
@@ -57,16 +32,19 @@ interface SpaceOverlaysProps {
   readonly selectedLine: string | null;
   readonly entryHint: boolean;
   readonly entryProgress: number;
+  readonly spaceId: number;
+  readonly spaceCount: number;
+  readonly spacePerfumeCount: number;
+  readonly previousSpaceId: number | null;
+  readonly nextSpaceId: number | null;
+  readonly isWarping: boolean;
+  readonly onNavigateSpace: (spaceId: number) => void;
   /** Varışta yerine yerleşen giriş metni; sunucuda üretiliyor. */
   readonly children?: ReactNode;
 }
 
 export function SpaceOverlays({
-  introRef,
-  cueRef,
   labelRef,
-  feelRef,
-  switchRef,
   feelTargetRef,
   appliedFeel,
   railWordsRef,
@@ -76,9 +54,31 @@ export function SpaceOverlays({
   selectedLine,
   entryHint,
   entryProgress,
+  spaceId,
+  spaceCount,
+  spacePerfumeCount,
+  previousSpaceId,
+  nextSpaceId,
+  isWarping,
+  onNavigateSpace,
   children,
 }: SpaceOverlaysProps) {
   const t = useDict();
+  const positionRef = useRef<HTMLParagraphElement>(null);
+  const restorePositionFocusRef = useRef(false);
+
+  useEffect(() => {
+    if (!isWarping && restorePositionFocusRef.current) {
+      restorePositionFocusRef.current = false;
+      positionRef.current?.focus();
+    }
+  }, [isWarping, spaceId]);
+
+  const navigateFromArrow = (targetId: number | null) => {
+    if (targetId === null || isWarping) return;
+    restorePositionFocusRef.current = true;
+    onNavigateSpace(targetId);
+  };
 
   return (
     <>
@@ -94,31 +94,20 @@ export function SpaceOverlays({
         durması bir piksel ofsetiyle değil, akışla sağlanıyor. Giriş metni bu
         yüzden `page.tsx`te konumlandırmasını bırakıp sade içerik oldu.
       */}
-      <div className="pointer-events-none absolute left-6 top-6 flex flex-col gap-7 sm:left-10 sm:top-10">
-        {/*
-          Giriş metni — sunucuda üretiliyor, görünürlüğü burada.
-
-          Sahne boyunca yok: uzaktayken ekranda "52 parfüm" yazması, henüz 52 nokta
-          görünmezken verilmiş bir söz olurdu. Varışta yerine yerleşiyor.
-        */}
-        <div ref={introRef} className="opacity-0 transition-opacity duration-700">
+      <div
+        data-space-controls="ready"
+        className="pointer-events-none absolute left-6 top-6 flex flex-col gap-7 sm:left-10 sm:top-10"
+      >
+        <div>
           {children}
+          <p className="mt-3 max-w-[15rem] text-xs leading-relaxed text-white/50">
+            {t.space.intro(spacePerfumeCount)}
+          </p>
         </div>
 
-        {/*
-          Kaydıraçlar da sahne boyunca yok — uzaktayken sorulacak bir şey henüz
-          ortada değil.
-
-          ⚠️ Görünürlüğü opaklık tek başına halledemiyor: opaklığı 0 olan bir
-          `<input>` hâlâ sekmeyle odaklanılabilir ve sahnenin ortasında klavye
-          kullanıcısını görünmez bir kontrole düşürürdü. `inert`i de yaklaşma
-          sahnesi yazıyor; ikisi tek yerden, `use-approach-scene`in `paintScene`i.
-        */}
-        <div
-          ref={feelRef}
-          className="pointer-events-auto w-[19rem] max-w-[calc(100vw-3rem)] opacity-0 transition-opacity duration-700"
-        >
+        <div className="pointer-events-auto w-[19rem] max-w-[calc(100vw-3rem)]">
           <SpaceFeelSliders
+            key={spaceId}
             targetRef={feelTargetRef}
             requestDraw={requestDraw}
             applied={appliedFeel}
@@ -127,49 +116,47 @@ export function SpaceOverlays({
         </div>
       </div>
 
-      {/*
-        Meta kontroller — sağ üst: bildirim + dil.
+      <nav aria-label={t.space.navigation} className="pointer-events-none absolute inset-0 z-20">
+        <p
+          ref={positionRef}
+          tabIndex={-1}
+          aria-live="polite"
+          aria-atomic="true"
+          className="absolute left-1/2 top-7 -translate-x-1/2 text-[9px] tracking-[0.28em] text-white/35 outline-none sm:top-9"
+        >
+          {t.space.position(spaceId, spaceCount)}
+        </p>
 
-        Yaklaşma sahnesi boyunca yok, varışta beliriyorlar: "sahne boyunca
-        ekranda kontrol olmaz" kuralı kaydıraçlarda yazılı ve burada da
-        geçerli. Görünürlüğü ve `inert`i yaklaşma sahnesi yazıyor — `inert`
-        ikisini birden kapsıyor, opaklığı 0 olan düğme de sekmeyle
-        odaklanılamıyor.
-      */}
-      <div
-        ref={switchRef}
-        className="pointer-events-auto absolute right-6 top-6 flex items-center gap-3 opacity-0 transition-opacity duration-700 sm:right-10 sm:top-10"
-      >
+        <span className="absolute left-3 top-1/2 h-11 w-11 -translate-y-1/2 sm:left-5">
+          <button
+            type="button"
+            aria-label={t.space.previous}
+            disabled={previousSpaceId === null || isWarping}
+            onClick={() => navigateFromArrow(previousSpaceId)}
+            className="pointer-events-auto flex h-11 w-11 items-center justify-center text-xl text-white/40 transition-[color,transform] hover:-translate-x-0.5 hover:text-white/80 focus-visible:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/35 disabled:pointer-events-none disabled:opacity-0"
+          >
+            <span aria-hidden="true">←</span>
+          </button>
+        </span>
+
+        <span className="absolute right-3 top-1/2 h-11 w-11 -translate-y-1/2 sm:right-5">
+          <button
+            type="button"
+            aria-label={t.space.next}
+            disabled={nextSpaceId === null || isWarping}
+            onClick={() => navigateFromArrow(nextSpaceId)}
+            className="pointer-events-auto flex h-11 w-11 items-center justify-center text-xl text-white/40 transition-[color,transform] hover:translate-x-0.5 hover:text-white/80 focus-visible:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/35 disabled:pointer-events-none disabled:opacity-0"
+          >
+            <span aria-hidden="true">→</span>
+          </button>
+        </span>
+      </nav>
+
+      {/* Meta kontroller — sağ üst: oturum, bildirim ve dil. */}
+      <div className="pointer-events-auto absolute right-6 top-6 flex items-center gap-3 sm:right-10 sm:top-10">
         <SignInLink />
         <NotifyControl />
         <LangSwitch />
-      </div>
-
-      {/*
-        Yaklaşma ipucu.
-
-        Söylediği tek şey "kaydırılabilir" — kimlik değil, hareket. Boşluk
-        korkusunun asıl kaynağı "neredeyim" değil "ne yapacağım" sorusuydu; bir
-        isim ona zaten cevap vermiyor.
-
-        Fare ikonu bilerek yok: sitenin kendi dili saç teli inceliğinde çizgiler
-        (giriş ipucundaki ilerleme şeridi de öyle). Nefes alması, hareketsiz bir
-        çizginin süs sanılmasını engelliyor.
-
-        İlerlemenin ilk üçte ikisinde sönüp bitiyor: kullanıcı kaydırmaya
-        başladığı an ipucunun işi bitmiştir, geri kalan yolda ekranda durması
-        yalnızca gürültü olurdu.
-      */}
-      <div
-        ref={cueRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-[18%] flex justify-center opacity-0 transition-opacity duration-300"
-      >
-        {APPROACH_CUE === 'mark' ? (
-          <span className="block h-10 w-px animate-[osmos-breathe_2.8s_ease-in-out_infinite] bg-white/60" />
-        ) : (
-          <span className="text-[11px] tracking-[0.45em] text-white/50">{t.site.name}</span>
-        )}
       </div>
 
       {/* Etiket katmanı — konumu her karede çizimle birlikte güncelleniyor. */}
@@ -231,7 +218,7 @@ export function SpaceOverlays({
           aria-hidden="true"
         >
           <span className="text-[11px] tracking-[0.25em] text-white/50">
-            {/* Cihaza göre iki kelime; gerekçe `AstronotIntro`da. */}
+            {/* İnce işaretçi ve dokunma için ayrı eylem sözcükleri. */}
             <span className="pointer-coarse:hidden">{t.space.entryHint}</span>
             <span className="hidden pointer-coarse:inline">{t.space.entryHintTouch}</span>
           </span>

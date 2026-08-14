@@ -7,7 +7,7 @@ import { ditherThreshold } from './dither-field';
 /**
  * Notanın kendi ölçümleri — ömür şeridi ve dört karakter ekseni.
  *
- * `note-orbit.ts`, `space-approach.ts` ve `dither-field.ts` ile aynı sözleşme:
+ * `note-orbit.ts` ve `dither-field.ts` ile aynı sözleşme:
  * React, DOM ve canvas bilmiyor. Sınamalar bu yüzden çalışıyor, çizim
  * `components/NoteMeasures.tsx`te.
  *

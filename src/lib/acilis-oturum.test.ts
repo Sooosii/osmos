@@ -104,10 +104,7 @@ test('hicbir yerde ciplak sessionStorage cagrisi yok', () => {
   /*
    * ⚠️ **Uykudaki bir Safari tuzağının nöbetçisi.** Safari "bütün çerezleri
    * engelle" açıkken `window.sessionStorage`a **erişmek bile** `SecurityError`
-   * fırlatıyor. `use-approach-scene.ts` çıplak çağırıyordu ama çağrılar
-   * `APPROACH_ONCE` sabitinin arkasındaydı ve o sabit `false` — yani satırlar
-   * hiç çalışmıyordu. Tuzak, sabiti bir gün açanın uyarı görmemesiydi; orası
-   * sitenin giriş kapısı. Erişimin tek güvenli yolu `oturumDeposu()` +
+   * fırlatıyor. Orası sitenin giriş kapısı. Erişimin tek güvenli yolu `oturumDeposu()` +
    * `oturumOku`/`oturumYaz`.
    */
   const offenders: string[] = [];

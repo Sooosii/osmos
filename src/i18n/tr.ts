@@ -112,7 +112,7 @@ export const TR: Dict = {
       add: 'dörtlüme ekle',
       added: 'dörtlünde',
       remove: 'çıkar',
-      search: '52 parfüm içinde ara',
+      search: '77 parfüm içinde ara',
       noMatch: 'Eşleşen yok.',
       full: 'Sınır dört — birini değiştir.',
       errors: {
@@ -139,9 +139,9 @@ export const TR: Dict = {
   studio: {
     title: 'Kur · OSMOS',
     heading: 'Kendi parfümünü kur',
-    lede: 'Notaları seç, her birinin sesini ayarla, şeklin oluşmasını izle. Haritadaki 52 parfümle aynı ölçüyle okunuyor.',
+    lede: 'Notaları seç, her birinin sesini ayarla, şeklin oluşmasını izle. Katalogdaki 77 parfümle aynı ölçüyle okunuyor.',
     notes: 'NOTALAR',
-    search: '136 nota içinde ara',
+    search: '148 nota içinde ara',
     weight: 'Ne kadar yüksek',
     curve: 'NASIL AÇILIYOR',
     nearest: 'HARITADA EN YAKINLAR',
@@ -194,6 +194,10 @@ export const TR: Dict = {
     heading: 'Koku uzayı',
     keyboardList: 'Koku uzayı — parfüme git',
     perfumeLink: (name) => `${name} sayfası`,
+    navigation: 'Koku uzayları arasında geç',
+    position: (current, total) => `UZAY ${current} / ${total}`,
+    previous: 'Önceki koku uzayı',
+    next: 'Sonraki koku uzayı',
     sliders: {
       temperature: { label: 'Sıcaklık — soğuktan sıcağa', low: 'SOĞUK', high: 'SICAK' },
       cleanliness: { label: 'Temizlik — kirliden temize', low: 'KIRLI', high: 'TEMIZ' },
@@ -378,6 +382,61 @@ export const TR: Dict = {
     faint: (word) => `hafif ${word}`,
     plain: (word) => word,
     strong: (word) => `belirgin ${word}`,
+  },
+
+  openingGate: {
+    scrollHint: 'Kokuyu uyandırmak için kaydır',
+    touchHint: 'Kokuyu uyandırmak için yukarı sürükle',
+    skip: 'Açılışı geç ve koku uzayına gir',
+  },
+
+  openingDirections: {
+    title: 'Açılış Yönleri — OSMOS',
+    description: 'OSMOS açılışı için üç hafif ve temaya uyumlu tasarım yönü.',
+    back: '← OSMOS’a dön',
+    labMark: 'GIRIS LAB / 01',
+    kicker: 'Açılış yönleri',
+    heading: 'Açılış, başka bir sitenin filmi gibi durmamalı.',
+    diagnosis:
+      'Şu anki kurgu 240 kare ve açık renk bir stüdyo dünyası taşıyor. Sonuç: ilk kaydırmada ağır, OSMOS uzayına geçerken yabancı.',
+    rule: 'Yeni kural: tek imza hareketi, siyah zemin, sıfır bekleme hissi.',
+    liveDraft: 'CANLI TASLAK',
+    recommended: 'Benim önerim',
+    facts: { speed: 'HIZ', character: 'TAVIR', tradeoff: 'KARSILIGI' },
+    choose: 'Bu yönü seç',
+    chosen: 'Bu yön seçildi',
+    idleStatus: 'Bir yön seç; ana açılışı ancak kararından sonra değiştireceğiz.',
+    selectedStatus: (title) =>
+      `${title} seçildi. Bu tercih yalnızca taslakta işaretlendi; ana açılış henüz değişmedi.`,
+    directions: {
+      constellation: {
+        title: 'Koku Takımyıldızı',
+        eyebrow: 'Nokta → nesne → uzay',
+        description:
+          'OSMOS noktaları eski atomizerin çizgisini kurar. Tek sıkışta zerreler çözülür ve ana haritanın yıldızlarına dönüşür.',
+        performance: '<100 KB görsel yük',
+        character: 'En yüksek tema uyumu',
+        tradeoff: 'Fotoğraf gerçekliğinden bilinçli olarak vazgeçer.',
+      },
+      obsidian: {
+        title: 'Obsidyen Atomizer',
+        eyebrow: 'Siyah cam / pirinç ışık',
+        description:
+          'Mevcut atomizer fikrini korur; stüdyo fonunu atar. Şişe karanlıktan metal parlamalarıyla çıkar, parçalanıp uzaya karışır.',
+        performance: 'Hedef 0,5–1,2 MB',
+        character: 'Nesne hâlâ başrolde',
+        tradeoff: 'Az sayıda işlenmiş görsel gerektirir.',
+      },
+      threshold: {
+        title: 'Sessiz Eşik',
+        eyebrow: 'Bir nefeslik geçiş',
+        description:
+          'Tek bir koku damlası karanlıkta titreşir. Dairesel dalga açıldığında altında zaten OSMOS uzayı vardır.',
+        performance: '<60 KB görsel yük',
+        character: 'En hızlı ve en sakin',
+        tradeoff: 'Anlatısı daha az, tavrı daha minimaldir.',
+      },
+    },
   },
 
   draft: {
