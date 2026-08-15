@@ -80,6 +80,8 @@ function scene(shelved: ReadonlySet<string>, selectedId: string | null = null): 
     entry: NO_ENTRY,
     feel: NO_FEEL,
     shelved,
+    /* Kimlik rengi zorunlu alan: sahnenin kenar ışığını o besliyor. */
+    identityColor: '#7FA8B8',
     /*
       ⚠️ Ray bu sınamalarda hep kapalı ve bu bilerek: dört sınama da `stroke()`
       çağrılarını SAYIYOR, biri `strokes[0]`ı okuyor. Ray açıkken çizilen

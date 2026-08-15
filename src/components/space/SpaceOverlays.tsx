@@ -35,6 +35,8 @@ interface SpaceOverlaysProps {
   readonly entryProgress: number;
   readonly spaceId: number;
   readonly spaceCount: number;
+  /** Uzayın kimlik rengi — sayacın yanındaki nokta. Kaynak `space-identity.ts`. */
+  readonly identityColor: string;
   readonly spacePerfumeCount: number;
   readonly previousSpaceId: number | null;
   readonly nextSpaceId: number | null;
@@ -57,6 +59,7 @@ export function SpaceOverlays({
   entryProgress,
   spaceId,
   spaceCount,
+  identityColor,
   spacePerfumeCount,
   previousSpaceId,
   nextSpaceId,
@@ -145,6 +148,17 @@ export function SpaceOverlays({
             */
             className="mt-2 w-fit text-[9px] tracking-[0.28em] text-white/35 outline-none sm:fixed sm:left-1/2 sm:top-9 sm:mt-0 sm:-translate-x-1/2"
           >
+            {/*
+              Kimlik noktası — geçiş bitince ekranda kalan tek renk işareti.
+              `aria-hidden`: sayacın kendisi bir `aria-live` alanı ve okuyucuya
+              "renk" diye bir şey söylemenin karşılığı yok; ayrımı görsel
+              olmayan ziyaretçi zaten SPACE numarasından okuyor.
+            */}
+            <span
+              aria-hidden="true"
+              className="mr-2 inline-block size-1.5 rounded-full align-middle"
+              style={{ backgroundColor: identityColor }}
+            />
             {t.space.position(spaceId, spaceCount)}
           </p>
 

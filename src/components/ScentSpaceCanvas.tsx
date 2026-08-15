@@ -71,6 +71,14 @@ interface Animation {
 interface SpaceScene {
   readonly id: number;
   readonly marks: readonly SpaceMark[];
+  /**
+   * Uzayın kimlik rengi — sunucuda ölçülüp hazır iniyor (`space-identity.ts`).
+   *
+   * Burada hesaplanmıyor ve hesaplanmamalı: ölçüm bütün parfüm veritabanını
+   * okuyor, istemciye inen ise tek bir hex. `marks`ın kendi gerekçesiyle aynı
+   * karar — benzerlik motoru tarayıcıya girmiyor.
+   */
+  readonly identityColor: string;
 }
 
 interface SpaceWarp {
@@ -537,6 +545,17 @@ export function ScentSpaceCanvas({ spaces, children }: ScentSpaceCanvasProps) {
       warp && currentWarpFrame?.showTarget
         ? (spaces.find((space) => space.id === warp.targetId)?.marks ?? marks)
         : displayedMarks;
+    /*
+      Zeminin kenar ışığı da noktalarla aynı anda değişiyor: `showTarget`
+      döndüğü kare, haritanın hedef uzaya geçtiği kare. İkisi ayrı anlarda
+      değişseydi bir an "yeni uzay, eski renk" görünürdü.
+    */
+    const frameIdentity =
+      (warp && currentWarpFrame?.showTarget
+        ? spaces.find((space) => space.id === warp.targetId)?.identityColor
+        : spaces.find((space) => space.id === displayedSpaceIdRef.current)?.identityColor) ??
+      /* İki arama da boşa düşerse zemin bugünkü mat siyahına iner — doğru düşüş. */
+      '#000000';
     if (warp && currentWarpFrame?.showTarget && !warp.swapped) {
       warp.swapped = true;
       displayedSpaceIdRef.current = warp.targetId;
@@ -600,6 +619,7 @@ export function ScentSpaceCanvas({ spaces, children }: ScentSpaceCanvasProps) {
       feel: feelTargetRef.current,
       shelved: shelvedRef.current,
       rail: railRef.current,
+      identityColor: frameIdentity,
     });
 
     if (warp && currentWarpFrame) {
@@ -609,6 +629,8 @@ export function ScentSpaceCanvas({ spaces, children }: ScentSpaceCanvasProps) {
         viewport.height,
         currentWarpFrame.progress,
         warp.direction,
+        /* Çizgiler VARILAN uzayın renginde: geçiş bir yere gitmek. */
+        spaces.find((space) => space.id === warp.targetId)?.identityColor ?? frameIdentity,
       );
       if (currentWarpFrame.done) {
         warpRef.current = null;
@@ -765,6 +787,7 @@ export function ScentSpaceCanvas({ spaces, children }: ScentSpaceCanvasProps) {
         entryHint={entryHint}
         entryProgress={entryProgress}
         spaceId={activeSpaceId}
+        identityColor={activeSpace?.identityColor ?? '#000000'}
         spaceCount={spaces.length}
         spacePerfumeCount={marks.length}
         previousSpaceId={previousSpaceId}

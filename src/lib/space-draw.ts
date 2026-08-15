@@ -32,6 +32,38 @@ const BACKGROUND_CENTER = '#000000';
 const BACKGROUND_EDGE = '#000000';
 
 /**
+ * Uzayın kimlik ışığı — kenarlarda duran çok soluk renk.
+ *
+ * ⚠️ **Merkez mat siyah KALIYOR.** Sahip vinyeti bir kez geri çevirdi ve
+ * doygun rengin tam ekran hâlini de ("göz yoruyor"). Buradaki renk yalnızca
+ * köşelere değiyor, hareket etmiyor ve iki sabitle sıfırlanabiliyor: `TINT`i
+ * 0 yapmak eski hâli birebir geri getirir.
+ *
+ * Rengin nereden geldiği `space-identity.ts`te: uydurulmuyor, uzayın kendi
+ * kataloğundan ölçülüyor.
+ */
+const EDGE_TINT = 0.13;
+const EDGE_DESATURATION = 0.45;
+
+/**
+ * Aile rengini kenara yakışacak hâle getirir: önce doygunluğu düşürür, sonra
+ * karanlığa çeker.
+ *
+ * Doygunluk düşürme `dither-field.ts`in kararının aynısı ve aynı sebeple —
+ * ham aile rengi geniş bir alana yayıldığında sahip onu bir kez reddetti.
+ */
+function edgeGlow(hex: string): string {
+  const value = Number.parseInt(hex.slice(1), 16);
+  const channels = [(value >> 16) & 255, (value >> 8) & 255, value & 255];
+  const luminance = 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+
+  const [r, g, b] = channels.map((channel) =>
+    Math.round((channel + (luminance - channel) * EDGE_DESATURATION) * EDGE_TINT),
+  );
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+/**
  * Kenara doğru sönüm — noktalar uzaklaştıkça kayboluyor.
  *
  * Ölçü, görüş alanına çizilebilen en büyük dairenin yarıçapı: 1.0 o dairenin
@@ -132,6 +164,14 @@ export interface SpaceScene {
    * seçimin kendisini gürültüye boğardı.
    */
   readonly rail: RailState | null;
+  /**
+   * Uzayın kimlik rengi — zeminin kenarına vuran ışık.
+   *
+   * `shelved` ile aynı gerekçeyle **isteğe bağlı değil**: varsayılanı olan bir
+   * alan, bir gün birinin onu geçirmeyi unutup kimliğin sessizce kaybolmasına
+   * yol açardı.
+   */
+  readonly identityColor: string;
 }
 
 export interface RailState {
@@ -148,7 +188,7 @@ export interface RailState {
  * tuvalde opaklık gerekiyor. `globalAlpha` yerine renge gömülüyor ki leke ile
  * çekirdek tek geçişte farklı saydamlıkta çizilebilsin.
  */
-function withAlpha(hex: string, alpha: number): string {
+export function withAlpha(hex: string, alpha: number): string {
   const value = Number.parseInt(hex.slice(1), 16);
   const r = (value >> 16) & 255;
   const g = (value >> 8) & 255;
@@ -167,12 +207,21 @@ function edgeFade(sx: number, sy: number, viewport: { width: number; height: num
   return (1 - (distance - FADE_START) / (FADE_END - FADE_START)) ** 2;
 }
 
-function drawBackground(ctx: CanvasRenderingContext2D, viewport: { width: number; height: number }) {
+function drawBackground(
+  ctx: CanvasRenderingContext2D,
+  viewport: { width: number; height: number },
+  identityColor: string,
+) {
   const cx = viewport.width / 2;
   const cy = viewport.height / 2;
   const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.hypot(cx, cy));
   gradient.addColorStop(0, BACKGROUND_CENTER);
-  gradient.addColorStop(1, BACKGROUND_EDGE);
+  /*
+    İki durak yetmiyor: tek geçişte renk merkeze kadar sürünüyor ve mat siyah
+    kararı bozuluyor. Ara durak rengi dış üçte bire hapsediyor.
+  */
+  gradient.addColorStop(0.62, BACKGROUND_EDGE);
+  gradient.addColorStop(1, edgeGlow(identityColor));
 
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, viewport.width, viewport.height);
@@ -420,7 +469,7 @@ function drawRail(ctx: CanvasRenderingContext2D, rail: Rail) {
 
 export function drawSpace(ctx: CanvasRenderingContext2D, scene: SpaceScene) {
   // Zemin opak: temizlemeye gerek yok, üstüne yazıyor.
-  drawBackground(ctx, scene.viewport);
+  drawBackground(ctx, scene.viewport, scene.identityColor);
 
   const selected = scene.selectedId
     ? (scene.marks.find((mark) => mark.id === scene.selectedId) ?? null)
