@@ -4,6 +4,7 @@ import { ScreenFrame } from '@/components/ScreenFrame';
 import { dictFor, getDict, localeFor } from '@/i18n/dict';
 import { withLocale } from '@/i18n/locale';
 import { pageAlternates } from '@/lib/site-url';
+import { requireAccounts } from '@/lib/tenant-guard';
 
 /**
  * Yeni şifre — sıfırlama mektubundaki bağlantının indiği sayfa.
@@ -29,6 +30,8 @@ export default async function ResetPasswordPage({
 }: {
   params: Promise<{ lang: string }>;
 }) {
+  requireAccounts();
+
   const locale = localeFor((await params).lang);
   const t = getDict(locale);
 

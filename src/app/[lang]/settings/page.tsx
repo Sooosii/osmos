@@ -8,6 +8,7 @@ import { withLocale } from '@/i18n/locale';
 import { currentViewer, topFourOf } from '@/lib/dal';
 import { allCards, cardsFor } from '@/lib/perfume-cards';
 import { pageAlternates } from '@/lib/site-url';
+import { requireAccounts } from '@/lib/tenant-guard';
 
 /**
  * Ayarlar — hesabın tek yönetim yeri.
@@ -31,6 +32,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 }
 
 export default async function SettingsPage({ params }: { params: Promise<{ lang: string }> }) {
+  requireAccounts();
+
   const locale = localeFor((await params).lang);
   const t = getDict(locale);
 

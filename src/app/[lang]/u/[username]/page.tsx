@@ -12,6 +12,7 @@ import { MIN_NOSE_PERFUMES } from '@/lib/nose';
 import { cardsFor } from '@/lib/perfume-cards';
 import { SHELF_KINDS } from '@/lib/shelf';
 import { normalizeUsername } from '@/lib/username';
+import { requireAccounts } from '@/lib/tenant-guard';
 
 /**
  * Herkese açık profil — üyeliğin görünen yüzü.
@@ -52,6 +53,8 @@ export default async function ProfilePage({
 }: {
   params: Promise<{ lang: string; username: string }>;
 }) {
+  requireAccounts();
+
   const { lang, username } = await params;
   const locale = localeFor(lang);
   const t = getDict(locale);

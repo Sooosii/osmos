@@ -7,6 +7,7 @@ import { withLocale } from '@/i18n/locale';
 import { publicNose } from '@/lib/dal';
 import { MIN_NOSE_PERFUMES } from '@/lib/nose';
 import { normalizeUsername } from '@/lib/username';
+import { requireAccounts } from '@/lib/tenant-guard';
 
 /**
  * Burun raporu — üyeliğin kişiye geri verdiği şey.
@@ -42,6 +43,8 @@ export default async function NosePage({
 }: {
   params: Promise<{ lang: string; username: string }>;
 }) {
+  requireAccounts();
+
   const { lang, username } = await params;
   const locale = localeFor(lang);
   const t = getDict(locale);

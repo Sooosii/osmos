@@ -230,7 +230,7 @@ export function PerfumeSearch() {
         </div>
 
         <div className="flex justify-between border-t border-white/15 px-4 py-2 text-[8px] tracking-[0.18em] text-white/25 sm:px-6">
-          <span>OSMOS / INDEX</span>
+          <span>{`${t.site.name} / INDEX`}</span>
           <span>{documents.length.toString().padStart(3, '0')}</span>
         </div>
       </div>

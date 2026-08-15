@@ -2,6 +2,35 @@ import type { Localized } from '@/data/types';
 import { DEFAULT_LOCALE, isLocale, type Locale } from './locale';
 import { EN, type Dict } from './en';
 import { TR } from './tr';
+import { activeTenant, isOsmos } from '@/lib/tenant';
+
+/**
+ * Kiracının markası sözlüğe burada giriyor.
+ *
+ * ⚠️ **Markalamanın tek dikişi burası ve bu bilinçli.** Ekranda "OSMOS" yazan
+ * yirmiden fazla yer var (çerçeve, künye altı, 404, hata ekranı, sekme
+ * başlıkları, manifest) ve hepsi zaten `t.site.name` okuyor. Sözlüğü giriş
+ * noktasında markalamak, o yirmi yeri tek tek elden geçirmeden hepsini
+ * kiracının adına çeviriyor. Yeni bir sayfa da doğru adı bedava alıyor —
+ * markayı elle yazan bir sayfa ise kiracıda yanlış görünür, o yüzden ekrana
+ * marka basan her yer `t.site.name`den geçmek zorunda.
+ *
+ * ⚠️ Ana sitede sözlük **nesne olarak** dönüyor, kopyası değil: `isOsmos()`
+ * erken çıkışı bugünkü OSMOS'un birebir aynı kalmasının garantisi.
+ */
+function branded(dict: Dict, locale: Locale): Dict {
+  if (isOsmos()) return dict;
+
+  const tenant = activeTenant();
+  return {
+    ...dict,
+    site: {
+      name: tenant.name,
+      title: tenant.title[locale],
+      description: tenant.description[locale],
+    },
+  };
+}
 
 /**
  * Dil kodundan sözlüğe — statik harita.
@@ -11,7 +40,7 @@ import { TR } from './tr';
  * (içinde işlev var), o yüzden istemci onu kendi paketinden çözmek zorunda.
  * İki sözlük de pakete iniyor; ikisi de gerçekten kullanıldığı için israf değil.
  */
-const DICTS: Readonly<Record<Locale, Dict>> = { en: EN, tr: TR };
+const DICTS: Readonly<Record<Locale, Dict>> = { en: branded(EN, 'en'), tr: branded(TR, 'tr') };
 
 export function getDict(locale: Locale): Dict {
   return DICTS[locale];

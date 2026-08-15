@@ -3,8 +3,17 @@ import { PERFUMES } from '@/data/perfumes';
 import { dominantFamily, getFamily } from '@/data/families';
 import { familyVector } from '@/lib/similarity';
 import { perfumeDots } from '@/lib/share-marks';
+import { getDict } from '@/i18n/dict';
+import { DEFAULT_LOCALE } from '@/i18n/locale';
 
-export const alt = 'OSMOS';
+/*
+  ⚠️ Kart üstündeki marka işareti dile bağlı değil: `site.name` iki sözlükte de
+  aynı ve kiracıda da tek. Alt metin modül düzeyinde okunmak zorunda (Next
+  `alt`i sabit bekliyor), o yüzden varsayılan dilden geçiyor.
+*/
+const BRAND = getDict(DEFAULT_LOCALE).site.name;
+
+export const alt = BRAND;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -119,7 +128,7 @@ export default async function Image({
             display: 'flex',
           }}
         >
-          OSMOS
+          {BRAND}
         </div>
       </div>
     ),

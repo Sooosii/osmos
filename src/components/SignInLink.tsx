@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSession } from '@/lib/auth-client';
 import { useDict, useLocale } from '@/i18n/LocaleProvider';
 import { withLocale } from '@/i18n/locale';
+import { activeTenant } from '@/lib/tenant';
 
 /**
  * Köşedeki giriş bağlantısı — sitenin üçüncü "meta" kontrolü.
@@ -35,7 +36,15 @@ import { withLocale } from '@/i18n/locale';
  * değişiyor: kimse çıkışı olmayan bir kapıya çağrılmıyor. Alan adı Resend'de
  * doğrulandığı gün tek bir değişken açılıyor.
  */
-const ACCOUNTS_INVITED = Boolean(process.env.NEXT_PUBLIC_ACCOUNTS_ENABLED);
+/*
+  ⚠️ **İki kapı, ikisi de gerekli.** Kiracı derlemesinde `NEXT_PUBLIC_ACCOUNTS_ENABLED`
+  zaten tanımlı olmayacağı için davet kendiliğinden kapalı görünüyor — ama o
+  "kendiliğinden" bir kaza: ana projeden kiracı projesine değişken kopyalayan
+  biri, müşterinin sitesinde OSMOS'un giriş ekranını açar. Kiracı kaydı bunu
+  niyete çeviriyor; env değil kayıt karar veriyor.
+*/
+const ACCOUNTS_INVITED =
+  Boolean(process.env.NEXT_PUBLIC_ACCOUNTS_ENABLED) && activeTenant().features.accounts;
 
 export function SignInLink({ className = '' }: { readonly className?: string }) {
   const { data, isPending } = useSession();
