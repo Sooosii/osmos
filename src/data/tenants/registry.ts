@@ -45,13 +45,6 @@ export interface Tenant {
   readonly description: Localized;
   readonly features: TenantFeatures;
   /**
-   * "powered by OSMOS" künyesi duruyor mu.
-   *
-   * Bizim tek organik satış kanalımız: müşterinin ziyaretçisi haritayı beğenip
-   * kimin yaptığına bakıyor. Kaldırılması sözleşmede ayrı kalem.
-   */
-  readonly credit: boolean;
-  /**
    * Arama motorlarına açık mı.
    *
    * ⚠️ Demo kiracılarda **false** olmak zorunda: bir işletmenin markasıyla
@@ -73,7 +66,6 @@ const OSMOS: Tenant = {
     tr: 'Koku evreni — niş parfümün haritası.',
   },
   features: { accounts: true, notify: true, feed: true },
-  credit: false,
   indexable: true,
 };
 
@@ -99,7 +91,6 @@ const DEMO_SELVA: Tenant = {
     tr: 'SELVA seckisi, koku haritasi olarak cizildi.',
   },
   features: { accounts: false, notify: false, feed: false },
-  credit: true,
   indexable: false,
 };
 

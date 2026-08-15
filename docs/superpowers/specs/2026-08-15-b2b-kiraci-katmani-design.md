@@ -127,7 +127,13 @@ müşterinin sitesinde OSMOS'un giriş ekranını açardı. Kayıt karar veriyor
   `locale.ts`/`proxy.ts` bu deponun en kırılgan yeri — "her İngilizce sayfa bir
   404'e bağlanıyordu" hatası tam oradan çıkmıştı. Kendi turunu ve kendi
   commit'ini hak ediyor.
-- Kiracıya özel vurgu rengi ve logo. Kayıtta yer var; ekranda karşılığı yok.
-  Aile renklerinin markaya göre DEĞİŞMEYECEĞİ kararı yerinde duruyor (renk =
-  koku ailesi).
+- Kiracıya özel vurgu rengi ve logo. Kayıtta **alan bile yok** — kullanılmayan
+  ayar bırakmamak için eklenmedi. Aile renklerinin markaya göre DEĞİŞMEYECEĞİ
+  kararı yerinde duruyor (renk = koku ailesi); marka vurgusu geldiğinde yalnızca
+  çerçeveye ve yazıya uygulanacak.
+- **"powered by OSMOS" künyesi.** Bizim tek organik satış kanalımız olacak
+  (müşterinin ziyaretçisi haritayı beğenip kimin yaptığına bakar) ama nereye
+  konacağı sahibin ekran kararı — alt şerit mi, künye altı mı, uzayda mı.
+  Kayda `credit` bayrağı olarak eklenmişti, ekranda karşılığı olmadığı için
+  **geri alındı**: kullanılmayan ayar, yapılmış iş gibi görünür.
 - `/api/*` uçlarının kiracıda kapatılması. Görünür yüzey değil ama açık uç.
