@@ -130,8 +130,20 @@ export function SpaceOverlays({
               ve görünmez hâlde sağ üstteki kontrollerin ALTINA uzanır. Metin
               çarpışmaz ama ölçüm çakışma gösterir ve odak halkası da satırın
               tamamı kadar uzar.
+
+              ⚠️ **İki konum, tek eleman** (sahip istedi: masaüstünde ortada).
+              Telefonda sol sütunun akışında kalıyor — orada ortaya dönmesi
+              ölçüldü ve imkansız: 390 px'te marka 66 + kontroller 203 +
+              boşluklar zaten 342 pikselin 293'ünü yiyor, ekranın merkezi
+              kontrol bölgesinin içine düşüyor.
+
+              ⚠️ `sm:` üstünde `fixed`, `absolute` DEĞİL: bu eleman mutlak
+              konumlu bir sütunun içinde duruyor ve `absolute` onu ekrana
+              değil o sütuna göre ortalardı. `fixed` görünür alana göre
+              konumlanıyor — dönüşümü olan bir ata olmadığı sürece; ölçüldü,
+              1440'ta metnin ortası ekranın ortasında.
             */
-            className="mt-2 w-fit text-[9px] tracking-[0.28em] text-white/35 outline-none"
+            className="mt-2 w-fit text-[9px] tracking-[0.28em] text-white/35 outline-none sm:fixed sm:left-1/2 sm:top-9 sm:mt-0 sm:-translate-x-1/2"
           >
             {t.space.position(spaceId, spaceCount)}
           </p>
