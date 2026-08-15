@@ -3,6 +3,7 @@ import { DEFAULT_LOCALE, isLocale, type Locale } from './locale';
 import { EN, type Dict } from './en';
 import { TR } from './tr';
 import { activeTenant, isOsmos } from '@/lib/tenant';
+import { brandStrings } from './brand';
 
 /**
  * Kiracının markası sözlüğe burada giriyor.
@@ -22,8 +23,17 @@ function branded(dict: Dict, locale: Locale): Dict {
   if (isOsmos()) return dict;
 
   const tenant = activeTenant();
+
+  /*
+    Önce sözlüğün TAMAMINDAKİ marka adı değişiyor (başlıkların içine gömülü
+    olanlar dahil, `brand.ts`), sonra `site` bloğu kiracının kendi başlığı ve
+    tarifiyle eziliyor. Sıra önemli: ters olsaydı geçiş `site.title`ı da
+    tarayıp kiracının başlığını bozardı.
+  */
+  const swapped = brandStrings(dict, EN.site.name, tenant.name);
+
   return {
-    ...dict,
+    ...swapped,
     site: {
       name: tenant.name,
       title: tenant.title[locale],
