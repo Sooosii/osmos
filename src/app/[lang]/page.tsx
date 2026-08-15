@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { PERFUMES, PERFUME_SPACES } from '@/data/perfumes';
 import { buildMarks } from '@/lib/space-marks';
+import { spaceIdentity } from '@/lib/space-identity';
 import { ScentSpaceCanvas } from '@/components/ScentSpaceCanvas';
 import { Acilis } from '@/components/Acilis';
 import { CursorGlitter } from '@/components/CursorGlitter';
@@ -32,9 +33,18 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
 
   // Küratör cümleleri sayfanın dilinde hesaplanıyor: nokta listesi sunucuda
   // kuruluyor ve istemciye hazır metin olarak iniyor.
+  /*
+    Kimlik rengi de burada, sunucuda ölçülüyor: `spaceIdentity` bütün parfüm
+    veritabanını okuyor, istemciye inen tek bir hex. `marks`la aynı gerekçe.
+  */
+  const universeIds = PERFUMES.map((perfume) => perfume.id);
   const spaces = PERFUME_SPACES.map((space) => ({
     id: space.id,
     marks: buildMarks(space.perfumes, locale, { feelUniverse: PERFUMES }),
+    identityColor: spaceIdentity(
+      space.perfumes.map((perfume) => perfume.id),
+      universeIds,
+    ).color,
   }));
 
   return (

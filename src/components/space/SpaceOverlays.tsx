@@ -35,6 +35,8 @@ interface SpaceOverlaysProps {
   readonly entryProgress: number;
   readonly spaceId: number;
   readonly spaceCount: number;
+  /** Uzayın kimlik rengi — sayacın yanındaki nokta. Kaynak `space-identity.ts`. */
+  readonly identityColor: string;
   readonly spacePerfumeCount: number;
   readonly previousSpaceId: number | null;
   readonly nextSpaceId: number | null;
@@ -57,6 +59,7 @@ export function SpaceOverlays({
   entryProgress,
   spaceId,
   spaceCount,
+  identityColor,
   spacePerfumeCount,
   previousSpaceId,
   nextSpaceId,
@@ -101,6 +104,64 @@ export function SpaceOverlays({
       >
         <div>
           {children}
+
+          {/*
+            ⚠️ **Uzay sayacı ekranın ortasında DURAMIYOR ve bu ölçüldü.**
+            Eskiden `absolute left-1/2 top-7` ile tepede ortadaydı; 390 px'te
+            76 pikselinin **70'i** sağ üstteki kontrollerin altında kalıyordu
+            (sahip gördü: "arkada kalıyor"). Sebep kaymanın azlığı değil, yer
+            yokluğu: 390'da marka 66 + kontroller 203 + boşluklar + kenar payı
+            zaten 293 piksel tutuyor ve ekranın MERKEZİ kontrol bölgesinin
+            içine düşüyor. Kaydırmakla çözülmezdi.
+
+            ⚠️ **Eşik eklenmedi, yapı değiştirildi** — `ScreenFrame`in aynı
+            hatayı iki kez yaşayıp vardığı karar (`min-[…]` eşikleri her yeni
+            kontrolde tekrar ayar istiyordu). Sayaç artık mutlak konumlu değil,
+            sol sütunun **akışında**: üstüne binebileceği bir şey yok ve sağ
+            üste yarın yeni bir kontrol eklenirse de olmayacak.
+
+            Alt orta denenmedi çünkü zaten dolu: küratör cümlesi ve giriş
+            ipucu orada (aşağıdaki sütun yorumunda yazılı).
+          */}
+          <p
+            ref={positionRef}
+            tabIndex={-1}
+            aria-live="polite"
+            aria-atomic="true"
+            /*
+              `w-fit`: blok olarak bırakılırsa kutusu sütun genişliğini kaplar
+              ve görünmez hâlde sağ üstteki kontrollerin ALTINA uzanır. Metin
+              çarpışmaz ama ölçüm çakışma gösterir ve odak halkası da satırın
+              tamamı kadar uzar.
+
+              ⚠️ **İki konum, tek eleman** (sahip istedi: masaüstünde ortada).
+              Telefonda sol sütunun akışında kalıyor — orada ortaya dönmesi
+              ölçüldü ve imkansız: 390 px'te marka 66 + kontroller 203 +
+              boşluklar zaten 342 pikselin 293'ünü yiyor, ekranın merkezi
+              kontrol bölgesinin içine düşüyor.
+
+              ⚠️ `sm:` üstünde `fixed`, `absolute` DEĞİL: bu eleman mutlak
+              konumlu bir sütunun içinde duruyor ve `absolute` onu ekrana
+              değil o sütuna göre ortalardı. `fixed` görünür alana göre
+              konumlanıyor — dönüşümü olan bir ata olmadığı sürece; ölçüldü,
+              1440'ta metnin ortası ekranın ortasında.
+            */
+            className="mt-2 w-fit text-[9px] tracking-[0.28em] text-white/35 outline-none sm:fixed sm:left-1/2 sm:top-9 sm:mt-0 sm:-translate-x-1/2"
+          >
+            {/*
+              Kimlik noktası — geçiş bitince ekranda kalan tek renk işareti.
+              `aria-hidden`: sayacın kendisi bir `aria-live` alanı ve okuyucuya
+              "renk" diye bir şey söylemenin karşılığı yok; ayrımı görsel
+              olmayan ziyaretçi zaten SPACE numarasından okuyor.
+            */}
+            <span
+              aria-hidden="true"
+              className="mr-2 inline-block size-1.5 rounded-full align-middle"
+              style={{ backgroundColor: identityColor }}
+            />
+            {t.space.position(spaceId, spaceCount)}
+          </p>
+
           <p className="mt-3 max-w-[15rem] text-xs leading-relaxed text-white/50">
             {t.space.intro(spacePerfumeCount)}
           </p>
@@ -118,16 +179,6 @@ export function SpaceOverlays({
       </div>
 
       <nav aria-label={t.space.navigation} className="pointer-events-none absolute inset-0 z-20">
-        <p
-          ref={positionRef}
-          tabIndex={-1}
-          aria-live="polite"
-          aria-atomic="true"
-          className="absolute left-1/2 top-7 -translate-x-1/2 text-[9px] tracking-[0.28em] text-white/35 outline-none sm:top-9"
-        >
-          {t.space.position(spaceId, spaceCount)}
-        </p>
-
         <span className="absolute left-3 top-1/2 h-11 w-11 -translate-y-1/2 sm:left-5">
           <button
             type="button"

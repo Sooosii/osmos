@@ -1,10 +1,24 @@
-/** Lightweight, deterministic canvas transition between perfume spaces. */
+import { withAlpha } from './space-draw';
+
+/**
+ * Uzaydan uzaya geçiş.
+ *
+ * ⚠️ **Çizgiler VARILAN uzayın renginde akıyor, beyaz değil.** Kimliğin en
+ * değerli yüzeyi burası: renk bir saniye sürüyor ve sonra ekran yine mat
+ * siyah kalıyor, yani sahibin "doygun renk tam ekran ve hareketliyken göz
+ * yoruyor" şikâyetine hiç değmiyor — ama kimliği tam **varış anında**
+ * öğretiyor. Renk `space-identity.ts`te uydurulmuyor, ölçülüyor.
+ *
+ * Renk çıkılan değil varılan uzaydan: geçiş bir yere gitmek, bir yerden
+ * ayrılmak değil.
+ */
 export function drawSpaceWarp(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
   progress: number,
   direction: -1 | 1,
+  color: string,
 ): void {
   const p = Math.min(1, Math.max(0, progress));
   if (p <= 0 || p >= 1) return;
@@ -28,8 +42,8 @@ export function drawSpaceWarp(
     const alpha = intensity * (0.08 + depth * 0.24);
 
     const gradient = ctx.createLinearGradient(tail, y, anchor, y);
-    gradient.addColorStop(0, 'rgba(255,255,255,0)');
-    gradient.addColorStop(1, `rgba(255,255,255,${alpha})`);
+    gradient.addColorStop(0, withAlpha(color, 0));
+    gradient.addColorStop(1, withAlpha(color, alpha));
     ctx.strokeStyle = gradient;
     ctx.lineWidth = 0.4 + depth * 1.2;
     ctx.beginPath();
