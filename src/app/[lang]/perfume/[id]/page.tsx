@@ -120,9 +120,18 @@ export default async function PerfumePage({
     Aynı kural bütün `uppercase` sınıflarında kendiliğinden işliyor, çünkü
     belge `lang="en"`.
   */
+  /*
+    ⚠️ **FAMILY ve YEAR şeritten KALDIRILDI** (sahip, 2026-08-15: "bunlar
+    yazmasın, telefonda göz yoruyor, kalabalık yapıyor"). Veri kaybolmuyor —
+    ikisi de sayfanın gövdesinde zaten duruyor: yıl parfümör satırında
+    ("Ilias Ermenidis, 2019"), aile hem sayfanın tepesindeki ışıkta hem
+    evrim çizelgesinin altındaki aile noktalarında. Şeritte tekrar
+    ediyorlardı ve 390 px'te üst satırın çoğunu onlar yiyordu.
+
+    Geri istenirse iki satır; sözlükteki `frame.family` ve `frame.year`
+    anahtarları bu yüzden silinmedi.
+  */
   const readouts: readonly FrameReadout[] = [
-    { label: t.perfume.frame.family, value: say(family.name, locale).toUpperCase() },
-    { label: t.perfume.frame.year, value: String(perfume.year) },
     { label: t.perfume.frame.notes, value: String(perfume.notes.length) },
   ];
 
