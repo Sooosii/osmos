@@ -57,7 +57,18 @@ export default async function RootLayout({
   params: Promise<{ lang: string }>;
 }>) {
   const { lang } = await params;
-  if (!isLocale(lang)) notFound();
+  /*
+    ⚠️ Denetim `LOCALES` değil AKTİF DİLLER üstünde ve bunu bir sızıntı
+    öğretti: `isLocale('tr')` her zaman doğru olduğu için, Türkçe sayfaları
+    hiç ÜRETİLMEYEN bir kiracıda bile `/tr` isteği istek anında çiziliyordu.
+    Nischengold demosunda `/tr` HTTP 200 ve Türkçe bir sayfa döndürdü —
+    Almanca satan bir dükkânın müşterisine gösterilecek en yanlış şey.
+
+    `generateStaticParams` tek başına yetmiyor: `dynamicParams` varsayılan
+    olarak açık ve listede olmayan bir parametre isteği reddetmiyor,
+    çiziyor. Kapı burada, düzende — altındaki bütün rotaları kapsıyor.
+  */
+  if (!isLocale(lang) || !aktifDiller().includes(lang)) notFound();
 
   /*
     ⚠️ `lang` artık gerçekten sayfanın dili ve bu bir davranış değişikliği:
