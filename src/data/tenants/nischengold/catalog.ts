@@ -7,23 +7,21 @@ import { deriveTenantCatalog } from '../derive';
  *
  * ⚠️ **Dükkân gerçek, çalışma resmi değil.** `nischengold.com` var olan bir
  * işletme ve bu seçki onun rafındaki parfümlerden kuruldu; ama kendisinden
- * onay alınmadı. Bu yüzden kiracı `indexable: false` ve talep edilirse aynı
- * gün kaldırılır. Kurgusal `demo-selva`dan farkı tam olarak bu: orada dükkân
- * uyduruktu, burada dükkân gerçek.
+ * onay alınmadı. Kiracı `indexable: false` ve talep edilirse aynı gün
+ * kaldırılır. Kurgusal `demo-selva`dan farkı tam olarak bu.
  *
- * ⚠️ **Seçki ölçümle kuruldu, seçimle değil.** `leadgen` boru hattı dükkânın
- * `products.json`unu okuyup 250 ürününü bizim 154 parfümümüzle eşleştirdi;
- * ilk on bir kimlik o eşleşmenin kendisi — yani **dükkânın gerçekten sattığı**
- * parfümler. Uydurma yok, "şunu da satıyordur" yok.
+ * ⚠️ **Seçki ölçümle kuruldu ve bir kez ölçüme çarpıp küçüldü.** Boru hattı
+ * dükkânın `products.json`unu okuyup 250 ürününü kataloğumuzla eşleştirdi ve
+ * 13 parfüm buldu. İlk sayım 15'ti; `naomi-goodsir-bois-dascese` ve
+ * `profumum-roma-neroli` **yanlış eşleşmeydi** — eşleştirici yalnız parfüm
+ * ADINA bakıyordu ve "Neroli" bizim Profumum Roma kaydımızı dükkânın Matière
+ * Première "Neroli Oranger"ıyla eşleştirmişti. İkisi de dükkânda YOK.
  *
- * ⚠️ **Son dördü sonradan eklendi ve sebebi ölçüm.** O on bir parfüm on beş
- * koku ailesinden yalnız sekizini tutuyordu; floral, resinous, spicy ve
- * aromatic boştu ve harita bir köşede toplanıyordu. Dört Matière Première
- * kaydı (`perfume-sets/space-3-c.ts`) tam o dört boşluk için girildi — ve
- * dördü de dükkânın rafında duruyor, yani seçki hâlâ onun katalogu.
+ * Bunun önemi teknik değil: "sizin kataloğunuzdan kurdum" diyen bir demo,
+ * satmadıkları bir parfümü içeremez. İlk cevapta yakalanırdı.
  */
 const SELECTION: readonly string[] = [
-  /* Dükkânın rafında bizde de bulunanlar — leadgen eşleştirmesinden. */
+  /* Dükkânın rafında bizde de bulunanlar — marka ve ad birlikte doğrulandı. */
   'nasomatto-baraonda',
   'nasomatto-blamage',
   'orto-parisi-viride',
@@ -31,16 +29,47 @@ const SELECTION: readonly string[] = [
   'marc-antoine-barrois-ganymede',
   'maison-crivelli-oud-maracuja',
   'spirit-of-dubai-ajyal',
-  'naomi-goodsir-bois-dascese',
   'simone-andreoli-malibu-party-in-the-bay',
   'matiere-premiere-santal-austral',
-  'profumum-roma-neroli',
   /* Aile boşluklarını kapatmak için girilenler — dördü de dükkânın rafında. */
   'matiere-premiere-radical-rose',
   'matiere-premiere-encens-suave',
   'matiere-premiere-crystal-saffron',
   'matiere-premiere-metal-lavender',
 ];
+
+/**
+ * Parfümden dükkânın KENDİ ürün sayfasına — dönüşüm yolu.
+ *
+ * ⚠️ **Elle doğrulandı, otomatik üretilmedi.** Dükkân çoğu parfümün hem
+ * temel hem `Extrait` sürümünü satıyor (Radical Rose / Radical Rose Extrait,
+ * Santal Austral / Santal Austral Extrait, Ganymede / Ganymede Extrait…).
+ * Bizim kayıtlarımız temel sürüm — Radical Rose 2020, Encens Suave 2019,
+ * Crystal Saffron 2022 — yani doğru adres her seferinde **`extrait` olmayan**.
+ * Otomatik eşleştirici ilk denemede beşinde de Extrait'i seçmişti.
+ *
+ * Yanlış bir bağlantı bağlantısızlıktan kötü: ziyaretçi başka bir ürüne
+ * düşer, sepete onu atar ve kimse fark etmez. Bu yüzden eşleşmeler tek tek
+ * gözle doğrulandı ve karar burada, okunabilir hâlde duruyor.
+ */
+const URUN_ADRESLERI: Readonly<Record<string, string>> = {
+  'nasomatto-baraonda': 'https://nischengold.com/products/baraonda',
+  'nasomatto-blamage': 'https://nischengold.com/products/blamage',
+  'orto-parisi-viride': 'https://nischengold.com/products/viride',
+  'orto-parisi-megamare': 'https://nischengold.com/products/megamare',
+  'marc-antoine-barrois-ganymede':
+    'https://nischengold.com/products/marc-antoine-barrois-ganymede-unisex-parfum',
+  'maison-crivelli-oud-maracuja': 'https://nischengold.com/products/oud-maracuja',
+  'spirit-of-dubai-ajyal': 'https://nischengold.com/products/spirit-of-dubai-ajyal-unisex-parfum',
+  'simone-andreoli-malibu-party-in-the-bay':
+    'https://nischengold.com/products/malibu-party-in-the-bay',
+  'matiere-premiere-santal-austral': 'https://nischengold.com/products/santal-austral',
+  'matiere-premiere-radical-rose': 'https://nischengold.com/products/radical-rose',
+  'matiere-premiere-encens-suave': 'https://nischengold.com/products/encens-suave',
+  'matiere-premiere-crystal-saffron': 'https://nischengold.com/products/crystal-saffron',
+  'matiere-premiere-metal-lavender':
+    'https://nischengold.com/products/matiere-premiere-metal-lavender-unisex-parfum',
+};
 
 const BY_ID = new Map(OSMOS_ALL.map((perfume) => [perfume.id, perfume]));
 
@@ -57,4 +86,8 @@ const SELECTED: readonly Perfume[] = SELECTION.map((id) => {
   return perfume;
 });
 
-export const NISCHENGOLD_CATALOG: readonly Perfume[] = deriveTenantCatalog(SELECTED);
+export const NISCHENGOLD_CATALOG: readonly Perfume[] = deriveTenantCatalog(
+  SELECTED,
+  URUN_ADRESLERI,
+  'Nischengold',
+);
