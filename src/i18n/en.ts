@@ -19,6 +19,11 @@
  * karışık imla, metnin çeviri olduğunu ele veren ilk şeydir.
  */
 export const EN = {
+  demo: {
+    uyari: (marka: string) =>
+      `Unofficial study — this page was not commissioned by ${marka}.`
+      + ' Built as a sample; it will be taken down on request:',
+  },
   site: {
     name: 'OSMOS',
     title: 'OSMOS',

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { LOCALES, isLocale } from "@/i18n/locale";
 import { dictFor } from "@/i18n/dict";
 import { LocaleProvider } from "@/i18n/LocaleProvider";
+import { DemoUyarisi } from '@/components/DemoUyarisi';
 import { SITE_BACKGROUND } from "@/lib/site-color";
 import { siteUrl } from "@/lib/site-url";
 import "../globals.css";
@@ -70,6 +71,12 @@ export default async function RootLayout({
       className={`${geistSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/*
+          Demo uyarisi cocuklardan ONCE: gercek bir isletmenin adiyla kurulmus
+          calismada ziyaretcinin ilk okuyacagi sey bunun resmi olmadigi olmali.
+          OSMOS'ta ve gercek musteride hic cizilmiyor.
+        */}
+        <DemoUyarisi lang={lang} />
         <LocaleProvider locale={lang}>{children}</LocaleProvider>
         {/*
           Ölçüm — para yol haritasının 0. fazı (sahip onayladı, 2026-08-11):
