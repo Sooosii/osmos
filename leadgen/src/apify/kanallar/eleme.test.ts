@@ -71,3 +71,29 @@ test('mesajlasma ve kisayol adresleri eleniyor', () => {
     assert.equal(elemedenGecer(d, null).gecti, false, d);
   }
 });
+
+/*
+  ⚠️ Bes kacak, uretilmis listeye bakinca bulundu. Hepsi ELENEN_ALANLARin
+  zaten tuttugu siniflarda ama listede yoktular:
+    · apkpure.net  → Android uygulama indirme sitesi. Google aramasina
+                     "Kiss of Aroma" diye bir UYGULAMA oldugu icin girdi.
+    · threads.com  → listede threads.NET vardi; Meta alan adini tasidi.
+    · snapchat.com → sosyal ag, listede yoktu.
+    · gmail.com    → posta saglayicisi; kimsenin dukkani degil.
+    · faire.com    → B2B pazar yeri; Amazonla ayni sinif, widget gomulemez.
+
+  ⚠️ Bu, sahibin "kimse elenmiyor" kuralini DEGISTIRMIYOR. O kural olcek
+  icin: buyuk parfum evleri elenmiyor. Burasi "satilamayacak yer" kapisi.
+*/
+test('mecra, pazar yeri ve posta saglayicisi elenmeye devam ediyor', () => {
+  for (const d of ['apkpure.net', 'threads.com', 'snapchat.com', 'gmail.com', 'faire.com']) {
+    assert.equal(elemedenGecer(d, null).gecti, false, d);
+  }
+});
+
+/* ⚠️ Gercek parfum evleri hala geciyor — sahibin kurali burada korunuyor. */
+test('buyuk parfum evleri bu eklemeden sonra da geciyor', () => {
+  for (const d of ['amouage.com', 'sergelutens.com', 'nasomatto.com', 'nishane.com']) {
+    assert.equal(elemedenGecer(d, null).gecti, true, d);
+  }
+});

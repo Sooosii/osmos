@@ -11,6 +11,7 @@ import { existsSync } from "node:fs";
 import { acVeritabani, ekleTemas, toplamHarcama, tumLeadler, upsertLead } from './db.ts';
 import { ApifyIstemcisi } from './apify/istemci.ts';
 import { topla } from './apify/topla.ts';
+import { elemedenGecer } from './apify/kanallar/eleme.ts';
 import { zenginlestirHepsi } from './enrich/index.ts';
 import { katalogParfumSayisi, katalogTohumlari, varsayilanKatalogDizini } from './seed.ts';
 import { puanla } from './score.ts';
@@ -174,11 +175,35 @@ async function main(): Promise<void> {
       liste tazelenebiliyor; bu komutun asıl varlık sebebi bu.
     */
     let n = 0;
+    let yeniElenen = 0;
     for (const l of tumLeadler(db)) {
+      /*
+        ⚠️ Eleme kuralı BURADA da uygulanıyor, yalnız toplama anında değil.
+        Sebep ölçüldü: `threads.net` listedeyken Meta alan adını
+        `threads.com`a taşıdı ve mecra sessizce hedef listesine girdi;
+        aynı şekilde apkpure.net, snapchat.com, gmail.com ve faire.com.
+        Kural sonradan genişlediğinde eski kayıtlar eskisi gibi kalıyordu,
+        yani listeyi düzeltmenin tek yolu saatler süren taramayı
+        tekrarlamaktı. Artık `score` bunu da tazeliyor.
+
+        ⚠️ Ters yöne İŞLEMİYOR: bir kez elenmiş kayıt burada geri
+        açılmıyor. Elenme sebepleri arasında ağdan gelen kararlar da var
+        (robots.txt kökü kapatıyor) ve onu bu komut ölçemez.
+      */
+      if (l.durum !== 'elendi') {
+        const eleme = elemedenGecer(l.domain, l.seed_url);
+        if (!eleme.gecti) {
+          upsertLead(db, { ...l, durum: 'elendi', notes: eleme.sebep, score: 0 });
+          yeniElenen += 1;
+          n += 1;
+          continue;
+        }
+      }
       upsertLead(db, { ...l, score: puanla(l).toplam, olcek: olcekCikar(l) });
       n += 1;
     }
-    log(`[score] ${n} adayın puanı ve ölçeği tazelendi`);
+    log(`[score] ${n} adayın puanı ve ölçeği tazelendi`
+      + (yeniElenen > 0 ? ` · ${yeniElenen} aday eleme kuralına takıldı` : ''));
   }
 
   if (komut === 'export' || komut === 'hepsi') {

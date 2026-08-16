@@ -25,7 +25,24 @@ const ELENEN_ALANLAR: ReadonlySet<string> = new Set([
   'reddit.com', 'youtube.com', 'youtu.be', 'instagram.com', 'facebook.com',
   'twitter.com', 'x.com', 'tiktok.com', 'pinterest.com', 'linkedin.com',
   'tumblr.com', 'quora.com', 'medium.com', 'threads.net', 'vk.com', 'telegram.me',
+  /*
+    ⚠️ Üretilen listeye bakınca çıkan kaçaklar. `threads.net` listedeydi ama
+    Meta alan adını `threads.com`a taşıdı — bir mecranın alan adı değişince
+    kural sessizce delinir.
+  */
+  'threads.com', 'snapchat.com', 'whatsapp.com', 'discord.com', 'twitch.tv',
+  /*
+    ⚠️ Yazılım/uygulama platformları. `apkpure.net` listeye Google'dan girdi:
+    "Kiss of Aroma" adında bir UYGULAMA var ve arama onu parfüm sandı.
+  */
+  'apkpure.net', 'apkpure.com', 'apkmirror.com', 'softonic.com',
+  /*
+    ⚠️ Posta sağlayıcıları. Kimsenin dükkânı değil; listeye bir yerden
+    `gmail.com` alan adı olarak sızdı.
+  */
+  'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com', 'gmx.de',
   // pazar yerleri — işletme ama widget gömülemez
+  'faire.com', 'ankorstore.com',
   'amazon.com', 'amazon.co.uk', 'amazon.de', 'amazon.fr', 'amazon.it', 'amazon.es',
   'amazon.ae', 'amazon.sa', 'amazon.ca', 'amazon.com.tr', 'amazon.nl',
   'ebay.com', 'ebay.co.uk', 'ebay.de', 'aliexpress.com', 'alibaba.com',

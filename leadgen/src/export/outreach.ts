@@ -110,11 +110,53 @@ export interface Acilis {
  * ⚠️ `benzer-urun` kanıtı hâlâ toplanıyor ve veritabanında duruyor ama
  * açılış cümlesine GİRMİYOR: yanlış ürünü ima ederdi.
  */
+/*
+  Başlığın KENDİSİ ambalaj/şişe satışını ilan ediyor mu.
+
+  ⚠️ Ölçüldü: listeye giren 508 işletmenin 15'i parfüm değil **parfüm şişesi**
+  satıyor ve bunu başlıkta kendisi söylüyor ("Parfüm Şişeleri Toptan",
+  "Atomizer Sprey Şişesi Üreticisi", "Kozmed Ambalaj", "hammaddeler").
+
+  ⚠️ Bunlar ELENMİYOR — sahibin "kimse elenmiyor" kuralı duruyor ve bu
+  fonksiyon hiçbir adayı listeden çıkarmıyor. Değişen tek şey mesajın içeriği.
+
+  ⚠️ Tetikleyici yalnız AMBALAJIN ADI. "Toptan" ve "üretici" ilk sürümde
+  listedeydi ve bir YANLIŞ POZİTİF üretti: "Parfüm Dünyası – Orjinal Toptan
+  Parfümler" parfüm satıyor, şişe değil — toptancı olması onu hedef
+  DIŞINA değil, tam içine koyuyor. Satış beyanı değil, satılan ŞEY belirleyici.
+*/
+const AMBALAJ_SATISI = new RegExp(
+  [
+    '(şişeler|şişesi|şişeleri|siseler|sisesi|siseleri)',
+    '(atomizer|spray bottle|tester bottle)',
+    '(ambalaj|packaging|hammadde|hammadeler)',
+  ].join('|'),
+  'iu',
+);
+
+/**
+ * Bu işletme parfüm satmıyor olabilir mi?
+ *
+ * `true` dönmesi adayı listeden çıkarmıyor; yalnız ona "kataloğunuzda N
+ * parfüm saydım" denmesini engelliyor. O cümle bir şişe toptancısına
+ * gittiğinde ilk bakışta yanlış — bakılmadığını söyler.
+ */
+export function parfumSatmiyorOlabilir(shopName: string | null): boolean {
+  if (shopName === null) return false;
+  return AMBALAJ_SATISI.test(shopName);
+}
+
 export function acilisCumlesi(lead: Lead, kanit: readonly Evidence[], dil: Dil): Acilis | null {
   const bul = (kind: string): Evidence | undefined => kanit.find((k) => k.kind === kind);
 
   const platformKanit = bul('platform');
-  if (lead.product_count !== null && platformKanit !== undefined) {
+  /*
+    ⚠️ Sayı iddiası yalnız parfüm sattığından emin olduğumuz dükkâna. Şişe
+    toptancısına "kataloğunuzda 313 parfüm saydım" demek, bakmadığımızı
+    söyler; boru hattının "kanıt yoksa cümle yazılmaz" kuralının aynısı.
+  */
+  const parfumcu = !parfumSatmiyorOlabilir(lead.shop_name);
+  if (parfumcu && lead.product_count !== null && platformKanit !== undefined) {
     const n = lead.product_count;
     /*
       ⚠️ Adres MÜŞTERİYE GİTMİYOR, yalnız `kaynakUrl`de duruyor: sayı
@@ -374,11 +416,23 @@ export interface OutreachOzeti {
 
 export function yazOutreachCsv(db: DatabaseSync, yol: string, parfumSayisi: number): OutreachOzeti {
   /*
-    Süzgeç bilerek dar: yalnız hiçbir kanalı olmayanlar dışarıda kalıyor.
-    Ölçek, puan ya da marka büyüklüğü hiçbir satırı elemiyor — sahibin
-    açık kararı.
+    Süzgeç bilerek dar: yalnız hiçbir kanalı olmayanlar ve ELENMİŞ olanlar
+    dışarıda kalıyor. Ölçek, puan ya da marka büyüklüğü hiçbir satırı
+    elemiyor — sahibin açık kararı.
+
+    ⚠️ `durum === 'elendi'` denetimi sonradan eklendi ve gerçek bir kaçağı
+    kapattı: eleme listesi genişletilip `score` ile tazelendiğinde beş mecra
+    (apkpure.net, threads.com, snapchat.com, gmail.com, faire.com) veri
+    tabanında elendi olarak işaretleniyor ama **mektup listesinde kalmaya
+    devam ediyordu.** Eleme yalnız toplama anında etkili olsaydı, sonradan
+    öğrenilen hiçbir kural mevcut listeyi düzeltemezdi.
+
+    ⚠️ Bu, sahibin "kimse elenmiyor" kuralına dokunmuyor: o kural ÖLÇEK
+    içindi (büyük parfüm evleri atılmıyor). Burası satılamayacak yer kapısı.
   */
-  const secilenler = tumLeadler(db).filter((l) => kanalSec(l) !== 'yok');
+  const secilenler = tumLeadler(db)
+    .filter((l) => l.durum !== 'elendi')
+    .filter((l) => kanalSec(l) !== 'yok');
 
   let kanitsiz = 0;
   let dm = 0;

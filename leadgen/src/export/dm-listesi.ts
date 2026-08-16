@@ -62,7 +62,7 @@ function blok(lead: Lead, sira: number, metin: string, kanitUrl: string | null):
 
 export function yazDmListesi(db: DatabaseSync, yol: string): DmListesiOzeti {
   const gorulen = temasKurulanlar(db);
-  const adaylar = tumLeadler(db).filter((l) => kanalSec(l) === 'dm');
+  const adaylar = tumLeadler(db).filter((l) => l.durum !== 'elendi' && kanalSec(l) === 'dm');
   const kalan = adaylar.filter((l) => !gorulen.has(l.domain));
 
   const bloklar: string[] = [];

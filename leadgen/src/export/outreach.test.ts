@@ -1,9 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  acilisCumlesi, dilIzi, dilSec, dmTaslagi, guvenCumlesi, kanalSec, mektupGovdesi, temizAd, type Dil,
+  acilisCumlesi, dilIzi, dilSec, dmTaslagi, guvenCumlesi, kanalSec, mektupGovdesi,
+  parfumSatmiyorOlabilir, temizAd, type Dil,
 } from './outreach.ts';
 import type { Evidence, Lead } from '../types.ts';
+import { geciciVeritabani } from '../sinama-db.ts';
+import { upsertLead } from '../db.ts';
+import { yazOutreachCsv } from './outreach.ts';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const PARFUM = 150;
 
@@ -391,4 +398,77 @@ test('ulkesi bilinmeyen ama sayfasi Turkce olana Turkce yaziliyor', () => {
 test('bilinen ulke sayfa metnini eziyor', () => {
   assert.equal(dilSec('DE', 'Uygun Fiyatlı Dekant Parfümler'), 'en');
   assert.equal(dilSec('TR', 'Independent perfumery'), 'tr');
+});
+
+/*
+  ⚠️ Listede parfum degil PARFUM SISESI satan 15 isletme var ve baslikta
+  bunu kendileri soyluyor: "Parfum Siseleri Toptan", "Atomizer Sprey Sisesi
+  Ureticisi", "Kozmed Ambalaj". Bir de apkpure.net (Android uygulama
+  indirme sitesi) var.
+
+  ⚠️ Bunlar ELENMIYOR — sahibin kurali "kimse elenmiyor" ve o kural duruyor.
+  Degisen tek sey mesajin ICERIGI: "kataloğunuzdaki N parfumu saydim"
+  demek onlara turu YANLIS bir cumle. Boru hattinin kendi kurali zaten bunu
+  soyluyordu: kanit yoksa cumle yazilmaz. Burada kanit var ama neyin kaniti
+  oldugu supheli, o yuzden sayi iddiasi dusuyor.
+*/
+test('baslikta ambalaj satisi ilan eden dukkan supheli sayiliyor', () => {
+  for (const ad of ['Parfüm Şişeleri, Parfüm Şişesi Toptan',
+    'Parfüm Atomizer Sprey Şişesi Üreticisi',
+    'Parfüm Şişeleri Hayalinizdeki Tasarımlar - Kozmed Ambalaj',
+    'Parfüm Şişeleri: İmalatçılara Yönelik Teknik Çözümler',
+    '1ml Tester Bottle For Essential Oil South Africa']) {
+    assert.equal(parfumSatmiyorOlabilir(ad), true, ad);
+  }
+});
+
+/* ⚠️ Gercek parfum dukkanlari supheli SAYILMIYOR — "sise" sozcugu bir parfum
+   dukkaninin basliginda da gecebilir; kural satisin KENDISINI ilan edene bakar. */
+/*
+  ⚠️ Ilk surumde "toptan" ve "uretici" de tetikliyordu ve bir YANLIS POZITIF
+  urettil: "Parfum Dunyasi - Orjinal Toptan Parfumler" parfum satiyor.
+  Toptanci olmak onu hedef DISINA degil tam icine koyuyor.
+*/
+test('toptan parfum saticisi supheli SAYILMIYOR', () => {
+  assert.equal(parfumSatmiyorOlabilir('Parfüm Dünyası – Orjinal Toptan Parfümler'), false);
+  assert.equal(parfumSatmiyorOlabilir('Parfüm Üreticisi ve Markası'), false);
+});
+
+test('gercek parfum dukkanlari supheli sayilmiyor', () => {
+  for (const ad of ['Alkemia Perfumes', 'Dekant House', 'Bloom Perfumery',
+    'Nischengold in Konstanz', 'Koku Mutfağı', 'Scent Split']) {
+    assert.equal(parfumSatmiyorOlabilir(ad), false, ad);
+  }
+});
+
+/* Supheli dukkana SAYI iddiasi yazilmiyor; acilis ya ana sayfaya duser ya bos kalir. */
+test('supheli dukkana parfum sayisi iddiasi yazilmiyor', () => {
+  const sise: Lead = { ...LEAD, shop_name: 'Parfüm Şişeleri Toptan' };
+  const a = acilisCumlesi(sise, [kanit('platform', 'https://ornek.com/products.json')], 'tr');
+  assert.equal(a, null);
+});
+
+/*
+  ⚠️ Gercek kacak: eleme listesi genisletilip `score` ile tazelendiginde bes
+  mecra (apkpure.net, threads.com, snapchat.com, gmail.com, faire.com) veri
+  tabaninda "elendi" oldu ama MEKTUP LISTESINDE KALDI — cunku disa aktarim
+  yalniz "kanali var mi" diye bakiyordu. Eleme yalniz toplama aninda etkili
+  olsaydi, sonradan ogrenilen hicbir kural mevcut listeyi duzeltemezdi ve
+  listeyi duzeltmenin tek yolu saatler suren taramayi tekrarlamak olurdu.
+*/
+test('elenmis aday, kanali olsa bile mektup listesine girmiyor', () => {
+  const db = geciciVeritabani();
+  upsertLead(db, { domain: 'gecerli.com', source: 'katalog', shop_name: 'Gecerli',
+    instagram: 'gecerli', durum: 'zenginlestirildi' });
+  upsertLead(db, { domain: 'apkpure.net', source: 'google', shop_name: 'APKPure',
+    instagram: 'apkpure', durum: 'elendi', notes: 'satilamaz alan adi' });
+
+  const yol = join(tmpdir(), `outreach-sinama-${process.pid}.csv`);
+  const ozet = yazOutreachCsv(db, yol, PARFUM);
+  const icerik = readFileSync(yol, 'utf8');
+
+  assert.equal(ozet.yazilan, 1, 'yalniz elenmemis aday yazilmali');
+  assert.ok(icerik.includes('gecerli.com'));
+  assert.ok(!icerik.includes('apkpure.net'), 'elenmis aday CSV de gorunmemeli');
+  db.close();
 });
