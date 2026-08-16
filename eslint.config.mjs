@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Sitenin disindaki tekil alt proje: kendi package.json'i, kendi
+    // tsconfig'i, kendi kurallari var. Buradan gezilirse site kurallari
+    // (react-hooks, next/*) sunucu betiklerine uygulanmaya calisilir.
+    "leadgen/**",
   ]),
 ]);
 

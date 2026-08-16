@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 /**
  * Vitest yapılandırması — tek işi `@/` takma adını çözmek.
@@ -18,6 +18,19 @@ import { defineConfig } from 'vitest/config';
  * sınamalar çözemez — değiştirirken ikisi birden.
  */
 export default defineConfig({
+  /*
+    ⚠️ `leadgen/` kendi sınamalarını kendi çalıştırıcısıyla koşuyor
+    (`cd leadgen && npm test`). Buradan dışlanmazsa Vitest'in varsayılan
+    `.test.ts` süpürgesi onları da toplar ve sitenin sınama sayısı ağdan
+    veri çeken betiklerle karışır.
+
+    ⚠️ Bu yorumda joker kalıbı AÇIKÇA yazılmıyor: içindeki yıldız-eğik
+    ikilisi blok yorumu tam orada kapatıyor ve dosyanın geri kalanı kod
+    sanılıyor. Bir kez yaşandı, yapılandırma hiç yüklenmedi.
+  */
+  test: {
+    exclude: [...configDefaults.exclude, 'leadgen/**'],
+  },
   resolve: {
     /*
       ⚠️ İkinci takma ad `server-only` paketi için ve gerekçesi

@@ -60,7 +60,9 @@ next-env.d.ts
 # B2B aday verisi — bu depo AÇIK ve bu dosyalar 735 işletmenin e-postası,
 # Instagram hesabı ve puanı. Kural bugüne kadar yalnız akılda duruyordu ve
 # `git add -A` bir kez hepsini sahneye aldı (leads.db, outreach.csv, dm-listesi);
-# fark edilmeseydi açık depoya girecekti. Artık kural dosyada.
+# fark edilmeseydi açık depoya girecekti. Artık kural dosyada. Kod depoda,
+# VERİ değil.
+/leadgen/node_modules/
 /leadgen/data/
 /leadgen/**/*.db
 /leadgen/**/*.csv
