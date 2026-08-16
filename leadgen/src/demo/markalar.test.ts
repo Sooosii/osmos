@@ -1,7 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
-import { markaAnahtari, ortusmeHesapla, osmosMarkalari } from './markalar.ts';
+import {
+  markaAnahtari, ortusmeHesapla, osmosMarkalari, urunOrtusmesiHesapla,
+} from './markalar.ts';
 
 const KATALOG = join(import.meta.dirname, '..', '..', '..', 'src', 'data', 'perfume-sets');
 const BIZIMKILER = osmosMarkalari(KATALOG);
@@ -48,4 +50,27 @@ test('ortak marka yoksa sifir donuyor, patlamiyor', () => {
 test('bos girdi patlamiyor', () => {
   assert.equal(ortusmeHesapla([], BIZIMKILER).sayi, 0);
   assert.equal(ortusmeHesapla(['', '   '], BIZIMKILER).hedefMarkaSayisi, 0);
+});
+
+/*
+  ⚠️ GERCEK bir yanlis eslesmenin karsiligi. Ilk surum yalniz parfum ADINA
+  bakiyordu ve bizim `profumum-roma-neroli` kaydimiz dukkanin Matiere
+  Premiere "Neroli Oranger"iyla eslesti: ayni kelime, bambaska parfum, baska
+  ev. Bedeli sayi hatasi degildi — o parfum demo seckisine girdi ve "sizin
+  katalogunuzdan kurdum" diyen bir demo, dukkanin satmadigi urunu icerdi.
+*/
+test('ayni kelimeyi tasiyan BASKA evin parfumu eslesmiyor', () => {
+  const bizim = [{ id: 'profumum-roma-neroli', ad: 'Neroli', marka: 'Profumum Roma' }];
+  const dukkan = ['Matiere Premiere Neroli Oranger - Unisex Parfum'];
+  assert.equal(urunOrtusmesiHesapla(dukkan, bizim).sayi, 0);
+});
+
+test('marka da tutuyorsa eslesme kaliyor', () => {
+  const bizim = [{ id: 'nasomatto-baraonda', ad: 'Baraonda', marka: 'Nasomatto' }];
+  assert.equal(urunOrtusmesiHesapla(['Nasomatto BARAONDA - Unisex Parfum'], bizim).sayi, 1);
+});
+
+test('marka yazim farki esleşmeyi bozmuyor', () => {
+  const bizim = [{ id: 'orto-parisi-viride', ad: 'Viride', marka: 'Orto Parisi' }];
+  assert.equal(urunOrtusmesiHesapla(['ORTO-PARISI Viride - Unisex Parfum'], bizim).sayi, 1);
 });

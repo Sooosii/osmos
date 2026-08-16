@@ -107,36 +107,29 @@ export interface UrunOrtusmesi {
  */
 export function urunOrtusmesiHesapla(
   dukkanBasliklari: readonly string[],
-  bizimkiler: readonly { readonly id: string; readonly ad: string }[],
+  bizimkiler: readonly KatalogParfumu[],
 ): UrunOrtusmesi {
   const sadeBasliklar = dukkanBasliklari.map(urunAnahtari);
   const kimlikler = bizimkiler
     .filter((b) => {
-      const a = urunAnahtari(b.ad);
+      const ad = urunAnahtari(b.ad);
       /* Üç harften kısa adlar her başlıkta geçer; yanlış eşleşme üretirler. */
-      return a.length >= 5 && sadeBasliklar.some((t) => t.includes(a));
+      if (ad.length < 5) return false;
+      /*
+        ⚠️ MARKA DA TUTMAK ZORUNDA. İlk sürüm yalnız parfüm ADINA bakıyordu
+        ve gerçek bir yanlış eşleşme üretti: bizim `profumum-roma-neroli`
+        kaydımız dükkânın Matière Première **"Neroli Oranger"**ıyla eşleşti —
+        aynı kelime, bambaşka parfüm, üstelik başka ev. Aynı şekilde
+        `naomi-goodsir-bois-dascese` de yanlış sayıldı.
+
+        Bunun bedeli sayı hatası değil: o iki parfüm demo seçkisine girdi ve
+        "sizin kataloğunuzdan kurdum" diyen bir demo, dükkânın satmadığı
+        parfümleri içerir hâle geldi. İlk cevapta yakalanırdı.
+      */
+      const marka = markaAnahtari(b.marka);
+      if (marka === '') return false;
+      return sadeBasliklar.some((t) => t.includes(ad) && t.includes(marka));
     })
     .map((b) => b.id);
   return { sayi: kimlikler.length, kimlikler };
-}
-
-export interface KatalogParfumu {
-  readonly id: string;
-  readonly ad: string;
-  readonly marka: string;
-}
-
-/** Kataloğumuzun kimlik + ad + marka listesi — eşleştirmenin girdisi. */
-export function osmosParfumleri(katalogDizini: string): readonly KatalogParfumu[] {
-  const hepsi: KatalogParfumu[] = [];
-  for (const dosya of readdirSync(katalogDizini).filter((d) => d.endsWith('.ts') && !d.endsWith('.test.ts'))) {
-    const metin = readFileSync(join(katalogDizini, dosya), 'utf8');
-    for (const kayit of metin.split(/\n {4}id: /).slice(1)) {
-      const id = /^.([^']+)./.exec(kayit)?.[1];
-      const ad = /name: .([^']+)./.exec(kayit)?.[1];
-      const marka = /brand: .([^']+)./.exec(kayit)?.[1];
-      if (id !== undefined && ad !== undefined && marka !== undefined) hepsi.push({ id, ad, marka });
-    }
-  }
-  return hepsi;
 }
