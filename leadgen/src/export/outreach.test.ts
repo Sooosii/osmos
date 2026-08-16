@@ -235,3 +235,33 @@ test('urun sozcugu iceren GERCEK marka adi korunuyor', () => {
   assert.equal(temizAd('Decant Direct'), 'Decant Direct', 'ikinci kelime jenerik degil');
   assert.equal(temizAd('Scent Split'), 'Scent Split');
 });
+
+/*
+  ⚠️ WooCommerce dukkanlarda `platform` kaniti ANA SAYFA (tespit ana sayfa
+  kaynagindaki "woocommerce" gecisinden yapiliyor), sayi ise ayri bir
+  `urun-sayisi` satirindan (`x-wp-total` basligi) geliyor. Eskiden kaynakUrl
+  her zaman `platform`dan aliniyordu; sonucu, "kataloğunuzda 191 parfum
+  saydim" diyen bir mesajin kanit adresinin ANA SAYFA olmasiydi.
+
+  Bu sessizce ADAY KAYBETTIRIYOR: dm-listesi.md "cumlede yazan sey o sayfada
+  gercekten yoksa gonderme" diyor, listeyi isleyen kisi ana sayfayi acip 191
+  sayisini bulamiyor ve gecerli bir adayi atiyor. Dis denetimde 110 sayi
+  iddiasinin 23unde olculdu.
+*/
+test('sayi iddiasinin kanit adresi urun-sayisi satirindan geliyor', () => {
+  const woo = [
+    kanit('platform', 'https://ornek.com/', 'ana sayfa kaynaginda woocommerce gecti'),
+    kanit('urun-sayisi', 'https://ornek.com/wp-json/wc/store/v1/products?per_page=1', 'x-wp-total: 129'),
+  ];
+  const a = acilisCumlesi(LEAD, woo, 'tr');
+  assert.ok(a);
+  assert.equal(a.kaynakUrl, 'https://ornek.com/wp-json/wc/store/v1/products?per_page=1');
+});
+
+/* Shopifyde ayri satir yok; sayi `platform` kanitindaki products.json ucundan
+   geliyor ve o adres zaten dogrulanabilir. Geri dusus korunuyor. */
+test('urun-sayisi satiri yoksa platform kaniti kullanilmaya devam ediyor', () => {
+  const a = acilisCumlesi(LEAD, [kanit('platform', 'https://ornek.com/products.json')], 'tr');
+  assert.ok(a);
+  assert.equal(a.kaynakUrl, 'https://ornek.com/products.json');
+});

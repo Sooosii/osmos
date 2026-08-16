@@ -70,9 +70,22 @@ export function acilisCumlesi(lead: Lead, kanit: readonly Evidence[], dil: Dil):
       ⚠️ Adres MÜŞTERİYE GİTMİYOR, yalnız `kaynakUrl`de duruyor: sayı
       `products.json` ucundan geliyor ve o adresi mektuba koymak "sizin
       API'nizi taradım" gibi okunuyor.
+
+      ⚠️ Ama LİSTEYİ İŞLEYEN KİŞİ bu adresi açıyor (`dm-listesi.md` "cümlede
+      yazan şey o sayfada gerçekten yoksa gönderme" diyor), o yüzden adres
+      sayıyı GÖSTERMEK zorunda. WooCommerce'te `platform` kanıtı ana sayfa —
+      tespit ana sayfa kaynağındaki "woocommerce" geçişinden yapılıyor — ve
+      sayı ayrı bir `urun-sayisi` satırında (`x-wp-total`) duruyor. Eskiden
+      hep `platform` alınıyordu ve sonuç sessizce ADAY KAYBETTİRİYORDU:
+      dış denetimde 110 sayı iddiasının 23'ünde kanıt adresi ana sayfaydı,
+      yani kişi 191'i bulamayıp geçerli adayı atacaktı.
+
+      Shopify'da ayrı satır yok; orada `platform` kanıtı zaten
+      `products.json` ucu, yani geri düşüş doğru adresi veriyor.
     */
+    const sayiKanit = bul('urun-sayisi') ?? platformKanit;
     return {
-      kaynakUrl: platformKanit.url,
+      kaynakUrl: sayiKanit.url,
       cumle: dil === 'tr'
         ? `Kataloğunuzda ${n} parfüm saydım ve hepsi tek bir listede duruyor.`
         : `I counted ${n} fragrances in your catalogue, all of them in a single list.`,
