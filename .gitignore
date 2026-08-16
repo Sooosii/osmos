@@ -56,3 +56,11 @@ next-env.d.ts
 
 # beyin fırtınası görsel sekmesinin mockup'ları — tartışmanın izi, işin kaydı değil
 /.superpowers/
+
+# leadgen — toplanan iş bağlantı bilgileri. DEPO AÇIK: bu satırlar kalkarsa
+# müşteri adayı listesi ve e-postaları herkese açık hale gelir. Kod depoda,
+# VERİ değil.
+/leadgen/node_modules/
+/leadgen/data/
+/leadgen/**/*.db
+/leadgen/**/*.csv

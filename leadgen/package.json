@@ -1,0 +1,14 @@
+{
+  "name": "osmos-leadgen",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OSMOS B2B musteri adayi boru hatti — parfum e-ticaretlerini bul, zenginlestir, puanla.",
+  "scripts": {
+    "leadgen": "node src/cli.ts",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
