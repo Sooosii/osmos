@@ -38,6 +38,14 @@ export interface Lead {
   readonly segment: Segment;
   /** Ölçek — BİLGİ amaçlı. Sahibin kararı: kimse elenmiyor. */
   readonly olcek: string;
+  /**
+   * Hedefin sattığı markalardan kaçı bizim kataloğumuzda var.
+   *
+   * ⚠️ `null` "ölçülmedi" demek, "sıfır" değil. Örtüşme ancak
+   * `demo-adaylari` komutu koştuktan sonra biliniyor ve puanlama bu ayrımı
+   * gözetiyor — ölçülmemiş bir hedefe örtüşme puanı verilmiyor.
+   */
+  readonly marka_ortusmesi: number | null;
   readonly score: number;
   readonly durum: Durum;
   readonly source: string;

@@ -19,6 +19,8 @@ import { yazLeadsCsv } from './export/leads.ts';
 import { yazOutreachCsv } from './export/outreach.ts';
 import { yazDmListesi } from './export/dm-listesi.ts';
 import { yazIlkTur } from './export/ilk-tur.ts';
+import { olcAdaylar, yazDemoRaporu } from './demo/adaylar.ts';
+import { osmosMarkalari } from './demo/markalar.ts';
 import { yazRapor } from './report.ts';
 
 /**
@@ -49,7 +51,9 @@ const DB_YOLU = join(VERI, 'leads.db');
 
 const log = (s: string): void => { process.stdout.write(`${s}\n`); };
 
-const KOMUTLAR = ['seed', 'topla', 'enrich', 'score', 'export', 'report', 'temas', 'hepsi'] as const;
+const KOMUTLAR = [
+  'seed', 'topla', 'enrich', 'demo-adaylari', 'score', 'export', 'report', 'temas', 'hepsi',
+] as const;
 type Komut = typeof KOMUTLAR[number];
 
 interface Secenekler {
@@ -147,6 +151,18 @@ async function main(): Promise<void> {
     const kume = sinir === null ? bekleyen : bekleyen.slice(0, sinir);
     log(`[enrich] ${kume.length} alan adı ölçülecek (bekleyen ${bekleyen.length})`);
     await zenginlestirHepsi(db, kume, log);
+  }
+
+  if (komut === 'demo-adaylari') {
+    /*
+      ⚠️ `hepsi` içinde DEĞİL. Ağa çıkıyor ve dakikalar sürüyor; ayrıca
+      sonucu bir satış kararına girdi olduğu için istenerek koşulmalı.
+    */
+    const bizimkiler = osmosMarkalari(varsayilanKatalogDizini());
+    log(`[demo] kataloğumuzda ${bizimkiler.size} benzersiz marka var`);
+    const sonuclar = await olcAdaylar(db, bizimkiler, sinir ?? 200, log);
+    const n = yazDemoRaporu(sonuclar, join(VERI, 'demo-adaylari.md'));
+    log(`[demo] demo-adaylari.md — ${n} hedefe demo bugün kurulabilir`);
   }
 
   if (komut === 'score' || komut === 'hepsi') {

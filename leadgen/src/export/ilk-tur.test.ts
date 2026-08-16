@@ -6,7 +6,7 @@ import type { Lead } from '../types.ts';
 const l = (o: Partial<Lead>): Lead => ({
   id: 1, domain: 'x.com', shop_name: null, platform: 'shopify', email: null,
   instagram: null, country: null, product_count: 100, has_similar_feature: null,
-  segment: 'butik-eticaret', olcek: 'kucuk', score: 50, durum: 'zenginlestirildi',
+  segment: 'butik-eticaret', olcek: 'kucuk', marka_ortusmesi: null, score: 50, durum: 'zenginlestirildi',
   source: 'google', notes: null, seed_url: null, ...o,
 });
 

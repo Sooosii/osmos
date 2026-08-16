@@ -51,42 +51,34 @@ export interface Acilis {
 /**
  * Açılış cümlesi — yalnız kanıta dayanarak.
  *
- * Sıra bilerek böyle: en üstteki gözlem hem en somut hem satışa en yakın
- * olan. "Şu ürün sayfanızda öneri bloğu yok" cümlesi hem doğrulanabilir bir
- * ayrıntı hem de teklifin kendisi.
+ * ⚠️ SIRALAMA DEĞİŞTİ. Önceki sürümde en üstteki gözlem "ürün sayfanızda
+ * öneri bloğu yok"tu ve o cümle bir WIDGET satıyordu. Sahibin kararıyla
+ * satılan şey değişti: müşterinin kendi katalogu, kendi markası ve kendi
+ * adresiyle çalışan bir harita sitesi. O ürün için doğru gözlem farklı —
+ * kaç parfümün TEK BİR LİSTEDE durduğu.
+ *
+ * ⚠️ `benzer-urun` kanıtı hâlâ toplanıyor ve veritabanında duruyor ama
+ * açılış cümlesine GİRMİYOR: yanlış ürünü ima ederdi.
  */
 export function acilisCumlesi(lead: Lead, kanit: readonly Evidence[], dil: Dil): Acilis | null {
   const bul = (kind: string): Evidence | undefined => kanit.find((k) => k.kind === kind);
-
-  const benzer = bul('benzer-urun');
-  if (lead.has_similar_feature === false && benzer !== undefined) {
-    return {
-      kaynakUrl: benzer.url,
-      cumle: dil === 'tr'
-        ? `${benzer.url} sayfasına baktım; ürünün altında "benzer ürünler" gibi bir öneri bloğu göremedim.`
-        : `I had a look at ${benzer.url} and could not find a "you may also like" block under the product.`,
-      kisa: dil === 'tr'
-        ? 'ürün sayfanızda "benzer ürünler" önerisi göremedim'
-        : 'I could not find a "you may also like" block on your product page',
-    };
-  }
 
   const platformKanit = bul('platform');
   if (lead.product_count !== null && platformKanit !== undefined) {
     const n = lead.product_count;
     /*
-      ⚠️ Adres MÜŞTERİYE GİTMİYOR, yalnız `kaynakUrl`de duruyor.
-      Sayı `products.json` ucundan geliyor ve o adresi mektuba koymak
-      "sizin API'nizi taradım" demek gibi okunuyor — dükkân sahibini
-      rahatsız eder. İddia yine doğrulanabilir: sayı sahibin önündeki
-      çalışma listesinde adresle birlikte duruyor.
+      ⚠️ Adres MÜŞTERİYE GİTMİYOR, yalnız `kaynakUrl`de duruyor: sayı
+      `products.json` ucundan geliyor ve o adresi mektuba koymak "sizin
+      API'nizi taradım" gibi okunuyor.
     */
     return {
       kaynakUrl: platformKanit.url,
       cumle: dil === 'tr'
-        ? `Kataloğunuzda ${n} ürün saydım.`
-        : `I counted ${n} products in your catalogue.`,
-      kisa: dil === 'tr' ? `kataloğunuzda ${n} ürün saydım` : `I counted ${n} products in your catalogue`,
+        ? `Kataloğunuzda ${n} parfüm saydım ve hepsi tek bir listede duruyor.`
+        : `I counted ${n} fragrances in your catalogue, all of them in a single list.`,
+      kisa: dil === 'tr'
+        ? `kataloğunuzdaki ${n} parfümü saydım`
+        : `I counted the ${n} fragrances in your catalogue`,
     };
   }
 
@@ -104,8 +96,8 @@ export function acilisCumlesi(lead: Lead, kanit: readonly Evidence[], dil: Dil):
 }
 
 const KONU = {
-  tr: 'benzer parfüm önerisi — 2 haftalık ücretsiz pilot',
-  en: 'similar-fragrance recommendations — a free two-week pilot',
+  tr: 'kataloğunuz için bir koku haritası — ücretsiz örnek',
+  en: 'a scent map for your catalogue — a free sample',
 } as const;
 
 /**
@@ -187,18 +179,20 @@ export function mektupGovdesi(lead: Lead, acilis: Acilis | null, dil: Dil, parfu
     return [
       `Merhaba${hitap},`,
       '',
-      'Ben Soroush, osmos.me adresindeki keşif motorunu geliştiriyorum.',
+      'Ben Soroush, osmos.me adresindeki koku haritasını geliştiriyorum.',
       '',
-      'OSMOS parfümleri notalarına göre haritalıyor: ziyaretçi bir parfümden'
-      + ` kokuca yakın olanlara geçebiliyor. ${guvenCumlesi(parfumSayisi, dil)}`,
+      'OSMOS parfümleri notalarına göre haritalıyor: ziyaretçi listede arama'
+      + ' yapmak yerine bir parfümden kokuca yakın olanlara geçerek geziniyor.'
+      + ` ${guvenCumlesi(parfumSayisi, dil)}`,
       '',
-      `${gozlem}Sizin ürün sayfalarınıza gömülebilen bir "benzer parfümler" önerisi,`
-      + ' sepet başına ortalama ürün sayısını artırmak için çalışıyor.',
+      `${gozlem}Aynısını sizin kataloğunuzla kurabiliyorum: sizin parfümleriniz,`
+      + ' sizin markanız, kendi adresiniz altında. Ziyaretçiniz bir ürün listesi'
+      + ' yerine keşif alanında dolaşıyor.',
       '',
-      '2 haftalık ücretsiz bir pilot önerebilirim: kendi kataloğunuzla kurulur,'
-      + ' ölçülür, işe yaramazsa kaldırılır.',
+      'Ücretsiz bir örnek hazırlayabilirim: kataloğunuzdan bir seçkiyle kurup'
+      + ' adresini gönderirim, beğenmezseniz aynı gün kaldırırım.',
       '',
-      'Denemek ister misiniz?',
+      'Bakmak ister misiniz?',
       '',
       'Soroush · osmos.me',
       'Bu yazışmayı sürdürmek istemezseniz "listeden çıkar" diye yanıt vermeniz yeterli;'
@@ -208,18 +202,21 @@ export function mektupGovdesi(lead: Lead, acilis: Acilis | null, dil: Dil, parfu
   return [
     `Hello${hitap},`,
     '',
-    'I am Soroush, and I build the discovery engine at osmos.me.',
+    'I am Soroush, and I build the scent map at osmos.me.',
     '',
-    'OSMOS maps fragrances by their notes, so a visitor can move from one'
-    + ` perfume to the ones that actually smell close to it. ${guvenCumlesi(parfumSayisi, dil)}`,
+    'OSMOS maps fragrances by their notes: instead of searching a list, a visitor'
+    + ' moves from one perfume to the ones that actually smell close to it.'
+    + ` ${guvenCumlesi(parfumSayisi, dil)}`,
     '',
-    `${gozlem}A "similar fragrances" block embedded in your product pages works to`
-    + ' raise the average number of items per cart.',
+    `${gozlem}I can build the same thing from your catalogue: your fragrances,`
+    + ' your brand, under your own address. Your visitor wanders a map instead'
+    + ' of scrolling a product list.',
     '',
-    'I can offer a free two-week pilot: it is set up with your own catalogue,'
-    + ' measured, and removed if it does not earn its place.',
+    'I can put together a free sample: I build it from a selection of your'
+    + ' catalogue and send you the link, and take it down the same day if you'
+    + ' do not like it.',
     '',
-    'Would you like to try it?',
+    'Would you like to see it?',
     '',
     'Soroush · osmos.me',
     'If you would rather not hear from me, reply "unsubscribe" and I will not write again.',
@@ -239,13 +236,13 @@ export function dmTaslagi(lead: Lead, acilis: Acilis | null, dil: Dil): string {
   const gozlem = acilis === null ? '' : `${acilis.kisa} — `;
   if (dil === 'tr') {
     return `Merhaba${hitap}! ${gozlem}osmos.me'de parfümleri notalarına göre`
-      + ' haritalayan bir motor geliştiriyorum. Ürün sayfanıza gömülebilen bir'
-      + ' benzer-parfüm önerisi sepet ortalamasını artırıyor; 2 hafta ücretsiz'
-      + ' denemek ister misiniz?';
+      + ' gezilebilir bir haritaya çeviriyorum. Aynısını sizin kataloğunuzla,'
+      + ' sizin markanızla kurabilirim; ücretsiz bir örnek hazırlayıp adresini'
+      + ' göndereyim mi?';
   }
-  return `Hi${hitap}! ${gozlem}I build osmos.me, an engine that maps fragrances`
-    + ' by their notes. A similar-fragrance block embedded in your product pages'
-    + ' lifts the average cart; would you like to try it free for two weeks?';
+  return `Hi${hitap}! ${gozlem}I turn fragrance catalogues into a map you can`
+    + ' wander by scent — osmos.me. I can build the same from your catalogue under'
+    + ' your own brand; shall I put together a free sample and send you the link?';
 }
 
 const BASLIKLAR = [

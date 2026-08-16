@@ -121,6 +121,13 @@ export async function zenginlestirBir(
     product_count: platform.productCount,
     has_similar_feature: benzer.hasSimilar,
     segment: segmentCikar(platform.urunAdlari, platform.productCount, platform.platform),
+    /*
+      ⚠️ Zenginleştirme marka örtüşmesini ÖLÇMÜYOR — o `demo-adaylari`
+      komutunun işi. Burada `null` geçiliyor ve `upsertLead` COALESCE ile
+      daha önce ölçülmüş bir değeri korur; sıfır yazmak "ölçtüm, yok"
+      demek olurdu ve yanlış olurdu.
+    */
+    marka_ortusmesi: null,
   } as const;
 
   const notParcalari = [

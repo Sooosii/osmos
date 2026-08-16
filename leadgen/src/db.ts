@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS leads (
   has_similar_feature INTEGER,
   segment             TEXT NOT NULL DEFAULT 'bilinmiyor',
   olcek               TEXT NOT NULL DEFAULT 'bilinmiyor',
+  marka_ortusmesi     INTEGER,
   score               INTEGER NOT NULL DEFAULT 0,
   durum               TEXT NOT NULL DEFAULT 'yeni',
   source              TEXT NOT NULL,
@@ -94,6 +95,7 @@ function sqlDeger(v: string | number | boolean | null | undefined): SqlDeger {
 function eksikSutunlariEkle(db: DatabaseSync): void {
   const beklenen: readonly (readonly [string, string])[] = [
     ['olcek', "TEXT NOT NULL DEFAULT 'bilinmiyor'"],
+    ['marka_ortusmesi', 'INTEGER'],
     ['seed_url', 'TEXT'],
   ];
   const mevcut = new Set(
@@ -126,9 +128,10 @@ export function upsertLead(db: DatabaseSync, lead: Partial<Lead> & { domain: str
   const simdi = new Date().toISOString();
   db.prepare(`
     INSERT INTO leads (domain, shop_name, platform, email, instagram, country,
-                       product_count, has_similar_feature, segment, olcek, score,
+                       product_count, has_similar_feature, segment, olcek,
+                       marka_ortusmesi, score,
                        durum, source, notes, seed_url, updated_at)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     ON CONFLICT(domain) DO UPDATE SET
       shop_name           = COALESCE(excluded.shop_name, leads.shop_name),
       platform            = CASE WHEN excluded.platform = 'bilinmiyor' THEN leads.platform ELSE excluded.platform END,
@@ -139,6 +142,7 @@ export function upsertLead(db: DatabaseSync, lead: Partial<Lead> & { domain: str
       has_similar_feature = COALESCE(excluded.has_similar_feature, leads.has_similar_feature),
       segment             = CASE WHEN excluded.segment = 'bilinmiyor' THEN leads.segment ELSE excluded.segment END,
       olcek               = CASE WHEN excluded.olcek = 'bilinmiyor' THEN leads.olcek ELSE excluded.olcek END,
+      marka_ortusmesi     = COALESCE(excluded.marka_ortusmesi, leads.marka_ortusmesi),
       score               = excluded.score,
       durum               = excluded.durum,
       notes               = COALESCE(excluded.notes, leads.notes),
@@ -149,7 +153,8 @@ export function upsertLead(db: DatabaseSync, lead: Partial<Lead> & { domain: str
     sqlDeger(lead.shop_name), sqlDeger(lead.platform ?? 'bilinmiyor'),
     sqlDeger(lead.email), sqlDeger(lead.instagram), sqlDeger(lead.country),
     sqlDeger(lead.product_count), sqlDeger(lead.has_similar_feature as UclyMantik),
-    sqlDeger(lead.segment ?? 'bilinmiyor'), sqlDeger(lead.olcek ?? 'bilinmiyor'), sqlDeger(lead.score ?? 0),
+    sqlDeger(lead.segment ?? 'bilinmiyor'), sqlDeger(lead.olcek ?? 'bilinmiyor'),
+    sqlDeger(lead.marka_ortusmesi), sqlDeger(lead.score ?? 0),
     sqlDeger(lead.durum ?? 'yeni'), sqlDeger(lead.source ?? 'bilinmiyor'),
     sqlDeger(lead.notes), sqlDeger(lead.seed_url), simdi,
   );

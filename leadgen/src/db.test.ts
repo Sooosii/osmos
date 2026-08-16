@@ -61,10 +61,11 @@ test('veritabanindan okunan satir dogru puanlaniyor', () => {
   const db = geciciVeritabani();
   upsertLead(db, {
     domain: 'hedef.com', source: 'k', email: 'info@hedef.com', platform: 'shopify',
-    product_count: 129, has_similar_feature: false, instagram: 'hedef',
+    product_count: 47, has_similar_feature: false, instagram: 'hedef', marka_ortusmesi: 5,
   });
   const l = tumLeadler(db)[0];
   assert.equal(puanla(l!).toplam, 100, 'veritabani turu yuzunden puan dusmemeli');
+  assert.equal(l?.marka_ortusmesi, 5, 'ortusme sayisi geri gelmeli');
   db.close();
 });
 

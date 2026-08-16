@@ -10,7 +10,8 @@ const PARFUM = 150;
 const LEAD: Lead = {
   id: 1, domain: 'ornek.com', shop_name: 'Ornek Parfum', platform: 'shopify',
   email: 'info@ornek.com', instagram: 'ornek', country: 'TR', product_count: 129,
-  has_similar_feature: false, segment: 'butik-eticaret', olcek: 'kucuk', score: 100,
+  has_similar_feature: false, segment: 'butik-eticaret', olcek: 'kucuk',
+  marka_ortusmesi: null, score: 100,
   durum: 'zenginlestirildi', source: 'katalog', notes: null, seed_url: null,
 };
 
@@ -56,10 +57,24 @@ test('hic kanit yoksa acilis cumlesi URETILMIYOR', () => {
   assert.equal(acilisCumlesi(LEAD, [], 'en'), null);
 });
 
-test('benzer-urun kaniti varsa cumle o sayfayi gosteriyor', () => {
-  const a = acilisCumlesi(LEAD, [kanit('benzer-urun', URUN)], 'tr');
-  assert.equal(a?.kaynakUrl, URUN);
-  assert.ok(a?.cumle.includes(URUN), 'cumle kanit adresini tasimali');
+/*
+  ⚠️ EMEKLIYE AYRILAN SINYAL. Onceki surumde en ustteki gozlem "urun
+  sayfanizda oneri blogu yok"tu ve o cumle bir WIDGET satiyordu. Satilan sey
+  degisti (kendi markasiyla calisan harita sitesi), o yuzden bu kanit
+  toplanmaya devam ediyor ama ACILIS CUMLESINE girmiyor — yanlis urunu
+  ima ederdi.
+*/
+test('benzer-urun kaniti artik acilis cumlesini SURUKLEMIYOR', () => {
+  const yalnizBenzer = acilisCumlesi(
+    { ...LEAD, product_count: null }, [kanit('benzer-urun', URUN)], 'tr',
+  );
+  assert.equal(yalnizBenzer, null, 'tek basina benzer-urun kaniti cumle kurmamali');
+});
+
+test('katalog sayisi acilis cumlesini surukluyor', () => {
+  const a = acilisCumlesi(LEAD, [kanit('platform', 'https://ornek.com/products.json')], 'tr');
+  assert.ok(a?.cumle.includes('129'), 'parfum sayisi cumlede olmali');
+  assert.ok(a?.cumle.includes('tek bir listede'), 'haritanin cozdugu sorun soylenmeli');
   assert.ok((a?.kisa.length ?? 0) > 0, 'DM icin kisa hali de olmali');
 });
 
@@ -77,12 +92,36 @@ test('urun sayisi yoksa ana sayfa basligina duyuluyor', () => {
 
 test('mektup sahibin verdigi iskeleti tasiyor', () => {
   for (const dil of TUM_DILLER) {
-    const m = mektupGovdesi(LEAD, acilisCumlesi(LEAD, [kanit('benzer-urun', URUN)], dil), dil, PARFUM);
+    const m = mektupGovdesi(LEAD, acilisCumlesi(LEAD, [kanit('platform', 'https://x/products.json')], dil), dil, PARFUM);
     assert.ok(m.includes('osmos.me'), `${dil}: urun adresi yok`);
-    assert.ok(/2 hafta|two-week/.test(m), `${dil}: ucretsiz pilot teklifi yok`);
+    assert.ok(/ücretsiz bir örnek|free sample/i.test(m), `${dil}: ucretsiz ornek teklifi yok`);
     assert.equal((m.match(/\?/g) ?? []).length, 1, `${dil}: tek soruyla bitmeli`);
     assert.ok(/listeden çıkar|unsubscribe/.test(m), `${dil}: opt-out cumlesi yok`);
   }
+});
+
+/*
+  ⚠️ BU SINAMA BIR KAZAYI ONLUYOR. Yazilmis 497 mesaj "urun sayfaniza
+  GOMULEBILEN benzer-parfum onerisi" diyordu — yani bir widget. Oyle bir urun
+  hic yazilmadi ve yazilmayacak; hazir olan sey musterinin kendi markasiyla
+  calisan bir harita SITESI. Biri "evet" deseydi verecek sey yoktu.
+  Metne widget vaadi bir daha girmesin.
+*/
+test('metinlerin hicbiri GOMULEBILIR bir sey vaat etmiyor', () => {
+  const yasak = /gömülebil|gömül|embedded|embed |widget|blok ekle/i;
+  for (const dil of TUM_DILLER) {
+    const a = acilisCumlesi(LEAD, [kanit('platform', 'https://x/products.json')], dil);
+    for (const metin of [mektupGovdesi(LEAD, a, dil, PARFUM), dmTaslagi(LEAD, a, dil), a?.cumle ?? '']) {
+      assert.ok(!yasak.test(metin), `${dil}: widget vaadi geri geldi → ${metin.slice(0, 90)}`);
+    }
+  }
+});
+
+test('metinler satilan seyi soyluyor: kendi markasiyla harita', () => {
+  const tr = mektupGovdesi(LEAD, null, 'tr', PARFUM);
+  assert.ok(/kendi adresiniz|sizin markanız/.test(tr), 'white-label vaadi eksik');
+  const en = mektupGovdesi(LEAD, null, 'en', PARFUM);
+  assert.ok(/your own address|your brand/.test(en), 'white-label vaadi eksik');
 });
 
 /*

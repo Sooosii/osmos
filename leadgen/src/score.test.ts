@@ -1,10 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { AGIRLIK, puanla, type PuanGirdisi } from './score.ts';
+import {
+  AGIRLIK, KATALOG_ALT, KATALOG_UST, ORTUSME_ESIGI, puanla, type PuanGirdisi,
+} from './score.ts';
 
 const BOS: PuanGirdisi = {
   email: null, platform: 'bilinmiyor', product_count: null,
-  has_similar_feature: null, instagram: null,
+  instagram: null, marka_ortusmesi: null,
 };
 
 test('hicbir sinyal yoksa puan sifir', () => {
@@ -19,30 +21,42 @@ test('bos dize e-posta sayilmiyor', () => {
   assert.equal(puanla({ ...BOS, email: '' }).toplam, 0);
 });
 
+/*
+  Shopify'in anlami degisti: artik "gomulebilir" oldugu icin degil,
+  products.json sayesinde katalogu OKUNABILIR oldugu icin degerli — demo
+  o yuzden ucuz.
+*/
 test('Shopify 20, WooCommerce 0 puan', () => {
   assert.equal(puanla({ ...BOS, platform: 'shopify' }).toplam, AGIRLIK.shopify);
   assert.equal(puanla({ ...BOS, platform: 'woocommerce' }).toplam, 0);
 });
 
-test('urun sayisi araligi uclarda da 20 puan, disinda 0', () => {
-  assert.equal(puanla({ ...BOS, product_count: 30 }).toplam, AGIRLIK.urunAraligi);
-  assert.equal(puanla({ ...BOS, product_count: 500 }).toplam, AGIRLIK.urunAraligi);
-  assert.equal(puanla({ ...BOS, product_count: 29 }).toplam, 0);
-  assert.equal(puanla({ ...BOS, product_count: 501 }).toplam, 0);
-});
-
-test('benzer urun ozelligi YOK ise 20, VAR ise 0', () => {
-  assert.equal(puanla({ ...BOS, has_similar_feature: false }).toplam, AGIRLIK.benzerYok);
-  assert.equal(puanla({ ...BOS, has_similar_feature: true }).toplam, 0);
+test('harita-boyu katalog araligi uclarda da puan aliyor', () => {
+  assert.equal(puanla({ ...BOS, product_count: KATALOG_ALT }).toplam, AGIRLIK.haritalikKatalog);
+  assert.equal(puanla({ ...BOS, product_count: KATALOG_UST }).toplam, AGIRLIK.haritalikKatalog);
 });
 
 /*
-  Boru hattinin en kolay bozulacak yeri. `null` "bakilmadi" demek; ona
-  puan verilirse ulasilamayan siteler listenin tepesine cikar ve sahip
-  en degersiz adaylara mektup yazar.
+  Alt uc: bu sayinin altinda harita bos gorunuyor. Ust uc: teslim her
+  parfumun elle girilmesini gerektirdigi icin ustu tek seferde yapilamiyor.
 */
-test('benzer urun BAKILMADI ise puan verilmiyor', () => {
-  assert.equal(puanla({ ...BOS, has_similar_feature: null }).toplam, 0);
+test('aralik disindaki kataloglar puan almiyor', () => {
+  assert.equal(puanla({ ...BOS, product_count: KATALOG_ALT - 1 }).toplam, 0);
+  assert.equal(puanla({ ...BOS, product_count: KATALOG_UST + 1 }).toplam, 0);
+});
+
+test('marka ortusmesi esigi tutuyor', () => {
+  assert.equal(puanla({ ...BOS, marka_ortusmesi: ORTUSME_ESIGI }).toplam, AGIRLIK.markaOrtusmesi);
+  assert.equal(puanla({ ...BOS, marka_ortusmesi: ORTUSME_ESIGI - 1 }).toplam, 0);
+});
+
+/*
+  ⚠️ `null` "olculmedi" demek, "sifir" degil. Ortusme ancak demo-adaylari
+  kosunca biliniyor; olculmemis bir hedefe puan vermek, ayni hatanin
+  (benzer-urun `null` iken puan verme) ikinci kez yapilmasi olurdu.
+*/
+test('OLCULMEMIS ortusme puan almiyor', () => {
+  assert.equal(puanla({ ...BOS, marka_ortusmesi: null }).toplam, 0);
 });
 
 test('Instagram 10 puan', () => {
@@ -51,11 +65,11 @@ test('Instagram 10 puan', () => {
 
 test('bes kural birlikte tam 100 ediyor', () => {
   const tam = puanla({
-    email: 'info@dukkan.com', platform: 'shopify', product_count: 129,
-    has_similar_feature: false, instagram: 'dukkan',
+    email: 'info@dukkan.com', platform: 'shopify', product_count: 47,
+    marka_ortusmesi: 5, instagram: 'dukkan',
   });
   assert.equal(tam.toplam, 100);
   assert.deepEqual(tam.kalemler, {
-    eposta: 30, shopify: 20, urunAraligi: 20, benzerYok: 20, instagram: 10,
+    eposta: 30, shopify: 20, haritalikKatalog: 25, markaOrtusmesi: 15, instagram: 10,
   });
 });
