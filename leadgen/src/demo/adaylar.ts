@@ -14,29 +14,43 @@ import { tumLeadler, upsertLead } from '../db.ts';
 import { adayHostlar } from '../domain.ts';
 import { jsonAyristir, naziceGetir } from '../net/fetch.ts';
 import { temizAd } from '../export/outreach.ts';
-import { ortusmeHesapla, type Ortusme } from './markalar.ts';
+import {
+  ortusmeHesapla, urunOrtusmesiHesapla,
+  type KatalogParfumu, type Ortusme, type UrunOrtusmesi,
+} from './markalar.ts';
 import type { Lead } from '../types.ts';
 
 /** Kaç ürün okunacak — marka listesi için bu kadarı yetiyor. */
 const URUN_SINIRI = 250;
 
-interface ShopifyUrun { readonly vendor?: string }
+interface ShopifyUrun { readonly vendor?: string; readonly title?: string }
 interface ShopifyListe { readonly products?: readonly ShopifyUrun[] }
 
 export interface AdayOlcumu {
   readonly lead: Lead;
   readonly ortusme: Ortusme | null;
+  /** ⚠️ Demo seçkisini kuran gerçek ölçüm bu; marka örtüşmesi ön elemedir. */
+  readonly urunOrtusmesi: UrunOrtusmesi | null;
   readonly not: string | null;
 }
 
-/** Bir hedefin marka listesini okur. */
-export async function hedefMarkalari(lead: Lead): Promise<readonly string[] | null> {
+export interface HedefKatalogu {
+  readonly markalar: readonly string[];
+  /** Marka + ad birleşik başlıklar — ürün eşleştirmesi bunun üstünde. */
+  readonly basliklar: readonly string[];
+}
+
+/** Bir hedefin katalogunu okur. */
+export async function hedefKatalogu(lead: Lead): Promise<HedefKatalogu | null> {
   for (const host of adayHostlar(lead.domain, lead.seed_url)) {
     const c = await naziceGetir(`https://${host}/products.json?limit=${URUN_SINIRI}`);
     const veri = jsonAyristir<ShopifyListe>(c);
     const urunler = veri?.products;
     if (urunler === undefined) continue;
-    return urunler.flatMap((u) => (u.vendor === undefined || u.vendor.trim() === '' ? [] : [u.vendor]));
+    return {
+      markalar: urunler.flatMap((u) => (u.vendor === undefined || u.vendor.trim() === '' ? [] : [u.vendor])),
+      basliklar: urunler.map((u) => `${u.vendor ?? ''} ${u.title ?? ''}`),
+    };
   }
   return null;
 }
@@ -51,6 +65,7 @@ export async function hedefMarkalari(lead: Lead): Promise<readonly string[] | nu
 export async function olcAdaylar(
   db: DatabaseSync,
   bizimkiler: ReadonlySet<string>,
+  parfumlerimiz: readonly KatalogParfumu[],
   sinir: number,
   log: (s: string) => void,
 ): Promise<readonly AdayOlcumu[]> {
@@ -62,39 +77,56 @@ export async function olcAdaylar(
   const sonuclar: AdayOlcumu[] = [];
 
   for (const [i, lead] of adaylar.entries()) {
-    const markalar = await hedefMarkalari(lead);
-    if (markalar === null) {
-      sonuclar.push({ lead, ortusme: null, not: 'katalog okunamadi' });
+    const katalog = await hedefKatalogu(lead);
+    if (katalog === null) {
+      sonuclar.push({ lead, ortusme: null, urunOrtusmesi: null, not: 'katalog okunamadi' });
       continue;
     }
-    const ortusme = ortusmeHesapla(markalar, bizimkiler);
-    upsertLead(db, { ...lead, marka_ortusmesi: ortusme.sayi });
-    sonuclar.push({ lead, ortusme, not: null });
+    const ortusme = ortusmeHesapla(katalog.markalar, bizimkiler);
+    const urunOrtusmesi = urunOrtusmesiHesapla(katalog.basliklar, parfumlerimiz);
+    upsertLead(db, {
+      ...lead,
+      marka_ortusmesi: ortusme.sayi,
+      urun_ortusmesi: urunOrtusmesi.sayi,
+    });
+    sonuclar.push({ lead, ortusme, urunOrtusmesi, not: null });
     if ((i + 1) % 25 === 0) log(`[demo] ${i + 1}/${adaylar.length}`);
   }
   return sonuclar;
 }
 
 export function yazDemoRaporu(sonuclar: readonly AdayOlcumu[], yol: string): number {
+  /*
+    ⚠️ Sıralama ÜRÜN örtüşmesine göre, marka örtüşmesine göre değil. Ölçüldü:
+    marka örtüşmesi 25 olan dükkânda ürün örtüşmesi 4 çıktı. Marka sırasıyla
+    sıralamak, demo kurulamayacak hedefleri listenin tepesine koyardı.
+  */
   const kurulabilir = sonuclar
-    .filter((s): s is AdayOlcumu & { ortusme: Ortusme } => s.ortusme !== null && s.ortusme.sayi > 0)
-    .sort((a, b) => b.ortusme.sayi - a.ortusme.sayi);
+    .filter((s): s is AdayOlcumu & { ortusme: Ortusme; urunOrtusmesi: UrunOrtusmesi } =>
+      s.ortusme !== null && s.urunOrtusmesi !== null && s.urunOrtusmesi.sayi > 0)
+    .sort((a, b) => b.urunOrtusmesi.sayi - a.urunOrtusmesi.sayi);
 
   const satirlar = kurulabilir.map((s, i) => [
     `### ${i + 1}. ${temizAd(s.lead.shop_name) ?? s.lead.domain}`,
     '',
     `- ${s.lead.domain} · skor ${s.lead.score} · ${s.lead.product_count ?? '?'} ürün`
     + ` · ${s.lead.segment}`,
-    `- **ortak marka: ${s.ortusme.sayi}** / hedefin ${s.ortusme.hedefMarkaSayisi} markası`,
-    `- demo seçkisi: ${s.ortusme.ortak.slice(0, 12).join(', ')}`,
+    `- **raflarında bizde de olan parfüm: ${s.urunOrtusmesi.sayi}**`
+    + ` · ortak marka ${s.ortusme.sayi}/${s.ortusme.hedefMarkaSayisi}`,
+    `- demo seçkisi (kimlikler): ${s.urunOrtusmesi.kimlikler.slice(0, 20).join(', ')}`,
     `- iletişim: ${s.lead.email ?? '—'}${s.lead.instagram === null ? '' : ` · @${s.lead.instagram}`}`,
     '',
   ].join('\n'));
 
   const metin = `# Demo adayları
 
-**${kurulabilir.length} hedefe demo bugün kurulabilir** — sattıkları markalar
-zaten kataloğumuzda, yani seçkiyi listelemek yetiyor.
+**${kurulabilir.length} hedefin rafında bizde de olan parfüm var.**
+
+⚠️ Ama sayılar küçük ve bu ÖLÇÜLDÜ: yirmi dükkânda ortalama **3 parfüm**.
+Sebep katalogun biçimi — bizde marka başına 1-2 küratörlü parfüm var,
+dükkânlar o markanın popüler parfümlerini satıyor. Yani "demo bedava kurulur"
+varsayımı YANLIŞ; demo, müşterinin parfümlerinin bir kısmının girilmesini
+gerektiriyor. Buradaki sayı, o işin ne kadarının hazır olduğunu söylüyor.
 
 ⚠️ Demo kuralları: gerçek bir işletmenin adıyla kurulan çalışma **noindex**,
 sayfada "resmi olmayan çalışma" etiketi, **talep edilirse aynı gün kaldırılır.**

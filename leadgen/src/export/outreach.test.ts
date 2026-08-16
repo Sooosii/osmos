@@ -11,7 +11,7 @@ const LEAD: Lead = {
   id: 1, domain: 'ornek.com', shop_name: 'Ornek Parfum', platform: 'shopify',
   email: 'info@ornek.com', instagram: 'ornek', country: 'TR', product_count: 129,
   has_similar_feature: false, segment: 'butik-eticaret', olcek: 'kucuk',
-  marka_ortusmesi: null, score: 100,
+  marka_ortusmesi: null, urun_ortusmesi: null, score: 100,
   durum: 'zenginlestirildi', source: 'katalog', notes: null, seed_url: null,
 };
 

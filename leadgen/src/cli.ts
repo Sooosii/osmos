@@ -20,7 +20,7 @@ import { yazOutreachCsv } from './export/outreach.ts';
 import { yazDmListesi } from './export/dm-listesi.ts';
 import { yazIlkTur } from './export/ilk-tur.ts';
 import { olcAdaylar, yazDemoRaporu } from './demo/adaylar.ts';
-import { osmosMarkalari } from './demo/markalar.ts';
+import { osmosMarkalari, osmosParfumleri } from './demo/markalar.ts';
 import { yazRapor } from './report.ts';
 
 /**
@@ -158,9 +158,11 @@ async function main(): Promise<void> {
       ⚠️ `hepsi` içinde DEĞİL. Ağa çıkıyor ve dakikalar sürüyor; ayrıca
       sonucu bir satış kararına girdi olduğu için istenerek koşulmalı.
     */
-    const bizimkiler = osmosMarkalari(varsayilanKatalogDizini());
-    log(`[demo] kataloğumuzda ${bizimkiler.size} benzersiz marka var`);
-    const sonuclar = await olcAdaylar(db, bizimkiler, sinir ?? 200, log);
+    const dizin = varsayilanKatalogDizini();
+    const bizimkiler = osmosMarkalari(dizin);
+    const parfumlerimiz = osmosParfumleri(dizin);
+    log(`[demo] kataloğumuzda ${parfumlerimiz.length} parfüm / ${bizimkiler.size} marka var`);
+    const sonuclar = await olcAdaylar(db, bizimkiler, parfumlerimiz, sinir ?? 200, log);
     const n = yazDemoRaporu(sonuclar, join(VERI, 'demo-adaylari.md'));
     log(`[demo] demo-adaylari.md — ${n} hedefe demo bugün kurulabilir`);
   }

@@ -25,7 +25,7 @@ export const AGIRLIK = {
   eposta: 30,
   shopify: 20,
   haritalikKatalog: 25,
-  markaOrtusmesi: 15,
+  urunOrtusmesi: 15,
   instagram: 10,
 } as const;
 
@@ -40,11 +40,17 @@ export const AGIRLIK = {
 export const KATALOG_ALT = 15;
 export const KATALOG_UST = 150;
 
-/** Demoyu ucuzlatan en az ortak marka sayısı. */
-export const ORTUSME_ESIGI = 3;
+/**
+ * Demoyu ucuzlatan en az ortak PARFÜM sayısı.
+ *
+ * ⚠️ Eşik marka değil ÜRÜN üstünde ve bu ölçüldü: marka örtüşmesi 25 olan
+ * dükkânda ürün örtüşmesi 4 çıktı, 24 olanda 3. Marka örtüşmesine puan
+ * vermek, demo maliyetini yanlış tahmin etmek olurdu.
+ */
+export const ORTUSME_ESIGI = 5;
 
 export type PuanGirdisi = Pick<
-  Lead, 'email' | 'platform' | 'product_count' | 'instagram' | 'marka_ortusmesi'
+  Lead, 'email' | 'platform' | 'product_count' | 'instagram' | 'urun_ortusmesi'
 >;
 
 export interface PuanDokumu {
@@ -54,7 +60,7 @@ export interface PuanDokumu {
 
 export function puanla(lead: PuanGirdisi): PuanDokumu {
   const sayi = lead.product_count;
-  const ortusme = lead.marka_ortusmesi;
+  const ortusme = lead.urun_ortusmesi;
   const kalemler = {
     eposta: lead.email !== null && lead.email !== '' ? AGIRLIK.eposta : 0,
     /*
@@ -69,8 +75,8 @@ export function puanla(lead: PuanGirdisi): PuanDokumu {
       ⚠️ `null` "ölçülmedi" demek ve puan almıyor. Örtüşme ancak
       `demo-adaylari` komutu koştuktan sonra biliniyor.
     */
-    markaOrtusmesi:
-      ortusme !== null && ortusme >= ORTUSME_ESIGI ? AGIRLIK.markaOrtusmesi : 0,
+    urunOrtusmesi:
+      ortusme !== null && ortusme >= ORTUSME_ESIGI ? AGIRLIK.urunOrtusmesi : 0,
     instagram: lead.instagram !== null && lead.instagram !== '' ? AGIRLIK.instagram : 0,
   } as const;
 

@@ -6,7 +6,7 @@ import {
 
 const BOS: PuanGirdisi = {
   email: null, platform: 'bilinmiyor', product_count: null,
-  instagram: null, marka_ortusmesi: null,
+  instagram: null, urun_ortusmesi: null,
 };
 
 test('hicbir sinyal yoksa puan sifir', () => {
@@ -45,9 +45,15 @@ test('aralik disindaki kataloglar puan almiyor', () => {
   assert.equal(puanla({ ...BOS, product_count: KATALOG_UST + 1 }).toplam, 0);
 });
 
-test('marka ortusmesi esigi tutuyor', () => {
-  assert.equal(puanla({ ...BOS, marka_ortusmesi: ORTUSME_ESIGI }).toplam, AGIRLIK.markaOrtusmesi);
-  assert.equal(puanla({ ...BOS, marka_ortusmesi: ORTUSME_ESIGI - 1 }).toplam, 0);
+/*
+  ⚠️ Esik MARKA degil URUN ustunde ve bu olculdu: marka ortusmesi 25 olan
+  dukkanda urun ortusmesi 4 cikti, 24 olanda 3, ortalama 3. Bizde marka
+  basina 1-2 KURATORLU parfum var, dukkanlar o markanin POPULER parfumlerini
+  satiyor; kesismeleri icin ozel bir sebep yok.
+*/
+test('URUN ortusmesi esigi tutuyor', () => {
+  assert.equal(puanla({ ...BOS, urun_ortusmesi: ORTUSME_ESIGI }).toplam, AGIRLIK.urunOrtusmesi);
+  assert.equal(puanla({ ...BOS, urun_ortusmesi: ORTUSME_ESIGI - 1 }).toplam, 0);
 });
 
 /*
@@ -56,7 +62,7 @@ test('marka ortusmesi esigi tutuyor', () => {
   (benzer-urun `null` iken puan verme) ikinci kez yapilmasi olurdu.
 */
 test('OLCULMEMIS ortusme puan almiyor', () => {
-  assert.equal(puanla({ ...BOS, marka_ortusmesi: null }).toplam, 0);
+  assert.equal(puanla({ ...BOS, urun_ortusmesi: null }).toplam, 0);
 });
 
 test('Instagram 10 puan', () => {
@@ -66,10 +72,10 @@ test('Instagram 10 puan', () => {
 test('bes kural birlikte tam 100 ediyor', () => {
   const tam = puanla({
     email: 'info@dukkan.com', platform: 'shopify', product_count: 47,
-    marka_ortusmesi: 5, instagram: 'dukkan',
+    urun_ortusmesi: 11, instagram: 'dukkan',
   });
   assert.equal(tam.toplam, 100);
   assert.deepEqual(tam.kalemler, {
-    eposta: 30, shopify: 20, haritalikKatalog: 25, markaOrtusmesi: 15, instagram: 10,
+    eposta: 30, shopify: 20, haritalikKatalog: 25, urunOrtusmesi: 15, instagram: 10,
   });
 });

@@ -75,3 +75,68 @@ export function ortusmeHesapla(
     .sort();
   return { sayi: ortak.length, ortak, hedefMarkaSayisi: gorulen.size };
 }
+
+/** Karşılaştırma için parfüm adını sadeleştirir. */
+export function urunAnahtari(ham: string): string {
+  return ham.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+export interface UrunOrtusmesi {
+  /** Dükkânın raflarında GERÇEKTEN bulunan, bizde de olan parfüm sayısı. */
+  readonly sayi: number;
+  /** Eşleşen parfümlerin kimlikleri — demo seçkisinin kendisi. */
+  readonly kimlikler: readonly string[];
+}
+
+/**
+ * ÜRÜN düzeyinde örtüşme — demo seçkisini kuran gerçek ölçüm.
+ *
+ * ⚠️ Marka örtüşmesi bunun yerine geçmiyor ve bu ÖLÇÜLDÜ. Yirmi dükkânda
+ * bakıldı: marka örtüşmesi 25 olan dükkânda ürün örtüşmesi 4 çıktı, 24 olanda
+ * 3, 14 olanda 2. Ortalama yalnızca **3 parfüm.**
+ *
+ * Sebep katalogun biçiminde: bizde marka başına 1-2 KÜRATÖRLÜ parfüm var,
+ * dükkânlar ise o markanın POPÜLER parfümlerini satıyor. İkisinin kesişmesi
+ * için özel bir sebep yok.
+ *
+ * Sonuç, satış planının bir varsayımını düşürdü: "hedef bizim markaları
+ * satıyorsa demo bedava kurulur" doğru değil. Demo, müşterinin parfümlerinin
+ * girilmesini gerektiriyor — yani teslim emeğinin bir kısmı peşin ödeniyor.
+ * Marka örtüşmesi yine de işe yarıyor ama başka bir işe: sıfırsa ürün
+ * örtüşmesi de kesin sıfırdır, yani ucuz bir ön eleme.
+ */
+export function urunOrtusmesiHesapla(
+  dukkanBasliklari: readonly string[],
+  bizimkiler: readonly { readonly id: string; readonly ad: string }[],
+): UrunOrtusmesi {
+  const sadeBasliklar = dukkanBasliklari.map(urunAnahtari);
+  const kimlikler = bizimkiler
+    .filter((b) => {
+      const a = urunAnahtari(b.ad);
+      /* Üç harften kısa adlar her başlıkta geçer; yanlış eşleşme üretirler. */
+      return a.length >= 5 && sadeBasliklar.some((t) => t.includes(a));
+    })
+    .map((b) => b.id);
+  return { sayi: kimlikler.length, kimlikler };
+}
+
+export interface KatalogParfumu {
+  readonly id: string;
+  readonly ad: string;
+  readonly marka: string;
+}
+
+/** Kataloğumuzun kimlik + ad + marka listesi — eşleştirmenin girdisi. */
+export function osmosParfumleri(katalogDizini: string): readonly KatalogParfumu[] {
+  const hepsi: KatalogParfumu[] = [];
+  for (const dosya of readdirSync(katalogDizini).filter((d) => d.endsWith('.ts') && !d.endsWith('.test.ts'))) {
+    const metin = readFileSync(join(katalogDizini, dosya), 'utf8');
+    for (const kayit of metin.split(/\n {4}id: /).slice(1)) {
+      const id = /^.([^']+)./.exec(kayit)?.[1];
+      const ad = /name: .([^']+)./.exec(kayit)?.[1];
+      const marka = /brand: .([^']+)./.exec(kayit)?.[1];
+      if (id !== undefined && ad !== undefined && marka !== undefined) hepsi.push({ id, ad, marka });
+    }
+  }
+  return hepsi;
+}

@@ -128,6 +128,7 @@ export async function zenginlestirBir(
       demek olurdu ve yanlış olurdu.
     */
     marka_ortusmesi: null,
+    urun_ortusmesi: null,
   } as const;
 
   const notParcalari = [

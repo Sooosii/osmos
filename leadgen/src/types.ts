@@ -46,6 +46,14 @@ export interface Lead {
    * gözetiyor — ölçülmemiş bir hedefe örtüşme puanı verilmiyor.
    */
   readonly marka_ortusmesi: number | null;
+  /**
+   * Dükkânın raflarında GERÇEKTEN bulunan, bizde de olan parfüm sayısı.
+   *
+   * ⚠️ Demo seçkisini kuran ölçüm bu. Marka örtüşmesi yerine geçmiyor ve
+   * bu ölçüldü: marka örtüşmesi 25 olan dükkânda ürün örtüşmesi 4 çıktı,
+   * ortalama yalnızca 3. `null` yine "ölçülmedi" demek.
+   */
+  readonly urun_ortusmesi: number | null;
   readonly score: number;
   readonly durum: Durum;
   readonly source: string;
