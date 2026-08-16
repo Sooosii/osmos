@@ -8,7 +8,8 @@ import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
 import { NoteMeasures } from '@/components/NoteMeasures';
 import type { Dict } from '@/i18n/en';
 import { getDict, localeFor, say } from '@/i18n/dict';
-import { LOCALES, withLocale } from '@/i18n/locale';
+import { withLocale } from '@/i18n/locale';
+import { aktifDiller } from '@/lib/tenant';
 import { pageAlternates } from '@/lib/site-url';
 
 /**
@@ -59,7 +60,7 @@ export const dynamicParams = false;
   doğrulanabilir: 136 × 2.
 */
 export function generateStaticParams() {
-  return LOCALES.flatMap((lang) => NOTES.map((note) => ({ lang, id: note.id })));
+  return aktifDiller().flatMap((lang) => NOTES.map((note) => ({ lang, id: note.id })));
 }
 
 export async function generateMetadata({

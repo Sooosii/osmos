@@ -1,7 +1,8 @@
 import type { MetadataRoute } from 'next';
 import { NOTES } from '@/data/notes';
 import { PERFUMES } from '@/data/perfumes';
-import { LOCALES, withLocale } from '@/i18n/locale';
+import { withLocale } from '@/i18n/locale';
+import { aktifDiller } from '@/lib/tenant';
 import { absolute } from './site-url';
 
 /**
@@ -50,10 +51,10 @@ export function sitemapEntries(): MetadataRoute.Sitemap {
   */
   return paths.flatMap((path) => {
     const languages = Object.fromEntries(
-      LOCALES.map((locale) => [locale, absolute(withLocale(locale, path))]),
+      aktifDiller().map((locale) => [locale, absolute(withLocale(locale, path))]),
     );
 
-    return LOCALES.map((locale) => ({
+    return aktifDiller().map((locale) => ({
       url: absolute(withLocale(locale, path)),
       lastModified: now,
       alternates: { languages },

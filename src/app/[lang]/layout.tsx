@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { Geist } from "next/font/google";
 import { notFound } from "next/navigation";
-import { LOCALES, isLocale } from "@/i18n/locale";
+import { isLocale } from "@/i18n/locale";
+import { aktifDiller } from "@/lib/tenant";
 import { dictFor } from "@/i18n/dict";
 import { LocaleProvider } from "@/i18n/LocaleProvider";
 import { DemoUyarisi } from '@/components/DemoUyarisi';
@@ -27,7 +28,7 @@ export const viewport: Viewport = {
 };
 
 export function generateStaticParams() {
-  return LOCALES.map((lang) => ({ lang }));
+  return aktifDiller().map((lang) => ({ lang }));
 }
 
 export async function generateMetadata({

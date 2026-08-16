@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { activeTenant, isOsmos, resolveTenant } from './tenant';
+import { LOCALES, type Locale } from '@/i18n/locale';
+import { activeTenant, dilleriSuz, isOsmos, resolveTenant } from './tenant';
 import { OSMOS_TENANT_ID, TENANTS, type Tenant } from '@/data/tenants/registry';
 import { TENANT_CATALOGS } from '@/data/tenants/catalogs';
 import { buildTenantSpaces, SPACE_CAPACITY } from '@/data/perfume-spaces';
 import { buildMarks } from './space-marks';
-import { LOCALES } from '@/i18n/locale';
 
 describe('resolveTenant', () => {
   it('tanımlı kimliği çözer', () => {
@@ -169,5 +169,40 @@ describe('kiracı şekli', () => {
         ).toBeGreaterThan(0);
       }
     }
+  });
+});
+
+describe('kiracının dilleri', () => {
+  const kiraci = (locales?: readonly Locale[]): Tenant => ({
+    id: 'x',
+    name: 'X',
+    title: { en: 'x', tr: 'x' },
+    description: { en: 'x', tr: 'x' },
+    features: { accounts: false, notify: false, feed: false },
+    indexable: false,
+    ...(locales === undefined ? {} : { locales }),
+  });
+
+  /* Dil bildirmeyen kiraci etkilenmiyor — OSMOS ve demo-selva iki dilli kaliyor. */
+  it('dil bildirilmezse hepsi üretiliyor', () => {
+    expect(dilleriSuz(kiraci())).toEqual(LOCALES);
+  });
+
+  /*
+    ⚠️ Bir müşteriye konuşmadığı dilde sekme göstermek, sitenin ona
+    hazırlanmadığını söyler. Nischengold tek dilli Almanca satıyor (ölçüldü:
+    `locale":"de"`, CHF, `/en` → 404); Türkçe sekme orada özensizlik olur.
+  */
+  it('bildirilen dil dışındakiler üretilmiyor', () => {
+    expect(dilleriSuz(kiraci(['en']))).toEqual(['en']);
+  });
+
+  it('sıra LOCALES ten geliyor, kiracının yazdığı sıradan değil', () => {
+    expect(dilleriSuz(kiraci(['tr', 'en']))).toEqual([...LOCALES]);
+  });
+
+  /* Bos liste sessizce dilsiz bir site uretirdi. */
+  it('hiçbir geçerli dil kalmazsa patlıyor', () => {
+    expect(() => dilleriSuz(kiraci([]))).toThrow(/geçerli dili yok/);
   });
 });

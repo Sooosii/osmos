@@ -4,7 +4,8 @@ import { PERFUMES } from '@/data/perfumes';
 import { getNote } from '@/data/notes';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
 import { getDict, localeFor, say } from '@/i18n/dict';
-import { LOCALES, withLocale } from '@/i18n/locale';
+import { withLocale } from '@/i18n/locale';
+import { aktifDiller } from '@/lib/tenant';
 import { cardsFor } from '@/lib/perfume-cards';
 import { SIMILAR_COUNT, similarTo } from '@/lib/similar';
 import { pageAlternates } from '@/lib/site-url';
@@ -31,7 +32,7 @@ import { pageAlternates } from '@/lib/site-url';
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return LOCALES.flatMap((lang) => PERFUMES.map((perfume) => ({ lang, id: perfume.id })));
+  return aktifDiller().flatMap((lang) => PERFUMES.map((perfume) => ({ lang, id: perfume.id })));
 }
 
 export async function generateMetadata({

@@ -1,4 +1,5 @@
 import { OSMOS_TENANT_ID, TENANTS, type Tenant } from '@/data/tenants/registry';
+import { LOCALES, type Locale } from '@/i18n/locale';
 
 /**
  * Aktif kiracıyı çözen katman.
@@ -42,4 +43,34 @@ export function activeTenant(): Tenant {
 /** Ana site mi — kiracıya özel dallanmaları okunur kılmak için. */
 export function isOsmos(): boolean {
   return TENANT_ID === OSMOS_TENANT_ID;
+}
+
+/**
+ * Kiracının bildirdiği dilleri süzer — SAF yarı, sınanabilir.
+ *
+ * ⚠️ `LOCALES` yerine geçmiyor, onu SÜZÜYOR. `LOCALES` sitenin desteklediği
+ * dillerin evreni ve `Locale` tipinin kaynağı; buradan dönen liste yalnız
+ * hangi sayfaların basılacağını söylüyor. Kiracı bir dil bildirmezse hepsi
+ * üretiliyor — OSMOS ve eski kiracılar etkilenmiyor.
+ *
+ * ⚠️ Sıra `LOCALES`ten geliyor, kiracının yazdığı sıradan değil: varsayılan
+ * dilin ilk sırada kalması `stripLocale`/`withLocale` davranışına bağlı.
+ */
+export function dilleriSuz(tenant: Tenant, hepsi: readonly Locale[] = LOCALES): readonly Locale[] {
+  const izinli = tenant.locales;
+  if (izinli === undefined) return hepsi;
+  const suzulmus = hepsi.filter((l) => izinli.includes(l));
+  /*
+    Boş liste bir yazım hatasıdır ve sessizce dilsiz bir site üretirdi.
+    Patlamak, hiç sayfası olmayan bir derlemeyi müşteriye yollamaktan iyidir.
+  */
+  if (suzulmus.length === 0) {
+    throw new Error(`Kiracının hiçbir geçerli dili yok: ${tenant.id}`);
+  }
+  return suzulmus;
+}
+
+/** Bu derlemede üretilecek diller — ortama bakan yarı. */
+export function aktifDiller(): readonly Locale[] {
+  return dilleriSuz(activeTenant());
 }

@@ -9,7 +9,8 @@
  * çıkıldığı gün kimsenin fark etmeyeceği yanlış bir sitemap üretirdi: yanlış
  * adres sessizce çalışır, eksik adres çalışmaz ve fark edilir.
  */
-import { LOCALES, withLocale, type Locale } from '@/i18n/locale';
+import { withLocale, type Locale } from '@/i18n/locale';
+import { aktifDiller } from '@/lib/tenant';
 
 const FALLBACK = 'http://localhost:3000';
 
@@ -53,7 +54,7 @@ export function absolute(path: string): string {
  */
 export function languageAlternates(path: string): Record<Locale, string> {
   return Object.fromEntries(
-    LOCALES.map((locale) => [locale, absolute(withLocale(locale, path))]),
+    aktifDiller().map((locale) => [locale, absolute(withLocale(locale, path))]),
   ) as Record<Locale, string>;
 }
 

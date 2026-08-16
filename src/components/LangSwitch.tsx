@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LOCALES, stripLocale, switchPath } from '@/i18n/locale';
+import { stripLocale, switchPath } from '@/i18n/locale';
+import { aktifDiller } from '@/lib/tenant';
 
 /**
  * Dil değiştirici — sitenin tek "meta" kontrolü.
@@ -27,12 +28,23 @@ export function LangSwitch({ className = '' }: { readonly className?: string }) 
   const pathname = usePathname();
   const router = useRouter();
   const active = stripLocale(pathname).locale;
+  const diller = aktifDiller();
+
+  /*
+    ⚠️ Tek dilli kiracıda hiç çizilmiyor. Tek seçenekli bir "değiştirici"
+    kontrol değil, gürültü — üstelik müşteriye sitenin başka bir dili
+    olduğunu ama ona verilmediğini düşündürür.
+
+    `NEXT_PUBLIC_TENANT` derleme anında paketin içine gömüldüğü için bu
+    istemci bileşeninde de okunabiliyor.
+  */
+  if (diller.length < 2) return null;
 
   return (
     <div
       className={`flex items-center gap-1.5 text-[9px] tracking-[0.18em] ${className}`}
     >
-      {LOCALES.map((locale, index) => (
+      {diller.map((locale, index) => (
         <span key={locale} className="flex items-center gap-1.5">
           {index > 0 ? (
             <span aria-hidden="true" className="text-white/15">
