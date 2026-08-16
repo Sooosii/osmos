@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { type FeelTarget, NO_FEEL, hasFeel } from '@/lib/space-feel';
 import { formatFeel, parseFeel } from '@/lib/space-feel-url';
 import { useDict } from '@/i18n/LocaleProvider';
@@ -27,6 +27,17 @@ import { useDict } from '@/i18n/LocaleProvider';
  * ediliyor, sınırı `ScentSpaceCanvas.tsx` çiziyor — `use-canvas-size.ts` ve
  * `SpaceOverlays.tsx` ile aynı sözleşme.
  */
+
+/**
+ * Kaç kaydıracın açık olduğu — üç durum.
+ *
+ * `'ikisi'` sıcaklık ve temizlik (açılış), `'dordu'` doku ve yakınlık da,
+ * `'hicbiri'` hiç kaydıraç yok ve harita tamamen açıkta.
+ */
+type Acilim = 'ikisi' | 'dordu' | 'hicbiri';
+
+/** Üç noktalı düğmenin dönen sırası; sahibin seçtiği dizi. */
+const ACILIM_SIRASI: readonly Acilim[] = ['ikisi', 'dordu', 'hicbiri'];
 
 /** Kaydıraç çözünürlüğü. Tamsayı adım, 0…1'e bölünüyor — kayan nokta yok. */
 const STEPS = 100;
@@ -75,7 +86,14 @@ const SLIDER_CLASS = [
  * dört kaydıracın rayları farklı yerlerden başlar, sütun eğrilirdi. Aynı sınır
  * `i18n/en.ts`teki uç damgalarına da geçerli — 'ON SKIN' bu yüzden elendi.
  */
-const EDGE_CLASS = 'w-[4.2rem] shrink-0 text-[10px] tracking-[0.15em] text-white/50';
+/*
+  ⚠️ Telefonda bir kademe küçük. Panelin kendisi 19 rem'den 14 rem'e indi
+  (`SpaceOverlays`); iki uç sütunu 4.2 rem'de kalsaydı rayın kendisine kalan yer
+  90 pikselin altına inerdi — sürüklenecek bir şey kalmazdı. En uzun uç altı
+  harf (VELVET) ve 3.4 rem onu 9 puntoda taşıyor.
+*/
+const EDGE_CLASS =
+  'w-[3.4rem] shrink-0 text-[9px] tracking-[0.12em] text-white/50 sm:w-[4.2rem] sm:text-[10px] sm:tracking-[0.15em]';
 
 interface AxisProps {
   /** `Character` sırasındaki yeri: 0 sıcaklık, 1 doku, 2 temizlik, 3 yakınlık. */
@@ -90,18 +108,40 @@ interface AxisProps {
   /** Topuk bırakıldı — adres çubuğu burada tazeleniyor. */
   readonly onCommit: () => void;
   /**
-   * Uç etiketinin sağ üstüne asılan düğme — yalnızca ilk eksende dolu.
+   * Bu eksenin açıklaması — soru işaretinin altından çıkan yazı.
    *
-   * Düğme `absolute` DEĞİL, uç etiketinin içinde akıyor. Mutlak konumlandırma
-   * `EDGE_CLASS`in sabit genişliğine ikinci bir sayı daha ekler ve satır
-   * yüksekliği 16 px olduğu için ya rayın ya üstteki satırın üzerine binerdi.
-   * Etiketin içinde `align-super` ile "sağ üstte" duruyor ve sütun eğrilmiyor:
-   * en uzun uç VELVET (6 harf), yerini bu düğme almıyor.
+   * ⚠️ Dört eksenin DÖRDÜNDE de dolu. Eskiden yalnız sıcaklıkta bir işaret
+   * vardı ve tıklanınca dördünü birden anlatan bir panel açıyordu; sahip
+   * "hepsinden de birer tane olsun" dedi. Açıklamanın sorulan eksenin yanında
+   * durması, hangi cümlenin hangi raya ait olduğunu aramayı da bitiriyor.
    */
-  readonly help?: ReactNode;
+  readonly help: string;
+  /** Ekran okuyucuya giden düğme adı; `sliders.help.about`tan geliyor. */
+  readonly helpLabel: string;
+  /** Açıklama basılarak açık tutuluyor mu? */
+  readonly helpOpen: boolean;
+  /** Soru işaretine basıldı — açıksa kapanıyor, kapalıysa açılıyor. */
+  readonly onToggleHelp: (axis: number) => void;
+  /** Odak eksenden çıktı — basılı kalan açıklama düşüyor. */
+  readonly onCloseHelp: () => void;
 }
 
-function Axis({ axis, label, low, high, onPick, start, onCommit, help }: AxisProps) {
+function Axis({
+  axis,
+  label,
+  low,
+  high,
+  onPick,
+  start,
+  onCommit,
+  help,
+  helpLabel,
+  helpOpen,
+  onToggleHelp,
+  onCloseHelp,
+}: AxisProps) {
+  const helpId = `eksen-yardim-${axis}`;
+
   return (
     <div className="flex items-center gap-2">
       <span className={`${EDGE_CLASS} text-right`}>{low}</span>
@@ -134,9 +174,85 @@ function Axis({ axis, label, low, high, onPick, start, onCommit, help }: AxisPro
         />
       </span>
 
-      <span className={EDGE_CLASS}>
+      {/*
+        Uç sözcüğü ve onun sağ üstündeki soru işareti.
+
+        ⚠️ Sözcük ile işaret AYNI kutuda ve kutu `EDGE_CLASS` genişliğinde:
+        işaret akışa girse dört rayın bittiği yer eğrilirdi (aynı gerekçe
+        sol uçtaki sabit genişlikte de yazılı). `align-super` onu satırın
+        yüksekliğini büyütmeden yukarı alıyor.
+      */}
+      <span className={`${EDGE_CLASS} relative`}>
         {high}
-        {help}
+
+        {/*
+          Açıklama kutusu: üstüne gelince beliriyor, BASINCA açık kalıyor.
+
+          ⚠️ İlk sürüm tamamen CSS'ti (`peer-hover`) ve okunmuyordu: kutuyu
+          okumak için fareyi kıpırdatmadan tutmak gerekiyordu, bir milim kayınca
+          yazı kayboluyordu. Sahip gördü — "basınca okunsun, geri çıkınca
+          kapansın". Bu bir KILIT ve kilidin durumu CSS'te tutulamaz.
+
+          Bugünkü davranış:
+            · üstüne gel          → beliriyor (önizleme, kilit yok)
+            · bas                 → açık KALIYOR, fare çekilse de duruyor
+            · tekrar bas          → kapanıyor
+            · başka yere geç, Esc → kapanıyor
+
+          ⚠️ Kilit bu bileşende değil bir üst katmanda, ve sebebi tek kural:
+          aynı anda yalnız bir açıklama açık kalsın. İki kutu birden açıkken
+          hangisinin hangi raya ait olduğu kaybolurdu — açıklamayı eksenin
+          yanına taşımanın bütün sebebi buydu.
+
+          ⚠️ Üstüne gelme kısmı **`peer`, `group` değil** ve bu ölçülerek
+          bulundu: bu projede `group-focus-within` hiç üretilmiyor, düğme
+          odaktayken kutu görünmüyordu. Kardeş seçici bu dosyada zaten kanıtlı —
+          rayın odak parıltısı da onunla çalışıyor.
+        */}
+        <span className="relative inline-block">
+          <button
+            type="button"
+            aria-label={helpLabel}
+            aria-describedby={helpId}
+            aria-expanded={helpOpen}
+            onClick={() => onToggleHelp(axis)}
+            /*
+              Odak eksenden çıkınca kilit düşüyor: "geri çıktığında kapansın".
+              `onBlur` hem sekmeyle geçmeyi hem de başka bir yere dokunmayı
+              karşılıyor; ikisi için ayrı dinleyici gerekmiyor.
+            */
+            onBlur={onCloseHelp}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape' && helpOpen) onCloseHelp();
+            }}
+            /* Odak halkası ve yuvarlak gövde "…" düğmesinden birebir: uzayda
+               tıklanabilir olan her şey aynı dili konuşuyor. */
+            className={`peer ml-1 rounded-full px-1 py-0.5 align-super text-[9px] leading-none transition-colors hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 ${
+              helpOpen ? 'text-white' : 'text-white/40'
+            }`}
+          >
+            ?
+          </button>
+
+          {/*
+            ⚠️ Kutu `absolute` ve sağa yaslı: panelin sağ kenarındaki bir
+            işaretten sola doğru açılıyor. Genişlik telefonda 13 rem — ölçüldü,
+            15 rem'de kutunun sol kenarı ekranın 4 piksel dışında kalıyordu.
+
+            Zemin donuk siyah, çünkü altında harita var: saydam bir kutuda
+            renkli noktalar cümlenin harflerini yiyor — aynı ölçüm eski açıklama
+            panelinde de yapılmıştı.
+          */}
+          <span
+            id={helpId}
+            role="tooltip"
+            className={`pointer-events-none absolute bottom-full right-0 z-20 mb-2 w-[13rem] max-w-[70vw] rounded-sm border border-white/10 bg-black/90 px-3 py-2 text-[11px] leading-[1.7] tracking-normal text-white/70 transition-opacity duration-150 sm:w-[15rem] ${
+              helpOpen ? 'opacity-100' : 'opacity-0 peer-hover:opacity-100'
+            }`}
+          >
+            {help}
+          </span>
+        </span>
       </span>
     </div>
   );
@@ -194,23 +310,42 @@ export function SpaceFeelSliders({
   const valuesRef = useRef<(number | null)[]>([...NO_FEEL]);
 
   /**
-   * "…" açık mı?
+   * Kaç kaydıraç açık — üç durum, dönen bir sıra.
    *
-   * Adreste doku veya yakınlık sorulmuşsa aşağıdaki etki bunu **açıyor**. Kapalı
-   * kalsaydı paylaşılan link, kullanıcının göremediği iki koşulla daralmış bir
-   * uzay gösterirdi — `toggleDetail`in kaçındığı şeyin ta kendisi.
+   * Sahibin seçtiği dizi: **ikisi → dördü → hiçbiri → ikisi**. Eskiden iki
+   * durum vardı (iki ya da dört kaydıraç) ve haritayı tamamen açığa çıkarmanın
+   * yolu yoktu; telefonda panel 390 piksellik ekranın 304'ünü kaplıyor, yani
+   * "hiçbiri" bir süs değil, haritaya bakmanın tek yolu.
+   *
+   * Adreste doku veya yakınlık sorulmuşsa aşağıdaki etki bunu `'dordu'` yapıyor.
+   * Paylaşılan bir link asla `'hicbiri'` ile açılmıyor: tarif yürürlükte olup
+   * ekranda görünmeyen bir kaydıraçtan gelirdi.
    */
-  const [detailed, setDetailed] = useState(false);
+  const [acilim, setAcilim] = useState<Acilim>('ikisi');
 
   /**
-   * Yardım açık mı?
+   * Sıfırlama sayacı — yalnızca topukları yeniden doğurmak için.
    *
-   * "…" ile bağı yok: biri eksen ekliyor, öbürü var olanları anlatıyor. Sahibin
-   * isteği açıkça "hepsini tek tek" olduğu için gizli iki eksen kapalıyken de
-   * dördü birden anlatılıyor — açıklamayı görmek için önce paneli açmak
-   * gerekseydi, açmayı bilmeyene hiçbir şey anlatılmamış olurdu.
+   * ⚠️ Süs değil, sessiz bir hatanın karşılığı. Kaydıraçlar kontrolsüz
+   * (`defaultValue`), yani topuk ancak grup YENIDEN DOĞARSA yerine oturuyor ve
+   * grubun kimliği (`key`) tarifin kendisinden geliyor. Tarif zaten boşken
+   * sürüklenmiş bir topuk için o kimlik hiç değişmez: sıfırla düğmesi tarifi
+   * temizler, adres temizlenir, ama ekrandaki topuz kenarda kalırdı — gördüğün
+   * yer ile sorulan şey farklı şeyler söylerdi.
    */
-  const [helping, setHelping] = useState(false);
+  const [sifirlamaSayisi, setSifirlamaSayisi] = useState(0);
+
+  /**
+   * Basılarak açık tutulan açıklama — hangi eksenin, ya da hiçbiri.
+   *
+   * ⚠️ Durum eksenin İÇİNDE değil burada, ve sebebi tek bir kural: aynı anda
+   * yalnız bir açıklama açık kalsın. Dört kutu birden açık olsaydı hangisinin
+   * hangi raya ait olduğu kaybolurdu.
+   *
+   * Üstüne gelme hâlâ CSS'te (`peer-hover`) ve durum tutmuyor: önizleme her
+   * karede React'i uyandırmamalı. Buradaki durum yalnızca KILIDI taşıyor.
+   */
+  const [acikYardim, setAcikYardim] = useState<number | null>(null);
 
   /**
    * Bir ekseni tazeler — ve o ekseni "sormuyorum"dan "şunu soruyorum"a geçirir.
@@ -262,7 +397,7 @@ export function SpaceFeelSliders({
     valuesRef.current = [...fromUrl];
     targetRef.current = fromUrl;
     setInitial(fromUrl);
-    setDetailed(DETAIL_AXES.some((axis) => fromUrl[axis] !== null));
+    setAcilim(DETAIL_AXES.some((axis) => fromUrl[axis] !== null) ? 'dordu' : 'ikisi');
     requestDraw();
   }, [targetRef, requestDraw]);
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -295,29 +430,65 @@ export function SpaceFeelSliders({
   }, []);
 
   /**
-   * "…" düğmesi — açar, kapatır.
+   * Tarifi tamamen boşaltır — dört eksen de "sormuyorum" hâline döner.
    *
-   * ⚠️ Kapanırken doku ve yakınlık tariften **düşürülüyor.** Görünmeyen bir
-   * koşulun cevabı sürüklemesi, kaydıraçların en baştan kaçındığı şeyin ta
-   * kendisi olurdu: kullanıcı ekranda göremediği bir sebeple daralmış bir cevaba
-   * bakardı. Kapatmanın tek dürüst anlamı "artık bunları sormuyorum".
+   * Üç şeyi birden yapmak zorunda ve üçü de gerekli:
+   *   · değer (`valuesRef` + `targetRef`) — çizim döngüsünün okuduğu yer
+   *   · adres (`commit`) — paylaşılan link daralmış bir uzay göstermesin
+   *   · topuk (`setInitial` + sayaç) — gördüğün yer ile sorulan şey aynı olsun
    *
-   * Kaydıraçların kendisini sıfırlamaya gerek yok: eksenler DOM'dan kalkıyor,
-   * tekrar açıldıklarında `defaultValue` ile ortada doğuyorlar. Yani gördüğün
-   * topuz ile tarifteki değer hep aynı şeyi söylüyor.
+   * ⚠️ Sayaç olmadan üçüncüsü sessizce eksik kalıyor; gerekçe `sifirlamaSayisi`
+   * tanımında yazılı.
    */
-  const toggleDetail = useCallback(() => {
-    if (detailed) {
-      for (const axis of DETAIL_AXES) valuesRef.current[axis] = null;
-      targetRef.current = [...valuesRef.current];
-      requestDraw();
-      // Kapanış da bir karar: adres, ekranda görünmeyen iki koşulu taşımasın.
-      commit();
-    }
-    setDetailed(!detailed);
-  }, [detailed, targetRef, requestDraw, commit]);
+  const yardimKapat = useCallback(() => setAcikYardim(null), []);
 
-  const toggleHelp = useCallback(() => setHelping((open) => !open), []);
+  const yardimDegistir = useCallback(
+    (axis: number) => setAcikYardim((acik) => (acik === axis ? null : axis)),
+    [],
+  );
+
+  const temizle = useCallback(() => {
+    /* Kilit de düşüyor: sıfırlamadan sonra havada kalmış bir açıklama, ekranda
+       artık sorulmayan bir şeyi anlatıyor olurdu. */
+    setAcikYardim(null);
+    valuesRef.current = [...NO_FEEL];
+    targetRef.current = NO_FEEL;
+    setInitial(NO_FEEL);
+    setSifirlamaSayisi((sayi) => sayi + 1);
+    onSlide();
+    commit();
+    requestDraw();
+  }, [targetRef, requestDraw, commit, onSlide]);
+
+  /**
+   * "…" düğmesi — üç durum arasında dönüyor.
+   *
+   * ⚠️ **`'hicbiri'`ne geçerken tarif tamamen düşüyor.** Kural eskiden yalnız
+   * doku ve yakınlık için vardı; gerekçesi değişmedi, kapsamı büyüdü: ekranda
+   * görünmeyen bir koşulun cevabı daraltması, kaydıraçların en baştan kaçındığı
+   * şeyin ta kendisi. Hiç kaydıraç görünmüyorsa hiçbir şey sorulmuyor demektir.
+   *
+   * Dörtten ikiye inen bir adım YOK — sıra `'dordu'`dan `'hicbiri'`ne geçiyor —
+   * ama doku ve yakınlığın ayrıca düşürülmesine gerek de yok: `temizle` zaten
+   * dördünü birden alıyor.
+   *
+   * `'hicbiri'`den `'ikisi'`ye dönerken düşürülecek bir şey yok, tarif zaten boş.
+   */
+  const ilerlet = useCallback(() => {
+    setAcikYardim(null);
+    const yeri = ACILIM_SIRASI.indexOf(acilim);
+    const sonraki = ACILIM_SIRASI[(yeri + 1) % ACILIM_SIRASI.length] ?? 'ikisi';
+
+    if (sonraki === 'hicbiri') temizle();
+    setAcilim(sonraki);
+  }, [acilim, temizle]);
+
+  /** Düğmenin yazısı basılınca NE OLACAĞINI söylüyor — `chart.pause` ile aynı kural. */
+  const ACILIM_ADI: Readonly<Record<Acilim, string>> = {
+    ikisi: WORDS.openDetail,
+    dordu: WORDS.closeDetail,
+    hicbiri: WORDS.reopenBasic,
+  };
 
   /*
     Raydan gelen tarif yürürlüğe giriyor.
@@ -333,7 +504,7 @@ export function SpaceFeelSliders({
     valuesRef.current = [...applied];
     targetRef.current = applied;
     setInitial(applied);
-    setDetailed(DETAIL_AXES.some((axis) => applied[axis] !== null));
+    setAcilim(DETAIL_AXES.some((axis) => applied[axis] !== null) ? 'dordu' : 'ikisi');
     commit();
     requestDraw();
   }, [applied, targetRef, requestDraw, commit]);
@@ -347,19 +518,6 @@ export function SpaceFeelSliders({
    * topuğun durduğu yer (`update`in yorumu). Adresten değer geldiyse topuk
    * oraya oturuyor ve gördüğün yer ile tarif aynı şeyi söylüyor.
    */
-  /*
-    Yardım satırları. Başlıklar ekran okuyucuya giden `label`ların ta kendisi:
-    aynı eksene ikinci bir ad takılmıyor ve sözcük tek yerde duruyor.
-
-    Sıra ekrandakiyle aynı — sıcaklık, temizlik, sonra "…" ile gelen ikisi.
-  */
-  const HELP_ROWS = [
-    { key: 'temperature', title: WORDS.temperature.label, body: WORDS.help.temperature },
-    { key: 'cleanliness', title: WORDS.cleanliness.label, body: WORDS.help.cleanliness },
-    { key: 'texture', title: WORDS.texture.label, body: WORDS.help.texture },
-    { key: 'proximity', title: WORDS.proximity.label, body: WORDS.help.proximity },
-  ];
-
   const startOf = (axis: number) => {
     const value = initial[axis];
     return value === null || value === undefined ? MIDDLE : Math.round(value * STEPS);
@@ -371,41 +529,48 @@ export function SpaceFeelSliders({
       doğdukları anda okunuyor. Adres sonradan geldiği için topuklar bir kez
       yeniden doğmak zorunda, yoksa tarif yürürlükte olur ama topuklar ortada
       durur — gördüğün yer ile tarif farklı şeyler söylerdi.
-    */
-    <div key={formatFeel(initial) ?? 'bos'} className="flex flex-col gap-2.5">
-      <Axis
-        axis={0}
-        label={WORDS.temperature.label}
-        low={WORDS.temperature.low}
-        high={WORDS.temperature.high}
-        onPick={update}
-        start={startOf(0)}
-        onCommit={commit}
-        help={
-          <button
-            type="button"
-            onClick={toggleHelp}
-            aria-expanded={helping}
-            aria-label={helping ? WORDS.help.close : WORDS.help.open}
-            /* Odak halkası ve yuvarlak gövde "…" düğmesinden birebir: uzayda
-               tıklanabilir olan her şey aynı dili konuşuyor. */
-            className="ml-1 rounded-full px-1 py-0.5 align-super text-[9px] leading-none text-white/40 transition-colors hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
-          >
-            ?
-          </button>
-        }
-      />
-      <Axis
-        axis={2}
-        label={WORDS.cleanliness.label}
-        low={WORDS.cleanliness.low}
-        high={WORDS.cleanliness.high}
-        onPick={update}
-        start={startOf(2)}
-        onCommit={commit}
-      />
 
-      {detailed ? (
+      Sıfırlama sayacı da kimliğin içinde: tarif ZATEN boşken sürüklenmiş bir
+      topuğu yerine oturtan tek şey o (gerekçe `sifirlamaSayisi` tanımında).
+    */
+    <div
+      key={`${formatFeel(initial) ?? 'bos'}-${sifirlamaSayisi}`}
+      className="flex flex-col gap-2.5"
+    >
+      {acilim !== 'hicbiri' ? (
+        <>
+          <Axis
+            axis={0}
+            label={WORDS.temperature.label}
+            low={WORDS.temperature.low}
+            high={WORDS.temperature.high}
+            onPick={update}
+            start={startOf(0)}
+            onCommit={commit}
+            help={WORDS.help.temperature}
+            helpLabel={WORDS.help.about(WORDS.temperature.label)}
+            helpOpen={acikYardim === 0}
+            onToggleHelp={yardimDegistir}
+            onCloseHelp={yardimKapat}
+          />
+          <Axis
+            axis={2}
+            label={WORDS.cleanliness.label}
+            low={WORDS.cleanliness.low}
+            high={WORDS.cleanliness.high}
+            onPick={update}
+            start={startOf(2)}
+            onCommit={commit}
+            help={WORDS.help.cleanliness}
+            helpLabel={WORDS.help.about(WORDS.cleanliness.label)}
+            helpOpen={acikYardim === 2}
+            onToggleHelp={yardimDegistir}
+            onCloseHelp={yardimKapat}
+          />
+        </>
+      ) : null}
+
+      {acilim === 'dordu' ? (
         <>
           {/*
             Etiketler ekranda seçildi.
@@ -433,6 +598,11 @@ export function SpaceFeelSliders({
             onPick={update}
             start={startOf(DETAIL_AXES[0])}
             onCommit={commit}
+            help={WORDS.help.texture}
+            helpLabel={WORDS.help.about(WORDS.texture.label)}
+            helpOpen={acikYardim === DETAIL_AXES[0]}
+            onToggleHelp={yardimDegistir}
+            onCloseHelp={yardimKapat}
           />
           <Axis
             axis={DETAIL_AXES[1]}
@@ -442,22 +612,28 @@ export function SpaceFeelSliders({
             onPick={update}
             start={startOf(DETAIL_AXES[1])}
             onCommit={commit}
+            help={WORDS.help.proximity}
+            helpLabel={WORDS.help.about(WORDS.proximity.label)}
+            helpOpen={acikYardim === DETAIL_AXES[1]}
+            onToggleHelp={yardimDegistir}
+            onCloseHelp={yardimKapat}
           />
         </>
       ) : null}
 
       {/*
-        Üç nokta hep duruyor: aynı düğme hem açıyor hem kapatıyor.
+        Üç nokta hep duruyor: aynı düğme üç durum arasında dönüyor
+        (ikisi → dördü → hiçbiri → ikisi).
 
-        Kapanışta eksenler tariften DÜŞÜYOR (`toggleDetail`). Kapanıp da tarifte
-        kalsalardı ekranda görünmeyen iki koşul cevabı sürüklerdi ve kullanıcı
-        neden o sonucu aldığını göremezdi — kapatmanın tek dürüst anlamı "artık
-        bunları sormuyorum".
+        `'hicbiri'`ne geçerken tarif tamamen DÜŞÜYOR (`ilerlet`). Düşmeseydi
+        ekranda hiç kaydıraç yokken cevap hâlâ daralmış olurdu ve kullanıcı
+        neden o sonucu aldığını göremezdi.
       */}
       {/*
         Hiza sihirli sayıdan değil, kaydıraçlarla AYNI iskeletten geliyor: boş
-        bir etiket sütunu, sonra düğme. Böylece üç nokta rayların tam başladığı
-        yerde duruyor ve `EDGE_CLASS` değişince kendiliğinden takip ediyor.
+        bir etiket sütunu, sonra düğmeler. Böylece üç nokta rayların tam
+        başladığı yerde duruyor ve `EDGE_CLASS` değişince kendiliğinden takip
+        ediyor.
 
         Önce `ml-[…rem]` ile hizalanmıştı ve iki kez ısırdı: hem etiket
         genişliğiyle elle eşlenmesi gereken ikinci bir sayıydı, hem de Tailwind
@@ -467,57 +643,34 @@ export function SpaceFeelSliders({
         <span className={EDGE_CLASS} aria-hidden="true" />
         <button
           type="button"
-          onClick={toggleDetail}
-          aria-expanded={detailed}
-          aria-label={detailed ? WORDS.closeDetail : WORDS.openDetail}
-          className={`w-fit rounded-full px-2 py-1 text-[13px] leading-none tracking-[0.3em] transition-colors hover:text-white/60 focus-visible:text-white/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 ${
-            detailed ? 'text-white/50' : 'text-white/50'
-          }`}
+          onClick={ilerlet}
+          aria-label={ACILIM_ADI[acilim]}
+          className="w-fit rounded-full px-2 py-1 text-[13px] leading-none tracking-[0.3em] text-white/50 transition-colors hover:text-white/60 focus-visible:text-white/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
         >
           …
         </button>
+
+        {/*
+          Sıfırla — sahibin isteği: "biri sıfırlamak isterse sıfırlayabilsin".
+
+          Kaydıraç sürüklendikten sonra ortaya geri götürecek bir yol yoktu;
+          topuğu gözle ortaya oturtmak da işe yaramıyor, çünkü dokunulmuş bir
+          eksen ortada dursa bile "ortayı soruyorum" demek oluyor (`update`in
+          yorumu). Sıfırlamanın anlamı ortaya getirmek değil, SORUYU GERİ ALMAK.
+
+          Düğme `'hicbiri'`de çizilmiyor: orada zaten sorulmuş bir şey yok.
+        */}
+        {acilim !== 'hicbiri' ? (
+          <button
+            type="button"
+            onClick={temizle}
+            aria-label={WORDS.resetLabel}
+            className="w-fit rounded-full px-2 py-1 text-[9px] leading-none tracking-[0.18em] text-white/35 transition-colors hover:text-white/70 focus-visible:text-white/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
+          >
+            {WORDS.reset}
+          </button>
+        ) : null}
       </div>
-
-      {/*
-        Açıklama panelin ALTINDA açılıyor, ortada bir kart olarak değil: harita
-        görünür kalsın diye. Okurken kaydıracı sürüklemek, sürüklerken açıklamayı
-        okumak mümkün — bir kartta ikisi de mümkün değildi.
-
-        Etiket sütunu burada YOK: metin proz, dört karakterlik bir girinti
-        panelin dörtte birini yerdi. Hiza yerine ince bir çizgi ayırıyor.
-
-        `max-h` + kaydırma telefon için: dört gövde 390 px'lik bir ekranda
-        kaydıraçların altına sığmıyor.
-
-        ⚠️ Perde tarayıcıda ölçülerek eklendi. Masaüstünde sol sütun boş siyah
-        ve metin zaten okunuyordu; 390 px'lik ekranda bulut metnin ARKASINDAN
-        geçiyor ve renkli noktalar cümleleri yiyor. Perde siyah üstünde
-        görünmüyor (siyah üstüne siyah), yalnızca nokta olan yerde çalışıyor.
-        Sağ kenarda sertçe bitmesin diye son 48 px'te eriyor — kart değil,
-        haritanın kendi kenar sönümüyle aynı dil.
-      */}
-      {helping ? (
-        <div
-          className="-mr-12 mt-1 flex max-h-[46vh] flex-col gap-3 overflow-y-auto pb-5 pr-12"
-          style={{
-            background:
-              'linear-gradient(to right, rgba(0,0,0,0.9), rgba(0,0,0,0.9) calc(100% - 48px), rgba(0,0,0,0))',
-          }}
-        >
-          {/* Ayırıcı çizgi başlıkta: perde sağa taşıyor, çizgi metin sütununda
-              kalsın diye. Kutuya verilseydi haritanın üstüne sarkardı. */}
-          <p className="border-t border-white/10 pt-3 text-[10px] tracking-[0.3em] text-white/50">
-            {WORDS.help.heading}
-          </p>
-
-          {HELP_ROWS.map((row) => (
-            <div key={row.key} className="flex flex-col gap-1">
-              <p className="text-[10px] tracking-[0.15em] text-white/60">{row.title}</p>
-              <p className="text-[11px] leading-[1.7] text-white/45">{row.body}</p>
-            </div>
-          ))}
-        </div>
-      ) : null}
     </div>
   );
 }

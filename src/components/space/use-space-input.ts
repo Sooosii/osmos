@@ -9,6 +9,7 @@ import {
   panBy,
   zoomAt,
 } from '@/lib/space-camera';
+import { olculenPaylar } from './kaplayan-katmanlar';
 import {
   type Probe,
   beginProbe,
@@ -632,7 +633,15 @@ export function useSpaceInput({
       gitmeyen çizgiler kalıyordu (52 parfümün yarısından çoğunda, ölçüldü).
     */
     if (mark && mark.id !== selectedRef.current) {
-      moveTo(fitToMarks(cameraRef.current, mark, markById, viewportRef.current));
+      moveTo(
+        fitToMarks(
+          cameraRef.current,
+          mark,
+          markById,
+          viewportRef.current,
+          olculenPaylar(viewportRef.current),
+        ),
+      );
     }
 
     /*

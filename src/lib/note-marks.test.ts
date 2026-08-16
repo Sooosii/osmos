@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import type { Note, Perfume, PerfumeNote } from '@/data/types';
 import { NOTES } from '@/data/notes';
 import { PERFUMES } from '@/data/perfumes';
-import { countUsedNotes } from './note-marks';
+import { buildNotePage, countUsedNotes } from './note-marks';
 
 /**
  * Paletin ne kadarının seçkide gerçekten geçtiği.
@@ -71,5 +71,44 @@ describe('countUsedNotes', () => {
 
     expect(used).toBeGreaterThan(0);
     expect(used).toBeLessThanOrEqual(NOTES.length);
+  });
+});
+
+describe('buildNotePage — katman', () => {
+  /*
+    ⚠️ Nota sayfasındaki damganın (ÜST / KALP / DIP) tek kaynağı bu alan.
+    Yanlış olsaydı belirti sessiz olurdu: sayfa açılır, liste dolu görünür,
+    yalnızca hangi parfümde ne olduğu yanlış yazardı — ve kimse fark etmezdi.
+
+    ⚠️ Tek bir notaya bakılıyor, 158'in hepsine değil: `buildNotePage` her
+    çağrıda `projectToSpace` ile 52×52'lik bir matris kuruyor ve paletin
+    tamamını gezen ilk yazım sınamayı 100 saniyeye çıkarıp zaman aşımına
+    uğrattı. Katman eşlemesi notaya göre değişen bir şey değil; bir nota onu
+    kanıtlıyor, üç katmanın da göründüğünü aşağıdaki sentetik sınama tutuyor.
+  */
+  test('gerçek veride taşıyıcının katmanı parfümün kendi kaydıyla aynı', () => {
+    const limon = NOTES.find((candidate) => candidate.id === 'lemon');
+    expect(limon, 'limon paletten kalkmış').toBeDefined();
+    if (!limon) return;
+
+    const { carriers } = buildNotePage(limon, PERFUMES);
+    expect(carriers.length).toBeGreaterThan(0);
+
+    for (const carrier of carriers) {
+      const perfume = PERFUMES.find((candidate) => candidate.id === carrier.id);
+      const entry = perfume?.notes.find((candidate) => candidate.noteId === limon.id);
+      expect(carrier.tier, carrier.id).toBe(entry?.tier);
+    }
+  });
+
+  test('üç katman da olduğu gibi taşınıyor', () => {
+    const katmanlar = ['top', 'heart', 'base'] as const;
+    const parfumler = katmanlar.map((tier, index) => ({
+      ...perfume(`p${index}`, ['bergamot']),
+      notes: [{ noteId: 'bergamot', tier, weight: 0.5 }],
+    }));
+
+    const { carriers } = buildNotePage(note('bergamot'), parfumler);
+    expect(carriers.map((carrier) => carrier.tier).sort()).toEqual(['base', 'heart', 'top']);
   });
 });

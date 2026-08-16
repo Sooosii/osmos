@@ -278,8 +278,16 @@ export const EN = {
       cleanliness: { label: 'Cleanliness — dirty to clean', low: 'DIRTY', high: 'CLEAN' },
       texture: { label: 'Texture — velvety to sharp', low: 'VELVET', high: 'SHARP' },
       proximity: { label: 'Proximity — airborne to skin-close', low: 'AIR', high: 'SKIN' },
+      /*
+        Üç durumlu düğmenin yazıları. Düğmenin adı, basılınca NE OLACAĞINI
+        söylüyor — `chart.pause`/`chart.play` ile aynı kural.
+      */
       openDetail: 'Two more axes: texture and proximity',
-      closeDetail: 'Close the texture and proximity axes',
+      closeDetail: 'Close all four axes',
+      reopenBasic: 'Ask again with temperature and cleanliness',
+      /** Tarifi tamamen boşaltan düğme. */
+      reset: 'CLEAR',
+      resetLabel: 'Clear the description and show the whole map',
       /*
         Yardım metni — sahibin isteği: "anlamayanlar için, hepsini tek tek".
 
@@ -291,9 +299,13 @@ export const EN = {
         karabiber keskin" söylüyor.
       */
       help: {
-        open: 'What do these four axes mean?',
-        close: 'Close the explanation',
-        heading: 'FOUR AXES',
+        /*
+          Her eksenin kendi soru işareti var ve üstüne gelince yalnız kendi
+          açıklamasını açıyor. Eskiden tek bir işaret dördünü birden anlatan bir
+          panel açıyordu; sahip "hepsinden de birer tane olsun" dedi — açıklama
+          artık sorulan eksenin yanında duruyor.
+        */
+        about: (axis: string) => `What does this axis mean? ${axis}`,
         temperature:
           'Whether the scent stands warm or cool. Spice, resin and vanilla read warm; citrus, mint and sea air read cool.',
         cleanliness:
@@ -479,6 +491,12 @@ export const EN = {
     tiers: { top: 'Top', heart: 'Heart', base: 'Base' },
     timeLabel: 'Time',
     /*
+      Zaman çubuğundaki evre işaretleri. Nokta görsel; adı yalnız bu yazı
+      taşıyor, o yüzden hem `aria-label` hem de üstüne gelince beliren yazı
+      buradan geliyor.
+    */
+    jumpTo: (phase: string) => `Jump to ${phase}`,
+    /*
       Duraklat/oynat düğmesinin yazısı. Düğmenin adı YAPACAĞI şeyi söylüyor
       ("Pause" akarken), durumu değil — `aria-pressed`li bir düğmede ikisi
       birden söylenirse ekran okuyucu "basılı: duraklat" der ve hangisi olduğu
@@ -493,7 +511,7 @@ export const EN = {
   },
 
   /** `phaseLabel` — dakikanın hangi evrede olduğu. */
-  phases: { opening: 'Opening', heart: 'Heart', base: 'Base' },
+  phases: { top: 'Top', heart: 'Heart', base: 'Base' },
 
   /**
    * `formatDuration` — dakikayı okunur süreye çevirir.

@@ -167,7 +167,15 @@ export function SpaceOverlays({
           </p>
         </div>
 
-        <div className="pointer-events-auto w-[19rem] max-w-[calc(100vw-3rem)]">
+        {/*
+          ⚠️ Genişlik telefonda ölçülerek kısaldı. 19 rem, 390 piksellik bir
+          ekranda **304 piksel** ediyor — genişliğin %78'i — ve panel haritanın
+          üstünde duran bir duvara dönüşüyordu (sahip: "uzaya karışıyor").
+          Kaydıraçların uç sözcükleri de aynı kademede küçülüyor
+          (`SpaceFeelSliders`in `EDGE_CLASS`i), yoksa dar sütunda VELVET satırı
+          kırardı.
+        */}
+        <div className="pointer-events-auto w-[14rem] max-w-[calc(100vw-3rem)] sm:w-[19rem]">
           <SpaceFeelSliders
             key={spaceId}
             targetRef={feelTargetRef}
@@ -204,8 +212,14 @@ export function SpaceOverlays({
         </span>
       </nav>
 
-      {/* Meta kontroller — sağ üst: oturum, bildirim ve dil. */}
-      <div className="pointer-events-auto absolute right-6 top-6 flex items-center gap-3 sm:right-10 sm:top-10">
+      {/* Meta kontroller — sağ üst: oturum, bildirim ve dil.
+
+          `data-space-meta`: kadraj bu kutunun kapladığı yeri ölçüp seçilen
+          parfümü onun altına düşürmüyor (`kaplayan-katmanlar.ts`). */}
+      <div
+        data-space-meta=""
+        className="pointer-events-auto absolute right-6 top-6 flex items-center gap-3 sm:right-10 sm:top-10"
+      >
         <PerfumeSearch />
         <SignInLink />
         <NotifyControl />
@@ -249,7 +263,10 @@ export function SpaceOverlays({
 
       {/* Küratör cümlesi yalnızca seçimde — fare gezdirirken alt metin sürekli
           değişip huzursuz etmesin. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 p-6 sm:p-8">
+      <div
+        data-space-caption=""
+        className="pointer-events-none absolute inset-x-0 bottom-0 p-6 sm:p-8"
+      >
         <p
           className={`mx-auto max-w-xl text-center text-sm italic leading-relaxed text-white/50 transition-opacity duration-300 ${
             selectedLine ? 'opacity-100' : 'opacity-0'

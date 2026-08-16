@@ -1,4 +1,4 @@
-import type { Note, Perfume } from '@/data/types';
+import type { Note, Perfume, PyramidTier } from '@/data/types';
 import { dominantFamily, getFamily } from '@/data/families';
 import { say } from '@/i18n/dict';
 import { DEFAULT_LOCALE, type Locale } from '@/i18n/locale';
@@ -29,6 +29,17 @@ export interface NoteMark {
   readonly depth: number;
   /** Baskın koku ailesinin rengi. */
   readonly color: string;
+  /**
+   * Notanın bu parfümdeki katmanı — üst, kalp ya da dip.
+   *
+   * ⚠️ Aynı nota her parfümde aynı yerde durmuyor ve nota sayfasının söylemesi
+   * gereken şey tam olarak buydu: limon birinde üstte parlayıp geçiyor,
+   * ötekinde kalbin içinde duruyor. Bilgi zaten `perfume.notes` kaydında vardı,
+   * burada atılıyordu.
+   *
+   * `weight` ile karıştırılmamalı: ağırlık ne kadar, katman nerede.
+   */
+  readonly tier: PyramidTier;
 }
 
 /** Nota sayfasının ihtiyaç duyduğu her şey, tek nesnede. */
@@ -127,6 +138,7 @@ export function buildNotePage(
       weight: entry.weight,
       depth,
       color: getFamily(dominantFamily(familyVector(perfume))).color,
+      tier: entry.tier,
     });
   }
 
