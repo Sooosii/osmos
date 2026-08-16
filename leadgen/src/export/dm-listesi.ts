@@ -16,7 +16,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { kanitlar, temasKurulanlar, tumLeadler } from '../db.ts';
-import { acilisCumlesi, dilSec, dmTaslagi, kanalSec, temizAd } from './outreach.ts';
+import { acilisCumlesi, dilSec, dmTaslagi, kanalSec, sayfaMetni, temizAd } from './outreach.ts';
 import type { Lead } from '../types.ts';
 
 /** Bir günde elle atılabilecek makul DM sayısı — üstü hesabı riske atıyor. */
@@ -67,8 +67,9 @@ export function yazDmListesi(db: DatabaseSync, yol: string): DmListesiOzeti {
 
   const bloklar: string[] = [];
   kalan.forEach((l, i) => {
-    const dil = dilSec(l.country);
-    const acilis = acilisCumlesi(l, kanitlar(db, l.id as number), dil);
+    const kanit = kanitlar(db, l.id as number);
+    const dil = dilSec(l.country, sayfaMetni(l, kanit));
+    const acilis = acilisCumlesi(l, kanit, dil);
     /*
       Gün ayracı: sahip listeyi tek oturumda bitirmeye çalışmasın. Instagram
       yeni bir hesaptan gelen yoğun DM'i kısıtlıyor.

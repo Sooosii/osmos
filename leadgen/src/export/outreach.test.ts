@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  acilisCumlesi, dilSec, dmTaslagi, guvenCumlesi, kanalSec, mektupGovdesi, temizAd, type Dil,
+  acilisCumlesi, dilIzi, dilSec, dmTaslagi, guvenCumlesi, kanalSec, mektupGovdesi, temizAd, type Dil,
 } from './outreach.ts';
 import type { Evidence, Lead } from '../types.ts';
 
@@ -264,4 +264,131 @@ test('urun-sayisi satiri yoksa platform kaniti kullanilmaya devam ediyor', () =>
   const a = acilisCumlesi(LEAD, [kanit('platform', 'https://ornek.com/products.json')], 'tr');
   assert.ok(a);
   assert.equal(a.kaynakUrl, 'https://ornek.com/products.json');
+});
+
+/*
+  ⚠️ Uretilen listeye bakinca cikti: "Hi https!" diye DM gidecekti. Dort
+  dukkanin shop_name alani ham ADRES (baslik cekilemeyince adres dusmus) ve
+  temizAd `https://...`i iki nokta ustunden bolup "https"i ad saniyordu —
+  bir kelime, bes harf, jenerik listede yok, yani butun kapilardan geciyordu.
+*/
+test('ham adres hitap olarak kullanilmiyor', () => {
+  assert.equal(temizAd('https://decantanddiscover.com/products/delphes?var...'), null);
+  assert.equal(temizAd('https://www.stephaniedebruijn.com/'), null);
+  assert.equal(temizAd('www.ornek.com'), null);
+});
+
+/*
+  ⚠️ WordPress kategori/arsiv sayfasinin basligi dukkan adi degil:
+  "PARFUM SISELERI Arsivleri" = "parfum siseleri arsivi". Uc kelime ve
+  hepsi jenerik olmadigi icin eski kapilardan geciyordu; arsiv/kategori
+  isareti tek basina yeter sebep.
+*/
+test('CMS arsiv ve kategori basliklari hitap olmuyor', () => {
+  assert.equal(temizAd('PARFÜM ŞİŞELERİ Arşivleri'), null);
+  assert.equal(temizAd('Official Samples Archives'), null);
+  assert.equal(temizAd('Parfum Kategori'), null);
+});
+
+/*
+  Cinsiyet ve urun kategorisi sozcukleri, listedeki karsiliklarinin baska
+  dildeki halleri: "Kadin Parfum" = "womens perfume", "Nischendufte kaufen"
+  = "buy niche fragrances". Ikisi de tarif, ad degil.
+*/
+test('baska dildeki kategori tarifleri de jenerik sayiliyor', () => {
+  assert.equal(temizAd('Kadın Parfüm'), null);
+  assert.equal(temizAd('Nischendüfte kaufen'), null);
+  assert.equal(temizAd('All Fragrances'), null);
+});
+
+/*
+  ⚠️ Kapi genisledi, GERCEK adlari yemedigi ayrica olculuyor. Bunlarin hepsi
+  jenerik bir sozcuk TASIYOR ama ad olarak gecerli.
+*/
+test('gercek dukkan adlari eleme genisledikten sonra da geciyor', () => {
+  for (const ad of ['Alkemia Perfumes', 'Bloom Perfumery', 'MiN New York', 'Dekant House', 'Indigo Perfumery']) {
+    assert.equal(temizAd(ad), ad);
+  }
+});
+
+/*
+  ⚠️ Uretilen 142 hitabi tek tek okuyunca kalan kotu olanlarin hepsi AYNI
+  kalipti: bir sifat + jenerik ad ("Luxury Parfum", "Artisanal Perfumes",
+  "Nis Parfum Fiyatlari"). Sifat listede olmadigi icin "hepsi jenerik"
+  kurali tutmuyordu, yani kategori sayfasinin basligiyla selamlaniyordu.
+*/
+test('sifat + jenerik ad kalibi hitap olmuyor', () => {
+  for (const tarif of ['Luxury Parfum', 'Artisanal Perfumes', 'Indie Brands',
+    'Independent perfumery', 'Roll-On Perfume Samples', 'Niş Parfüm Fiyatları',
+    'Parfüm Şişesi', 'MINIs', 'Esans']) {
+    assert.equal(temizAd(tarif), null, tarif);
+  }
+});
+
+/* Bir dukkanin adi soru sormaz — "Dekant Parfum Nedir?" bir blog basligi. */
+test('soru isareti tasiyan baslik hitap olmuyor', () => {
+  assert.equal(temizAd('Dekant Parfüm Nedir?'), null);
+});
+
+/* Destek/iletisim sayfalarinin basligi da dukkanin adi degil. */
+test('site sayfasi basliklari hitap olmuyor', () => {
+  assert.equal(temizAd('Customer Service'), null);
+  assert.equal(temizAd('Search for Scents'), null);
+});
+
+/* ⚠️ Ayrac yalniz bosluk degil: "Decants/Samples" tek sozcuk sayiliyordu. */
+test('egik cizgi de sozcuk ayraci', () => {
+  assert.equal(temizAd('Decants/Samples'), null);
+});
+
+/*
+  ⚠️ Eleme UC KEZ genisledi; gercek adlarin hayatta kaldigi her seferinde
+  ayrica olculuyor. Bunlarin hepsi jenerik bir sozcuk TASIYOR.
+*/
+test('gercek adlar ucuncu genislemeden sonra da geciyor', () => {
+  for (const ad of ['Alkemia Perfumes', 'Bloom Perfumery', 'MiN New York',
+    'Dekant House', 'Decant Direct', 'Scent Split', 'Merz Apothecary',
+    'The Harmonist', 'Kingdom Scotland']) {
+    assert.equal(temizAd(ad), ad, ad);
+  }
+});
+
+/*
+  ⚠️ Olculdu: DM listesindeki 239 hesabin 45i Turk dukkani ama INGILIZCE
+  mesaj aliyordu. Sebep, dilSecin yalnizca ulke koduna bakmasi ve ulkenin
+  735 adayin 599unda BOS olmasi — cunku ulke uzantidan cikiyor ve bu
+  dukkanlar .com kullaniyor. Sahibin en kolay kapatacagi pazar bu.
+
+  Cozum ulkeyi UYDURMAK degil: ana sayfa metnindeki dil izine bakmak.
+  Iz yalniz Turkceye OZGU harflerden ve sozcuklerden okunuyor; u ve o
+  Almancayla ortak oldugu icin tek basina yetmiyor.
+*/
+test('Turkceye ozgu harfler dil izi sayiliyor', () => {
+  assert.equal(dilIzi('Orijinal ve Uygun Fiyatlı Dekant Parfümler'), 'tr');
+  assert.equal(dilIzi('Koku Mutfağı'), 'tr');
+  assert.equal(dilIzi('Niche Parfüm Çeşitleri'), 'tr');
+});
+
+/* ⚠️ Almanca da u/o kullaniyor; Turkce sanilmamali. */
+test('Almanca sayfa Turkce sayilmiyor', () => {
+  assert.equal(dilIzi('Exklusive Parfümproben günstig kaufen'), null);
+  assert.equal(dilIzi('Nischendüfte online entdecken'), null);
+  assert.equal(dilIzi('Independent perfumery, London'), null);
+  assert.equal(dilIzi(null), null);
+});
+
+test('ulkesi bilinmeyen ama sayfasi Turkce olana Turkce yaziliyor', () => {
+  assert.equal(dilSec(null, 'Uygun Fiyatlı Dekant Parfümler'), 'tr');
+  assert.equal(dilSec(null, 'Independent perfumery'), 'en');
+  assert.equal(dilSec(null), 'en');
+});
+
+/*
+  ⚠️ Ulke BILINIYORSA metin onu ezmiyor. Alman bir dukkanin sayfasinda
+  Turkce bir urun adi gecmesi o dukkani Turk yapmaz; yanlis dilde mesaj,
+  dilsiz mesajdan kotu.
+*/
+test('bilinen ulke sayfa metnini eziyor', () => {
+  assert.equal(dilSec('DE', 'Uygun Fiyatlı Dekant Parfümler'), 'en');
+  assert.equal(dilSec('TR', 'Independent perfumery'), 'tr');
 });

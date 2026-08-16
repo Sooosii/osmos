@@ -16,7 +16,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { kanitlar, temasKurulanlar, tumLeadler } from '../db.ts';
-import { acilisCumlesi, dilSec, dmTaslagi, kanalSec, mektupGovdesi, temizAd } from './outreach.ts';
+import { acilisCumlesi, dilSec, dmTaslagi, kanalSec, mektupGovdesi, sayfaMetni, temizAd } from './outreach.ts';
 import type { Lead } from '../types.ts';
 
 /** Bir oturumda bitirilebilecek iş — kanal başına. */
@@ -91,12 +91,12 @@ export function yazIlkTur(db: DatabaseSync, yol: string, parfumSayisi: number): 
   const mailler = enGucluler(hepsi, 'mail', gorulen, TUR_BOYU);
 
   const dmBloklari = dmler.map((l, i) => {
-    const dil = dilSec(l.country);
+    const dil = dilSec(l.country, sayfaMetni(l, kanitlar(db, l.id as number)));
     const a = acilisCumlesi(l, kanitlar(db, l.id as number), dil);
     return dmBlok(l, i + 1, dmTaslagi(l, a, dil), a?.kaynakUrl ?? null);
   });
   const mailBloklari = mailler.map((l, i) => {
-    const dil = dilSec(l.country);
+    const dil = dilSec(l.country, sayfaMetni(l, kanitlar(db, l.id as number)));
     const a = acilisCumlesi(l, kanitlar(db, l.id as number), dil);
     return mailBlok(l, i + 1, KONU[dil], mektupGovdesi(l, a, dil, parfumSayisi), a?.kaynakUrl ?? null);
   });

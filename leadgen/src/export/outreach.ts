@@ -20,9 +20,59 @@ import { csvYaz } from './csv.ts';
 export type Dil = 'tr' | 'en';
 export type Kanal = 'dm' | 'mail' | 'yok';
 
-/** Ülkesi Türkiye olana Türkçe, kalanına İngilizce yazılıyor. */
-export function dilSec(country: string | null): Dil {
-  return country === 'TR' ? 'tr' : 'en';
+/*
+  ⚠️ Türkçeye ÖZGÜ işaretler. `ü` ve `ö` bilerek YOK: ikisi de Almancada
+  var ve "Parfümproben" gibi bir başlık Türkçe sanılırdı.
+*/
+const TURKCE_HARF = /[ğşıĞŞİ]/u;
+const TURKCE_SOZCUK = /\b(fiyat|fiyatları|fiyatlı|kargo|sepet|ücretsiz|indirim|satın|ürün|ürünler|kokusu|muadil|çeşitleri|uygun|orijinal)\b/iu;
+
+/*
+  ⚠️ Almanca kapısı. Türkçe işareti bulunsa bile bu sözcüklerden biri varsa
+  karar VERİLMİYOR: Alman bir dükkâna Türkçe yazmak, İngilizce yazmaktan
+  kötü. Şüphede kalınca dil seçilmiyor, İngilizceye düşülüyor.
+*/
+const ALMANCA_SOZCUK = /\b(kaufen|günstig|versand|exklusive|düfte|nischendüfte|parfümproben|parfumproben|entdecken|unsere|bestellen)\b/iu;
+
+/**
+ * Sayfa metninden dil izi — ülke uzantısı susunca tek kalan kanıt.
+ *
+ * ⚠️ Neden var: `country` alan adı uzantısından çıkıyor ve 735 adayın
+ * 599'unda BOŞ, çünkü dükkânlar `.com` kullanıyor. Ölçüldü: DM listesindeki
+ * 239 hesabın **45'i Türk dükkânı ama İngilizce mesaj alıyordu** — sahibin
+ * en kolay kapatacağı pazar.
+ *
+ * ⚠️ Ülke UYDURULMUYOR: bu fonksiyon `country`ye dokunmuyor, yalnız hangi
+ * dilde yazılacağını söylüyor. Kanıt, `ana-sayfa` kanıt satırının metni.
+ */
+export function dilIzi(metin: string | null): Dil | null {
+  if (metin === null || metin.trim() === '') return null;
+  if (ALMANCA_SOZCUK.test(metin)) return null;
+  return TURKCE_HARF.test(metin) || TURKCE_SOZCUK.test(metin) ? 'tr' : null;
+}
+
+/**
+ * Ülkesi Türkiye olana Türkçe, kalanına İngilizce.
+ *
+ * ⚠️ Sayfa metni yalnızca ülke BİLİNMEDİĞİNDE devreye giriyor. Bilinen bir
+ * ülkeyi metinle ezmek, Alman bir dükkânın sayfasında Türkçe bir ürün adı
+ * geçtiği için ona Türkçe yazmak demekti.
+ */
+/**
+ * Dil izinin bakacağı metin: sayfa başlığı + ana sayfa kanıtının özeti.
+ *
+ * ⚠️ Başlık da metne giriyor ve çoğu zaman TEK işaret o: "Koku Mutfağı"
+ * gibi bir başlıkta dükkânın dili yazılı, ana sayfa özeti ise boş olabiliyor.
+ */
+export function sayfaMetni(lead: Pick<Lead, 'shop_name'>, kanit: readonly Evidence[]): string {
+  const ana = kanit.find((k) => k.kind === 'ana-sayfa');
+  return [lead.shop_name ?? '', ana?.snippet ?? ''].join(' ').trim();
+}
+
+export function dilSec(country: string | null, sayfaMetni: string | null = null): Dil {
+  if (country === 'TR') return 'tr';
+  if (country !== null) return 'en';
+  return dilIzi(sayfaMetni) ?? 'en';
 }
 
 /**
@@ -148,7 +198,31 @@ const JENERIK_AD = new Set([
   */
   'discovery', 'set', 'sets', 'collection', 'collections', 'catalog',
   'catalogue', 'products', 'product', 'sample', 'samples', 'decant',
-  'decants', 'sale', 'new', 'gift', 'kit', 'bundle', 'ml',
+  'decants', 'sale', 'new', 'gift', 'kit', 'bundle', 'ml', 'box',
+  /*
+    ⚠️ Yukarıdakilerin BAŞKA DİLLERDEKİ karşılıkları. Liste İngilizce ve
+    Türkçe doğduğu için Almanca/Romence başlıklar süzgeçten geçiyordu:
+    "Nischendüfte kaufen" (niş kokular satın al) ve "Parfumproben Online
+    Kaufen" birer tarif, ad değil. Yeni bir dil eklenirse buraya da bakılacak.
+  */
+  'kaufen', 'düfte', 'dufte', 'duft', 'nischendüfte', 'nischendufte',
+  'proben', 'parfumproben', 'parfumuri', 'parfümeri', 'parfumeri',
+  /* Cinsiyet ve "ürünleri" gibi kategori sözcükleri. */
+  'kadın', 'kadin', 'erkek', 'unisex', 'women', 'men', 'all',
+  'ürünleri', 'urunleri', 'ürünler', 'urunler',
+  /*
+    ⚠️ Kategori ve tarif sözcükleri. Çıktıya bakınca çıkan örüntü şuydu:
+    kalan kötü hitapların hepsi bir SIFAT + jenerik ad kalıbıydı ("Luxury
+    Parfum", "Artisanal Perfumes", "Roll-On Perfume Samples", "Niş Parfüm
+    Fiyatları"). Sıfat listede olmadığı için "hepsi jenerik" kuralı
+    tutmuyordu. Sıfatlar da tarifin parçası; ad değil.
+  */
+  'luxury', 'artisanal', 'indie', 'independent', 'mini', 'minis',
+  'rollon', 'brands', 'brand', 'esans', 'essence', 'nis', 'niş',
+  'fiyatları', 'fiyatlari', 'fiyat', 'serisi', 'seri', 'nedir', 'şişesi',
+  'sisesi', 'parfümproben', 'duftproben', 'düftproben',
+  /* Dükkânın adı değil, sitesinin bir sayfası: destek/iletişim/arama. */
+  'customer', 'service', 'support', 'contact', 'about', 'faq', 'search', 'for',
 ]);
 
 /**
@@ -164,11 +238,38 @@ const JENERIK_AD = new Set([
  */
 export function temizAd(ham: string | null): string | null {
   if (ham === null) return null;
+
+  /*
+    ⚠️ Başlık çekilemeyen dört dükkânda `shop_name` HAM ADRES olmuş. Aşağıdaki
+    bölme iki nokta üstünden yapıldığı için `https://x.com/...` → "https"
+    kalıyordu: bir kelime, kısa, jenerik listede yok — bütün kapılardan geçip
+    "Hi https!" diye bir DM üretiyordu. Adres kılığındaki her şey burada düşer.
+  */
+  if (/^https?:|^www\.|\/\//i.test(ham.trim())) return null;
+
+  /*
+    ⚠️ WordPress arşiv/kategori sayfasının başlığı dükkânın adı değil:
+    "PARFÜM ŞİŞELERİ Arşivleri", "Official Samples Archives". Bunlar jenerik
+    OLMAYAN bir sözcük taşıyabildiği için "hepsi jenerik" kuralına takılmıyor;
+    arşiv/kategori işareti tek başına yeter sebep.
+  */
+  if (/\b(arşiv|arsiv|archive|kategori|category|etiket|tag)\w*/iu.test(ham)) return null;
+
   const ilk = ham.split(/[|:·—]| - | – /)[0] ?? '';
   const ad = ilk.replace(/\.\.\.$/, '').replace(/[\s,.\-–—]+$/, '').trim();
   if (ad === '' || ad.length > 28) return null;
 
-  const kelimeler = ad.split(/\s+/);
+  /*
+    ⚠️ "Dekant Parfüm Nedir?" bir blog yazısının başlığı. Bir dükkânın adı
+    soru sormaz; soru işareti tek başına yeter sebep.
+  */
+  if (ad.includes('?')) return null;
+
+  /*
+    ⚠️ Ayraç yalnız boşluk değil: "Decants/Samples" tek sözcük sayılıyordu ve
+    birleşik hâli listede olmadığı için jenerik denetiminden kaçıyordu.
+  */
+  const kelimeler = ad.split(/[\s/&]+/).filter((k) => k !== '');
   if (kelimeler.length > 3) return null;
   if (kelimeler.every((k) => JENERIK_AD.has(k.toLowerCase().replace(/[^\p{L}]/gu, '')))) return null;
   return ad;
@@ -283,11 +384,12 @@ export function yazOutreachCsv(db: DatabaseSync, yol: string, parfumSayisi: numb
   let dm = 0;
   let mail = 0;
   const satirlar = secilenler.map((l, i) => {
-    const dil = dilSec(l.country);
+    const kanit = kanitlar(db, l.id as number);
+    const dil = dilSec(l.country, sayfaMetni(l, kanit));
     const kanal = kanalSec(l);
     if (kanal === 'dm') dm += 1;
     else mail += 1;
-    const acilis = acilisCumlesi(l, kanitlar(db, l.id as number), dil);
+    const acilis = acilisCumlesi(l, kanit, dil);
     if (acilis === null) kanitsiz += 1;
     return [
       i + 1, l.domain, l.shop_name, l.score, l.segment, l.olcek, l.platform, l.country,
