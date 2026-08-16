@@ -472,3 +472,30 @@ test('elenmis aday, kanali olsa bile mektup listesine girmiyor', () => {
   assert.ok(!icerik.includes('apkpure.net'), 'elenmis aday CSV de gorunmemeli');
   db.close();
 });
+
+/*
+  ⚠️ Mektup listesinin hitaplari ayri bir kume ve orada iki kacak vardi.
+
+  "Women's Fragrance Decants" → uc sozcugun ucu de jenerik listede (women,
+  fragrance, decants) ama hitap yine de yazildi: iyelik eki. Sozcuk
+  "Women's" olarak gelince harf suzgeci "womens" uretiyor ve listede
+  "women" var, "womens" yok. Ek atilmadan karsilastirma tutmuyor.
+
+  "e shop" → tek harflik bir belirtec ad degil. Tek harfli sozcukler
+  jenerik sayiliyor.
+*/
+test('iyelik eki jenerik denetimini delmiyor', () => {
+  assert.equal(temizAd("Women's Fragrance Decants"), null);
+  assert.equal(temizAd("Men's Perfume Shop"), null);
+});
+
+test('tek harfli belirtecler ad sayilmiyor', () => {
+  assert.equal(temizAd('e shop'), null);
+  assert.equal(temizAd('Modern Luxury Perfume'), null);
+  assert.equal(temizAd('Discounted Mini Perfume'), null);
+});
+
+/* Ilk turun 3. sirasinda "Hi Travel & Discovery Sets!" cikiyordu — kategori. */
+test('seyahat boyu kategorisi hitap olmuyor', () => {
+  assert.equal(temizAd('Travel & Discovery Sets'), null);
+});

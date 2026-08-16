@@ -239,6 +239,8 @@ const JENERIK_AD = new Set([
     başlayacaktı. Katalog/ürün sözcükleri de jenerik sayılıyor.
   */
   'discovery', 'set', 'sets', 'collection', 'collections', 'catalog',
+  /* "Travel & Discovery Sets" — seyahat boyu da bir urun kategorisi. */
+  'travel', 'size', 'sizes',
   'catalogue', 'products', 'product', 'sample', 'samples', 'decant',
   'decants', 'sale', 'new', 'gift', 'kit', 'bundle', 'ml', 'box',
   /*
@@ -260,6 +262,8 @@ const JENERIK_AD = new Set([
     tutmuyordu. Sıfatlar da tarifin parçası; ad değil.
   */
   'luxury', 'artisanal', 'indie', 'independent', 'mini', 'minis',
+  'modern', 'discounted', 'discount', 'cheap', 'premium', 'exclusive',
+  'exklusive', 'line',
   'rollon', 'brands', 'brand', 'esans', 'essence', 'nis', 'niş',
   'fiyatları', 'fiyatlari', 'fiyat', 'serisi', 'seri', 'nedir', 'şişesi',
   'sisesi', 'parfümproben', 'duftproben', 'düftproben',
@@ -313,7 +317,23 @@ export function temizAd(ham: string | null): string | null {
   */
   const kelimeler = ad.split(/[\s/&]+/).filter((k) => k !== '');
   if (kelimeler.length > 3) return null;
-  if (kelimeler.every((k) => JENERIK_AD.has(k.toLowerCase().replace(/[^\p{L}]/gu, '')))) return null;
+  /*
+    ⚠️ İyelik eki karşılaştırmayı deliyordu: "Women's Fragrance Decants"in üç
+    sözcüğü de listede (women, fragrance, decants) ama harf süzgeci
+    "Women's"ten "womens" üretiyor ve listede "women" var, "womens" yok.
+    Hitap bu yüzden yazılıyordu. Ek önce atılıyor.
+
+    ⚠️ Tek harfli sözcük de jenerik: "e shop" bir ad değil.
+  */
+  const sadeKok = (k: string): string => k
+    .toLowerCase()
+    .replace(/['’´`]s$/u, '')
+    .replace(/[^\p{L}]/gu, '');
+
+  if (kelimeler.every((k) => {
+    const kok = sadeKok(k);
+    return kok.length <= 1 || JENERIK_AD.has(kok);
+  })) return null;
   return ad;
 }
 
