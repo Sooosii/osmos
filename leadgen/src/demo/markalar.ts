@@ -81,6 +81,27 @@ export function urunAnahtari(ham: string): string {
   return ham.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+export interface KatalogParfumu {
+  readonly id: string;
+  readonly ad: string;
+  readonly marka: string;
+}
+
+/** Kataloğumuzun kimlik + ad + marka listesi — eşleştirmenin girdisi. */
+export function osmosParfumleri(katalogDizini: string): readonly KatalogParfumu[] {
+  const hepsi: KatalogParfumu[] = [];
+  for (const dosya of readdirSync(katalogDizini).filter((d) => d.endsWith('.ts') && !d.endsWith('.test.ts'))) {
+    const metin = readFileSync(join(katalogDizini, dosya), 'utf8');
+    for (const kayit of metin.split(/\n {4}id: /).slice(1)) {
+      const id = /^.([^']+)./.exec(kayit)?.[1];
+      const ad = /name: .([^']+)./.exec(kayit)?.[1];
+      const marka = /brand: .([^']+)./.exec(kayit)?.[1];
+      if (id !== undefined && ad !== undefined && marka !== undefined) hepsi.push({ id, ad, marka });
+    }
+  }
+  return hepsi;
+}
+
 export interface UrunOrtusmesi {
   /** Dükkânın raflarında GERÇEKTEN bulunan, bizde de olan parfüm sayısı. */
   readonly sayi: number;
