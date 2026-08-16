@@ -9,7 +9,7 @@ import { NoteMeasures } from '@/components/NoteMeasures';
 import type { Dict } from '@/i18n/en';
 import { getDict, localeFor, say } from '@/i18n/dict';
 import { withLocale } from '@/i18n/locale';
-import { aktifDiller } from '@/lib/tenant';
+import { aktifDiller, isOsmos } from '@/lib/tenant';
 import { pageAlternates } from '@/lib/site-url';
 
 /**
@@ -77,6 +77,21 @@ export async function generateMetadata({
     title: getDict(locale).note.title(say(note.name, locale)),
     description: say(note.description, locale),
     alternates: pageAlternates(`/note/${id}`, locale),
+    /*
+      ⚠️ **Nota ansiklopedisi KİRACIDA arama motoruna kapalı.** 158 nota
+      sayfası her kiracıda birebir aynı — ölçüldü: 57 KB'lık sayfada yalnız
+      iki kelime farklı, açıklamalar bayt bayt aynı. İki müşteri yayına
+      girdiğinde Google bunları kopya içerik sayar, birini kanonik seçer,
+      ötekileri eler; yani ikisinin de sitesine zarar verir.
+
+      Sayfa duruyor ve ziyaretçi okuyor — "ambroxan nedir" diye merak eden
+      müşterisi için gerçek bir ansiklopedi. Kapanan yalnız arama motoruna
+      açıklığı. Kiracının GERÇEKTEN benzersiz sayfaları (parfüm ve
+      benzerleri, kendi katalogu) açık kalıyor.
+
+      OSMOS'ta hiçbir şey değişmiyor: ansiklopedinin aslı orada.
+    */
+    ...(isOsmos() ? {} : { robots: { index: false, follow: true } }),
   };
 }
 
