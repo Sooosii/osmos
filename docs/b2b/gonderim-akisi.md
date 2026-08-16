@@ -14,12 +14,22 @@ ticari e-postayı B2B'de bile yasaklıyor; DM o kuralın kapsamında değil.
 
 | Dosya | Ne var |
 |---|---|
-| `leadgen/data/dm-listesi.md` | **239 hesap**, güne bölünmüş (günde 15, ~16 gün). Her mesajın altında kanıt adresi ve hazır taslak |
-| `leadgen/data/outreach.csv` | 497 satır — DM ve mail, `kanal` sütunuyla ayrılmış |
+| `leadgen/data/dm-listesi.md` | **233 hesap**, güne bölünmüş (günde 15, ~16 gün). Her mesajın altında kanıt adresi ve hazır taslak. **45'i Türkçe** — dükkânın sayfası Türkçeyse mesaj da Türkçe |
+| `leadgen/data/outreach.csv` | 486 satır — DM ve mail, `kanal` sütunuyla ayrılmış |
 | `leadgen/data/demo-adaylari.md` | **7 hedef**: raflarında bizde de olan parfüm var |
 | `leadgen/data/leads_ranked.csv` | 735 aday, tam liste |
 
 ---
+
+
+⚠️ **Listede parfüm satmayan 14 işletme var** — parfüm ŞİŞESİ toptancıları
+(`erbaturglass.com`, `kozmedambalaj.com`, `hammaddeler.com`…). Elenmediler,
+"kimse elenmiyor" kuralı duruyor; ama mesajları artık **sayı iddiası
+taşımıyor**, nötr "dükkânınızı gezdim" cümlesiyle gidiyorlar. Yine de
+göndermeden önce bakmaya değer: onlara satılacak bir şey olmayabilir.
+
+⚠️ Beş mecra listeden **çıkarıldı** (apkpure.net, threads.com, snapchat.com,
+gmail.com, faire.com) — hiçbiri parfüm işletmesi değildi.
 
 ## Günün akışı (15 mesaj, ~40 dakika)
 
