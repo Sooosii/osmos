@@ -9,6 +9,7 @@ import { publicComposition } from '@/lib/dal';
 import { asPerfume, nearestToComposition } from '@/lib/composition';
 import { cardsFor } from '@/lib/perfume-cards';
 import { normalizeUsername } from '@/lib/username';
+import { requireAccounts } from '@/lib/tenant-guard';
 
 /**
  * Bir kompozisyonun kendi sayfası — paylaşılan bağlantının indiği yer.
@@ -45,6 +46,8 @@ export default async function CompositionPage({
 }: {
   params: Promise<{ lang: string; username: string; slug: string }>;
 }) {
+  requireAccounts();
+
   const { lang, username, slug } = await params;
   const locale = localeFor(lang);
   const t = getDict(locale);

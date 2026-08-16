@@ -1,18 +1,12 @@
 import type { Perfume } from './types';
 import { hasNote } from './notes';
-import { CURATED_A } from './perfume-sets/curated-a';
-import { CURATED_B } from './perfume-sets/curated-b';
-import { CURATED_C } from './perfume-sets/curated-c';
-import { CURATED_D } from './perfume-sets/curated-d';
-import { CURATED_E } from './perfume-sets/curated-e';
-import { CURATED_F } from './perfume-sets/curated-f';
-import { FILLERS } from './perfume-sets/fillers';
-import { SPACE_2_PERFUMES } from './perfume-sets/space-2';
-import { SPACE_2_ADDITIONS } from './perfume-sets/space-2-additions';
-import { SPACE_3_A } from './perfume-sets/space-3-a';
-import { SPACE_3_B } from './perfume-sets/space-3-b';
+import { OSMOS_EXPANSION, OSMOS_LEGACY } from './osmos-catalog';
+import { TENANT_CATALOGS } from './tenants/catalogs';
+import { OSMOS_TENANT_ID } from './tenants/registry';
+import { activeTenant } from '@/lib/tenant';
 import {
   buildPerfumeSpaces,
+  buildTenantSpaces,
   findPerfumeSpaceId,
   type PerfumeSpace,
 } from './perfume-spaces';
@@ -24,25 +18,35 @@ import {
  * dosyada 800 satırı aşıyor. Bu modül onları birleştirip tek giriş noktası
  * sunuyor, böylece `@/data/perfumes` yolu ve `PERFUMES` / `getPerfume`
  * sözleşmesi değişmiyor.
+ *
+ * ⚠️ **B2B kiracı dikişi tam olarak burası ve yalnızca burası.** 42 dosya
+ * `@/data/perfumes`ten okuyor; hepsi bu tek giriş noktasından geçtiği için
+ * kiracının katalogunu bağlamak o 42 dosyanın hiçbirine dokunmayı
+ * gerektirmiyor. Aşağıdaki dallanma değişirse bütün site başka bir katalog
+ * gösterir — dikişin dar olması bu yüzden değerli.
+ *
+ * ⚠️ **Kalibrasyon bedava geliyor ve bu bir kaza değil.** `buildMarks` kaydıraç
+ * eksenlerini `feelUniverse`e göre yayıyor ve ana sayfa oraya `PERFUMES`i
+ * geçiyor. Kiracıda `PERFUMES` zaten yalnızca onun katalogu olduğu için eksenler
+ * kiracının kendi evreninde normalleşiyor — istenen davranış bu. Ana sitenin
+ * global cetveli kiracıya uygulansaydı, hep şarkiyat satan bir dükkanın bütün
+ * parfümleri haritanın bir köşesinde kümelenirdi.
  */
-const LEGACY_PERFUMES: readonly Perfume[] = [
-  ...CURATED_A,
-  ...CURATED_B,
-  ...CURATED_C,
-  ...CURATED_D,
-  ...CURATED_E,
-  ...CURATED_F,
-  ...FILLERS,
-];
+const TENANT = activeTenant();
 
-const EXPANSION_PERFUMES: readonly Perfume[] = [
-  ...SPACE_2_PERFUMES,
-  ...SPACE_2_ADDITIONS,
-  ...SPACE_3_A,
-  ...SPACE_3_B,
-];
+function tenantCatalog(id: string): readonly Perfume[] {
+  const catalog = TENANT_CATALOGS[id];
+  if (!catalog) {
+    throw new Error(`Kiracının katalogu tanımlı değil: ${id}`);
+  }
+  return catalog;
+}
 
-export const PERFUME_SPACES = buildPerfumeSpaces(LEGACY_PERFUMES, EXPANSION_PERFUMES);
+export const PERFUME_SPACES =
+  TENANT.id === OSMOS_TENANT_ID
+    ? buildPerfumeSpaces(OSMOS_LEGACY, OSMOS_EXPANSION)
+    : buildTenantSpaces(tenantCatalog(TENANT.id));
+
 export const PERFUMES: readonly Perfume[] = PERFUME_SPACES.flatMap((space) => space.perfumes);
 
 const PERFUME_BY_ID = new Map<string, Perfume>();

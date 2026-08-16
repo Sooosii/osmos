@@ -7,6 +7,7 @@ import { publicProfile } from '@/lib/dal';
 import { cardsFor } from '@/lib/perfume-cards';
 import { SHELF_KINDS } from '@/lib/shelf';
 import { normalizeUsername } from '@/lib/username';
+import { requireAccounts } from '@/lib/tenant-guard';
 
 /**
  * Rafların kendi sayfası — "elimde ne var, neyi kokladım, ne istiyorum".
@@ -44,6 +45,8 @@ export default async function ShelfPage({
 }: {
   params: Promise<{ lang: string; username: string }>;
 }) {
+  requireAccounts();
+
   const { lang, username } = await params;
   const locale = localeFor(lang);
   const t = getDict(locale);

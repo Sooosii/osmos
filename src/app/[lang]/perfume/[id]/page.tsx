@@ -182,7 +182,7 @@ export default async function PerfumePage({
               prefetch={false}
               className="transition-colors hover:text-white"
             >
-              OSMOS
+              {t.site.name}
             </Link>
             <span aria-hidden="true" className="text-white/20">
               ·

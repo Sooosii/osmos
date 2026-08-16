@@ -1,6 +1,7 @@
 import { PERFUMES } from '@/data/perfumes';
 import { buildFeedXml } from '@/lib/feed';
 import { siteUrl } from '@/lib/site-url';
+import { activeTenant } from '@/lib/tenant';
 
 /**
  * `/feed.xml` — duyuru kanalının sunucusuz yarısı.
@@ -17,6 +18,16 @@ import { siteUrl } from '@/lib/site-url';
 export const dynamic = 'force-static';
 
 export function GET(): Response {
+  /*
+    Kiracıda besleme kapalı: kataloğu kimin, ne zaman büyüteceği müşteriyle
+    yapılan anlaşmaya bağlı ve "yeni parfüm" duyurusunu bizim takvimimizden
+    yollamak yanlış olurdu. Kapalıyken 404 dönüyor — boş bir besleme, çalışan
+    ama hiç güncellenmeyen bir kanal gibi görünürdü.
+  */
+  if (!activeTenant().features.feed) {
+    return new Response('Not Found', { status: 404 });
+  }
+
   return new Response(buildFeedXml(PERFUMES, siteUrl()), {
     headers: { 'Content-Type': 'application/rss+xml; charset=utf-8' },
   });

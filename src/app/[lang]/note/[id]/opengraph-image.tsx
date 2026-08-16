@@ -3,9 +3,12 @@ import { getNote, hasNote, noteBand } from '@/data/notes';
 import { PERFUMES } from '@/data/perfumes';
 import { noteColor } from '@/lib/note-marks';
 import { noteDots } from '@/lib/share-marks';
-import { dictFor, localeFor, say } from '@/i18n/dict';
+import { dictFor, getDict, localeFor, say } from '@/i18n/dict';
+import { DEFAULT_LOCALE } from '@/i18n/locale';
 
-export const alt = 'OSMOS';
+const BRAND = getDict(DEFAULT_LOCALE).site.name;
+
+export const alt = BRAND;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -105,7 +108,7 @@ export default async function Image({
             display: 'flex',
           }}
         >
-          OSMOS
+          {BRAND}
         </div>
       </div>
     ),

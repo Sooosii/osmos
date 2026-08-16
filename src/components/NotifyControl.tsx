@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useDict, useLocale } from '@/i18n/LocaleProvider';
 import { vapidKeyBytes } from '@/lib/push-client';
+import { activeTenant } from '@/lib/tenant';
 
 /**
  * Bildirim düğmesi — dil değiştiricinin kardeşi, sitenin ikinci "meta" kontrolü.
@@ -31,6 +32,14 @@ type NotifyState = 'hidden' | 'idle' | 'busy' | 'on' | 'denied';
 /* Derlemede satıra gömülüyor; tam ad kalıp olarak yazılmak zorunda. */
 const VAPID_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
+/*
+  ⚠️ Kiracıda bildirim kapalı ve gerekçe beslemeninkiyle aynı (`feed.xml`):
+  müşterinin ziyaretçisine ne zaman bildirim gideceğine bizim takvimimiz karar
+  veremez. Env'in yokluğuna güvenilmiyor, kayıt karar veriyor — `SignInLink`teki
+  aynı gerekçe.
+*/
+const NOTIFY_ALLOWED = activeTenant().features.notify;
+
 function supported(): boolean {
   return (
     typeof window !== 'undefined' &&
@@ -46,7 +55,7 @@ export function NotifyControl({ className = '' }: { readonly className?: string 
   const [state, setState] = useState<NotifyState>('hidden');
 
   useEffect(() => {
-    if (!VAPID_KEY || !supported()) return;
+    if (!NOTIFY_ALLOWED || !VAPID_KEY || !supported()) return;
 
     let cancelled = false;
     (async () => {
@@ -67,7 +76,7 @@ export function NotifyControl({ className = '' }: { readonly className?: string 
   }, []);
 
   async function subscribe() {
-    if (!VAPID_KEY) return;
+    if (!NOTIFY_ALLOWED || !VAPID_KEY) return;
     setState('busy');
     try {
       const permission = await Notification.requestPermission();

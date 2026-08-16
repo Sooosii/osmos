@@ -8,6 +8,7 @@ import { currentViewer } from '@/lib/dal';
 import { noteOptions } from '@/lib/note-options';
 import { allCards } from '@/lib/perfume-cards';
 import { pageAlternates } from '@/lib/site-url';
+import { requireAccounts } from '@/lib/tenant-guard';
 
 /**
  * Kurma aracının sayfası.
@@ -32,6 +33,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 }
 
 export default async function StudioPage({ params }: { params: Promise<{ lang: string }> }) {
+  requireAccounts();
+
   const locale = localeFor((await params).lang);
   const t = getDict(locale);
 

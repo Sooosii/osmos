@@ -4,6 +4,7 @@ import { SignInForm } from '@/components/SignInForm';
 import { dictFor, getDict, localeFor } from '@/i18n/dict';
 import { withLocale } from '@/i18n/locale';
 import { pageAlternates } from '@/lib/site-url';
+import { requireAccounts } from '@/lib/tenant-guard';
 
 /**
  * Giriş ekranı.
@@ -27,6 +28,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 }
 
 export default async function SignInPage({ params }: { params: Promise<{ lang: string }> }) {
+  requireAccounts();
+
   const locale = localeFor((await params).lang);
   const t = getDict(locale);
 

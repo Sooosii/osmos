@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
-import { EN } from '@/i18n/en';
+import { getDict } from '@/i18n/dict';
+import { DEFAULT_LOCALE } from '@/i18n/locale';
 import { SITE_BACKGROUND } from '@/lib/site-color';
 
 /**
@@ -18,10 +19,12 @@ import { SITE_BACKGROUND } from '@/lib/site-color';
  * adres çubuğu olmadan da yol kaybolmuyor.
  */
 export default function manifest(): MetadataRoute.Manifest {
+  const t = getDict(DEFAULT_LOCALE);
+
   return {
-    name: EN.site.title,
-    short_name: EN.site.name,
-    description: EN.site.description,
+    name: t.site.title,
+    short_name: t.site.name,
+    description: t.site.description,
     start_url: '/',
     display: 'standalone',
     background_color: SITE_BACKGROUND,

@@ -1,9 +1,10 @@
 import { ImageResponse } from 'next/og';
 import { PERFUMES } from '@/data/perfumes';
-import { dictFor } from '@/i18n/dict';
+import { dictFor, getDict } from '@/i18n/dict';
+import { DEFAULT_LOCALE } from '@/i18n/locale';
 import { mapDots } from '@/lib/share-marks';
 
-export const alt = 'OSMOS';
+export const alt = getDict(DEFAULT_LOCALE).site.name;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -56,7 +57,7 @@ export default async function Image({ params }: { params: Promise<{ lang: string
       >
         <div style={{ display: 'flex', flexDirection: 'column', width: 520 }}>
           <div style={{ fontSize: 84, letterSpacing: 22, color: '#fff', display: 'flex' }}>
-            OSMOS
+            {t.site.name}
           </div>
           <div
             style={{
