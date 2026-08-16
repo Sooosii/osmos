@@ -223,11 +223,12 @@ export const TR: Dict = {
         high: 'TENDE',
       },
       openDetail: 'Iki eksen daha: doku ve yakınlık',
-      closeDetail: 'Doku ve yakınlık eksenlerini kapat',
+      closeDetail: 'Dört ekseni de kapat',
+      reopenBasic: 'Sıcaklık ve temizlikle yeniden sor',
+      reset: 'SIFIRLA',
+      resetLabel: 'Tarifi boşalt, haritanın tamamını göster',
       help: {
-        open: 'Bu dört eksen ne demek?',
-        close: 'Açıklamayı kapat',
-        heading: 'DÖRT EKSEN',
+        about: (axis) => `Bu eksen ne demek? ${axis}`,
         temperature:
           'Kokunun sıcak mı soğuk mu durduğu. Baharat, reçine ve vanilya sıcak; narenciye, nane ve deniz havası soğuk okunuyor.',
         cleanliness:
@@ -363,6 +364,7 @@ export const TR: Dict = {
   chart: {
     tiers: { top: 'Üst', heart: 'Kalp', base: 'Dip' },
     timeLabel: 'Zaman',
+    jumpTo: (phase) => `${phase} evresine git`,
     pause: 'DURAKLAT',
     play: 'OYNAT',
     disclaimer:
@@ -371,7 +373,7 @@ export const TR: Dict = {
       `${name} evrim imzası: ${notes} notalarının 8 saat boyunca yükselip düşüşü.`,
   },
 
-  phases: { opening: 'Açılış', heart: 'Kalp', base: 'Dip' },
+  phases: { top: 'Üst', heart: 'Kalp', base: 'Dip' },
 
   duration: {
     firstSeconds: 'ilk saniyeler',

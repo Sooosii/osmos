@@ -22,6 +22,7 @@ import { type FeelTarget, NO_FEEL } from '@/lib/space-feel';
 import { useSpaceInput } from '@/components/space/use-space-input';
 import { useShelfRings } from '@/components/space/use-shelf-rings';
 import { SpaceOverlays } from '@/components/space/SpaceOverlays';
+import { olculenPaylar } from '@/components/space/kaplayan-katmanlar';
 import { SpaceKeyboardList } from '@/components/space/SpaceKeyboardList';
 import {
   adjacentSpaceId,
@@ -724,7 +725,17 @@ export function ScentSpaceCanvas({ spaces, children }: ScentSpaceCanvasProps) {
       neyse oydu. Dokunma yoluyla aynı işlev kullanılıyor artık: iki yol da
       aynı kareyi gösteriyor.
     */
-    moveTo(fitToMarks(cameraRef.current, mark, markById, viewportRef.current));
+    moveTo(
+      fitToMarks(
+        cameraRef.current,
+        mark,
+        markById,
+        viewportRef.current,
+        /* Pay ölçülerek geliyor: panelin boyu üç durumlu düğmeyle değişiyor,
+           yani sabit bir sayı bir sonraki basışta yalan olurdu. */
+        olculenPaylar(viewportRef.current),
+      ),
+    );
   };
 
   return (

@@ -68,7 +68,29 @@ const PORTRAIT_FILL = 1.45;
  */
 const PAN_LIMIT = 1.12;
 
-export const MIN_SCALE = 0.6;
+/**
+ * En uzak duruş.
+ *
+ * ⚠️ 0.6'dan 0.35'e **ölçülerek** indi. `fitTo` seçilen noktayı komşularıyla
+ * birlikte kadraja sığdırıyor ve ihtiyaç duyduğu ölçeği bu tabana kırpıyor;
+ * bağladığı yerde hiçbir belirti yok — kare sığmıyor, en uçtaki komşu sessizce
+ * dışarıda kalıyor. Sahibin "en köşede kalan parfüm görünmüyor" dediği şeyin
+ * son parçası buydu.
+ *
+ * Sayı ölçümden: ölçülmüş panel paylarıyla parfümlerin ihtiyacı sıralandığında
+ * en dar beşi **0.369 · 0.539 · 0.584 · 0.592 · 0.626**. Yani 0.5 bile tek bir
+ * parfümü (`lancome-idole-peach-n-roses`) dışarıda bırakıyordu; o parfüm
+ * komşularının hepsine uzak duran yalnız bir nokta ve haritanın söylediği şey
+ * tam olarak o — uzaklığı göstermek için kadrajın açılması gerekiyor.
+ *
+ * Bedeli elle uzaklaşmanın da bu kadar geniş olması; zararsız, çünkü tek
+ * yaptığı bulutun tamamını daha küçük görebilmek.
+ *
+ * Kırpma `fitTo`ya özel bir tabana taşınmadı çünkü `clampCamera` her sürükleme
+ * ve yakınlaşmada aynı sınırı uyguluyor: iki ayrı taban, sığdırmadan sonraki
+ * ilk sürüklemede haritayı sıçratırdı.
+ */
+export const MIN_SCALE = 0.35;
 export const MAX_SCALE = 6;
 
 /**
@@ -348,13 +370,54 @@ export function focusOn(camera: Camera, point: Placed): Camera {
  * kenarı en yakın olan.
  */
 /**
- * Sığdırmanın kenar payı (CSS px).
+ * Sığdırmanın en az kenar payı (CSS px).
  *
  * Dikeyde daha geniş: seçili noktanın etiketi noktanın ÜSTÜNDE duruyor ve
  * kenara yapışmış bir nokta etiketini ekran dışına taşırdı.
+ *
+ * Bunlar artık bir TABAN, tavan değil: gerçek pay ekrandaki kaplayan
+ * katmanlardan ölçülüyor (`insetsFromBoxes`) ve her zaman bu değerlerin
+ * üstünde kalıyor.
  */
-const FIT_PAD_X = 48;
-const FIT_PAD_Y = 72;
+const MIN_INSET_X = 48;
+const MIN_INSET_Y = 72;
+
+export interface Insets {
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+  readonly left: number;
+}
+
+/** Ölçülmüş bir kutu — `getBoundingClientRect`in ihtiyaç duyulan dört alanı. */
+export interface Box {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+export const DEFAULT_INSETS: Insets = {
+  top: MIN_INSET_Y,
+  right: MIN_INSET_X,
+  bottom: MIN_INSET_Y,
+  left: MIN_INSET_X,
+};
+
+/**
+ * Noktanın kendi payı — çizilen daire kadar.
+ *
+ * ⚠️ Sığdırma nokta MERKEZLERİNE bakıyor; ekranda görünen ise bir daire.
+ * Merkezi payın tam sınırına oturan nokta yarısı kesik çiziliyordu ve sahibin
+ * "hâlâ az ucundan görünmüyor" dediği şey buydu — kusur kadrajın kendisinde
+ * değil, kadrajın neyi ölçtüğündeydi.
+ *
+ * En kalın hâli alınıyor (en derin nokta, en yakın ölçek): pay ölçekle
+ * değiştiği için sığdırmanın çözdüğü şeyin içinde döngü olurdu. Sabit ve
+ * cömert bir pay o döngüyü kesiyor, ve `markRadius`tan türediği için yarıçap
+ * sabitleri değişirse kendiliğinden takip ediyor.
+ */
+const MARK_MARGIN = Math.ceil(markRadius(1, FOCUS_SCALE));
 
 /*
  * ⚠️ Burada bir zamanlar `FIT_MIN_SCALE = 1` vardı: "durgun ölçekte bulutun
@@ -366,6 +429,48 @@ const FIT_PAD_Y = 72;
  * kadraja sığmıyordu — üçünün de ihtiyacı 1'in altındaydı. Taban kaldırıldı,
  * sınırı `MIN_SCALE` veriyor.
  */
+
+/**
+ * Ekranı kaplayan katmanlardan kenar payı çıkarır.
+ *
+ * ⚠️ **Kadrajın en büyük kusuru buydu ve ölçüldü.** Pay sabitti (48/72) ve
+ * ekranın üstündeki katmanları hiç bilmiyordu; oysa 390×844 telefonda sol
+ * kontrol sütunu tek başına **304 × 191 piksel** kaplıyor. Payın içine düşen
+ * komşu "kadrajda" sayılıyor, ziyaretçi ise onu göremiyordu.
+ *
+ * **Her kutu, EN UCUZA geldiği kenara yazılıyor.** Kural şart: sol sütun
+ * telefonda 24'ten 328'e uzanıyor, yani sol pay olarak yazılsaydı genişliğin
+ * %84'ünü yerdi ve kadraj çökerdi. Üst pay olarak yüksekliğin yalnızca %25'i.
+ * Masaüstünde aynı kutu bir KÖŞE: orada sol kenar daha ucuza geliyor ve
+ * kendiliğinden oraya yazılıyor. Eşik yok, ekran boyu kararı veriyor —
+ * `ScreenFrame`in iki kez kırılıp vardığı ilke.
+ *
+ * Saf: DOM'a dokunmuyor, ölçüyü çağıran veriyor.
+ */
+export function insetsFromBoxes(boxes: readonly Box[], viewport: Viewport): Insets {
+  const inset = { ...DEFAULT_INSETS };
+
+  for (const box of boxes) {
+    if (box.width <= 0 || box.height <= 0) continue;
+
+    /* Dört aday: kutuyu hangi kenara yazsak ne kadarını yerdi. */
+    const adaylar = [
+      { kenar: 'top' as const, pay: box.y + box.height, boy: viewport.height },
+      { kenar: 'bottom' as const, pay: viewport.height - box.y, boy: viewport.height },
+      { kenar: 'left' as const, pay: box.x + box.width, boy: viewport.width },
+      { kenar: 'right' as const, pay: viewport.width - box.x, boy: viewport.width },
+    ];
+
+    let ucuz = adaylar[0];
+    for (const aday of adaylar) {
+      if (aday.pay / aday.boy < ucuz.pay / ucuz.boy) ucuz = aday;
+    }
+
+    inset[ucuz.kenar] = Math.max(inset[ucuz.kenar], ucuz.pay);
+  }
+
+  return inset;
+}
 
 /**
  * Seçilen noktayı ve komşularını AYNI kareye sığdırır.
@@ -396,6 +501,7 @@ export function fitTo(
   focus: Placed,
   others: readonly Placed[],
   viewport: Viewport,
+  insets: Insets = DEFAULT_INSETS,
 ): Camera {
   /* Kırpılmış kamera üzerinden ölçülüyor ki uçtaki nokta bile dürüst çıksın. */
   const base = centerOn(camera, focus);
@@ -412,9 +518,24 @@ export function fitTo(
     Pay görüntü alanından DÜŞÜLÜYOR, `MARGIN` büyütülmüyor: `pixelsPerUnit`
     haritanın durgun ölçeğini tanımlıyor ve onu oynatmak bütün sayfayı
     değiştirirdi (beş sınama tam olarak onu tutuyor).
+
+    ⚠️ Kullanılabilir yarı genişlik **iki payın BÜYÜĞÜNDEN** çıkıyor, ikisinin
+    ortalamasından değil: seçilen nokta ekranın tam ortasında duruyor, yani
+    kare merkeze göre simetrik. Solda 215, sağda 48 piksellik bir pay varsa
+    merkezin iki yanında kullanılabilecek olan 215'tir — küçüğüne bakmak
+    komşuyu yine panelin altında bırakırdı.
+
+    Nokta payı (`MARK_MARGIN`) ayrıca düşülüyor: kadraj merkezleri değil
+    daireleri içine almalı.
   */
-  const usableX = Math.max(viewport.width - FIT_PAD_X * 2, 1) / 2;
-  const usableY = Math.max(viewport.height - FIT_PAD_Y * 2, 1) / 2;
+  const usableX = Math.max(
+    viewport.width / 2 - Math.max(insets.left, insets.right) - MARK_MARGIN,
+    1,
+  );
+  const usableY = Math.max(
+    viewport.height / 2 - Math.max(insets.top, insets.bottom) - MARK_MARGIN,
+    1,
+  );
 
   const unit = Math.min(
     maxX > 0 ? usableX / maxX : Infinity,
@@ -433,6 +554,7 @@ export function fitToMarks(
   mark: SpaceMark,
   byId: ReadonlyMap<string, SpaceMark>,
   viewport: Viewport,
+  insets: Insets = DEFAULT_INSETS,
 ): Camera {
   const neighbours: Placed[] = [];
   for (const id of mark.neighborIds) {
@@ -440,7 +562,7 @@ export function fitToMarks(
     if (neighbour) neighbours.push(neighbour);
   }
 
-  return fitTo(camera, mark, neighbours, viewport);
+  return fitTo(camera, mark, neighbours, viewport, insets);
 }
 
 export function hitTest(

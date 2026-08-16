@@ -177,9 +177,41 @@ export function formatDuration(
   return rest === 0 ? words.hours(hours) : words.hoursMinutes(hours, rest);
 }
 
+/**
+ * Evrelerin başladığı dakikalar — tek kaynak.
+ *
+ * ⚠️ Eşikler bir zamanlar yalnız `phaseLabel`in gövdesindeydi (15 ve 120 diye
+ * iki çıplak sayı). Zaman çubuğundaki evre işaretleri de aynı yerlere düşmek
+ * zorunda ve orada elle yazılmış bir kopya, biri değişince sessizce yalan
+ * söyleyen ikinci bir doğru üretirdi: yazı "Kalp" derken işaret bir başka yeri
+ * gösterirdi. Sıra artan; `phaseLabel` sondan tarıyor.
+ */
+export const PHASE_STARTS = [
+  { key: 'top', minutes: 0 },
+  { key: 'heart', minutes: 15 },
+  { key: 'base', minutes: 120 },
+] as const satisfies readonly { key: keyof typeof EN.phases; minutes: number }[];
+
 /** Dakikanın hangi evrede olduğu. */
 export function phaseLabel(minutes: number, words: typeof EN.phases = EN.phases): string {
-  if (minutes < 15) return words.opening;
-  if (minutes < 120) return words.heart;
-  return words.base;
+  for (let i = PHASE_STARTS.length - 1; i >= 0; i -= 1) {
+    const phase = PHASE_STARTS[i];
+    if (phase !== undefined && minutes >= phase.minutes) return words[phase.key];
+  }
+  return words[PHASE_STARTS[0].key];
+}
+
+/**
+ * `minutesAt`in tersi — dakikadan ilerleme.
+ *
+ * `minutesAt` = `expm1(p · log1p(span))` olduğu için tersi `log1p(m) / log1p(span)`.
+ * Zaman çubuğundaki evre işaretlerinin yeri buradan geliyor; elle hesaplanmış
+ * bir yüzde koymak, aralık (`SIGNATURE_MAX_MINUTES`) değiştiği gün işaretleri
+ * yanlış yere bırakırdı.
+ *
+ * Aralığın dışındaki dakika kırpılmıyor: çağıran zaten kendi aralığını veriyor
+ * ve kırpma, hatayı görünmez kılardı.
+ */
+export function progressAtMinutes(minutes: number, spanMinutes: number): number {
+  return Math.log1p(minutes) / Math.log1p(spanMinutes);
 }

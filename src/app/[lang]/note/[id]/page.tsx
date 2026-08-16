@@ -227,6 +227,20 @@ export default async function NotePage({
                           {carrier.name}
                         </span>
                         <span className="text-xs text-white/50">{carrier.brand}</span>
+                        {/*
+                          Katman damgası — sahibin sorusu: "hangi parfümde üst,
+                          hangisinde kalp?". Aynı nota her parfümde aynı yerde
+                          durmuyor ve liste bunu söylemiyordu.
+
+                          `ml-auto` ile sağa yaslanıyor: adlar solda hizalı
+                          kalıyor, damga sütun hâlinde okunuyor. Sözcükler
+                          `t.bands`ten, yani nota listesindeki (`PerfumeNotes`)
+                          başlıklarla AYNI kaynaktan — aynı kavrama iki ad
+                          takılmıyor.
+                        */}
+                        <span className="ml-auto shrink-0 text-[0.65rem] tracking-[0.3em] text-white/40">
+                          {t.bands[carrier.tier]}
+                        </span>
                       </Link>
                     </li>
                   ))}

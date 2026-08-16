@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import {
   CYCLE_MS,
   MAX_STEP_MS,
+  PHASE_STARTS,
   SIGNATURE_MAX_MINUTES,
   SLIDER_MAX_MINUTES,
   advanceCycle,
@@ -10,8 +11,10 @@ import {
   minutesAt,
   morphAt,
   phaseLabel,
+  progressAtMinutes,
   seekCycle,
 } from './evolution-loop';
+import { EN } from '@/i18n/en';
 
 /**
  * Evrim imzasının saatinin sınamaları.
@@ -163,11 +166,52 @@ describe('formatDuration', () => {
 
 describe('phaseLabel', () => {
   test('evre sınırları', () => {
-    expect(phaseLabel(0)).toBe('Opening');
-    expect(phaseLabel(14)).toBe('Opening');
+    expect(phaseLabel(0)).toBe('Top');
+    expect(phaseLabel(14)).toBe('Top');
     expect(phaseLabel(15)).toBe('Heart');
     expect(phaseLabel(119)).toBe('Heart');
     expect(phaseLabel(120)).toBe('Base');
+  });
+});
+
+describe('progressAtMinutes', () => {
+  /*
+    ⚠️ Zaman çubuğundaki evre işaretlerinin yeri buna dayanıyor. Ters işlev
+    yanlış olsaydı belirti sessiz olurdu: işaret ekranda durur, basılınca
+    "Kalp" yazan bir yere değil başka bir dakikaya giderdi.
+  */
+  test('minutesAt ile gidip geliyor', () => {
+    for (const span of [SIGNATURE_MAX_MINUTES, SLIDER_MAX_MINUTES]) {
+      for (const minutes of [0, 1, 15, 120, span]) {
+        expect(minutesAt(progressAtMinutes(minutes, span), span)).toBeCloseTo(minutes, 6);
+      }
+    }
+  });
+
+  test('uçlar 0 ve 1', () => {
+    expect(progressAtMinutes(0, SIGNATURE_MAX_MINUTES)).toBe(0);
+    expect(progressAtMinutes(SIGNATURE_MAX_MINUTES, SIGNATURE_MAX_MINUTES)).toBeCloseTo(1, 12);
+  });
+
+  test('evre başlangıçları sırayı bozmadan çubuğa düşüyor', () => {
+    const yerler = PHASE_STARTS.map((phase) =>
+      progressAtMinutes(phase.minutes, SIGNATURE_MAX_MINUTES),
+    );
+    expect(yerler[0]).toBe(0);
+    for (let i = 1; i < yerler.length; i += 1) {
+      expect(yerler[i]).toBeGreaterThan(yerler[i - 1] as number);
+      expect(yerler[i]).toBeLessThan(1);
+    }
+  });
+
+  /*
+    Eşikler ile etiketler aynı kaynaktan okunuyor mu — `PHASE_STARTS`ın varlık
+    sebebi bu. Her evrenin başındaki dakika o evrenin adını vermeli.
+  */
+  test('her evre başlangıcı kendi adını veriyor', () => {
+    for (const phase of PHASE_STARTS) {
+      expect(phaseLabel(phase.minutes)).toBe(EN.phases[phase.key]);
+    }
   });
 });
 

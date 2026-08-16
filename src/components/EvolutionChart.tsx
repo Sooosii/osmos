@@ -201,12 +201,13 @@ export function EvolutionChart({ perfume }: EvolutionChartProps) {
         })}
       </ul>
 
-      {/* Katman göstergesi */}
+      {/* Katman göstergesi. Punto imzadaki aile efsanesiyle aynı: sitede aynı
+          işi yapan iki gösterge aynı görünmeli. */}
       <div className="mt-8 flex gap-5">
         {(Object.keys(TIER_COLOR) as PyramidTier[]).map((tier) => (
-          <span key={tier} className="flex items-center gap-2 text-xs text-white/50">
+          <span key={tier} className="flex items-center gap-2 text-sm text-white/70">
             <span
-              className="h-1.5 w-1.5 rounded-full"
+              className="h-2 w-2 rounded-full"
               style={{ backgroundColor: TIER_COLOR[tier] }}
             />
             {t.chart.tiers[tier]}

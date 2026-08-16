@@ -9,6 +9,7 @@ import { rankOf, settleRows } from '@/lib/signature-order';
 import {
   SIGNATURE_MAX_MINUTES,
   MAX_STEP_MS,
+  PHASE_STARTS,
   SLIDER_STEPS,
   advanceCycle,
   cycleProgress,
@@ -16,6 +17,7 @@ import {
   minutesAt,
   morphAt,
   phaseLabel,
+  progressAtMinutes,
   seekCycle,
 } from '@/lib/evolution-loop';
 import type { Perfume, ScentFamily, Volatility } from '@/data/types';
@@ -306,7 +308,20 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
    */
   const paint = useCallback(
     (progress: number, dtMs: number, snap: boolean) => {
-      const morph = morphAt(progress);
+      /*
+        ⚠️ **Duraklatılmış kare çizelge hâlinde çiziliyor, eğri hâlinde değil.**
+
+        `morphAt` turun BAŞINDA ve SONUNDA sıfır veriyor, `labelOpacity` de
+        orada nota adlarını ve yüzdeleri tamamen söndürüyor. Yani kaydıracı
+        sonuna kadar çekip "sekizinci saatte ne var" diye bakan kişi hiçbir şey
+        okuyamıyordu — sahip gördü: "ilk başı ve en sonu da gözüksün".
+
+        Duraklatmanın anlamı zaten "bir kareye bakacağım" ve bakılacak şey
+        okunur olmalı. Akarken hiçbir şey değişmiyor: biçim döngüsü olduğu gibi
+        duruyor ve `morphAt`in dönüş katsayısına DOKUNULMUYOR —
+        `evolution-loop.ts` o katsayıyı adıyla yasaklıyor.
+      */
+      const morph = running ? morphAt(progress) : 1;
       const minutes = minutesAt(progress, SIGNATURE_MAX_MINUTES);
 
       /*
@@ -381,7 +396,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
       kaynakta Türkçe metin yok, çalışma anında İngilizce metin var. Ekranda
       görülerek bulundu (erişilebilirlik turu, 2026-08-10).
     */
-    [rows, curves, geometry, t],
+    [rows, curves, geometry, t, running],
   );
 
   useEffect(() => {
@@ -441,6 +456,58 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
   const toggle = useCallback(() => setRunning((on) => !on), []);
 
   /**
+   * Zaman çubuğunun evre işaretleri — turun başı, kalp, dip ve sonu.
+   *
+   * ⚠️ Yerler `progressAtMinutes` ile HESAPLANIYOR, elle yazılmıyor. Kaydıracın
+   * zaman eşlemesi logaritmik (`minutesAt`), yani "kalp 15. dakikada başlıyor"
+   * çubuğun %3'üne değil %45'ine denk geliyor. Elle bir yüzde yazmak, aralık
+   * (`SIGNATURE_MAX_MINUTES`) değiştiği gün işaretleri sessizce yanlış yere
+   * bırakırdı — ve yanlışlık ancak birinin saati okumasıyla fark edilirdi.
+   *
+   * Sondaki işaretin adı evre değil SÜRE ("8 hours"): turun sonu bir evrenin
+   * başlangıcı değil, dip notanın bittiği yer.
+   */
+  const isaretler = useMemo(
+    () => [
+      ...PHASE_STARTS.map((phase) => ({
+        key: phase.key as string,
+        progress: progressAtMinutes(phase.minutes, SIGNATURE_MAX_MINUTES),
+        label: t.phases[phase.key],
+      })),
+      {
+        key: 'son',
+        progress: 1,
+        label: formatDuration(SIGNATURE_MAX_MINUTES, t.duration),
+      },
+    ],
+    [t],
+  );
+
+  /**
+   * Bir işarete basıldı — saat oraya gidiyor ve duruyor.
+   *
+   * Duraklatmak şart: işaretin bütün amacı "orada ne var" sorusunu cevaplamak
+   * ve akmaya devam eden bir imzada o kare hemen kayıp giderdi. `handleSeek`
+   * aynı kararı sürükleme için zaten veriyor.
+   *
+   * Topuk elle yazılıyor: çizim döngüsü topuğu yalnız AKARKEN takip ediyor,
+   * yani duraklatılmış hâlde kimse yazmasa topuz eski yerinde kalırdı.
+   */
+  const isarete = useCallback(
+    (progress: number) => {
+      elapsedRef.current = seekCycle(progress);
+      setRunning(false);
+
+      const yeri = cycleProgress(elapsedRef.current);
+      paint(yeri, 0, true);
+      if (sliderRef.current) {
+        sliderRef.current.value = String(Math.round(yeri * SLIDER_STEPS));
+      }
+    },
+    [paint],
+  );
+
+  /**
    * Topuk sürüklendi — saat oraya taşınıyor.
    *
    * ⚠️ Sürüklemek **duraklatıyor.** Akarken sürüklemek iki elin aynı topuza
@@ -468,7 +535,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
           başka dil olur.
         */}
         <span ref={phaseRef} className="text-sm tracking-wide text-white/80">
-          {t.phases.opening}
+          {t.phases.top}
         </span>
         <span className="text-white/25">·</span>
         <span ref={durationRef} className="text-sm tabular-nums text-white/50">
@@ -543,7 +610,7 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
         Kaydıracın biçimi `/evolution`daki çizelgeden birebir: sitede aynı işi
         yapan iki denetim aynı görünmeli.
       */}
-      <div className="mt-5 flex items-center gap-4">
+      <div className="mt-5 flex items-end gap-4">
         <button
           type="button"
           onClick={toggle}
@@ -553,18 +620,61 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
           {running ? t.chart.pause : t.chart.play}
         </button>
 
-        <input
-          ref={sliderRef}
-          type="range"
-          min={0}
-          max={SLIDER_STEPS}
-          step={1}
-          defaultValue={0}
-          autoComplete="off"
-          onChange={handleSeek}
-          aria-label={t.chart.timeLabel}
-          className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/15 accent-white"
-        />
+        {/*
+          Kaydıraç ve evre işaretleri tek sütunda: işaretlerin yeri çubuğun
+          genişliğine göre yüzdeyle veriliyor, yani ikisi aynı kutuyu paylaşmak
+          zorunda. Ayrı kutulara konsalardı hiza ekran genişliğine göre kayardı.
+        */}
+        <div className="relative w-full">
+          <div className="relative mb-2 h-4">
+            {isaretler.map((isaret) => (
+              <button
+                key={isaret.key}
+                type="button"
+                onClick={() => isarete(isaret.progress)}
+                aria-label={t.chart.jumpTo(isaret.label)}
+                /*
+                  Tam yerinde durması için `-translate-x-1/2`: nokta kutunun
+                  ortasında ve kutu işaretin yüzdesinde. Uçtaki ikisi kutunun
+                  yarısı kadar dışarı taşıyor — solda oynat düğmesiyle arasındaki
+                  boşluğa, sağda sayfanın kendi kenar payına düşüyor.
+
+                  `group` üstüne gelince adı açıyor; işaretin ne olduğunu
+                  söyleyen tek yer o yazı ve `aria-label`.
+                */
+                style={{ left: `${isaret.progress * 100}%` }}
+                className="group absolute bottom-0 flex -translate-x-1/2 items-end justify-center px-2 py-1 focus-visible:outline-none"
+              >
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 rounded-full bg-white/30 transition-colors group-hover:bg-white/90 group-focus-visible:bg-white/90"
+                />
+                {/*
+                  Ad yalnız üstüne gelince beliriyor. Dördü birden yazılsaydı
+                  327 piksellik telefonda "8 hours" ile "Base" üst üste binerdi;
+                  basıldığında grafiğin üstündeki yazı zaten hangi evrede
+                  olunduğunu söylüyor.
+                */}
+                <span className="pointer-events-none absolute bottom-4 whitespace-nowrap text-[9px] tracking-[0.15em] text-white/0 transition-colors group-hover:text-white/60 group-focus-visible:text-white/60">
+                  {isaret.label}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <input
+            ref={sliderRef}
+            type="range"
+            min={0}
+            max={SLIDER_STEPS}
+            step={1}
+            defaultValue={0}
+            autoComplete="off"
+            onChange={handleSeek}
+            aria-label={t.chart.timeLabel}
+            className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/15 accent-white"
+          />
+        </div>
       </div>
 
       {/*
@@ -574,10 +684,16 @@ export function EvolutionSignature({ perfume }: EvolutionSignatureProps) {
       */}
       <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2">
         {families.map((family) => (
-          <span key={family.id} className="flex items-center gap-2 text-xs text-white/50">
+          /*
+            ⚠️ Punto ölçülerek büyütüldü: 390 piksellik telefonda 12 px ve %50
+            aklıkla çiziliyordu, sahip "okunmuyor" dedi. Renk = aile kuralının
+            ekrandaki tek okunur karşılığı bu satır; okunmayan bir efsane,
+            grafiğin renklerini anlamsız bırakıyor.
+          */
+          <span key={family.id} className="flex items-center gap-2 text-sm text-white/70">
             <span
               aria-hidden="true"
-              className="h-1.5 w-1.5 rounded-full"
+              className="h-2 w-2 rounded-full"
               style={{ backgroundColor: family.color }}
             />
             {say(family.name, locale)}

@@ -56,3 +56,11 @@ next-env.d.ts
 
 # beyin fırtınası görsel sekmesinin mockup'ları — tartışmanın izi, işin kaydı değil
 /.superpowers/
+
+# B2B aday verisi — bu depo AÇIK ve bu dosyalar 735 işletmenin e-postası,
+# Instagram hesabı ve puanı. Kural bugüne kadar yalnız akılda duruyordu ve
+# `git add -A` bir kez hepsini sahneye aldı (leads.db, outreach.csv, dm-listesi);
+# fark edilmeseydi açık depoya girecekti. Artık kural dosyada.
+/leadgen/data/
+/leadgen/**/*.db
+/leadgen/**/*.csv
