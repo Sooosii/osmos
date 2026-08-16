@@ -94,4 +94,23 @@ const DEMO_SELVA: Tenant = {
   indexable: false,
 };
 
-export const TENANTS: readonly Tenant[] = [OSMOS, DEMO_SELVA];
+/**
+ * Nischengold — ilk GERÇEK işletme demosu.
+ *
+ * ⚠️ `indexable: false` bir tercih değil zorunluluk: var olan bir işletmenin
+ * markasıyla, onayı alınmamış bir çalışma arama sonuçlarında görünmemeli.
+ * Sahibin kuralı ayrıca talep edilirse aynı gün kaldırılmasını söylüyor.
+ */
+const NISCHENGOLD: Tenant = {
+  id: 'nischengold',
+  name: 'Nischengold',
+  title: { en: 'Nischengold — scent map', tr: 'Nischengold — koku haritasi' },
+  description: {
+    en: 'The Nischengold shelf, drawn as a map of scent.',
+    tr: 'Nischengold rafi, koku haritasi olarak cizildi.',
+  },
+  features: { accounts: false, notify: false, feed: false },
+  indexable: false,
+};
+
+export const TENANTS: readonly Tenant[] = [OSMOS, DEMO_SELVA, NISCHENGOLD];
