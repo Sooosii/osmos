@@ -20,6 +20,21 @@ import type { Dict } from './en';
  * çözüm gerçek tarayıcıda ölçülmeden seçilmemeli.
  */
 export const TR: Dict = {
+  /**
+   * Demo şeridi — gerçek bir işletmenin adıyla kurulmuş, onayı alınmamış
+   * çalışmanın üstünde duruyor.
+   *
+   * ⚠️ Metinde "OSMOS" kelimesi BİLEREK yok. `brandStrings` sözlükteki her
+   * marka geçişini kiracının adıyla değiştiriyor; buraya yazılsaydı uyarı
+   * "bu sayfa Nischengold tarafından yaptırılmadı, Nischengold hazırladı"
+   * gibi saçma bir cümleye dönerdi. Kim yaptığı sorusunu bileşendeki
+   * `osmos.me` bağlantısı cevaplıyor — bağlantı sözlükten geçmiyor.
+   */
+  demo: {
+    uyari: (marka: string) =>
+      `Resmî olmayan çalışma — bu sayfa ${marka} tarafından yaptırılmadı.`
+      + ' Örnek olarak hazırlandı ve talep üzerine kaldırılır:',
+  },
   site: {
     name: 'OSMOS',
     title: 'OSMOS',

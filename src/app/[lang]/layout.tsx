@@ -2,9 +2,11 @@ import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { Geist } from "next/font/google";
 import { notFound } from "next/navigation";
-import { LOCALES, isLocale } from "@/i18n/locale";
+import { isLocale } from "@/i18n/locale";
+import { aktifDiller } from "@/lib/tenant";
 import { dictFor } from "@/i18n/dict";
 import { LocaleProvider } from "@/i18n/LocaleProvider";
+import { DemoUyarisi } from '@/components/DemoUyarisi';
 import { SITE_BACKGROUND } from "@/lib/site-color";
 import { siteUrl } from "@/lib/site-url";
 import "../globals.css";
@@ -26,7 +28,7 @@ export const viewport: Viewport = {
 };
 
 export function generateStaticParams() {
-  return LOCALES.map((lang) => ({ lang }));
+  return aktifDiller().map((lang) => ({ lang }));
 }
 
 export async function generateMetadata({
@@ -55,7 +57,18 @@ export default async function RootLayout({
   params: Promise<{ lang: string }>;
 }>) {
   const { lang } = await params;
-  if (!isLocale(lang)) notFound();
+  /*
+    ⚠️ Denetim `LOCALES` değil AKTİF DİLLER üstünde ve bunu bir sızıntı
+    öğretti: `isLocale('tr')` her zaman doğru olduğu için, Türkçe sayfaları
+    hiç ÜRETİLMEYEN bir kiracıda bile `/tr` isteği istek anında çiziliyordu.
+    Nischengold demosunda `/tr` HTTP 200 ve Türkçe bir sayfa döndürdü —
+    Almanca satan bir dükkânın müşterisine gösterilecek en yanlış şey.
+
+    `generateStaticParams` tek başına yetmiyor: `dynamicParams` varsayılan
+    olarak açık ve listede olmayan bir parametre isteği reddetmiyor,
+    çiziyor. Kapı burada, düzende — altındaki bütün rotaları kapsıyor.
+  */
+  if (!isLocale(lang) || !aktifDiller().includes(lang)) notFound();
 
   /*
     ⚠️ `lang` artık gerçekten sayfanın dili ve bu bir davranış değişikliği:
@@ -70,6 +83,12 @@ export default async function RootLayout({
       className={`${geistSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/*
+          Demo uyarisi cocuklardan ONCE: gercek bir isletmenin adiyla kurulmus
+          calismada ziyaretcinin ilk okuyacagi sey bunun resmi olmadigi olmali.
+          OSMOS'ta ve gercek musteride hic cizilmiyor.
+        */}
+        <DemoUyarisi lang={lang} />
         <LocaleProvider locale={lang}>{children}</LocaleProvider>
         {/*
           Ölçüm — para yol haritasının 0. fazı (sahip onayladı, 2026-08-11):

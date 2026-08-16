@@ -1,4 +1,5 @@
 import type { Localized } from '../types';
+import type { Locale } from '@/i18n/locale';
 
 /**
  * Kiracı kaydı — B2B'nin çekirdeği.
@@ -52,6 +53,19 @@ export interface Tenant {
    * `robots.ts` ve `sitemap.ts` bunu okuyor.
    */
   readonly indexable: boolean;
+  /**
+   * Bu kiracı için ÜRETİLECEK diller. Verilmezse sitenin tamamı.
+   *
+   * ⚠️ Bir müşteriye konuşmadığı dilde sekme göstermek, sitenin ona
+   * hazırlanmadığını söyler. Nischengold Konstanz'da, tek dilli Almanca
+   * satıyor (para birimi CHF, `/en` sürümü bile 404) — Türkçe bir sekme
+   * orada özensizlik olarak okunur.
+   *
+   * ⚠️ Bu alan **tip evrenini değiştirmiyor**: `LOCALES` sitenin
+   * desteklediği dillerin listesi olarak duruyor, buradaki alt küme yalnız
+   * hangi sayfaların üretileceğini söylüyor.
+   */
+  readonly locales?: readonly Locale[];
 }
 
 /** Ana site. Değişken yokken bu seçilir ve bugünkü OSMOS birebir çıkar. */
@@ -94,4 +108,30 @@ const DEMO_SELVA: Tenant = {
   indexable: false,
 };
 
-export const TENANTS: readonly Tenant[] = [OSMOS, DEMO_SELVA];
+/**
+ * Nischengold — ilk GERÇEK işletme demosu.
+ *
+ * ⚠️ `indexable: false` bir tercih değil zorunluluk: var olan bir işletmenin
+ * markasıyla, onayı alınmamış bir çalışma arama sonuçlarında görünmemeli.
+ * Sahibin kuralı ayrıca talep edilirse aynı gün kaldırılmasını söylüyor.
+ */
+const NISCHENGOLD: Tenant = {
+  id: 'nischengold',
+  name: 'Nischengold',
+  title: { en: 'Nischengold — scent map', tr: 'Nischengold — koku haritasi' },
+  description: {
+    en: 'The Nischengold shelf, drawn as a map of scent.',
+    tr: 'Nischengold rafi, koku haritasi olarak cizildi.',
+  },
+  features: { accounts: false, notify: false, feed: false },
+  indexable: false,
+  /*
+    Dükkân tek dilli Almanca (ölçüldü: `locale":"de"`, CHF, `/en` → 404).
+    Almanca eklemek 269 sözlük dizesi + 158 nota açıklaması demek; o ayrı bir
+    karar. Bu demo İngilizce duruyor — bitmiş bir teslimat gibi değil, bir
+    ÖRNEK gibi görünmesi de bilinçli.
+  */
+  locales: ['en'],
+};
+
+export const TENANTS: readonly Tenant[] = [OSMOS, DEMO_SELVA, NISCHENGOLD];

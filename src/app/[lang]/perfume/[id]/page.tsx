@@ -12,7 +12,8 @@ import { PerfumeNotes } from '@/components/PerfumeNotes';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
 import { ShelfPicker } from '@/components/ShelfPicker';
 import { getDict, localeFor, say } from '@/i18n/dict';
-import { LOCALES, withLocale } from '@/i18n/locale';
+import { withLocale } from '@/i18n/locale';
+import { aktifDiller } from '@/lib/tenant';
 import { pageAlternates } from '@/lib/site-url';
 import { searchForPerfume } from '@/lib/space-navigation';
 
@@ -69,7 +70,7 @@ export const dynamicParams = false;
   doğrulanabilir: 150 × 2.
 */
 export function generateStaticParams() {
-  return LOCALES.flatMap((lang) => PERFUMES.map((perfume) => ({ lang, id: perfume.id })));
+  return aktifDiller().flatMap((lang) => PERFUMES.map((perfume) => ({ lang, id: perfume.id })));
 }
 
 export async function generateMetadata({
