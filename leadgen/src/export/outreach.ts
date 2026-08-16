@@ -136,6 +136,14 @@ const JENERIK_AD = new Set([
   'fragrance', 'fragrances', 'scent', 'scents', 'shop', 'store', 'online',
   'boutique', 'natural', 'naturliches', 'natürliches', 'niche', 'the', 'and',
   'home', 'official', 'welcome', 'buy', 'best',
+  /*
+    ⚠️ Sayfa başlığı bazen ÜRÜN adı taşıyor: `bibliotheque-de-parfum.ua`
+    için "Discovery Set" çıktı ve mektup "Hello Discovery Set," diye
+    başlayacaktı. Katalog/ürün sözcükleri de jenerik sayılıyor.
+  */
+  'discovery', 'set', 'sets', 'collection', 'collections', 'catalog',
+  'catalogue', 'products', 'product', 'sample', 'samples', 'decant',
+  'decants', 'sale', 'new', 'gift', 'kit', 'bundle', 'ml',
 ]);
 
 /**

@@ -181,3 +181,18 @@ test('adsiz hitap kurulabiliyor — bos ad patlamiyor', () => {
   const m = mektupGovdesi({ ...LEAD, shop_name: 'Perfume Shop' }, null, 'tr', PARFUM);
   assert.ok(m.startsWith('Merhaba,'), 'ad dusunce dogrudan virgul gelmeli');
 });
+
+/*
+  ⚠️ Sayfa basligi bazen URUN adi tasiyor. `bibliotheque-de-parfum.ua` icin
+  "Discovery Set" cikti ve mektup "Hello Discovery Set," diye baslayacakti.
+*/
+test('urun adi hitap olarak kullanilmiyor', () => {
+  assert.equal(temizAd('Discovery Set'), null);
+  assert.equal(temizAd('Perfume Samples'), null);
+  assert.equal(temizAd('Gift Set 5ml'), null);
+});
+
+test('urun sozcugu iceren GERCEK marka adi korunuyor', () => {
+  assert.equal(temizAd('Decant Direct'), 'Decant Direct', 'ikinci kelime jenerik degil');
+  assert.equal(temizAd('Scent Split'), 'Scent Split');
+});

@@ -18,6 +18,7 @@ import { olcekCikar } from './olcek.ts';
 import { yazLeadsCsv } from './export/leads.ts';
 import { yazOutreachCsv } from './export/outreach.ts';
 import { yazDmListesi } from './export/dm-listesi.ts';
+import { yazIlkTur } from './export/ilk-tur.ts';
 import { yazRapor } from './report.ts';
 
 /**
@@ -172,6 +173,9 @@ async function main(): Promise<void> {
       + (b.kanitsiz > 0 ? ` · ${b.kanitsiz} tanesinde kanıt yok, açılış cümlesi boş bırakıldı` : ''));
     log(`[export] dm-listesi.md ${d.toplam} hesap (~${d.gun} gün)`
       + (d.atlanan > 0 ? ` · ${d.atlanan} tanesine daha önce yazılmış, atlandı` : ''));
+    const t = yazIlkTur(db, join(VERI, 'ilk-tur.md'), parfumSayisi);
+    log(`[export] ilk-tur.md ${t.dm} DM + ${t.mail} mail`
+      + (t.turkiye > 0 ? ` (${t.turkiye} Türkiye adresi — İYS gerekiyor)` : ''));
   }
 
   if (komut === 'report' || komut === 'hepsi') {
