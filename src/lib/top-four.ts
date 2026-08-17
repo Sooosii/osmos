@@ -13,7 +13,15 @@ import { hasPerfume } from '@/data/perfumes';
  * iddiasını sessizce bozar.
  */
 
-export const MAX_TOP_FOUR = 4;
+/*
+  ⚠️ Sabit ayrı dosyada (`top-four-sabit.ts`) ve buradan yeniden ihraç ediliyor.
+  Sebep: `SettingsForm` bir `'use client'` bileşeni ve bu modülden YALNIZCA bu
+  sayıyı alıyordu; ama modül `hasPerfume` için `@/data/perfumes`e dokunduğundan
+  o tek sayı bütün katalogu tarayıcı paketine çekiyordu (ölçüldü 2026-08-17).
+  Yeniden ihraç, sunucudaki çağıranların ithal satırını değiştirmemek için.
+*/
+export { MAX_TOP_FOUR } from './top-four-sabit';
+import { MAX_TOP_FOUR } from './top-four-sabit';
 
 export type TopFourError = 'tooMany' | 'duplicate' | 'unknown';
 

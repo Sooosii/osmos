@@ -1,8 +1,13 @@
 import { describe, expect, test } from 'vitest';
-import { PERFUMES } from '@/data/perfumes';
+import { PERFUMES, perfumesOf } from '@/data/perfumes';
 import { signatureOf, SIGNATURE_SIZE } from '@/lib/nose-signature';
 
-const [a, b, c, d, e] = PERFUMES.map((perfume) => perfume.id);
+/*
+  ⚠️ Sınama artık PARFÜM geçiyor, kimlik değil: `signatureOf` katalogu kendisi
+  aramayı bıraktı (gerekçesi fonksiyonun başında — kimlik alan sürüm bütün
+  katalogu istemci paketine çekiyordu).
+*/
+const [a, b, c, d, e] = PERFUMES;
 
 describe('signatureOf', () => {
   test('bos secim imza uretmiyor', () => {
@@ -59,13 +64,28 @@ describe('signatureOf', () => {
     }
   });
 
-  test('bilinmeyen kimlik sessizce atlaniyor', () => {
+  /*
+    ⚠️ "Bilinmeyen kimlik sessizce atlanıyor" kuralı buradan `perfumesOf`a
+    TAŞINDI (`data/perfumes.ts`), çünkü çözüm artık sunucuda yapılıyor. Kural
+    kaybolmadı, aşağıdaki iki sınama onu kimlik ucunda tutuyor; burada kalan
+    tek şey boş listenin imzasız olması.
+  */
+  test('bos liste imza uretmiyor', () => {
+    expect(signatureOf(perfumesOf(['yok-boyle-bir-parfum']))).toBeNull();
+  });
+
+  test('bilinmeyen kimlik sessizce atlaniyor — cozum sunucuda', () => {
     /*
       Veri silinmiş ya da yeniden adlandırılmış bir parfüm profili çökertmemeli;
-      imza kalanla çizilir. Hepsi bilinmiyorsa imza yok.
+      imza kalanla çizilir.
     */
-    expect(signatureOf(['yok-boyle-bir-parfum'])).toBeNull();
-    expect(signatureOf([a, 'yok-boyle-bir-parfum'])!.arcs).toHaveLength(1);
+    expect(perfumesOf(['yok-boyle-bir-parfum'])).toEqual([]);
+    expect(signatureOf(perfumesOf([a.id, 'yok-boyle-bir-parfum']))!.arcs).toHaveLength(1);
+  });
+
+  test('perfumesOf sirayi koruyor', () => {
+    /* Sıra imzanın anlamı: "birinci parfümüm" iddiası buradan geçiyor. */
+    expect(perfumesOf([b.id, a.id]).map((p) => p.id)).toEqual([b.id, a.id]);
   });
 
   test('dortten fazlasi alinmiyor', () => {

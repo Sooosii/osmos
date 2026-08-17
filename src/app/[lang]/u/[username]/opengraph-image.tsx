@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import { perfumesOf } from '@/data/perfumes';
 import { publicProfile } from '@/lib/dal';
 import { cardsFor } from '@/lib/perfume-cards';
 import { SIGNATURE_SIZE, signatureOf } from '@/lib/nose-signature';
@@ -33,7 +34,7 @@ export default async function Image({
   const profile = await publicProfile(normalizeUsername(username));
   if (!profile) return new ImageResponse(<div style={{ background: '#050507' }} />, size);
 
-  const signature = signatureOf(profile.topFour);
+  const signature = signatureOf(perfumesOf(profile.topFour));
   const cards = cardsFor(profile.topFour);
 
   /* İmza kartta 340 px; tarif 100 birimlik kutuda geliyor. */

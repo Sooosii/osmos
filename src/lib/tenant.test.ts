@@ -12,6 +12,17 @@ describe('resolveTenant', () => {
   });
 
   /*
+    ⚠️ `perfumes.ts` ana derlemeyi ayırırken bu değeri **elle yazılmış metin**
+    olarak karşılaştırıyor (`=== 'osmos'`), çünkü ölü dalın elenmesi sabitin
+    katlanmasına bağlı kalmasın — o eleme, kiracının paketinde OSMOS
+    katalogunun bulunmamasının tek sebebi. Kimlik değişirse orası sessizce her
+    iki katalogu da paketlemeye döner ve sızıntı geri gelir.
+  */
+  it("OSMOS kimliği 'osmos' olarak kalıyor — perfumes.ts metni buna bağlı", () => {
+    expect(OSMOS_TENANT_ID).toBe('osmos');
+  });
+
+  /*
     Bu sınamanın kapattığı hata sessiz olanı: değişkende bir harf hatası olan
     müşteri derlemesi sorunsuz tamamlanır, yayına çıkar ve müşterinin alan adı
     altında OSMOS'un katalogunu gösterir. Kimse fark etmez çünkü site çalışıyor

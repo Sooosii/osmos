@@ -14,6 +14,34 @@ const nextConfig: NextConfig = {
         source: '/sw.js',
         headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
       },
+      /*
+        Güvenlik başlıkları.
+
+        ⚠️ **Asıl olan `frame-ancestors`.** Ölçüldü (2026-08-17): canlıda tek
+        güvenlik başlığı `Strict-Transport-Security`di — yani site herhangi bir
+        sayfada iframe'e alınabiliyordu. Bunu bugün önemli yapan şey hesapların
+        canlıda AÇILMIŞ olması (`/signin`, `/settings`, `/studio` 200 dönüyor):
+        çerçeveye alınmış bir `/settings`te giriş yapmış kullanıcıya istemediği
+        bir şeyi tıklatmak mümkündü. 12 Ağustos denetimi hesaplar kapalıyken
+        yapıldığı için bu ölçülmemişti.
+
+        ⚠️ `X-Frame-Options` ve CSP `frame-ancestors` birlikte yazılıyor:
+        ikincisi modern tarayıcıda ötekini eziyor, birincisi eski tarayıcı için
+        duruyor. CSP'nin tamamı (script-src vb.) bilerek YOK — Next'in satır içi
+        betikleri nonce ister ve yanlış kurulmuş bir CSP siteyi sessizce kırar.
+        XSS yüzeyi zaten ölçülmüş ve pratikte sıfır (`dangerouslySetInnerHTML`,
+        `eval`, `innerHTML` hiçbir yerde yok); buradaki üç başlık savunma
+        derinliği, tek dayanak değil.
+      */
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        ],
+      },
     ];
   },
   experimental: {

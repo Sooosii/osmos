@@ -6,7 +6,7 @@ import { signOut } from '@/lib/auth-client';
 import { useDict, useLocale } from '@/i18n/LocaleProvider';
 import { withLocale } from '@/i18n/locale';
 import type { PerfumeCard } from '@/lib/perfume-cards';
-import { MAX_TOP_FOUR } from '@/lib/top-four';
+import { MAX_TOP_FOUR } from '@/lib/top-four-sabit';
 import {
   chooseUsernameAction,
   saveProfileAction,
