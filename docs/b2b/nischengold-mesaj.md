@@ -90,6 +90,7 @@ kanıt artık sayı değil, **linkin kendisi.** Açılan demo, sayılmış bir k
 > untereinander in einer Liste. Jeder Weg endet auf Ihrer eigenen Produktseite.
 >
 > Ansehen können Sie sie hier: https://nischengold.osmos.me
+> (einmal scrollen — die Karte erscheint nach einer kurzen Intro)
 >
 > Das ist eine inoffizielle Arbeit — nicht von Ihnen beauftragt, für
 > Suchmaschinen gesperrt, und auf Wunsch nehme ich sie noch am selben Tag
@@ -103,6 +104,12 @@ kanıt artık sayı değil, **linkin kendisi.** Açılan demo, sayılmış bir k
 > — Soroush
 
 **Neden bu metin:**
+- **Kaydırma satırı ölçümden doğdu (2026-08-18).** Demo 390 px'te açıldı ve
+  ilk ekran harita değil **kapı** çıktı: siyah zemin, "Scroll to awaken the
+  scent". Instagram'dan linke basan biri haritayı değil onu görüyor, üstelik
+  "resmi olmayan çalışma" uyarısı da kapının arkasında kalıyor. Kapı sahibin
+  tasarımı ve **değiştirilmedi**; mesaja tek satır eklendi. Tek atışlık bir
+  temasta "sayfa boş sandım" en pahalı kayıp.
 
 - **Ilk cümle ürünü anlatıyor, kendini değil.** "Merhaba, ben X, şunu yapıyorum"
   diye başlayan bir DM okunmadan kapanıyor.
