@@ -10,6 +10,7 @@ import { EvolutionSignature } from '@/components/EvolutionSignature';
 import { Neighbors } from '@/components/Neighbors';
 import { PerfumeNotes } from '@/components/PerfumeNotes';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
+import { KaynakKunyesi } from '@/components/KaynakKunyesi';
 import { ShelfPicker } from '@/components/ShelfPicker';
 import { getDict, localeFor, say } from '@/i18n/dict';
 import { withLocale } from '@/i18n/locale';
@@ -384,6 +385,11 @@ export default async function PerfumePage({
                 {t.nav.backToSpace}
               </Link>
             </p>
+            {/*
+              Kaynak künyesi — yalnız kiracıda çiziliyor, osmos.me'de null.
+              Sayfanın en dibi ve en sönük satırı; yerini sahip seçti.
+            */}
+            <KaynakKunyesi lang={locale} />
           </footer>
         </div>
       </ScreenFrame>
