@@ -28,9 +28,10 @@ const kanit = [
   },
 ] as unknown as readonly Evidence[];
 
-const lead = (product_count: number): Lead => ({
+const lead = (product_count: number, notes: string | null = null): Lead => ({
   domain: 'x.com',
   shop_name: 'Niche Perfume Shop',
+  notes,
   product_count,
 } as unknown as Lead);
 
@@ -55,6 +56,23 @@ describe('sayı iddiası', () => {
     const a = acilisCumlesi(lead(URUN_TAVANI), kanit, 'tr');
     expect(a?.cumle).not.toContain('saydım');
     expect(a?.cumle).toContain("'den fazla");
+  });
+
+  /*
+    ⚠️ **Sayı eşiği tek başına yetmiyor.** Tarama bir sayfa getirilemediğinde de
+    kırılıyor ve toplam orada kalıyor — 1000'in ÇOK altında. Ölçüldü
+    (2026-08-19): scentido.com kayıtta 250 ürünle duruyordu, gerçekte 490.
+    Kayıt bunu nota yazmıştı (); eksik olan metnin onu okumasıydı.
+  */
+  it('kayittaki (tavan) isareti sayidan BAGIMSIZ olarak iddiayi kaldiriyor', () => {
+    const a = acilisCumlesi(lead(250, 'urun sayisi 250+ (tavan)'), kanit, 'en');
+    expect(a?.cumle).not.toContain('I counted');
+    expect(a?.cumle).toContain('runs past 250');
+  });
+
+  it('isaret YOKSA sayi gercek sayilir', () => {
+    const a = acilisCumlesi(lead(977), kanit, 'en');
+    expect(a?.cumle).toContain('I counted 977');
   });
 
   /* Tavanın üstü de aynı muameleyi görmeli — sayı yine gerçek değil. */

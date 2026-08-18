@@ -181,7 +181,19 @@ export function acilisCumlesi(lead: Lead, kanit: readonly Evidence[], dil: Dil):
       tutmuyorsa mesajı gönderme." Doğrusu zaten elimizde — **1000'den fazla**
       doğru bir cümle ve daha da etkileyici.
     */
-    const tavanda = n >= URUN_TAVANI;
+    /*
+      ⚠️⚠️ **Sayı eşiği TEK BAŞINA yetmiyor ve bu ölçülerek görüldü.** Ilk
+      düzeltme yalnız `n >= URUN_TAVANI` (1000) bakıyordu; oysa tarama bir
+      sayfa GETIRILEMEDIĞINDE de kırılıyor ve toplam orada kalıyor. Örnek
+      ölçüldü (2026-08-19): `scentido.com` kayıtta **250** ürünle duruyordu,
+      gerçekte **490**. Mesaj "kataloğunuzdaki 250 parfümü saydım" diyecekti —
+      yarısı kadar, ve dükkân sahibi ilk bakışta görürdü.
+
+      Kayıt bunu zaten biliyordu: `enrich` tavana dayanan ölçümü nota
+      `urun sayisi N+ (tavan)` diye yazıyor. Eksik olan, metnin o notu
+      OKUMAMASIYDI. Ölçüldü: 7 dükkânda işaret var ama sayı 1000'in altında.
+    */
+    const tavanda = n >= URUN_TAVANI || (lead.notes ?? '').includes('(tavan)');
     /*
       ⚠️ Adres MÜŞTERİYE GİTMİYOR, yalnız `kaynakUrl`de duruyor: sayı
       `products.json` ucundan geliyor ve o adresi mektuba koymak "sizin
