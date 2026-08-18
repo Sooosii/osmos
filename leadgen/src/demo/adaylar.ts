@@ -18,12 +18,13 @@ import {
   ortusmeHesapla, urunOrtusmesiHesapla,
   type KatalogParfumu, type Ortusme, type UrunOrtusmesi,
 } from './markalar.ts';
+import type { DukkanUrunu } from './taslak.ts';
 import type { Lead } from '../types.ts';
 
 /** Kaç ürün okunacak — marka listesi için bu kadarı yetiyor. */
 const URUN_SINIRI = 250;
 
-interface ShopifyUrun { readonly vendor?: string; readonly title?: string }
+interface ShopifyUrun { readonly vendor?: string; readonly title?: string; readonly handle?: string }
 interface ShopifyListe { readonly products?: readonly ShopifyUrun[] }
 
 export interface AdayOlcumu {
@@ -38,6 +39,13 @@ export interface HedefKatalogu {
   readonly markalar: readonly string[];
   /** Marka + ad birleşik başlıklar — ürün eşleştirmesi bunun üstünde. */
   readonly basliklar: readonly string[];
+  /**
+   * Ürünlerin kendisi — `handle` ürün adresini kuruyor.
+   *
+   * ⚠️ `basliklar` ile AYNI sıradan üretiliyor: eşleştirme başlık üstünde
+   * yapılıp adres buradan alınıyor, ikisi ayrışırsa yanlış ürüne bağlanırdık.
+   */
+  readonly urunler: readonly DukkanUrunu[];
 }
 
 /** Bir hedefin katalogunu okur. */
@@ -50,6 +58,10 @@ export async function hedefKatalogu(lead: Lead): Promise<HedefKatalogu | null> {
     return {
       markalar: urunler.flatMap((u) => (u.vendor === undefined || u.vendor.trim() === '' ? [] : [u.vendor])),
       basliklar: urunler.map((u) => `${u.vendor ?? ''} ${u.title ?? ''}`),
+      urunler: urunler.flatMap((u) => (u.handle === undefined ? [] : [{
+        handle: u.handle,
+        baslik: `${u.vendor ?? ''} ${u.title ?? ''}`,
+      }])),
     };
   }
   return null;

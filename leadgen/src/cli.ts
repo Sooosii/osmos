@@ -7,7 +7,7 @@
  */
 import { parseArgs } from 'node:util';
 import { join } from "node:path";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { acVeritabani, ekleTemas, toplamHarcama, tumLeadler, upsertLead } from './db.ts';
 import { ApifyIstemcisi } from './apify/istemci.ts';
 import { topla } from './apify/topla.ts';
@@ -17,10 +17,13 @@ import { katalogParfumSayisi, katalogTohumlari, varsayilanKatalogDizini } from '
 import { puanla } from './score.ts';
 import { olcekCikar } from './olcek.ts';
 import { yazLeadsCsv } from './export/leads.ts';
-import { yazOutreachCsv } from './export/outreach.ts';
+import { temizAd, yazOutreachCsv } from './export/outreach.ts';
 import { yazDmListesi } from './export/dm-listesi.ts';
 import { yazIlkTur } from './export/ilk-tur.ts';
-import { olcAdaylar, yazDemoRaporu } from './demo/adaylar.ts';
+import { hedefKatalogu, olcAdaylar, yazDemoRaporu } from './demo/adaylar.ts';
+import {
+  adresAdaylari, katalogTaslagi, kayitTaslagi, kiraciKimligi,
+} from './demo/taslak.ts';
 import { osmosMarkalari, osmosParfumleri } from './demo/markalar.ts';
 import { yazRapor } from './report.ts';
 
@@ -62,7 +65,7 @@ const DB_YOLU = process.env.LEADGEN_DB?.trim() || join(VERI, 'leads.db');
 const log = (s: string): void => { process.stdout.write(`${s}\n`); };
 
 const KOMUTLAR = [
-  'seed', 'topla', 'enrich', 'demo-adaylari', 'score', 'export', 'report', 'temas', 'hepsi',
+  'seed', 'topla', 'enrich', 'demo-adaylari', 'kiraci-taslak', 'score', 'export', 'report', 'temas', 'hepsi',
 ] as const;
 type Komut = typeof KOMUTLAR[number];
 
@@ -188,6 +191,52 @@ async function main(): Promise<void> {
     const sonuclar = await olcAdaylar(db, bizimkiler, parfumlerimiz, sinir ?? 200, log);
     const n = yazDemoRaporu(sonuclar, join(VERI, 'demo-adaylari.md'));
     log(`[demo] demo-adaylari.md — ${n} hedefe demo bugün kurulabilir`);
+  }
+
+  if (komut === 'kiraci-taslak') {
+    /*
+      ⚠️ `hepsi` içinde DEĞİL — ağa çıkıyor ve çıktısı bir satış kararına
+      girdi. `demo-adaylari` ile aynı gerekçe.
+    */
+    const [domain] = argumanlar;
+    if (domain === undefined) {
+      log('kullanim: node src/cli.ts kiraci-taslak <domain>');
+      process.exit(1);
+    }
+
+    const lead = tumLeadler(db).find((l) => l.domain === domain);
+    if (lead === undefined) {
+      log(`[taslak] listede yok: ${domain}`);
+      process.exit(1);
+    }
+
+    const katalog = await hedefKatalogu(lead);
+    if (katalog === null) {
+      log(`[taslak] katalog okunamadi: ${domain}`);
+      process.exit(1);
+    }
+
+    const bizimkiler = osmosParfumleri(varsayilanKatalogDizini());
+    const adaylar = adresAdaylari(katalog.urunler, bizimkiler);
+    if (adaylar.length === 0) {
+      log(`[taslak] ortusen parfum yok — demo kurulamaz: ${domain}`);
+      process.exit(1);
+    }
+
+    const kimlik = kiraciKimligi(domain);
+    const magaza = temizAd(lead.shop_name) ?? kimlik;
+    const dizin = join(VERI, `taslak-${kimlik}`);
+    mkdirSync(dizin, { recursive: true });
+    writeFileSync(join(dizin, 'catalog.ts'), katalogTaslagi(kimlik, magaza, domain, adaylar));
+    writeFileSync(join(dizin, 'kayit.txt'), kayitTaslagi(kimlik, magaza));
+
+    const bakilacak = adaylar.filter((a) => a.adaylar.length > 1);
+    log(`[taslak] ${adaylar.length} parfum · ${dizin}`);
+    log(`[taslak] ${bakilacak.length} adreste birden cok aday var — once onlara bak:`);
+    for (const a of bakilacak) {
+      log(`  ${a.id} → ${a.secim.handle}  (otekiler: ${a.adaylar.filter((x) => x !== a.secim).map((x) => x.handle).join(", ")})`);
+    }
+    log(`[taslak] ⚠️ her adres DOGRULANMADI isaretiyle cikti; tarayicida acmadan silme.`);
   }
 
   if (komut === 'score' || komut === 'hepsi') {
