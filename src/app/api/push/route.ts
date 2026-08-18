@@ -1,6 +1,7 @@
 import { parseEndpoint, parseSubscription } from '@/lib/push-subscription';
 import { allow, clientIp, tooManyRequests } from '@/lib/rate-limit';
 import { deleteSubscription, saveSubscription, storeReady } from '@/lib/push-store';
+import { ucKapali } from '@/lib/tenant-guard';
 
 /**
  * `/api/push` — sitenin ilk (ve tek) sunucu parçası.
@@ -42,6 +43,9 @@ const RATE_LIMIT = 10;
 const RATE_WINDOW = 60;
 
 export async function POST(request: Request): Promise<Response> {
+  const kapali = ucKapali('notify');
+  if (kapali) return kapali;
+
   const verdict = await allow('push', clientIp(request.headers), RATE_LIMIT, RATE_WINDOW);
   if (!verdict.ok) return tooManyRequests(verdict);
 
@@ -63,6 +67,9 @@ export async function POST(request: Request): Promise<Response> {
 }
 
 export async function DELETE(request: Request): Promise<Response> {
+  const kapali = ucKapali('notify');
+  if (kapali) return kapali;
+
   const verdict = await allow('push', clientIp(request.headers), RATE_LIMIT, RATE_WINDOW);
   if (!verdict.ok) return tooManyRequests(verdict);
 

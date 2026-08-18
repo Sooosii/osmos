@@ -35,6 +35,19 @@ export const TR: Dict = {
       `Resmî olmayan çalışma — bu sayfa ${marka} tarafından yaptırılmadı.`
       + ' Örnek olarak hazırlandı ve talep üzerine kaldırılır:',
   },
+  /**
+   * Kaynak künyesi — kiracının parfüm sayfasının dibinde duran tek satır.
+   *
+   * ⚠️ **Cümlede "OSMOS" GEÇMEZ ve bu pazarlık dışı.** `brandStrings`
+   * sözlükteki her "OSMOS"u kiracının adıyla değiştiriyor; buraya marka
+   * yazılsaydı Nischengold'un sayfasında *"powered by Nischengold"* çıkardı.
+   * `demo.uyari` aynı tuzağa bir kez düştü, çözümü de aynı: markayı cümle
+   * değil, altındaki `osmos.me` **bağlantısı** söylüyor — o bir adres,
+   * sözlükten geçmiyor.
+   */
+  kaynak: {
+    harita: 'koku haritasını kuran:',
+  },
   site: {
     name: 'OSMOS',
     title: 'OSMOS',

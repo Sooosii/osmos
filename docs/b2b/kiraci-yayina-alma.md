@@ -33,6 +33,14 @@ Altı ölçüm — Nischengold'da 2026-08-16'da hepsi geçti:
 | sekme başlığı | kiracının adı, OSMOS değil | ✅ "Nischengold — scent map" |
 | ana sayfada "OSMOS" geçişi | 0 | ✅ 0 |
 | her parfümün satıcı bağlantısı | müşterinin kendi alan adı | ✅ **13/13** |
+| kapalı özelliğin uçları (`/api/shelf`, `/api/push`, `/api/compose/nearest`, `/api/auth/...`) | **404** | ✅ dördü de (2026-08-18) |
+| `/api/perfume-search` | **200**, yalnız kiracının katalogu | ✅ 13 kayıt, OSMOS kaydı 0 |
+| tarayıcı konsolu | 0 hata (Vercel Analytics hariç, o yerelde hep 404) | ✅ |
+
+⚠️ **Uçları GET ile ölçme.** `/api/push` ve `/api/compose/nearest` yalnız POST
+tanıyor; GET'te 405 dönüyorlar ve o 405 kapıya HİÇ ulaşmadan çıkıyor —
+"kapalı" sanılır, oysa ölçüm hiç yapılmamıştır. Doğru yöntem:
+`curl -X POST -H "content-type: application/json" -d '{}' ...`
 
 ⚠️ Sekme başlığını **gerçek tarayıcı** yakaladı, gözle bulunmamıştı: marka 20+
 başlık dizesinin içinde gömülü ve çoğu fonksiyon (`src/i18n/brand.ts`).
@@ -109,6 +117,43 @@ görünüyor mu, `osmos.me` bağlantısı çalışıyor mu.
 | taslak ekranlar (`/evolution`, `/space`) | 404 | ✅ ikisi de |
 | hesap dünyası (`/signin`, `/settings`, `/studio`, `/u/…`, `/feed.xml`) | 404 | ✅ beşi de |
 | **katalog sızıntısı** | yüklenen parçalarda OSMOS metni yok | ✅ 15 parça tarandı, 0 |
+
+---
+
+## 6. Kaldırma — "talep edilirse aynı gün"
+
+⚠️ **Söz üç belgede yazılıydı, ADIMI hiçbirinde yoktu.** Talep geldiği an
+aranacak şey bu olmamalı: dükkân "kaldırın" dediğinde geçen her saat, verilen
+sözün değeri kadar zarar veriyor. Sıra tartışmadan önce gelir — **önce
+kaldırılır, sonra konuşulur.**
+
+```bash
+npx vercel alias remove <adres> --yes        # adres dağıtımdan kopar — SITE ANINDA DÜŞER
+npx vercel project remove <kimlik> --yes     # proje tamamen gider
+```
+
+⚠️⚠️ **`vercel domains remove` KULLANILMAYACAK.** O komut alan adının
+**sahipliğini** hesaptan düşürüyor; `osmos.me` ile çalıştırılırsa kaldırılan
+şey kiracının demosu değil **ana sitenin alan adı** olur. Kiracı bir alt alan
+adında duruyor ve alt alan adının kendi "domain" kaydı yok — yukarıdaki iki
+komut yeterli.
+
+Sonra DNS: `osmos.me` tarafındaki `<kimlik>` CNAME kaydı silinir (joker kayıt
+duruyorsa alt alan adı yine bir yere düşer, o yüzden ölçmeden bitmiş sayılmaz).
+
+**Doğrula — kaldırdım demeden önce:**
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" -L https://<adres>/   # 200 DÖNMEMELI
+```
+
+⚠️ Kiracı kaydını (`registry.ts`) ve katalogu depodan silmek **şart değil** ve
+aceleye getirilmemeli: kayıt `NEXT_PUBLIC_TENANT` verilmedikçe hiçbir şeyi
+değiştirmiyor, osmos.me etkilenmiyor. Yayından kalkan site kalkmıştır; kod
+temizliği ayrı ve sakin bir iş.
+
+⚠️ Aynı gün bir de **cevap yazılır**: kaldırıldığı, kaydın silindiği ve bir
+daha yazılmayacağı. Sessizce kaldırmak sözün yarısını tutmaktır.
 
 ---
 

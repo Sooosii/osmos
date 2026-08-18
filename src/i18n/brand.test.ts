@@ -77,3 +77,27 @@ describe('kiracı sözlüğünde marka sızıntısı', () => {
     expect(brandLeaks(EN, EN.site.name).length).toBeGreaterThan(10);
   });
 });
+
+/**
+ * Kaynak künyesinin cümlesi.
+ *
+ * ⚠️ **Yukarıdaki sızıntı kapısı bu hatayı YAKALAMAZ, ve incelik burada:**
+ * sözlüğe "powered by OSMOS" yazılsaydı `brandStrings` onu "powered by
+ * Nischengold"a çevirirdi ve sızıntı sınaması temiz derdi — ortada OSMOS
+ * kalmadığı için. Ekranda ise satır kendi kendini yalanlar: müşterinin sitesi,
+ * kendisi tarafından kurulduğunu söyler.
+ *
+ * Kural: cümle marka İÇERMEZ; markayı `KaynakKunyesi`deki `osmos.me`
+ * bağlantısı söyler — bağlantı sözlükten geçmiyor.
+ */
+describe('kaynak künyesi cümlesi', () => {
+  for (const [name, dict] of [
+    ['EN', EN],
+    ['TR', TR],
+  ] as const) {
+    it(`${name} cümlesi markadan bağımsız — değişim ona dokunmuyor`, () => {
+      expect(dict.kaynak.harita).not.toContain(EN.site.name);
+      expect(brandStrings(dict, EN.site.name, 'SELVA').kaynak.harita).toBe(dict.kaynak.harita);
+    });
+  }
+});

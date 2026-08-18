@@ -24,6 +24,19 @@ export const EN = {
       `Unofficial study — this page was not commissioned by ${marka}.`
       + ' Built as a sample; it will be taken down on request:',
   },
+  /**
+   * Kaynak künyesi — kiracının parfüm sayfasının dibinde duran tek satır.
+   *
+   * ⚠️ **Cümlede "OSMOS" GEÇMEZ ve bu pazarlık dışı.** `brandStrings`
+   * sözlükteki her "OSMOS"u kiracının adıyla değiştiriyor; buraya marka
+   * yazılsaydı Nischengold'un sayfasında *"powered by Nischengold"* çıkardı.
+   * `demo.uyari` aynı tuzağa bir kez düştü, çözümü de aynı: markayı cümle
+   * değil, altındaki `osmos.me` **bağlantısı** söylüyor — o bir adres,
+   * sözlükten geçmiyor.
+   */
+  kaynak: {
+    harita: 'scent map by',
+  },
   site: {
     name: 'OSMOS',
     title: 'OSMOS',

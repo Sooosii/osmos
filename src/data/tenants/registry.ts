@@ -130,6 +130,10 @@ const NISCHENGOLD: Tenant = {
     Almanca eklemek 269 sözlük dizesi + 158 nota açıklaması demek; o ayrı bir
     karar. Bu demo İngilizce duruyor — bitmiş bir teslimat gibi değil, bir
     ÖRNEK gibi görünmesi de bilinçli.
+
+    Sahibin kararı (2026-08-18): Almanca **cevap gelirse** eklenecek, önce
+    değil. Ilgi doğrulanmadan 269 sözlük dizesi + 158 nota açıklaması
+    yazılmıyor. Ayrıntı: `docs/b2b/nischengold-mesaj.md`.
   */
   locales: ['en'],
 };

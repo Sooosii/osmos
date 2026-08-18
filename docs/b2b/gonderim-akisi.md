@@ -17,6 +17,7 @@ ticari e-postayı B2B'de bile yasaklıyor; DM o kuralın kapsamında değil.
 | `leadgen/data/dm-listesi.md` | **233 hesap**, güne bölünmüş (günde 15, ~16 gün). Her mesajın altında kanıt adresi ve hazır taslak. **45'i Türkçe** — dükkânın sayfası Türkçeyse mesaj da Türkçe |
 | `leadgen/data/outreach.csv` | 486 satır — DM ve mail, `kanal` sütunuyla ayrılmış |
 | `leadgen/data/demo-adaylari.md` | **7 hedef**: raflarında bizde de olan parfüm var |
+| `docs/b2b/nischengold-mesaj.md` | **Nischengold ayrı ele alınıyor**: demosu zaten canlı, mesajı Almanca ve DM ile gidiyor |
 | `leadgen/data/leads_ranked.csv` | 735 aday, tam liste |
 
 ---
