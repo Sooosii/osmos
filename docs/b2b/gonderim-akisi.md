@@ -1,14 +1,21 @@
 # Gönderim akışı — günlük çalışma sayfası
 
-> 🔒 **BU AKIŞ (233 DM) HÂLÂ KAPALI.** Karar dosyası 2026-08-18'de kapandı ama
-> sahip kapıyı **yalnız Nischengold için** açtı: tek mesaj fatura doğurmuyor,
-> 233 mesaj doğurabilir — aynı hafta birden çok "evet" gelirse hem evrak hem
-> teslim kapasitesi aynı yere biner.
+> 🔓 **AÇILDI — 2026-08-18.** Şirket kararları verildi, evrak sahip tarafından
+> halledildi, ilk mesaj (Nischengold) gitti.
 >
-> 🔓 **Serbest olan tek iş:** `docs/b2b/nischengold-mesaj.md`.
+> ⚠️ **Ama 15/gün ile BAŞLAMIYOR.** Ilk parti **10 mesaj**; sonra durup okunuyor.
+> Gerekçe: mesajın işe yaradığına dair kanıt yok ve yanlış bir metin 233 dükkânı
+> geri dönülmez biçimde yakar. Karar kuralı önceden yazıldı:
 >
-> Bu akış `sirket-ve-fatura.md` §7'deki **2-4 numaralı işlemler** (NACE 62.01,
-> e-Fatura/302 denemesi, döviz hesabı) bitmeden başlatılmıyor.
+> | 10 mesajdan gelen cevap | ne yapılır |
+> |---|---|
+> | **≥2** (red bile olsa) | metin çalışıyor → 15/gün |
+> | **1** | tek değişken değiştirilip 10 daha |
+> | **0** | aynı metinle devam **edilmez** — önce gönderen hesap ve kanal gözden geçirilir |
+>
+> ⚠️ **Türk dükkânları bu turda DEĞİL** (45 hesap). Kiracı sitesi bir Türk
+> dükkânının `/` adresinde hâlâ Ingilizce açılıyor; Türkiye'den gelen bir "evet"
+> yarım bir ürünle karşılaşır. Türkiye, dil turundan sonra.
 
 **Kanal sırası:** Instagram DM → mail → telefon.
 DM ilk sırada çünkü Almanya (en büyük bilinen hedef grubu, 57 dükkân) izinsiz

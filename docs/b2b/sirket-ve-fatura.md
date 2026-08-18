@@ -205,15 +205,23 @@ her birinin sahibi yazılı.
 | # | Işlem | Kimde | Durum |
 |---|---|---|---|
 | 1 | Şirket seçildi | — | ✅ hep babanın |
-| 2 | **NACE 62.01 bildirimi** | **sen + müşavir** | ⏳ |
-| 3 | e-Fatura kullanıcısı hazır, **istisna 302 bir kez denendi** | **sen + müşavir** | ⏳ |
+| 2 | **NACE 62.01 bildirimi** | — | ✅ sahip halletti (2026-08-18) |
+| 3 | e-Fatura + **istisna 302** | — | ✅ sahip halletti (2026-08-18) |
 | 4 | Şirketin **döviz hesabı** (EUR) + SWIFT | — | ✅ **elde, sorun yok** (2026-08-18) |
 | 5 | Teklif şablonunda **VAT ID isteme** + **unvan** satırı | ben | ⏳ |
 | 6 | Kişisel Instagram hesabı: profil fotoğrafı + birkaç gönderi | **sen** | ⏳ |
 | 7 | 🔓 **Nischengold'a DM** | **sen** | serbest — `nischengold-mesaj.md` |
-| 8 | 🔒 233'lük liste | — | kapalı; 2-4 bitmeden açılmıyor |
+| 8 | 🔓 233'lük liste | **sen** | serbest — ama **10'luk parti** ile başlıyor, 15/gün ile değil |
 
-⚠️ **7 ile 8 arasındaki fark bilinçli.** Tek mesaj fatura doğurmuyor, 233 mesaj
+⚠️ **2 ve 3 sahibin beyanı, benim ölçümüm değil** (2026-08-18: *"onu kenara koy,
+halledildi gibi say"*). Kayda böyle geçiyor çünkü tek bir yerde gerçekten
+bağlayıcı: **ilk fatura kesilirken.** Kod uyuşmazsa fatura reddedilebilir ya da
+istisna kabul görmez — teklif gönderilmeden önce bir kez teyit edilsin, sonra
+bir daha sorulmayacak.
+
+⚠️ **8 açıldı ama 15/gün ile değil.** Elde mesajın işe yaradığına dair sıfır
+kanıt var: bir mesaj sinyal değil. Metin bir yerinden bozuksa bunu 233 dükkânı
+yakarak öğreniriz ve onlara bir daha yazılamaz. Sıra: **10 mesaj → oku → karar.**
 doğurabilir: aynı hafta birden çok "evet" gelirse hem evrak hem teslim
 kapasitesi (parfüm başına 15-25 dakika veri girişi) aynı yere biner.
 
