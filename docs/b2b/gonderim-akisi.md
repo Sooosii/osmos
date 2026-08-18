@@ -23,6 +23,33 @@ ticari e-postayı B2B'de bile yasaklıyor; DM o kuralın kapsamında değil.
 
 ---
 
+## Parti nasıl kurulur — ölçümle, puanla değil
+
+```bash
+cd leadgen
+node src/cli.ts demo-adaylari --sinir 150   # katalogları ölç (ücretsiz, dakikalar)
+node src/cli.ts export                      # taslakları tazele
+node scripts/parti-kur.mjs                  # data/ilk-parti.md
+```
+
+⚠️ **Sıra PUANA göre değil ÖRTÜŞMEYE göre.** Puan "iyi hedef mi" der; örtüşme
+"evet derse kaç saatimi yer" der. Ölçüldü (2026-08-18): puan 188 dükkânda
+birden 55, yani sıralama fiilen alfabetik. Nischengold da zaten puanla
+bulunmadı — 20 dükkânın katalogu ölçülüp en iyisi seçildi.
+
+⚠️⚠️ **Marka örtüşmesi TAM 1 olan dükkân değil PARFÜM EVİDİR** — örtüşen tek
+marka kendisi. Segment sınıflandırıcısı bunları `butik-eticaret` diye
+işaretliyor ve ayıramıyor. Ölçüldü: kuralın yakaladığı 13 kaydın 12'si
+gerçekten ev (BDK Parfums, Nasomatto, Orto Parisi, Zoologist, Atelier Des Ors,
+Marc Antoine Barrois, Carner Barcelona…). Bir eve "kataloğunuzun haritası"
+satmak bambaşka bir konuşma: onda 15 parfüm var, seçki değil.
+
+⚠️ **Marka örtüşmesi SIFIR ayrı bir durum, elenmiyor.** Dekantçıda Shopify'ın
+`vendor` alanı parfüm evini değil dükkânın kendi adını taşıyor; ürün eşleşmesi
+başlıktan geldiği için doğru. Bugünkü ilk onun dördü dekantçı.
+
+---
+
 ## Elindeki liste
 
 | Dosya | Ne var |
