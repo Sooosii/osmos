@@ -101,7 +101,7 @@ kanıt artık sayı değil, **linkin kendisi.** Açılan demo, sayılmış bir k
 > Falls Sie keine weiteren Nachrichten möchten, sagen Sie einfach Bescheid —
 > dann höre ich auf.
 >
-> — Soroush
+> — Soroush Sehat
 
 **Neden bu metin:**
 - **Kaydırma satırı ölçümden doğdu (2026-08-18).** Demo 390 px'te açıldı ve
@@ -119,6 +119,9 @@ kanıt artık sayı değil, **linkin kendisi.** Açılan demo, sayılmış bir k
   okunur ve haklı olur.
 - **Tek soru.** Iki soru soran mesaj cevapsız kalıyor.
 - **Opt-out kendi cümlesinde.** Hem nezaket hem hukuk.
+- **Tam ad, yalnız ilk ad değil.** Izni alınmamış bir çalışma gösteren mesajda
+  tam ad "arkasında duruyorum" demek; Almanya'da iş yazışması zaten tam adla
+  imzalanıyor. Teklif ve faturadaki adla da örtüşüyor.
 - **Fiyat YOK.** Ilk mesajda fiyat, cevabı "pahalı"ya indirger; fiyat ikinci
   turda ve gerekçesiyle konuşuluyor (€490 + €290/yıl, kurucu fiyatı).
 
