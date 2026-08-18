@@ -8,6 +8,36 @@ deposuna bağlanıyorlar, ayrıldıkları tek yer ortam değişkenleri.
 
 ---
 
+## 0. Katalog taslağını ÜRET — elle yazma
+
+```bash
+cd leadgen
+node src/cli.ts kiraci-taslak <domain>      # data/taslak-<kimlik>/
+```
+
+Üretilenler: `catalog.ts` (seçki + aday adresler) ve `kayit.txt`
+(`registry.ts` + `catalogs.ts` için yapıştırmalık satırlar).
+
+⚠️ **Bu adım ölçülen 6-8 saatin büyük kısmını siliyor** — o sürenin çoğu veri
+girişi değil ARAMAydı: her parfümün dükkândaki ürün adresini elle bulmak.
+Eşleşen kimlikler zaten hesaplanıyordu, adres de `products.json`da duruyordu.
+
+⚠️⚠️ **Üretilen adres bir ÖNERİ, karar değil.** Her satır `DOGRULANMADI`
+işaretiyle çıkıyor ve `src/data/tenants/dogrulama.test.ts` işaret durduğu
+sürece düşüyor — yani doğrulanmamış demo master'a giremez. Adresi tarayıcıda
+aç, ürünün gerçekten o parfüm olduğunu **gör**, sonra işareti sil.
+
+⚠️ Komut birden çok adayı olan satırları ayrıca listeliyor; önce onlara bak.
+Sebep ölçüldü: dükkânlar çoğu parfümü hem temel hem `Extrait` olarak satıyor
+ve bizim kayıtlarımız temel sürüm. **Yanlış bağlantı bağlantısızlıktan
+kötüdür** — ziyaretçi başka ürüne düşer, sepete onu atar, kimse fark etmez.
+
+**Ne kadar güveniliyor:** araç Nischengold üzerinde denendi ve elle
+doğrulanmış **13 adresin 13'ünü birebir** üretti, beş Extrait tuzağının beşini
+de doğru tarafa düşürdü. Yine de kapı duruyor: doğrulama gözle yapılıyor.
+
+---
+
 ## 1. Kiracı kaydı master'da olmalı
 
 `src/data/tenants/registry.ts` + `src/data/tenants/<kimlik>/catalog.ts`.

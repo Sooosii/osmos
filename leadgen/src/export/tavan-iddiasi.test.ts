@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { acilisCumlesi } from './outreach';
+import { acilisCumlesi } from './outreach.ts';
 import { URUN_TAVANI } from '../enrich/platform.ts';
 import type { Evidence, Lead } from '../types.ts';
 
@@ -21,15 +21,18 @@ import type { Evidence, Lead } from '../types.ts';
  * Doğrusu zaten elimizdeydi: **1000'den fazla** hem doğru hem daha etkileyici.
  */
 
-const kanit: readonly Evidence[] = [
-  { domain: 'x.com', kind: 'platform', url: 'https://x.com/products.json?limit=250&page=1', snippet: '' } as Evidence,
-];
+const kanit = [
+  {
+    domain: 'x.com', kind: 'platform', snippet: '',
+    url: 'https://x.com/products.json?limit=250&page=1',
+  },
+] as unknown as readonly Evidence[];
 
 const lead = (product_count: number): Lead => ({
   domain: 'x.com',
   shop_name: 'Niche Perfume Shop',
   product_count,
-} as Lead);
+} as unknown as Lead);
 
 describe('sayı iddiası', () => {
   it('tavanin ALTINDA gercek sayi soyleniyor', () => {

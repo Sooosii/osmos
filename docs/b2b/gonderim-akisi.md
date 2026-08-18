@@ -140,6 +140,10 @@ cümlede · tek soru · çıkış kapısı (opt-out).
 
 ## Satarken söylenecekler
 
+> 📄 **Gönderilecek hâli:** `docs/b2b/teklif.md` — aynı kararlar, müşteriye
+> yollanabilir tek metin hâlinde (Ingilizce). Bu bölüm gerekçeleri tutuyor,
+> o dosya metni.
+
 **Ne satıyoruz:** siteyi değiştirmiyoruz, **kapı ekliyoruz.** Kiracı sitesinde
 sepet yok, hesap yok; her yol müşterinin kendi ürün sayfasında bitiyor.
 ⚠️ "Site değişimi" olarak sunulursa ilk cümlede reddedilir.

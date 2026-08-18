@@ -17,6 +17,25 @@ import { join } from 'node:path';
 const MARKA = /brand: '([^']+)'/g;
 
 /**
+ * Aksanları düşürür: `è` → `e`.
+ *
+ * ⚠️ **Bu olmadan iki normalleştirici birbirini tutmuyordu ve sonuç sessiz
+ * ADAY KAYBIydı.** `urunAnahtari` `[^a-z0-9]` kullanıyordu, yani aksanlı harfi
+ * SİLİYORDU (`matière` → `matire`); `markaAnahtari` ise `p{L}` ile onu
+ * KORUYORDU (`matière` → `matière`). Bir dükkân "Matière Première" yazdığı an
+ * o evin bütün parfümleri eşleşmiyordu — hata vermeden, sayı düşük çıkarak.
+ *
+ * Ölçüldü (2026-08-18): tek bir dükkânda (Nischengold) 256 başlığın 15'i
+ * ASCII dışı karakter taşıyor. Nischengold markayı aksansız yazdığı için
+ * tuzak orada patlamadı; Fransız ya da Alman yazımı kullanan bir dükkânda
+ * patlardı ve kimse aramazdı.
+ */
+function aksansiz(ham: string): string {
+  /* NFD harfi ve aksanını ayırıyor; ikinci adım ayrılan işaretleri atıyor. */
+  return ham.normalize('NFD').replace(/\p{M}/gu, '');
+}
+
+/**
  * Karşılaştırma için markayı sadeleştirir.
  *
  * ⚠️ Düz eşitlik yetmiyor: aynı ev "Orto Parisi", "ORTO PARISI" ve
@@ -24,7 +43,7 @@ const MARKA = /brand: '([^']+)'/g;
  * Küçük harfe indirip harf-dışını atmak bu üçünü de birleştiriyor.
  */
 export function markaAnahtari(ham: string): string {
-  return ham
+  return aksansiz(ham)
     .toLowerCase()
     .replace(/\b(parfums?|perfumes?|fragrances?|maison|atelier|the)\b/g, '')
     .replace(/[^\p{L}\p{N}]/gu, '');
@@ -78,7 +97,14 @@ export function ortusmeHesapla(
 
 /** Karşılaştırma için parfüm adını sadeleştirir. */
 export function urunAnahtari(ham: string): string {
-  return ham.toLowerCase().replace(/[^a-z0-9]/g, '');
+  /*
+    ⚠️ `aksansiz` burada da ŞART ve eksikliği bir kez sessizce aday kaybettirdi:
+    bu işlev `[^a-z0-9]` ile aksanlı harfi silerken (`matière` → `matire`)
+    `markaAnahtari` onu koruyordu (`matière`). Ikisi ayrıştığı için "Matière
+    Première" yazan bir dükkânda o evin hiçbir parfümü eşleşmiyordu — hata yok,
+    yalnızca düşük bir sayı. Gerekçenin tamamı `aksansiz`ın başında.
+  */
+  return aksansiz(ham).toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 export interface KatalogParfumu {

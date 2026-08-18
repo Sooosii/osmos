@@ -208,7 +208,7 @@ her birinin sahibi yazılı.
 | 2 | **NACE 62.01 bildirimi** | — | ✅ sahip halletti (2026-08-18) |
 | 3 | e-Fatura + **istisna 302** | — | ✅ sahip halletti (2026-08-18) |
 | 4 | Şirketin **döviz hesabı** (EUR) + SWIFT | — | ✅ **elde, sorun yok** (2026-08-18) |
-| 5 | Teklif şablonunda **VAT ID isteme** + **unvan** satırı | ben | ⏳ |
+| 5 | Teklif şablonu (**VAT ID** + **unvan** satırlarıyla) | — | ✅ `docs/b2b/teklif.md` |
 | 6 | Kişisel Instagram hesabı: profil fotoğrafı + birkaç gönderi | **sen** | ⏳ |
 | 7 | 🔓 **Nischengold'a DM** | **sen** | serbest — `nischengold-mesaj.md` |
 | 8 | 🔓 233'lük liste | **sen** | serbest — ama **10'luk parti** ile başlıyor, 15/gün ile değil |

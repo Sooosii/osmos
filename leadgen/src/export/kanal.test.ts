@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { kanalSec } from './outreach';
+import { kanalSec } from './outreach.ts';
 
 /**
  * Kanal sırasının kapısı.
