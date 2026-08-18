@@ -23,6 +23,16 @@ const SAYFA_BOYU = 250;
  */
 const EN_FAZLA_SAYFA = 4;
 
+/**
+ * Sayının dayandığı tavan — 250 × 4.
+ *
+ * ⚠️ **Dışa vuruluyor çünkü mesaj metni bunu bilmek ZORUNDA.** Tavana dayanan
+ * kayıt için `product_count` gerçek sayı değil; "kataloğunuzdaki 1000 parfümü
+ * saydım" cümlesi o dükkânlarda **uydurma bir iddia** olur ve ilk bakışta
+ * yakalanır. Ölçüldü (2026-08-18): 59 DM hedefi tam da bu cümleyle gidecekti.
+ */
+export const URUN_TAVANI = SAYFA_BOYU * EN_FAZLA_SAYFA;
+
 /** Benzer-ürün ölçümü için en çok kaç ürün sayfası denenecek. */
 export const EN_FAZLA_URUN_ADAYI = 3;
 

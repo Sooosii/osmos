@@ -123,8 +123,17 @@ export interface UrunOrtusmesi {
  * Sonuç, satış planının bir varsayımını düşürdü: "hedef bizim markaları
  * satıyorsa demo bedava kurulur" doğru değil. Demo, müşterinin parfümlerinin
  * girilmesini gerektiriyor — yani teslim emeğinin bir kısmı peşin ödeniyor.
- * Marka örtüşmesi yine de işe yarıyor ama başka bir işe: sıfırsa ürün
- * örtüşmesi de kesin sıfırdır, yani ucuz bir ön eleme.
+ * ⚠️⚠️ **Burada bir zamanlar "marka sıfırsa ürün de kesin sıfırdır, yani ucuz
+ * bir ön eleme" yazıyordu. YANLIŞ — ve ölçüldü (2026-08-18).** Beş dükkânda
+ * marka örtüşmesi 0 iken ürün örtüşmesi 6, 4, 2, 2 ve 1 çıktı; beşi de
+ * **dekant dükkânı.** Sebep Shopify'ın `vendor` alanı: dekantçıda orada
+ * parfüm evi değil dükkânın kendi adı yazıyor ("DecantSample"), yani marka
+ * sayısı sıfırlanıyor. Ürün eşleşmesi ise BAŞLIKTAN geliyor ve doğru.
+ *
+ * ⚠️ **O cümle bir gün gerçek bir filtreye dönüşürse dekant segmentinin
+ * tamamı sessizce elenir** — bugünkü en iyi on hedefin dördü dekantçı.
+ * Marka örtüşmesi bir ÖN ELEME DEĞİL, yanında duran ikinci bir sayıdır;
+ * `adaylar.ts` ikisini de her dükkânda hesaplıyor ve hiçbirini atlamıyor.
  */
 export function urunOrtusmesiHesapla(
   dukkanBasliklari: readonly string[],

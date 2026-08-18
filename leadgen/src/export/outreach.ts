@@ -13,6 +13,7 @@
  * ⚠️ Üretilen Türkçe metinde büyük İ harfi geçmez (sahibin kesin kuralı).
  */
 import type { DatabaseSync } from 'node:sqlite';
+import { URUN_TAVANI } from '../enrich/platform.ts';
 import { kanitlar, tumLeadler } from '../db.ts';
 import type { Evidence, Lead } from '../types.ts';
 import { csvYaz } from './csv.ts';
@@ -76,19 +77,34 @@ export function dilSec(country: string | null, sayfaMetni: string | null = null)
 }
 
 /**
+/**
  * Hangi kanaldan gidilecek.
  *
- * ⚠️ Sıra hafızadan geliyor ve sahibin durumuna dayanıyor: *"e-posta
- * Türkiye'de tek başına zayıf kanal: Instagram DM, sonra mail, sonra
- * telefon."* Sahip yeni ve markası tanınmıyor; tanınmayan bir alan adından
- * gelen soğuk mail açılmıyor bile, DM açılıyor.
+ * **Instagram varsa DM. Nokta.** Mail yalnızca Instagram YOKKEN.
+ *
+ * ⚠️ **Burada bir kez bayat bir kural duruyordu ve ölçümle devrildi.** Eski
+ * hâli `country === TR` şartı taşıyordu; gerekçesi de yorumunda yazılıydı:
+ * *"e-posta TÜRKİYE'de tek başına zayıf kanal."* O cümle hedef pazar Türkiye
+ * sanılırken yazılmıştı. 2026-08-16'da liste sayıldı ve tersi çıktı: bilinen
+ * en büyük grup **Almanya (57)**, Türkiye 24. Ve Almanya'da **UWG §7 izinsiz
+ * ticari e-postayı B2B'de bile yasaklıyor** — yani eski kural, e-postası olan
+ * her Alman dükkânını tam da yasak olan kanala yolluyordu.
+ *
+ * ⚠️ Karar `docs/b2b/sirket-ve-fatura.md` §5'te 16 Ağustos'ta verilmişti
+ * ("kanal sırası: Instagram DM → mail → telefon") ama **koda girmemişti**.
+ * Ölçüldü (2026-08-18): eski kuralla 253 mail / 233 DM; yenisiyle 446 DM /
+ * 40 mail. **213 dükkân yanlış kanaldaydı**, 18'i bilinen Almanya.
+ *
+ * ⚠️ DM ayrıca sahibin durumuna da uyuyor: markası tanınmıyor, tanınmayan bir
+ * alan adından gelen soğuk mail açılmıyor bile.
  */
 export function kanalSec(lead: Pick<Lead, 'email' | 'instagram' | 'country'>): Kanal {
   const dmVar = lead.instagram !== null && lead.instagram !== '';
   const mailVar = lead.email !== null && lead.email !== '';
-  if (dmVar && (lead.country === 'TR' || !mailVar)) return 'dm';
+
+  if (dmVar) return 'dm';
   if (mailVar) return 'mail';
-  return dmVar ? 'dm' : 'yok';
+  return 'yok';
 }
 
 export interface Acilis {
@@ -159,6 +175,14 @@ export function acilisCumlesi(lead: Lead, kanit: readonly Evidence[], dil: Dil):
   if (parfumcu && lead.product_count !== null && platformKanit !== undefined) {
     const n = lead.product_count;
     /*
+      ⚠️ **Tavana dayanan sayı iddia edilmez.** `product_count` 1000 ise gerçek
+      sayı değil, taramanın durduğu yer (`URUN_TAVANI`). "1000 parfüm saydım"
+      demek uydurma bir iddiadır ve akışın kendi kuralını çiğner: "sayı
+      tutmuyorsa mesajı gönderme." Doğrusu zaten elimizde — **1000'den fazla**
+      doğru bir cümle ve daha da etkileyici.
+    */
+    const tavanda = n >= URUN_TAVANI;
+    /*
       ⚠️ Adres MÜŞTERİYE GİTMİYOR, yalnız `kaynakUrl`de duruyor: sayı
       `products.json` ucundan geliyor ve o adresi mektuba koymak "sizin
       API'nizi taradım" gibi okunuyor.
@@ -179,11 +203,15 @@ export function acilisCumlesi(lead: Lead, kanit: readonly Evidence[], dil: Dil):
     return {
       kaynakUrl: sayiKanit.url,
       cumle: dil === 'tr'
-        ? `Kataloğunuzda ${n} parfüm saydım ve hepsi tek bir listede duruyor.`
-        : `I counted ${n} fragrances in your catalogue, all of them in a single list.`,
+        ? (tavanda
+          ? `Kataloğunuzda ${n}'den fazla parfüm var ve hepsi tek bir listede duruyor.`
+          : `Kataloğunuzda ${n} parfüm saydım ve hepsi tek bir listede duruyor.`)
+        : (tavanda
+          ? `Your catalogue runs past ${n} fragrances, all of them in a single list.`
+          : `I counted ${n} fragrances in your catalogue, all of them in a single list.`),
       kisa: dil === 'tr'
-        ? `kataloğunuzdaki ${n} parfümü saydım`
-        : `I counted the ${n} fragrances in your catalogue`,
+        ? (tavanda ? `kataloğunuzdaki ${n}'den fazla parfüm` : `kataloğunuzdaki ${n} parfümü saydım`)
+        : (tavanda ? `your catalogue runs past ${n} fragrances` : `I counted the ${n} fragrances in your catalogue`),
     };
   }
 
@@ -349,7 +377,7 @@ function hitapAdi(lead: Lead): string {
  */
 export function mektupGovdesi(lead: Lead, acilis: Acilis | null, dil: Dil, parfumSayisi: number): string {
   const hitap = hitapAdi(lead);
-  const gozlem = acilis === null ? '' : `${acilis.cumle}\n\n`;
+  const gozlem = acilis === null ? '' : `${basHarfBuyut(acilis.kisa)} — `;
 
   if (dil === 'tr') {
     return [
@@ -407,9 +435,26 @@ export function mektupGovdesi(lead: Lead, acilis: Acilis | null, dil: Dil, parfu
  * alma zaten bir tık, mektuptaki cümle burada yer kaplamaktan başka bir işe
  * yaramıyor.
  */
+/**
+ * Gözlem cümlesi hitaptan sonra CÜMLE BAŞI oluyor — ilk harfi büyüyor.
+ *
+ * ⚠️ Eskiden şans eseri çalışıyordu: tek gözlem *"I counted…"* idi ve büyük
+ * harfle başlıyordu. Tavan cümlesi eklenince *"Hi Fragrancelord! your
+ * catalogue runs past…"* çıktı — gerçek bir işletmeye giden mesajda küçük
+ * harfle başlayan bir cümle özensizlik olarak okunur.
+ *
+ * ⚠️ `toUpperCase()`, `toLocaleUpperCase('tr')` DEĞİL: Türkçe eşleme küçük
+ * `i`yi noktalı `İ`ye çevirir ve sahibin duran kuralı ekranda noktalı İ
+ * istemiyor. Aynı karar sitede de yazılı.
+ */
+function basHarfBuyut(metin: string): string {
+  if (metin === '') return metin;
+  return metin[0].toUpperCase() + metin.slice(1);
+}
+
 export function dmTaslagi(lead: Lead, acilis: Acilis | null, dil: Dil): string {
   const hitap = hitapAdi(lead);
-  const gozlem = acilis === null ? '' : `${acilis.kisa} — `;
+  const gozlem = acilis === null ? '' : `${basHarfBuyut(acilis.kisa)} — `;
   if (dil === 'tr') {
     return `Merhaba${hitap}! ${gozlem}osmos.me'de parfümleri notalarına göre`
       + ' gezilebilir bir haritaya çeviriyorum. Aynısını sizin kataloğunuzla,'
