@@ -37,13 +37,38 @@ Altı ölçüm — Nischengold'da 2026-08-16'da hepsi geçti:
 ⚠️ Sekme başlığını **gerçek tarayıcı** yakaladı, gözle bulunmamıştı: marka 20+
 başlık dizesinin içinde gömülü ve çoğu fonksiyon (`src/i18n/brand.ts`).
 
-## 3. Vercel projesi (panelde)
+## 3. Vercel projesi
 
-1. **Add New → Project** → aynı `Sooosii/osmos` deposu.
-2. Ortam değişkenleri (Production):
-   - `NEXT_PUBLIC_TENANT` = kiracı kimliği
-   - `NEXT_PUBLIC_SITE_URL` = kiracının **kendi** adresi
-3. Deploy.
+**Panelde:** Add New → Project → aynı `Sooosii/osmos` deposu.
+
+**Ya da komut satırından** (Nischengold böyle kuruldu, 2026-08-18):
+
+```bash
+npx vercel project add <kimlik>
+npx vercel link --project <kimlik> --yes
+npx vercel git connect                     # her push'ta kendiliğinden dağıtsın
+printf '<kimlik>'          | npx vercel env add NEXT_PUBLIC_TENANT production
+printf 'https://<adres>'   | npx vercel env add NEXT_PUBLIC_SITE_URL production
+npx vercel domains add <adres> <kimlik>
+npx vercel deploy --prod --yes
+npx vercel alias set <dagitim-adresi> <adres>
+```
+
+⚠️⚠️ **CLI ile kurulan proje çerçeveyi TANIMIYOR — `Framework Preset: Other`.**
+Panelden kurulan proje Next'i kendiliğinden seçiyor, `vercel project add`
+seçmiyor. Sonucu sessiz ve tam olarak yanıltıcı: **derleme başarıyla
+tamamlanıyor**, günlükte Next'in rota tablosu bile basılıyor, dağıtım "Ready"
+diyor — ama Vercel o çıktıyı yok sayıp `public/` klasörünü düz statik site gibi
+sunuyor. Bütün site 404 (`X-Vercel-Error: NOT_FOUND`), tek istisna
+`public/`teki dosyalar. Teşhisi veren ölçüm buydu: `/sw.js` **200** dönerken
+`/` 404 dönüyorsa sebep budur.
+
+Çözüm depoda: kökteki **`vercel.json`** çerçeveyi `nextjs` olarak sabitliyor,
+yani hangi yoldan kurulursa kurulsun her proje doğru derleniyor. Dosya
+silinmemeli.
+
+⚠️ `vercel link` **`.env.local`in sonuna `VERCEL_OIDC_TOKEN` satırı ekliyor.**
+Dosya `.gitignore`da, zararsız; ama "ben yazmadım" diye silinmesin.
 
 ⚠️⚠️ **`NEXT_PUBLIC_SITE_URL`i ana projeden KOPYALAMA.** İçine `https://osmos.me`
 girerse `src/proxy.ts` (`shouldMoveToCanonical`) kiracının her isteğini **308 ile
