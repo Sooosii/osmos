@@ -148,4 +148,27 @@ const NISCHENGOLD: Tenant = {
   locales: ['en'],
 };
 
-export const TENANTS: readonly Tenant[] = [OSMOS, DEMO_SELVA, NISCHENGOLD];
+/**
+ * Scentitude — ilk partiden gelen ilk demo (BAE).
+ *
+ * ⚠️ 19 Ağustos'ta Instagram DM'e **WhatsApp numarası bırakarak** cevap verdi;
+ * demoyu istediklerini söylemediler. `indexable: false` ve talep edilirse aynı
+ * gün kaldırılır — Nischengold'la aynı kural.
+ *
+ * ⚠️ Dükkân Ingilizce satıyor (BAE, "Get Free UAE Delivery"), yani `/` Ingilizce
+ * açılıyor. Dilin sırası artık öneksiz dili belirliyor (`i18n/locale.ts`).
+ */
+const SCENTITUDE: Tenant = {
+  id: 'scentitude',
+  name: 'Scentitude',
+  title: { en: 'Scentitude — scent map', tr: 'Scentitude — koku haritasi' },
+  description: {
+    en: 'The Scentitude shelf, drawn as a map of scent.',
+    tr: 'Scentitude rafi, koku haritasi olarak cizildi.',
+  },
+  features: { accounts: false, notify: false, feed: false },
+  indexable: false,
+  locales: ['en'],
+};
+
+export const TENANTS: readonly Tenant[] = [OSMOS, DEMO_SELVA, NISCHENGOLD, SCENTITUDE];
