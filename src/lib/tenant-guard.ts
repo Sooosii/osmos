@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { activeTenant } from './tenant';
-import { OSMOS_TENANT_ID } from '@/data/tenants/registry';
+import { OSMOS_TENANT_ID, type TenantFeatures } from '@/data/tenants/registry';
 
 /**
  * Hesap dünyasının rota kapısı.
@@ -43,4 +43,36 @@ export function requireAccounts(): void {
  */
 export function requireMainSite(): void {
   if (activeTenant().id !== OSMOS_TENANT_ID) notFound();
+}
+
+/**
+ * Kapalı özelliğin **ucu** — sayfa değil, `/api/...` işleyicisi.
+ *
+ * ⚠️ **Neden `notFound()` değil:** yukarıdaki iki kapı sayfalar için ve
+ * `notFound()` bir EKRAN çiziyor. Bir uç ekran çizmemeli — `fetch` eden
+ * istemciye HTML gövdesi dönmek, hata ayıklarken yanıltıcı ve boşuna bayt.
+ * Bu yüzden kapı gövdesiz bir `Response` veriyor ve çağıran onu döndürüyor.
+ *
+ * ⚠️ **404, 403 değil.** Deponun duran kuralı bu: 403 "burada bir şey var ama
+ * giremezsin" der; oysa müşterinin sitesinde o özellik **yok**. Kapalı
+ * özelliğin sayfaları da 404 dönüyor (`requireAccounts`), uç da aynı cümleyi
+ * kurmalı.
+ *
+ * ⚠️ **Sonucu `null` olduğunda çağıran DEVAM EDER.** Kullanım kalıbı:
+ *
+ *     const kapali = ucKapali('accounts');
+ *     if (kapali) return kapali;
+ *
+ * Kapının işleyicinin **ilk satırı** olması gerekiyor: `/api/auth`ta
+ * `getAuth()` kiracıda `DATABASE_URL` olmadan patlıyor, yani kapı geç
+ * çalışırsa müşterinin alan adında 404 değil **500** çıkar.
+ *
+ * ⚠️ Bütün uçlar kapanmıyor ve kapanmamalı: `/api/perfume-search` kiracıda
+ * ÇALIŞIYOR (arama kutusu çerçevede ve uzayda çiziliyor) ve kiracı
+ * derlemesinde yalnız kiracının kendi katalogunu basıyor. Hangi ucun neden
+ * açık olduğunu `src/app/api/kiraci-uclari.test.ts` yazılı tutuyor.
+ */
+export function ucKapali(feature: keyof TenantFeatures): Response | null {
+  if (activeTenant().features[feature]) return null;
+  return new Response(null, { status: 404 });
 }

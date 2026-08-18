@@ -1,5 +1,6 @@
 import { currentViewer, shelfOf } from '@/lib/dal';
 import { allow, clientIp, tooManyRequests } from '@/lib/rate-limit';
+import { ucKapali } from '@/lib/tenant-guard';
 
 /**
  * Okuyucunun **kendi** rafı.
@@ -34,6 +35,9 @@ const RATE_LIMIT = 60;
 const RATE_WINDOW = 60;
 
 export async function GET(request: Request): Promise<Response> {
+  const kapali = ucKapali('accounts');
+  if (kapali) return kapali;
+
   const verdict = await allow('shelf', clientIp(request.headers), RATE_LIMIT, RATE_WINDOW);
   if (!verdict.ok) return tooManyRequests(verdict);
 

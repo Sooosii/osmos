@@ -1,6 +1,7 @@
 import { nearestToComposition } from '@/lib/composition-nearest';
 import { allow, clientIp, tooManyRequests } from '@/lib/rate-limit';
 import type { PerfumeNote } from '@/data/types';
+import { ucKapali } from '@/lib/tenant-guard';
 
 /**
  * Taslak kompozisyona en yakın parfümler.
@@ -37,6 +38,16 @@ const RATE_LIMIT = 40;
 const RATE_WINDOW = 60;
 
 export async function POST(request: Request): Promise<Response> {
+  /*
+    ⚠️ Özellik `accounts` — ucun adında geçmiyor ama tek tüketicisi kurma
+    aracı (`Studio.tsx`) ve o araç hesap dünyasının parçası: `/studio`
+    kiracıda zaten `requireAccounts()` ile 404. Uç açık kalsaydı müşterinin
+    alan adında ulaşılamayan bir sayfanın ucu bedavaya dururdu — üstelik
+    sitenin **en pahalı** ve girişsiz herkese açık olanı.
+  */
+  const kapali = ucKapali('accounts');
+  if (kapali) return kapali;
+
   const verdict = await allow('nearest', clientIp(request.headers), RATE_LIMIT, RATE_WINDOW);
   if (!verdict.ok) return tooManyRequests(verdict);
 
