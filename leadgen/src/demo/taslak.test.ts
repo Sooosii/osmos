@@ -102,3 +102,45 @@ describe('kiracı kimliği', () => {
     expect(kiraciKimligi('www.fragrance-lord.co.uk')).toBe('fragrance-lord');
   });
 });
+
+/**
+ * Biçim şüphesi.
+ *
+ * ⚠️ **Gerçek bir olaydan doğdu (2026-08-19, Scentitude taslağı).** Araç
+ * `bdk-creme-de-cuir` için `creme-de-cuir-hair-perfume-50ml` önerdi ve hiç
+ * işaretlemedi — çünkü tek adaydı ve "birden çok aday" kuralı bunu görmüyor.
+ * Dükkân o kokunun yalnız **saç parfümü** sürümünü satıyor.
+ *
+ * Tek başına hata değil (koku gerçekten o rafta) ama **karar olmalı, kaza
+ * değil.** Daha kötü hâli açık: aynı adı taşıyan bir MUM ya da sabun sessizce
+ * haritaya girerdi ve "sizin kataloğunuzdan kurdum" diyen bir demo bunu
+ * kaldıramaz.
+ */
+describe('biçim şüphesi', () => {
+  const bizim: readonly KatalogParfumu[] = [
+    { id: 'bdk-creme-de-cuir', ad: 'Creme de Cuir', marka: 'BDK' },
+    { id: 'nasomatto-baraonda', ad: 'Baraonda', marka: 'Nasomatto' },
+  ];
+
+  it('sac parfumu ISARETLENIYOR', () => {
+    const s = adresAdaylari([urun('cdc-hair', 'BDK Crème de Cuir Hair perfume 50ML')], bizim);
+    expect(s[0]?.bicimSupheli).toBe(true);
+  });
+
+  it('mum ve sabun da isaretleniyor', () => {
+    for (const b of ['BDK Creme de Cuir Candle', 'BDK Creme de Cuir Soap Bar']) {
+      expect(adresAdaylari([urun('x', b)], bizim)[0]?.bicimSupheli, b).toBe(true);
+    }
+  });
+
+  /*
+    ⚠️ Işaret DAR tutulmak zorunda: `edp`, `parfum`, `ml` normal kelimeler ve
+    işaretlenselerdi her satır şüpheli olurdu — o zaman işaret hiçbir şey
+    söylemez ve gözle bakan kişi hepsini geçer.
+  */
+  it('normal parfum sisesi isaretlenmiyor', () => {
+    for (const b of ['Nasomatto Baraonda 30ml', 'Nasomatto Baraonda EDP', 'Nasomatto Baraonda Extrait']) {
+      expect(adresAdaylari([urun('x', b)], bizim)[0]?.bicimSupheli, b).toBe(false);
+    }
+  });
+});

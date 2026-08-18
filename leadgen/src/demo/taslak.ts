@@ -31,7 +31,28 @@ export interface AdresAdayi {
   readonly secim: DukkanUrunu;
   /** Eşleşen bütün ürünler; birden çoksa gözle bakılacak. */
   readonly adaylar: readonly DukkanUrunu[];
+  /**
+   * Seçilen ürün parfüm ŞİŞESİ olmayabilir — saç parfümü, mum, sabun, set…
+   *
+   * ⚠️ **Gerçek bir olaydan eklendi (2026-08-19, Scentitude taslağı).** Araç
+   * `bdk-creme-de-cuir` için `creme-de-cuir-hair-perfume-50ml` önerdi ve
+   * **hiç işaretlemedi**, çünkü tek adaydı — "birden çok aday" kuralı bunu
+   * yakalamıyor. Dükkân o kokunun yalnız saç parfümü sürümünü satıyor.
+   *
+   * Bu tek başına hata değil: koku gerçekten o rafta. Ama **karar olmalı**,
+   * kaza değil — ve daha kötü hâli var: aynı adı taşıyan bir MUM ya da sabun
+   * sessizce haritaya girerdi.
+   */
+  readonly bicimSupheli: boolean;
 }
+
+/**
+ * Parfüm şişesi olmadığını düşündüren biçim kelimeleri.
+ *
+ * ⚠️ Liste dar tutuldu: `edp`, `edt`, `parfum`, `ml` gibi normal kelimeler
+ * BURADA YOK — olsaydı her ürün işaretlenir ve işaret anlamını yitirirdi.
+ */
+const BICIM_IZI = /(hair|candle|soap|shower|body|lotion|cream(?!e)|deodorant|oil|balm|shampoo|set|bundle|discovery|sampler)/i;
 
 /**
  * Kimlikten adaya.
@@ -66,7 +87,7 @@ export function adresAdaylari(
     if (adaylar.length === 0) continue;
 
     const secim = [...adaylar].sort((x, y) => x.baslik.length - y.baslik.length)[0];
-    cikti.push({ id: b.id, secim, adaylar });
+    cikti.push({ id: b.id, secim, adaylar, bicimSupheli: BICIM_IZI.test(secim.baslik) });
   }
 
   return cikti;
@@ -98,10 +119,15 @@ export function katalogTaslagi(
 
   const adresler = adaylar.map((a) => {
     const kacAday = a.adaylar.length;
-    const not = kacAday > 1
-      ? `  /* ${ISARET} · ${kacAday} aday, en kısası seçildi — ötekiler: ${a.adaylar.filter((x) => x !== a.secim).map((x) => x.handle).join(', ')} */`
-      : `  /* ${ISARET} */`;
-    return `${not}\n  '${a.id}': 'https://${domain}/products/${a.secim.handle}',`;
+    const parcalar = [ISARET];
+    if (kacAday > 1) {
+      parcalar.push(`${kacAday} aday, en kısası seçildi — ötekiler: `
+        + a.adaylar.filter((x) => x !== a.secim).map((x) => x.handle).join(', '));
+    }
+    if (a.bicimSupheli) {
+      parcalar.push(`⚠️ BIÇIM ŞÜPHELI — parfüm şişesi olmayabilir: "${a.secim.baslik}"`);
+    }
+    return `  /* ${parcalar.join(' · ')} */\n  '${a.id}': 'https://${domain}/products/${a.secim.handle}',`;
   }).join('\n');
 
   return `import type { Perfume } from '../../types';

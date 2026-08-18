@@ -230,11 +230,13 @@ async function main(): Promise<void> {
     writeFileSync(join(dizin, 'catalog.ts'), katalogTaslagi(kimlik, magaza, domain, adaylar));
     writeFileSync(join(dizin, 'kayit.txt'), kayitTaslagi(kimlik, magaza));
 
-    const bakilacak = adaylar.filter((a) => a.adaylar.length > 1);
+    const bakilacak = adaylar.filter((a) => a.adaylar.length > 1 || a.bicimSupheli);
     log(`[taslak] ${adaylar.length} parfum · ${dizin}`);
     log(`[taslak] ${bakilacak.length} adreste birden cok aday var — once onlara bak:`);
     for (const a of bakilacak) {
-      log(`  ${a.id} → ${a.secim.handle}  (otekiler: ${a.adaylar.filter((x) => x !== a.secim).map((x) => x.handle).join(", ")})`);
+      log(`  ${a.id} → ${a.secim.handle}`
+        + (a.adaylar.length > 1 ? `  (otekiler: ${a.adaylar.filter((x) => x !== a.secim).map((x) => x.handle).join(", ")})` : '')
+        + (a.bicimSupheli ? `  ⚠️ BICIM SUPHELI: "${a.secim.baslik}"` : ''));
     }
     log(`[taslak] ⚠️ her adres DOGRULANMADI isaretiyle cikti; tarayicida acmadan silme.`);
   }
