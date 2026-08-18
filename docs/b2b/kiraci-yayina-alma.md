@@ -46,6 +46,13 @@ etkilenmiyor.
 
 Demo ise: **`indexable: false`** ve kendi `locales`i.
 
+⚠️⚠️ **`locales` dizisinin SIRASI anlamlı: ilk yazılan dil öneksiz olandır.**
+Türk bir dükkân için `['tr', 'en']` yaz — `/` Türkçe açılır, `/en/...` önekli
+durur. Ters yazılırsa (`['en', 'tr']`) site Ingilizce açılır ve bu **sessiz**
+bir hatadır: derleme geçer, sayfalar çıkar, yalnızca müşteri kendi dilinde
+karşılanmaz. Dükkânın dilini **ölç**, varsayma (Nischengold'da `locale":"de"`
+ve CHF ölçülmüştü).
+
 ## 2. Yerelde ölç (yayından ÖNCE)
 
 ```bash

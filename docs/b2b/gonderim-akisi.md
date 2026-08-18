@@ -13,9 +13,11 @@
 > | **1** | tek değişken değiştirilip 10 daha |
 > | **0** | aynı metinle devam **edilmez** — önce gönderen hesap ve kanal gözden geçirilir |
 >
-> ⚠️ **Türk dükkânları bu turda DEĞİL** (45 hesap). Kiracı sitesi bir Türk
-> dükkânının `/` adresinde hâlâ Ingilizce açılıyor; Türkiye'den gelen bir "evet"
-> yarım bir ürünle karşılaşır. Türkiye, dil turundan sonra.
+> ✅ **Türk dükkânları ARTIK açık** (45 hesap, 2026-08-19). Kiracı sitesi bir
+> Türk dükkânının `/` adresinde Ingilizce açılıyordu ve bu yüzden ilk partiden
+> çıkarılmışlardı; `locales` artık **ilk yazılan dili öneksiz** yapıyor.
+> Ölçüldü: `locales: ['tr', 'en']` kiracısında `/` Türkçe, `/en/...` önekli,
+> `/tr/...` kanonik hâline 307. Türkçe metinlerin tamamı zaten vardı.
 
 **Kanal sırası:** Instagram DM → mail → telefon.
 DM ilk sırada çünkü Almanya (en büyük bilinen hedef grubu, 57 dükkân) izinsiz

@@ -208,8 +208,25 @@ describe('kiracının dilleri', () => {
     expect(dilleriSuz(kiraci(['en']))).toEqual(['en']);
   });
 
-  it('sıra LOCALES ten geliyor, kiracının yazdığı sıradan değil', () => {
-    expect(dilleriSuz(kiraci(['tr', 'en']))).toEqual([...LOCALES]);
+  /*
+    ⚠️⚠️ **Bu iddia bir kez TERSINE çevrildi ve sebebi yazılı kalsın.** Eskiden
+    "sıra LOCALES'ten gelir, kiracının yazdığı sıradan değil" diyordu ve
+    gerekçesi doğruydu: varsayılan dil sabit `'en'`di, ilk sırada başka bir dil
+    durursa `stripLocale`/`withLocale` bozulurdu.
+
+    Artık varsayılan dil **kiracıdan** geliyor (`locale.ts`), yani ilişki
+    tersine döndü: ilk sırada yazılan dil, öneksiz olan dildir. Eski sıralama
+    korunsaydı Türkçe isteyen bir kiracının sitesi Ingilizce açılırdı — sessizce,
+    ve kimse sebebini `dilleriSuz`ta aramazdı.
+  */
+  it('sıra KIRACININ yazdığı sıra — ilk yazılan varsayılan dil', () => {
+    expect(dilleriSuz(kiraci(['tr', 'en']))).toEqual(['tr', 'en']);
+    expect(dilleriSuz(kiraci(['en', 'tr']))).toEqual(['en', 'tr']);
+  });
+
+  /* Tanınmayan bir dil listeye sızmıyor — `LOCALES` hâlâ evrenin kendisi. */
+  it('gecersiz dil suzuluyor, sira bozulmadan', () => {
+    expect(dilleriSuz(kiraci(['tr', 'de' as never, 'en']))).toEqual(['tr', 'en']);
   });
 
   /* Bos liste sessizce dilsiz bir site uretirdi. */

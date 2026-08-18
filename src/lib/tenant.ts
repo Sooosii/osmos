@@ -1,4 +1,5 @@
 import { OSMOS_TENANT_ID, TENANTS, type Tenant } from '@/data/tenants/registry';
+import { TENANT_ID } from './tenant-id';
 import { LOCALES, type Locale } from '@/i18n/locale';
 
 /**
@@ -11,12 +12,11 @@ import { LOCALES, type Locale } from '@/i18n/locale';
  */
 
 /*
-  ⚠️ **Tam ad kalıp olarak yazılmak ZORUNDA.** Next `NEXT_PUBLIC_*`i derlemede
-  satıra gömüyor ve bunu metinsel eşleşmeyle yapıyor: `process.env[key]` ya da
-  yeniden adlandırılmış bir okuma gömülmez, tarayıcıda `undefined` çıkar ve
-  kiracı sitesi sessizce OSMOS'a döner. `NotifyControl` aynı uyarıyı taşıyor.
+  ⚠️ Ortam okuması artık `lib/tenant-id.ts`te ve sebebi bir ithal döngüsü:
+  `locale.ts` varsayılan dili kiracıdan alıyor, bu dosya da `locale.ts`ten
+  `LOCALES` okuyor. Okuma ikisinin de altına inince zincir düzleşti.
+  Kalıbın neden tam ad yazılmak zorunda olduğu orada yazılı.
 */
-const TENANT_ID = process.env.NEXT_PUBLIC_TENANT?.trim() || OSMOS_TENANT_ID;
 
 /**
  * Kimlikten kiracıya.
@@ -53,13 +53,21 @@ export function isOsmos(): boolean {
  * hangi sayfaların basılacağını söylüyor. Kiracı bir dil bildirmezse hepsi
  * üretiliyor — OSMOS ve eski kiracılar etkilenmiyor.
  *
- * ⚠️ Sıra `LOCALES`ten geliyor, kiracının yazdığı sıradan değil: varsayılan
- * dilin ilk sırada kalması `stripLocale`/`withLocale` davranışına bağlı.
+ * ⚠️⚠️ **Sıra artık KIRACININ yazdığı sıra — ve bu kural bir kez tersine
+ * çevrildi.** Eskiden `LOCALES` sırası kazanıyordu ve gerekçesi şuydu:
+ * "varsayılan dilin ilk sırada kalması `stripLocale`/`withLocale` davranışına
+ * bağlı." O gerekçe doğruydu ama varsayılan dil **sabit `'en'`** olduğu sürece.
+ * Artık varsayılan dil kiracıdan geliyor (`locale.ts`), yani ilişki tersine
+ * döndü: **ilk sırada yazılan dil varsayılan olan dildir.**
+ *
+ * `locales: ['tr', 'en']` yazan bir kiracıda `/` Türkçe açılıyor ve `/en/...`
+ * önekli duruyor. Eski sıralama bunu sessizce bozardı: kiracı Türkçe isterdi,
+ * site Ingilizce açılırdı ve kimse sebebini `dilleriSuz`ta aramazdı.
  */
 export function dilleriSuz(tenant: Tenant, hepsi: readonly Locale[] = LOCALES): readonly Locale[] {
   const izinli = tenant.locales;
   if (izinli === undefined) return hepsi;
-  const suzulmus = hepsi.filter((l) => izinli.includes(l));
+  const suzulmus = izinli.filter((l) => hepsi.includes(l));
   /*
     Boş liste bir yazım hatasıdır ve sessizce dilsiz bir site üretirdi.
     Patlamak, hiç sayfası olmayan bir derlemeyi müşteriye yollamaktan iyidir.
