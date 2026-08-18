@@ -96,6 +96,20 @@ Müşteri sitesi için: müşterinin kendi alt alan adı (pakete dahil).
 2. adımdaki altı ölçümün aynısı, bu kez canlı adreste. Ek olarak: demo şeridi
 görünüyor mu, `osmos.me` bağlantısı çalışıyor mu.
 
+**Nischengold — canlıda ölçüldü (2026-08-18, `nischengold.osmos.me`):**
+
+| ölçüm | beklenen | çıkan |
+|---|---|---|
+| `/` | 200 | ✅ |
+| `/tr`, `/de` | 404 | ✅ ikisi de |
+| `/robots.txt` | `Disallow: /` | ✅ |
+| sekme başlığı | kiracının adı | ✅ `Nischengold — scent map` |
+| ana sayfada "OSMOS" | 0 | ✅ |
+| satıcı bağlantıları | müşterinin alan adı | ✅ **13/13** |
+| taslak ekranlar (`/evolution`, `/space`) | 404 | ✅ ikisi de |
+| hesap dünyası (`/signin`, `/settings`, `/studio`, `/u/…`, `/feed.xml`) | 404 | ✅ beşi de |
+| **katalog sızıntısı** | yüklenen parçalarda OSMOS metni yok | ✅ 15 parça tarandı, 0 |
+
 ---
 
 ## Bilinmesi gerekenler
