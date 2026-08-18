@@ -9,12 +9,43 @@
  * çerez de oturum bayrağı da reddedildi, gerekçeleri
  * `docs/superpowers/specs/2026-08-10-turkceye-gecis-design.md` ①'de.
  */
+import { TENANTS } from '@/data/tenants/registry';
+import { TENANT_ID } from '@/lib/tenant-id';
+
 export const LOCALES = ['en', 'tr'] as const;
 
 export type Locale = (typeof LOCALES)[number];
 
-/** Öneksiz yolların dili. */
-export const DEFAULT_LOCALE: Locale = 'en';
+/**
+ * Öneksiz yolların dili — **kiracıdan geliyor.**
+ *
+ * ⚠️ **Eskiden sabit `'en'`di ve bu bir teslim engeliydi.** Türk bir dükkânın
+ * kiracı sitesi `/` adresinde Ingilizce açılıyordu; Türkiye'den gelen bir "evet"
+ * yarım bir ürünle karşılaşırdı. Listedeki 45 Türkçe hesap tam bu yüzden ilk
+ * partiden çıkarılmıştı.
+ *
+ * Kural: **kiracının BILDIRDIĞI ilk dil öneksiz olandır.** `locales: ['tr']`
+ * yazan bir kiracıda `/` Türkçe açılıyor, `/tr/...` kanonik hâline yönleniyor
+ * ve `/en/...` hiç üretilmiyor. Kiracı dil bildirmezse (OSMOS dahil) eskisi
+ * gibi Ingilizce.
+ *
+ * ⚠️ **Kayıt `registry`den okunuyor, `tenant.ts`ten DEĞİL** — `tenant.ts` bu
+ * dosyadan `LOCALES` alıyor ve ters yönde bir değer ithali çalışma zamanında
+ * döngü kurardı. `registry` bu dosyadan yalnız **tip** alıyor, o kenar derlemede
+ * siliniyor. Ortam okuması ikisinin de altındaki `lib/tenant-id.ts`te.
+ *
+ * ⚠️ Bilinmeyen kimlikte **patlamıyor**, Ingilizceye düşüyor: bu modül
+ * `global-not-found` dahil her yerde yükleniyor ve buradaki bir istisna sitenin
+ * kendi hata sayfasını da götürürdü. Kimliğin geçerliliğini `resolveTenant`
+ * zaten derleme zamanında gürültüyle denetliyor.
+ */
+export const DEFAULT_LOCALE: Locale = varsayilanDil();
+
+function varsayilanDil(): Locale {
+  const kayit = TENANTS.find((t) => t.id === TENANT_ID);
+  const ilk = kayit?.locales?.[0];
+  return ilk !== undefined && (LOCALES as readonly string[]).includes(ilk) ? ilk : 'en';
+}
 
 /**
  * Adresi sunucuya taşıyan başlık.

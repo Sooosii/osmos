@@ -106,6 +106,16 @@ const DEMO_SELVA: Tenant = {
   },
   features: { accounts: false, notify: false, feed: false },
   indexable: false,
+  /*
+    ⚠️ **Doğrulama kiracısı olmasının asıl işi burada.** SELVA iki dilli ve
+    **Türkçesi önce**: `/` Türkçe açılıyor, `/en/...` önekli duruyor. Bu diziliş
+    kiracının varsayılan dilini gerçekten sınayan tek yer — Nischengold tek dilli
+    (`['en']`) olduğu için orada eski davranışla yenisi ayırt edilemiyor.
+
+    Türk dükkânları listede 45 hesap ve teslim için bu şart: bir Türk dükkânının
+    sitesi `/` adresinde Ingilizce açılamaz.
+  */
+  locales: ['tr', 'en'],
 };
 
 /**

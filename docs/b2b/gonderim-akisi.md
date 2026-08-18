@@ -13,9 +13,22 @@
 > | **1** | tek değişken değiştirilip 10 daha |
 > | **0** | aynı metinle devam **edilmez** — önce gönderen hesap ve kanal gözden geçirilir |
 >
-> ⚠️ **Türk dükkânları bu turda DEĞİL** (45 hesap). Kiracı sitesi bir Türk
-> dükkânının `/` adresinde hâlâ Ingilizce açılıyor; Türkiye'den gelen bir "evet"
-> yarım bir ürünle karşılaşır. Türkiye, dil turundan sonra.
+> ✅ **Teslim engeli kalktı (2026-08-19):** kiracının `locales` dizisinde ilk
+> yazılan dil artık öneksiz olan dil. Ölçüldü — `['tr','en']` kiracısında `/`
+> Türkçe açılıyor, `/en/...` önekli, `/tr/...` kanoniğe 307. Bir Türk
+> dükkânının sitesi artık kendi dilinde açılabiliyor.
+>
+> ⚠️⚠️ **Ama Türkiye SIRAYA GIRMEDI, ve sebebi ölçüldü.** Listede 68 Türkçe DM
+> hedefi var; ölçülebilen 4'ünde **örtüşme sıfır** ve 68'in yalnız **6'sı
+> Shopify** (boru hattı yalnız Shopify ölçebiliyor — WooCommerce'te marka alanı
+> standart değil). Türkiye + Shopify kesişiminde duran iki dükkân
+> `loccitane.com.tr` ve `eveshop.com.tr`: biri marka mağazası, öteki toplu
+> perakende, ikisi de örtüşmesiz.
+>
+> **Okunuşu:** katalogumuz niş ve küratörlü; listedeki Türk dükkânları kitlesel.
+> Engel teslim tarafındaydı ve kalktı, ama **talep tarafı hâlâ uluslararası niş
+> ve dekant dükkânlarını gösteriyor.** Türkiye için önce ÖLÇÜLEBILIR hedef
+> lazım (WooCommerce ölçümü ya da elle bakılmış bir liste).
 
 **Kanal sırası:** Instagram DM → mail → telefon.
 DM ilk sırada çünkü Almanya (en büyük bilinen hedef grubu, 57 dükkân) izinsiz
