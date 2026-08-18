@@ -48,7 +48,16 @@ function ortamiYukle(): void {
 }
 
 const VERI = join(import.meta.dirname, '..', 'data');
-const DB_YOLU = join(VERI, 'leads.db');
+/**
+ * Defterin yeri.
+ *
+ * ⚠️ **`LEADGEN_DB` bir kolaylık değil, sınamanın gerçek deftere yazmasını
+ * engelleyen şey.** `temas-argumanlari.test.ts` komutu gerçekten çalıştırıyor;
+ * yol sabit kaldığı sürece her koşu canlı deftere sahte bir satır ekliyordu
+ * (ölçüldü: iki çöp satır yazıldı ve elle silindi). Tekrar koruması bu deftere
+ * bakıyor, yani kirlenmesi sessiz ve zararlı.
+ */
+const DB_YOLU = process.env.LEADGEN_DB?.trim() || join(VERI, 'leads.db');
 
 const log = (s: string): void => { process.stdout.write(`${s}\n`); };
 
@@ -63,6 +72,8 @@ interface Secenekler {
   readonly sonda: boolean;
   readonly onayla: boolean;
   readonly kanal: string | null;
+  /** Komuttan sonraki serbest argümanlar — `temas <domain> <sonuc>` gibi. */
+  readonly argumanlar: readonly string[];
 }
 
 function komutOku(): Secenekler {
@@ -87,12 +98,13 @@ function komutOku(): Secenekler {
     sonda: values.sonda === true,
     onayla: values.onayla === true,
     kanal: typeof values.kanal === 'string' ? values.kanal : null,
+    argumanlar: positionals.slice(1),
   };
 }
 
 async function main(): Promise<void> {
   ortamiYukle();
-  const { komut, sinir, sonda, onayla, kanal } = komutOku();
+  const { komut, sinir, sonda, onayla, kanal, argumanlar } = komutOku();
   const db = acVeritabani(DB_YOLU);
 
   if (komut === 'seed' || komut === 'hepsi') {
@@ -130,7 +142,17 @@ async function main(): Promise<void> {
       Elle yapılan işin kaydı. Tek amacı tekrarı önlemek: aynı kişiye ikinci
       kez aynı mesajı atmak, hiç atmamaktan kötü.
     */
-    const [, domain, sonuc, ...notParcalari] = process.argv.slice(1).filter((a) => !a.startsWith('--'));
+    /*
+      ⚠️ **Argümanlar `komutOku`dan geliyor, `process.argv`den DEĞİL — ve bu bir
+      hatadan sonra böyle.** Burada bir zamanlar `process.argv.slice(1)` vardı ve
+      bir kaydırma yapıyordu: `temas nischengold.com gonderildi` çağrısı deftere
+      **domain=`temas`, sonuc=`nischengold.com`** diye yazılıyordu. Komut hata
+      vermiyor, hatta makul bir satır basıyordu — yani ilk gerçek mesaj
+      kaydedilmemiş, tekrar koruması da sessizce devre dışı kalmıştı. Defterin
+      TEK işi tekrarı önlemek olduğu için bu, aracın kendisini işlevsiz kılan
+      bir hataydı. `temas-argumanlari.test.ts` kaydırmayı tutuyor.
+    */
+    const [domain, sonuc, ...notParcalari] = argumanlar;
     if (domain === undefined || sonuc === undefined) {
       log('kullanim: node src/cli.ts temas <domain> <gonderildi|cevap|red|ilgilendi> [not]');
       process.exit(1);
