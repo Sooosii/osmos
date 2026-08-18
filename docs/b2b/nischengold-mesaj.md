@@ -24,6 +24,20 @@ sayfasına gidiyor.
 
 Sahibin kararı (2026-08-18). OSMOS adına hesap açılmıyor.
 
+**Hesap: `@soroshzs`** (görünen ad: Soroush)
+
+**Ölçüldü — 2026-08-18:** profil fotoğrafı ✅ · 137 takipçi · 178 takip ·
+**0 gönderi.**
+
+⚠️ **Koşulun yarısı eksik.** Iyi haber: 137 takipçi + profil fotoğrafı +
+gerçek ad, hesabı "bugün açılmış sahte hesap" olmaktan çıkarıyor — DM istek
+kutusunda çürümez. Kalan boşluk şu: dükkân sahibi mesajı okuyup "bu kim"
+diye profile tıklarsa **hiçbir şey bulamıyor.**
+
+⚠️ **En ucuz kapatma yolu 10 gönderi değil, BIYOGRAFI:** profil biyografisine
+`osmos.me` yazılırsa merak eden kişi bir yere düşüyor. Bir dakikalık iş ve
+0 gönderi sorununun asıl zararını kaldırıyor. Gönderi eklemek isteğe bağlı.
+
 Gerekçe: metin zaten kişisel konuşuyor (*"sizin sortimentinizden 13 koku aldım,
 bunu kurdum"*) ve o cümle ancak geçmişi olan gerçek bir hesaptan gelince
 inandırıcı. Marka zaten linkin arkasında duruyor — ayrıca bir marka hesabına
@@ -86,7 +100,7 @@ kanıt artık sayı değil, **linkin kendisi.** Açılan demo, sayılmış bir k
 > Falls Sie keine weiteren Nachrichten möchten, sagen Sie einfach Bescheid —
 > dann höre ich auf.
 >
-> — [adın]
+> — Soroush
 
 **Neden bu metin:**
 

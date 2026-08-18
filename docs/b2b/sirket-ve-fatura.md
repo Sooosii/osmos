@@ -169,6 +169,9 @@ Sahip bunu zaten hafızadan seçmişti; ölçüm onu destekledi.
 
 ## 6. Mali müşavire sorulacaklar (olduğu gibi okunabilir)
 
+> 📄 **Yanına alınacak hâli:** `docs/b2b/musavir-gorusmesi.md` — aynı sorular,
+> üstünde işin 60 saniyelik özeti ve altında cevap için boşluk.
+
 ⚠️ **Kararlar verildikten SONRA yeniden yazıldı.** Eski listede "kendi şahıs
 şirketimi kursam" ve "74.10 mu 62.01 mi" soruları vardı; ikisi de kapandı,
 yerlerine seçilen yolun gerçek soruları geldi. Müşavire karar sordurmuyoruz,
@@ -204,7 +207,7 @@ her birinin sahibi yazılı.
 | 1 | Şirket seçildi | — | ✅ hep babanın |
 | 2 | **NACE 62.01 bildirimi** | **sen + müşavir** | ⏳ |
 | 3 | e-Fatura kullanıcısı hazır, **istisna 302 bir kez denendi** | **sen + müşavir** | ⏳ |
-| 4 | Şirketin **döviz hesabı** var mı, IBAN/SWIFT bilgisi elde mi | **sen** | ⏳ |
+| 4 | Şirketin **döviz hesabı** (EUR) + SWIFT | — | ✅ **elde, sorun yok** (2026-08-18) |
 | 5 | Teklif şablonunda **VAT ID isteme** + **unvan** satırı | ben | ⏳ |
 | 6 | Kişisel Instagram hesabı: profil fotoğrafı + birkaç gönderi | **sen** | ⏳ |
 | 7 | 🔓 **Nischengold'a DM** | **sen** | serbest — `nischengold-mesaj.md` |
