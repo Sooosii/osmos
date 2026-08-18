@@ -467,15 +467,26 @@ function basHarfBuyut(metin: string): string {
 export function dmTaslagi(lead: Lead, acilis: Acilis | null, dil: Dil): string {
   const hitap = hitapAdi(lead);
   const gozlem = acilis === null ? '' : `${basHarfBuyut(acilis.kisa)} — `;
+  /*
+    ⚠️ **"bir kez kaydır" ölçümle kondu, nezaketten değil.** 390 px'te bakıldı:
+    `osmos.me`ye telefondan giren kişinin ilk gördüğü şey harita değil **kapı** —
+    siyah zemin, birkaç nokta ve "Scroll to awaken the scent". Kapı sahibin
+    tasarımı ve dokunulmuyor; ama bu mesajı alan kişi tanımadığı birinin sitesine
+    bakıyor, yani sekmeyi kapatması bedava. Nischengold'a giden mesajda aynı satır
+    var ve orada risk daha küçüktü — adam KENDI haritasına bakıyordu.
+
+    Satır kısa tutuldu: mesajın işi meraklandırmak, kullanım kılavuzu vermek değil.
+  */
   if (dil === 'tr') {
     return `Merhaba${hitap}! ${gozlem}osmos.me'de parfümleri notalarına göre`
-      + ' gezilebilir bir haritaya çeviriyorum. Aynısını sizin kataloğunuzla,'
-      + ' sizin markanızla kurabilirim; ücretsiz bir örnek hazırlayıp adresini'
-      + ' göndereyim mi?';
+      + ' gezilebilir bir haritaya çeviriyorum (açılınca bir kez kaydırın).'
+      + ' Aynısını sizin kataloğunuzla, sizin markanızla kurabilirim;'
+      + ' ücretsiz bir örnek hazırlayıp adresini göndereyim mi?';
   }
   return `Hi${hitap}! ${gozlem}I turn fragrance catalogues into a map you can`
-    + ' wander by scent — osmos.me. I can build the same from your catalogue under'
-    + ' your own brand; shall I put together a free sample and send you the link?';
+    + ' wander by scent — osmos.me (give it one scroll). I can build the same from'
+    + ' your catalogue under your own brand; shall I put together a free sample'
+    + ' and send you the link?';
 }
 
 const BASLIKLAR = [
