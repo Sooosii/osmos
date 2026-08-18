@@ -1,8 +1,14 @@
 # Gönderim akışı — günlük çalışma sayfası
 
-> 🔒 **KAPALI.** Bu akış `docs/b2b/sirket-ve-fatura.md` kapanmadan
-> **başlatılmıyor.** Sahibin kararı: *"önce hukuki/vergi netleşsin."*
-> Liste ve taslaklar hazır, tetiğe basılmıyor.
+> 🔒 **BU AKIŞ (233 DM) HÂLÂ KAPALI.** Karar dosyası 2026-08-18'de kapandı ama
+> sahip kapıyı **yalnız Nischengold için** açtı: tek mesaj fatura doğurmuyor,
+> 233 mesaj doğurabilir — aynı hafta birden çok "evet" gelirse hem evrak hem
+> teslim kapasitesi aynı yere biner.
+>
+> 🔓 **Serbest olan tek iş:** `docs/b2b/nischengold-mesaj.md`.
+>
+> Bu akış `sirket-ve-fatura.md` §7'deki **2-4 numaralı işlemler** (NACE 62.01,
+> e-Fatura/302 denemesi, döviz hesabı) bitmeden başlatılmıyor.
 
 **Kanal sırası:** Instagram DM → mail → telefon.
 DM ilk sırada çünkü Almanya (en büyük bilinen hedef grubu, 57 dükkân) izinsiz

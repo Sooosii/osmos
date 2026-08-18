@@ -1,8 +1,15 @@
 # Nischengold — ilk mesaj ve gönderim günü
 
-> 🔒 **GÖNDERİLMEDİ ve kapı açılmadan gönderilmiyor.**
-> Kapı: `docs/b2b/sirket-ve-fatura.md` §6 (mali müşavir + şirket kararı).
-> Bu dosya metni ve gönderim günü yapılacakları taşıyor, tetiği değil.
+> 🔓 **SERBEST — 2026-08-18.** Sahip altı şirket kararını verdi ve kapıyı
+> **yalnız bu mesaj için** açtı: *"Nischengold'a şimdi yaz, evrak paralel
+> yürüsün."* Gerekçe ölçülebilir — ilk DM hiçbir fatura doğurmuyor ve cevap
+> döngüsü günler-haftalar sürüyor, o süre NACE bildirimi ve e-Fatura denemesi
+> için fazlasıyla yeterli.
+>
+> ⚠️ **Alınan risk yazılı:** "evet, alalım" cevabı evrak bitmeden gelirse
+> müşteri bekletilir. Bilerek kabul edildi.
+>
+> 🔒 233'lük liste hâlâ **kapalı** (`docs/b2b/gonderim-akisi.md`).
 
 **Hedef:** Nischengold in Konstanz · `nischengold.com` · Instagram `@nischengold`
 · `info@nischengold.com` · leadgen skoru 100, listenin en üstü.
@@ -10,6 +17,25 @@
 **Demo canlıda:** https://nischengold.osmos.me — 13 parfüm, 194 sayfa,
 `noindex`, demo şeridi açık, 13/13 parfümde bağlantı dükkânın kendi ürün
 sayfasına gidiyor.
+
+---
+
+## Gönderen hesap — sahibin KENDİ kişisel Instagram hesabı
+
+Sahibin kararı (2026-08-18). OSMOS adına hesap açılmıyor.
+
+Gerekçe: metin zaten kişisel konuşuyor (*"sizin sortimentinizden 13 koku aldım,
+bunu kurdum"*) ve o cümle ancak geçmişi olan gerçek bir hesaptan gelince
+inandırıcı. Marka zaten linkin arkasında duruyor — ayrıca bir marka hesabına
+gerek yok.
+
+⚠️ **Koşulu var ve atlanırsa karar boşa çıkar:** hesabın profil fotoğrafı ve
+birkaç gönderisi olmalı. Bugün açılmış, sıfır gönderili bir hesaptan gelen
+soğuk DM — kişisel de olsa — istek kutusunda kalır ve hiç açılmaz. Mesajın
+kalitesi bu filtreyi aşmaya yetmiyor.
+
+⚠️ Bunun bir bedeli var ve biliniyor: dükkân seni kişisel hesabından görür ve
+cevabı oraya yazar.
 
 ---
 
@@ -133,7 +159,22 @@ cd leadgen && node src/cli.ts temas nischengold.com gonderildi
    olarak sunuluyor; gerekçesi `sirket-ve-fatura.md`de.
 3. **Katalog** — pakete 20 parfüme kadar giriş dahil; notaları müşteri veriyor
    (şart koşuluyor, fiyat düşmüyor).
-4. **Fatura** — şirket kararı kapanmış olmalı; kapanmadan teklif gönderilmez.
+4. **Teklifte açılacak iki şey — sahibin kararı (2026-08-18).**
+   ⚠️ Müşteri her yerde "OSMOS" görüyor ama fatura **babanın şirketinin**
+   unvanıyla gelecek. Bu uyuşmazlık **teklifte** açılıyor, fatura anında
+   değil: parayı gönderecek Alman muhasebeci beklemediği bir unvan görünce
+   ödemeyi durdurup sorar — tam tahsilat anında güven sarsılır. Teklife iki
+   satır giriyor:
+   - hizmet **OSMOS** adıyla veriliyor, faturayı **[şirket unvanı]** kesiyor
+   - **VAT ID'niz** gerekiyor (reverse charge, §13b UStG) — faturayı keserken
+     aramak gecikme demek
+5. **Fatura tarafı** (`sirket-ve-fatura.md`): KDV %0 · istisna **302** ·
+   ⚠️ tanım **yazılım/hizmet dilinde** yazılıyor ("harita kurulumu + katalog
+   verisinin işlenmesi + barındırma"), çünkü şirkete eklenen tek NACE kodu
+   **62.01**; "tasarım" öne çıkarılırsa tanım ile faaliyet kodu ayrışır.
+   Tahsilat **%50 peşin / %50 teslimde**, babanın şirket döviz hesabına.
+   ⚠️ Teklif gönderilmeden §7'deki 2-4 numaralı işlemler bitmiş olmalı —
+   ilk DM için şart değildi, **teklif için şart.**
 
 ## "Kaldırın" derlerse
 

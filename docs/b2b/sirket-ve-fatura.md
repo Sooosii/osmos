@@ -5,9 +5,50 @@
 > maddenin yanında kaynağı yazılı. **Uygulamadan önce mali müşavire
 > onaylatılacak** — sonundaki soru listesi tam bunun için var.
 
-**Neden şimdi:** 239 hesaplık Instagram DM listesi ve 258 e-posta adresi hazır
-bekliyor. Sahibin kararı: *"önce hukuki/vergi netleşsin."* Bu dosya kapanmadan
-**tek mesaj gitmiyor.**
+**Neden yazıldı:** 239 hesaplık Instagram DM listesi ve 258 e-posta adresi hazır
+bekliyordu, sahibin kararı *"önce hukuki/vergi netleşsin"* idi.
+
+✅ **2026-08-18: netleşti.** Altı karar tek tek soruldu ve verildi (aşağıda).
+Kapı **Nischengold için açıldı**; 233'lük liste hâlâ kapalı ve §7'deki 2-4
+numaralı işlemler bitmeden açılmıyor.
+
+---
+
+## ✅ KARARLAR VERİLDİ — 2026-08-18
+
+Altı karar sahibe tek tek soruldu, altısı da cevaplandı. **Bu belge artık
+kapalı değil: kalan şey karar değil İŞLEM.**
+
+| # | Karar | Sonuç |
+|---|---|---|
+| 1 | Hangi şirket | **③ Hep babanın şirketi.** Kendi şahıs şirketi açılmıyor. |
+| 2 | NACE kodu | **Yalnız 62.01** (bilgisayar programlama). 74.10 eklenmiyor. |
+| 3 | Para yolu | **Babanın şirket döviz hesabı / SWIFT.** Wise ve Payoneer yok. |
+| 4 | Unvan uyuşmazlığı | **Teklifte açılıyor**, faturadan önce. Ilk DM'de şirket adı geçmiyor. |
+| 5 | Gönderim kapısı | **Nischengold'a şimdi yazılıyor**, evrak paralel yürüyor. 233'lük liste hâlâ kapalı. |
+| 6 | Gönderen hesap | **Sahibin kendi kişisel Instagram hesabı.** OSMOS hesabı açılmıyor. |
+
+⚠️ **2. kararın faturaya etkisi:** kod yalnız 62.01 olduğu için fatura tanımı
+yazılım/hizmet dilinde yazılacak — "tasarım" kelimesi öne çıkarılmayacak ki
+tanım ile faaliyet kodu örtüşsün. (Harita kurulumu + katalog verisinin
+işlenmesi + yıllık barındırma.)
+
+⚠️ **3. kararın avantajı bedava geliyor:** para doğrudan Türkiye'deki hesaba
+girdiği için *"döviz beyan tarihine kadar Türkiye'ye getirilmeli"* şartı
+kendiliğinden sağlanıyor. Wise seçilseydi bu ayrıca takip edilecekti.
+
+⚠️ **5. karar bir riski bilerek alıyor:** "evet, alalım" cevabı evrak
+bitmeden gelirse müşteri bekletilir. Kabul edilen gerekçe ölçülebilir: ilk DM
+hiçbir fatura doğurmuyor ve cevap döngüsü günler-haftalar sürüyor.
+
+⚠️ **6. kararın bir koşulu var:** kişisel hesabın profil fotoğrafı ve birkaç
+gönderisi olmalı. Bomboş bir hesaptan gelen soğuk DM, kişisel de olsa istek
+kutusunda kalır ve hiç açılmaz.
+
+⚠️ **Kapanmayan tek şey paranın kime ait olduğu:** ③ seçildiği için gelir
+hukuken babanın şirketinin. Bu bilinerek seçildi; sahibin kendi mali geçmişi
+(gelir kaydı, kredi, referans) bu yoldan oluşmuyor. Gelir düzenli hâle
+geldiğinde yeniden bakılacak bir karar.
 
 ---
 
@@ -16,7 +57,7 @@ bekliyor. Sahibin kararı: *"önce hukuki/vergi netleşsin."* Bu dosya kapanmada
 Üç yol var. Üçü de çalışır; farkları paranın kimin olduğu, ne zaman kurulduğu ve
 ne kadar sabit yük getirdiği.
 
-| | ① Babanın şirketi | ② Kendi şahıs şirketin | ③ Önce baba, sonra kendi |
+| | ① Babanın şirketi | ② Kendi şahıs şirketin | ③ **SEÇİLDİ — hep babanın** |
 |---|---|---|---|
 | Ne zaman hazır | Bugün (şirket zaten var) | Kuruluş birkaç iş günü | Bugün |
 | Sabit aylık yük | **Yok** (sana ait yeni yük yok) | **Bağ-Kur** başlıyor | İlk müşteride yok, sonra başlıyor |
@@ -63,9 +104,9 @@ Müşteri yurt dışında (ilk hedefler Almanya, İngiltere, Kanada). Bu, fatura
 
 | Yol | Not |
 |---|---|
-| **Wise Business** (önerilen) | Şahıs şirketinde hesap adı fatura unvanıyla eşleşiyor — banka/muhasebe tarafında en az sürtünme |
-| Payoneer | Alternatif |
-| SWIFT (doğrudan banka) | En yavaş, masraflı |
+| **Babanın şirket döviz hesabı / SWIFT** | ✅ **SEÇİLDİ (2026-08-18).** Şirket zaten var: sıfır kurulum, ve "döviz Türkiye'ye getirilmeli" şartı kendiliğinden sağlanıyor. Bedeli havale masrafı |
+| Wise Business | Ucuz ve hızlı, Avrupalı müşteriye yerel IBAN verir — ama hesap **babanın şirketi adına** açılmalı ve para Wise'da bırakılamaz |
+| Payoneer | Wise ile aynı mantık, aynı koşul |
 
 ⚠️ **Döviz, beyan tarihine kadar Türkiye'ye GETİRİLMELİ** — hizmet ihracatı
 istisnasının şartı. TL'ye çevirmek zorunlu değil, döviz hesabında durabilir.
@@ -126,31 +167,52 @@ Sahip bunu zaten hafızadan seçmişti; ölçüm onu destekledi.
 
 ---
 
-## 6. Mali müşavire sorulacaklar (olduğu gibi sorulabilir)
+## 6. Mali müşavire sorulacaklar (olduğu gibi okunabilir)
 
-1. Yurt dışındaki bir şirkete verilen **yazılım/tasarım hizmeti** için e-faturayı
-   **KDV %0, istisna kodu 302** ile kesmek doğru mu?
-2. **Hizmet ihracatı kazanç indirimi %100** (CBK 11257) bu işe uygulanıyor mu?
-   Beyanda nereye yazılıyor?
-3. Babamın şirketi üzerinden faturalarsam **NACE kodu** eklemek gerekir mi?
-   74.10 mu 62.01 mi uygun?
-4. Kendi şahıs şirketimi kursam **aylık toplam sabit yük** ne olur (Bağ-Kur
-   dahil)? **Genç girişimci istisnası** benim durumumda açılır mı?
-5. Tahsilatı **Wise Business** üzerinden almam sorun çıkarır mı? **Dövizin
-   Türkiye'ye getirilmesi** şartını pratikte nasıl sağlıyorum?
+⚠️ **Kararlar verildikten SONRA yeniden yazıldı.** Eski listede "kendi şahıs
+şirketimi kursam" ve "74.10 mu 62.01 mi" soruları vardı; ikisi de kapandı,
+yerlerine seçilen yolun gerçek soruları geldi. Müşavire karar sordurmuyoruz,
+**verilmiş kararı doğrulatıyoruz** — cevabı farklı çıkarsa karar değişir.
+
+1. Yurt dışındaki bir şirkete verilen **yazılım hizmeti** için e-faturayı
+   **KDV %0, istisna kodu 302** ile kesmek doğru mu? Fatura tanımına ne
+   yazmalıyım (harita kurulumu + katalog verisinin işlenmesi + barındırma)?
+2. **Hizmet ihracatı kazanç indirimi %100** (CBK 11257) bu işe uygulanıyor mu,
+   beyanda nereye yazılıyor? Şirket **babama ait** olduğu için bir farkı var mı?
+3. Babamın şirketine **NACE 62.01** (bilgisayar programlama) eklemek bu iş için
+   yeterli mi? Tek başına hem 302 istisnasını hem %100 indirimi karşılıyor mu,
+   yoksa tasarım kodu (74.10) da gerekir mi?
+4. ⚠️ **Işi ben yapıyorum ama şirket babamın.** Bu yapıda benim bir ücret /
+   huzur hakkı almam gerekir mi, yoksa gelir tamamen şirkette mi kalır? Ileride
+   kendi şirketime geçersem bugünkü yapı bir sorun çıkarır mı?
+5. Tahsilatı **babamın şirket döviz hesabına SWIFT** ile almak en temiz yol mu?
+   **Ihracat bedelinin yurda getirilmesi** ve varsa **%X bozdurma** yükümlülüğü
+   bu tutarlarda (₺ karşılığı birkaç bin lira) nasıl işliyor?
 6. **%50 peşin / %50 teslimde** çalışırken fatura ne zaman kesilir — peşinatta
-   mı, teslimde mi, ikiye bölünerek mi?
+   mı, teslimde mi, ikiye bölünerek mi? Peşinat alındığında henüz hizmet
+   verilmemiş oluyor, bu bir sorun mu?
 
 ---
 
-## 7. Karar verilince ne olacak (kontrol listesi)
+## 7. Nerede kaldık — işlem listesi
 
-- [ ] Şirket seçildi (①/②/③)
-- [ ] Seçenek ① ise NACE kodu eklendi
-- [ ] e-Fatura kullanıcısı hazır, istisna kodu 302 denendi
-- [ ] Wise Business (ya da seçilen yol) açık, unvan eşleşiyor
-- [ ] Teklif şablonuna **VAT ID isteme** satırı eklendi
-- [ ] ✅ **Gönderim serbest** — `docs/b2b/gonderim-akisi.md` başlatılır
+**Karar aşaması bitti** (yukarıda §"KARARLAR VERİLDİ"). Kalanlar işlem, ve
+her birinin sahibi yazılı.
+
+| # | Işlem | Kimde | Durum |
+|---|---|---|---|
+| 1 | Şirket seçildi | — | ✅ hep babanın |
+| 2 | **NACE 62.01 bildirimi** | **sen + müşavir** | ⏳ |
+| 3 | e-Fatura kullanıcısı hazır, **istisna 302 bir kez denendi** | **sen + müşavir** | ⏳ |
+| 4 | Şirketin **döviz hesabı** var mı, IBAN/SWIFT bilgisi elde mi | **sen** | ⏳ |
+| 5 | Teklif şablonunda **VAT ID isteme** + **unvan** satırı | ben | ⏳ |
+| 6 | Kişisel Instagram hesabı: profil fotoğrafı + birkaç gönderi | **sen** | ⏳ |
+| 7 | 🔓 **Nischengold'a DM** | **sen** | serbest — `nischengold-mesaj.md` |
+| 8 | 🔒 233'lük liste | — | kapalı; 2-4 bitmeden açılmıyor |
+
+⚠️ **7 ile 8 arasındaki fark bilinçli.** Tek mesaj fatura doğurmuyor, 233 mesaj
+doğurabilir: aynı hafta birden çok "evet" gelirse hem evrak hem teslim
+kapasitesi (parfüm başına 15-25 dakika veri girişi) aynı yere biner.
 
 ---
 
