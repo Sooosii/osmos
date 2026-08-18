@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { SIGNATURE_SIZE, signatureOf } from '@/lib/nose-signature';
+import type { Perfume } from '@/data/types';
 
 /**
  * Patron'un dönen takımyıldız zemini.
@@ -21,14 +22,14 @@ import { SIGNATURE_SIZE, signatureOf } from '@/lib/nose-signature';
  * bir zemin göstermek, sitenin başka yerlerinde verilmiş sözü bozmak olurdu.
  * O durumda desen duruyor — kayboluyor değil, donuyor.
  */
-export function PatronBackdrop({ perfumeIds }: { readonly perfumeIds: readonly string[] }) {
+export function PatronBackdrop({ perfumes }: { readonly perfumes: readonly Perfume[] }) {
   const ref = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
 
-    const signature = signatureOf(perfumeIds);
+    const signature = signatureOf(perfumes);
     if (!signature) return;
 
     const context = canvas.getContext('2d');
@@ -119,7 +120,7 @@ export function PatronBackdrop({ perfumeIds }: { readonly perfumeIds: readonly s
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
     };
-  }, [perfumeIds]);
+  }, [perfumes]);
 
   return (
     <canvas

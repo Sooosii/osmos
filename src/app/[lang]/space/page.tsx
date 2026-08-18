@@ -7,6 +7,7 @@ import type { ScentFamily } from '@/data/types';
 import type { Dict } from '@/i18n/en';
 import { getDict, localeFor, say } from '@/i18n/dict';
 import { pageAlternates } from '@/lib/site-url';
+import { requireMainSite } from '@/lib/tenant-guard';
 
 /**
  * Uzay taslağı — benzerlik motorunu doğrulamak için.
@@ -65,6 +66,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 }
 
 export default async function SpaceDraft({ params }: { params: Promise<{ lang: string }> }) {
+  requireMainSite();
+
   const locale = localeFor((await params).lang);
   const t = getDict(locale);
   const expectations = expectationsFor(t);

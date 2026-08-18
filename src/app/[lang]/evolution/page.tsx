@@ -1,6 +1,8 @@
 import { EvolutionTimeline } from '@/components/EvolutionTimeline';
+import { PERFUMES } from '@/data/perfumes';
 import { dictFor, localeFor } from '@/i18n/dict';
 import { pageAlternates } from '@/lib/site-url';
+import { requireMainSite } from '@/lib/tenant-guard';
 
 /**
  * Evrim çizelgesi — zaman kaydıracıyla notaların yükselip düşüşü.
@@ -31,6 +33,8 @@ export default async function EvolutionPage({
 }: {
   params: Promise<{ lang: string }>;
 }) {
+  requireMainSite();
+
   const { lang } = await params;
   const t = dictFor(lang);
 
@@ -38,7 +42,8 @@ export default async function EvolutionPage({
     <main className="min-h-screen bg-[#0A0A0C] px-6 py-24 sm:px-12">
       <div className="mx-auto flex max-w-3xl flex-col">
         <p className="mb-16 text-xs tracking-[0.3em] text-white/50">{t.site.name}</p>
-        <EvolutionTimeline />
+        {/* Katalog sunucudan geçiyor — gerekçesi `EvolutionTimeline`ın başında. */}
+        <EvolutionTimeline perfumes={PERFUMES} />
       </div>
     </main>
   );

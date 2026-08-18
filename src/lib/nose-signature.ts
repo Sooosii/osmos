@@ -1,5 +1,5 @@
 import { dominantFamily, getFamily } from '@/data/families';
-import { PERFUMES } from '@/data/perfumes';
+import type { Perfume } from '@/data/types';
 import { familyVector } from './similarity';
 
 /**
@@ -79,15 +79,25 @@ function clamp(value: number, low: number, high: number): number {
   return Math.min(Math.max(value, low), high);
 }
 
-export function signatureOf(perfumeIds: readonly string[]): Signature | null {
-  const chosen = perfumeIds
-    .slice(0, MAX_SLOTS)
-    /*
-      Bilinmeyen kimlik sessizce atlanıyor: veriden çıkarılmış bir parfüm
-      birinin profilini çökertmemeli. Hepsi bilinmiyorsa imza da yok.
-    */
-    .map((id) => PERFUMES.find((perfume) => perfume.id === id))
-    .filter((perfume) => perfume !== undefined);
+/**
+ * ⚠️ **Kimlik DEĞİL parfüm alıyor — ve bu güvenlik gereği.**
+ *
+ * Eskiden imza kimlik listesi alıp katalogda kendisi arıyordu (`PERFUMES.find`).
+ * Sonucu şuydu: imzayı çizen üç istemci bileşeni — `PatronBackdrop`,
+ * `SignatureClip`, `NoseSignature` — bu modül üzerinden **bütün katalogu**
+ * tarayıcıya çekiyordu. Ölçüldü (2026-08-17): kiracı derlemesinde OSMOS'un
+ * 154 kaydı, küratör cümleleriyle birlikte, müşterinin alan adından herkese
+ * açık iniyordu.
+ *
+ * Çözüm sunucuya taşındı (`perfumesOf`, `data/perfumes.ts`): istemciye artık
+ * yalnızca kişinin dört parfümü iniyor. **Buraya kimlik alan bir sürüm geri
+ * konursa sızıntı da geri gelir**; `kiraci-sizinti.test.ts` bunu tutuyor.
+ *
+ * Bilinmeyen kimliğin sessizce atlanması kuralı `perfumesOf`a taşındı: hepsi
+ * bilinmiyorsa liste boş gelir ve imza yine `null` olur.
+ */
+export function signatureOf(perfumes: readonly Perfume[]): Signature | null {
+  const chosen = perfumes.slice(0, MAX_SLOTS);
 
   if (chosen.length === 0) return null;
 

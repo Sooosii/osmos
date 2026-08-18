@@ -5,6 +5,7 @@ import { PatronBackdrop } from '@/components/PatronBackdrop';
 import { SignatureClip } from '@/components/SignatureClip';
 import { PerfumeMiniCard } from '@/components/PerfumeMiniCard';
 import { ScreenFrame } from '@/components/ScreenFrame';
+import { perfumesOf } from '@/data/perfumes';
 import { dictFor, getDict, localeFor } from '@/i18n/dict';
 import { withLocale } from '@/i18n/locale';
 import { currentViewer, publicProfile } from '@/lib/dal';
@@ -86,7 +87,7 @@ export default async function ProfilePage({
         boş bir imzadan zemin de doğmuyor.
       */}
       {profile.patron && profile.topFour.length > 0 ? (
-        <PatronBackdrop perfumeIds={profile.topFour} />
+        <PatronBackdrop perfumes={perfumesOf(profile.topFour)} />
       ) : null}
 
       <ScreenFrame
@@ -105,7 +106,7 @@ export default async function ProfilePage({
           <header className="flex flex-col gap-8 sm:flex-row sm:items-center sm:gap-12">
             {/* İmza — fotoğrafın durduğu yer; Top 4'ten türetiliyor. */}
             <NoseSignature
-              perfumeIds={profile.topFour}
+              perfumes={perfumesOf(profile.topFour)}
               size={132}
               label={t.account.profile.signatureLabel(profile.username)}
             />
@@ -144,7 +145,7 @@ export default async function ProfilePage({
                     paylaşım yapmak olurdu.
                   */}
                   {profile.patron ? (
-                    <SignatureClip perfumeIds={profile.topFour} username={profile.username} />
+                    <SignatureClip perfumes={perfumesOf(profile.topFour)} username={profile.username} />
                   ) : null}
                 </p>
               ) : null}

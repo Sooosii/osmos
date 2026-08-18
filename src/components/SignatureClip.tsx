@@ -3,6 +3,7 @@
 import { useState, useSyncExternalStore } from 'react';
 import { useDict } from '@/i18n/LocaleProvider';
 import { SIGNATURE_SIZE, signatureOf } from '@/lib/nose-signature';
+import type { Perfume } from '@/data/types';
 import { clipFileName, pickClipType } from '@/lib/clip-format';
 
 /**
@@ -29,11 +30,11 @@ const SECONDS = 8;
 const FPS = 30;
 
 interface SignatureClipProps {
-  readonly perfumeIds: readonly string[];
+  readonly perfumes: readonly Perfume[];
   readonly username: string;
 }
 
-export function SignatureClip({ perfumeIds, username }: SignatureClipProps) {
+export function SignatureClip({ perfumes, username }: SignatureClipProps) {
   const t = useDict();
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -54,7 +55,7 @@ export function SignatureClip({ perfumeIds, username }: SignatureClipProps) {
     () => null,
   );
 
-  const signature = signatureOf(perfumeIds);
+  const signature = signatureOf(perfumes);
   if (!signature || !type) return null;
 
   async function record() {

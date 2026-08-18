@@ -1,4 +1,4 @@
-import { nearestToComposition } from '@/lib/composition';
+import { nearestToComposition } from '@/lib/composition-nearest';
 import { allow, clientIp, tooManyRequests } from '@/lib/rate-limit';
 import type { PerfumeNote } from '@/data/types';
 

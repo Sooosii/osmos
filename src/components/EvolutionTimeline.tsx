@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { PERFUMES } from '@/data/perfumes';
+import type { Perfume } from '@/data/types';
 import { EvolutionChart } from './EvolutionChart';
 import { useLocale } from '@/i18n/LocaleProvider';
 import { say } from '@/i18n/dict';
@@ -16,21 +16,33 @@ import { say } from '@/i18n/dict';
  *
  * Kaydıraç parfüm değişince sıfırlanmıyor: iki parfümü **aynı dakikada**
  * karşılaştırmak bu ekranın asıl işi.
+ *
+ * ⚠️ **Katalog PROP olarak geliyor, `@/data/perfumes`ten ithal EDİLMİYOR.**
+ * Bu dosya `'use client'` ve o modülü ithal ettiği sürece paketleyici bütün
+ * katalogları — OSMOS'un 154 kaydını ve her kiracının katalogunu — tarayıcıya
+ * inen ortak bir parçaya koyuyordu (`perfumes.ts` ternary'sinin iki dalı da
+ * statik). Ölçüldü (2026-08-17): kiracı derlemesinde
+ * `/_next/static/chunks/000-*.js` 100 KB'lık bir dosyaydı ve içinde OSMOS'un
+ * elle yazılmış küratör cümleleri iki dilde duruyordu — müşterinin alan
+ * adından, tek istekle, herkese açık. Prop'a çevrilince veri artık sayfanın
+ * RSC yüküne giriyor, yani her site yalnızca kendi katalogunu taşıyor.
+ * **Buraya `@/data/perfumes` ithali geri konursa sızıntı da geri gelir**;
+ * `kiraci-sizinti.test.ts` bunu tutuyor.
  */
-export function EvolutionTimeline() {
+export function EvolutionTimeline({ perfumes }: { perfumes: readonly Perfume[] }) {
   const locale = useLocale();
-  const [perfumeId, setPerfumeId] = useState(PERFUMES[0].id);
+  const [perfumeId, setPerfumeId] = useState(perfumes[0].id);
 
   const perfume = useMemo(
-    () => PERFUMES.find((entry) => entry.id === perfumeId) ?? PERFUMES[0],
-    [perfumeId],
+    () => perfumes.find((entry) => entry.id === perfumeId) ?? perfumes[0],
+    [perfumes, perfumeId],
   );
 
   return (
     <section className="w-full max-w-3xl">
       {/* Parfüm seçici — iki uç örneği karşılaştırmak için */}
       <div className="mb-12 flex flex-wrap gap-2">
-        {PERFUMES.map((entry) => {
+        {perfumes.map((entry) => {
           const isActive = entry.id === perfume.id;
           return (
             <button

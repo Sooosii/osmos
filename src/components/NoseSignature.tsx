@@ -1,4 +1,5 @@
 import { SIGNATURE_SIZE, signatureOf } from '@/lib/nose-signature';
+import type { Perfume } from '@/data/types';
 
 /**
  * Burun imzasının çizimi — profilde fotoğrafın durduğu yer.
@@ -19,15 +20,15 @@ import { SIGNATURE_SIZE, signatureOf } from '@/lib/nose-signature';
  */
 interface NoseSignatureProps {
   /** Top 4 — sıralı. Sıra deseni değiştiriyor. */
-  readonly perfumeIds: readonly string[];
+  readonly perfumes: readonly Perfume[];
   /** Kenar uzunluğu (CSS pikseli). */
   readonly size?: number;
   /** Ekran okuyucunun duyduğu metin; yoksa süs sayılıp gizleniyor. */
   readonly label?: string;
 }
 
-export function NoseSignature({ perfumeIds, size = 120, label }: NoseSignatureProps) {
-  const signature = signatureOf(perfumeIds);
+export function NoseSignature({ perfumes, size = 120, label }: NoseSignatureProps) {
+  const signature = signatureOf(perfumes);
 
   /*
     Seçim yoksa imza da yok. Boş dört halka çizmek "burası eksik" derdi;

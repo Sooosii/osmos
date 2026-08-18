@@ -1,13 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import { NOTES } from '@/data/notes';
 import { PERFUMES } from '@/data/perfumes';
-import {
-  MAX_COMPOSITION_NOTES,
-  MIN_COMPOSITION_NOTES,
-  asPerfume,
-  compositionError,
-  nearestToComposition,
-} from '@/lib/composition';
+import { MAX_COMPOSITION_NOTES, MIN_COMPOSITION_NOTES, asPerfume, compositionError } from '@/lib/composition';
+import { nearestToComposition } from '@/lib/composition-nearest';
 
 const note = (id: string, weight = 0.6, tier: 'top' | 'heart' | 'base' = 'heart') => ({
   noteId: id,

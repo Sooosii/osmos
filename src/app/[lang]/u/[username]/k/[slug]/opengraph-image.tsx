@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { getNote } from '@/data/notes';
 import { publicComposition } from '@/lib/dal';
-import { nearestToComposition } from '@/lib/composition';
+import { nearestToComposition } from '@/lib/composition-nearest';
 import { cardsFor } from '@/lib/perfume-cards';
 import { noteColor } from '@/lib/note-marks';
 import { normalizeUsername } from '@/lib/username';

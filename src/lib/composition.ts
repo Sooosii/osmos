@@ -1,7 +1,5 @@
 import { hasNote } from '@/data/notes';
-import { PERFUMES } from '@/data/perfumes';
 import type { Perfume, PerfumeNote } from '@/data/types';
-import { similarity } from './similarity';
 
 /**
  * Kendi kompozisyonun — Patron'un asıl sebebi.
@@ -63,27 +61,4 @@ export interface CompositionMatch {
   readonly perfumeId: string;
   /** Kosinüs benzerliği, 0–1. */
   readonly score: number;
-}
-
-/**
- * Kompozisyona en çok benzeyen parfümler — güçlüden zayıfa.
- *
- * Geçersiz kompozisyonda **boş dönüyor, patlamıyor**: ekran kullanıcı nota
- * eklerken her tuşta bunu çağırıyor ve yarım bir kompozisyon normal bir ara
- * durum, hata değil.
- */
-export function nearestToComposition(
-  notes: readonly PerfumeNote[],
-  limit: number,
-): readonly CompositionMatch[] {
-  if (compositionError(notes) !== null) return [];
-
-  const draft = asPerfume(notes, 'taslak');
-
-  return PERFUMES.map((perfume) => ({
-    perfumeId: perfume.id,
-    score: similarity(draft, perfume),
-  }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit);
 }
