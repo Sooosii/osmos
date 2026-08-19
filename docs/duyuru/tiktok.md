@@ -33,7 +33,7 @@ kendi kendine dönen imza. Yani **ekran kaydı doğrudan malzeme**: yüz yok,
 | Saniye | Görüntü | Yazı / anlatı |
 |---|---|---|
 | 0-2 | Kapı: astronot, kaydırma başlıyor | "Parfümleri kokularına göre haritaladım" |
-| 2-6 | Perde kalkıyor, uzay açılıyor, yaklaşma | "52 parfüm. Konumları rastgele değil" |
+| 2-6 | Perde kalkıyor, uzay açılıyor, yaklaşma | "150 parfüm. Konumları rastgele değil" |
 | 6-11 | Haritada süzülme, renkli noktalar | "Yan yana duran iki nokta gerçekten birbirine benziyor" |
 | 11-16 | Bir noktaya dokunuş → parfüm sayfası | "Notaların kaçının ortak olduğundan hesaplanıyor" |
 | 16-22 | Dönen evrim imzası, yakın çekim | "Ve her parfümün açılıştan dibe kendi imzası var" |

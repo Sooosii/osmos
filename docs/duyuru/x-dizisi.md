@@ -17,7 +17,7 @@ ilk 10 saniye burada da çalışır); yoksa `docs/preview/` altındaki üç kare
 > Perfume writing is either marketing copy or a list of notes.
 > Neither tells you what a scent is actually like.
 >
-> So I built a map. 52 perfumes, placed by what their notes share.
+> So I built a map. 150 perfumes, placed by what their notes share.
 > No photographs anywhere — everything is drawn from data.
 >
 > osmos.me
@@ -40,7 +40,7 @@ ilk 10 saniye burada da çalışır); yoksa `docs/preview/` altındaki üç kare
 
 **4/6** — görsel: nota sayfası
 
-> 136 notes, each with its own page: how fast it rises, how long it lasts,
+> 158 notes, each with its own page: how fast it rises, how long it lasts,
 > and where it sits on four axes — cool/warm, velvet/sharp, dirty/clean,
 > air/skin.
 >
@@ -71,7 +71,7 @@ ilk 10 saniye burada da çalışır); yoksa `docs/preview/` altındaki üç kare
 
 Dizi fazla gelirse (ya da dizi tutmazsa bir hafta sonra tekrar denemek için):
 
-> I built a map of 52 perfumes where position comes from what their notes
+> I built a map of 150 perfumes where position comes from what their notes
 > share — cosine distance over family, character and shared notes, reduced
 > with MDS.
 >

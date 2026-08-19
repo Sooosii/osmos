@@ -1,13 +1,18 @@
 # Affiliate başvuruları — ne, nereye, hangi metinle
 
-**Durum (2026-08-12, güncellendi):** alan adı alındı (`osmos.me`), satıcı
-satırı artık **52/52 parfümde** çalışıyor (59 bağlantı) ama **hiçbiri komisyon
+**Durum (2026-08-19, yeniden sayıldı):** alan adı alındı (`osmos.me`), satıcı
+satırı **150 parfümün 72'sinde** çalışıyor (80 bağlantı) ama **hiçbiri komisyon
 getirmiyor**. Bu belge o boşluğu kapatmak için.
+
+⚠️ **Önceki hâli 52/52 diyordu ve bayatlamıştı.** Katalog 52'den 150'ye
+çıkarken satıcı satırı 72'de kaldı; yani "her parfümde var" artık doğru değil
+ve başvuru metninde de iddia edilmiyor. Kalan 78 parfüm, bağlantısı
+girildikçe kapanacak açık iş.
 
 ⚠️ O turda ölçülen ve buraya bakan iki şey:
 **FragranceX ve Notino robota kapalı değil** — gerçek tarayıcıda açılıyorlar,
-yani panel geldiğinde derin bağlantı üretmek kolay olacak. Ve 59 bağlantının
-gerçek bileşimi: **markanın kendi mağazası 29**, **Luckyscent 26**,
+yani panel geldiğinde derin bağlantı üretmek kolay olacak. Ve 80 bağlantının
+gerçek bileşimi: **markanın kendi mağazası 49**, **Luckyscent 27**,
 **Scent Split (dekant) 4**. Yani komisyon ihtimali olan tek kalem henüz
 hiçbiri — Luckyscent'in programı yok, marka mağazalarının çoğunda da yok,
 Scent Split ölçülmedi.
@@ -27,7 +32,7 @@ götürüyorlar ve satır onlarsız hiç çizilmiyordu. Ama para yolu değiller.
 Bu kataloğu taşıyan niş satıcıların çoğunda program yok (Luckyscent, Osswald,
 Fumerie, Bloom). Programı olanlar ise ağırlıkla designer taşıyor. Örtüşme
 sıfır değil — FragranceX'in Nasomatto ve Orto Parisi taşıdığı görüldü — ama
-52'nin tamamını kapatmıyor.
+150'nin tamamını kapatmıyor.
 
 **Sonuç: satır iki işi ayrı ayrı yapacak.** Her parfümde dürüst bir "nerede
 bulunur" (marka mağazası / Luckyscent), ve mümkün olan yerde komisyonlu bir
@@ -105,8 +110,8 @@ coupon/deal content, no paid search on brand terms, no email blasts.
 
 ### Başvuru metni (İngilizce, kopyala-yapıştır)
 
-> OSMOS is a map of niche perfumery: 52 fragrances placed on a plane by the
-> kinship of their notes, with a hand-built encyclopaedia of 136 raw
+> OSMOS is a map of niche perfumery: 150 fragrances placed on a plane by the
+> kinship of their notes, with a hand-built encyclopaedia of 158 raw
 > materials behind it. Every perfume has its own page — house, year,
 > perfumer, an animated evolution curve built from volatility data, and its
 > nearest neighbours in scent space.

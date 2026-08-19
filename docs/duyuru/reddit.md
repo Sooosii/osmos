@@ -34,7 +34,7 @@ okumadan yazılmıştı. Kuralların bıraktığı tek kapı şu:
 
 > *"If you wish to propose an AMA, message the mods."*
 
-Yani teorik olarak modlara AMA önerebilirsin ("52 parfümü elle haritaladım,
+Yani teorik olarak modlara AMA önerebilirsin ("150 parfümü elle haritaladım,
 sorun"). Ama gerçekçi ol: yeni bir hesabın kendi sitesi için AMA önerisi
 neredeyse kesin reddedilir. **Tavsiyem: r/fragrance'ı listeden çıkar.**
 Trafik kaynağı olarak değeri, ban riskine ve harcanacak zamana değmiyor.
@@ -65,8 +65,8 @@ serpiştirmek için değil.
 Kural "veriyi sade anlat" dediği için şiirsel olanlar elendi
 ("A map of scent" gibi). Kalanlar:
 
-1. `[OC] 52 perfumes mapped by note similarity — cosine distance over shared notes, scent family and character, reduced to 2D with classical MDS`
-2. `[OC] 52 perfumes placed by how much their notes overlap (136 notes, MDS projection)`
+1. `[OC] 150 perfumes mapped by note similarity — cosine distance over shared notes, scent family and character, reduced to 2D with classical MDS`
+2. `[OC] 150 perfumes placed by how much their notes overlap (158 notes, MDS projection)`
 
 **Öneri: 2.** Birincisi daha eksiksiz ama uzun; ikincisi hem sade hem
 yöntemi söylüyor. İkisi de sansasyonel değil, sayı taşıyor, veriyi anlatıyor.
@@ -81,7 +81,7 @@ Bu yorum **kural gereği**; yazmazsan gönderi silinir. Kendi cümlelerinle,
   piramitlerden.
 - Her notanın uçuculuk değerleri (tepe dakikası, yarı ömür), dört karakter
   ekseni ve koku ailesi ağırlıkları **benim tarafımdan** girildi — öznel.
-- 52 parfüm, 136 nota, 44 marka, 1994–2025.
+- 150 parfüm, 158 nota, 115 marka, 1986–2026.
 
 **Araçlar:**
 - TypeScript; çizim canvas ve SVG ile elle yazıldı — **grafik kütüphanesi

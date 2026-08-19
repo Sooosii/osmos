@@ -1,21 +1,29 @@
 # Gerçekler — bütün duyuru metinlerinin kaynağı
 
-⚠️ **Buradaki her sayı koddan sayıldı** (son yeniden sayım: 2026-08-12, Show HN sabahı). Duyuruda bunların
+⚠️ **Buradaki her sayı koddan sayıldı** (son yeniden sayım: **2026-08-19**). Duyuruda bunların
 dışında bir rakam kullanma; "yüzlerce nota", "binlerce kombinasyon" gibi
 şişirmeler ilk yorumda çürütülür ve bütün gönderinin güvenilirliğini alır.
 Veri değişirse (parfüm eklenince) bu dosya yeniden sayılır.
+
+⚠️⚠️ **Bu dosya bir kez BAYATLADI ve duyuru ateşlenmeden yakalandı
+(2026-08-19).** Tablo 12 Ağustos sayımında donmuştu: 52 parfüm / 136 nota
+diyordu, gerçek 150 / 158'di. Daha kötüsü bir iddia artık **yanlıştı** —
+*"her parfümde nerede bulunur satırı var, 52/52"*. Katalog 52'den 150'ye
+çıkarken satıcı satırı 72'de kalmıştı, yani oran 72/150. Show HN'de o cümle
+tek bir tıklamayla çürütülürdü ve çürüten kişi haklı olurdu. **Duyurudan
+önceki son iş bu dosyayı yeniden saymaktır** — istisnasız.
 
 ## Sayılar
 
 | Ne | Kaç |
 |---|---|
-| Parfüm | **52** (hepsi küratörlü, hepsinin kendi cümlesi var) |
-| Marka | **44** |
-| Yıl aralığı | **1994–2025** |
-| Nota | **136** |
-| Parfüm başına ortalama nota | **9.4** |
-| Üretilen sayfa | **510** (iki dil dahil; hesap sayfaları hariç hepsi statik) |
-| Sınama | **520** |
+| Parfüm | **150** (hepsi küratörlü, hepsinin kendi cümlesi var) |
+| Marka | **115** |
+| Yıl aralığı | **1986–2026** |
+| Nota | **158** |
+| Parfüm başına ortalama nota | **8.0** |
+| Üretilen sayfa | **948** (iki dil dahil; hesap sayfaları hariç hepsi statik) |
+| Sınama | **682** (site) + **286** (leadgen boru hattı) |
 | Koku ailesi | **15** |
 | Karakter ekseni | **4** (sıcaklık, doku, temizlik, yakınlık) |
 
@@ -28,14 +36,18 @@ Veri değişirse (parfüm eklenince) bu dosya yeniden sayılır.
 - **Hesap sunucuda kalıyor.** Benzerlik matrisi ve izdüşüm tarayıcıya hiç
   inmiyor; istemciye yalnızca sonuç gidiyor (ad, renk, konum, derinlik).
 - **İki dilli**, İngilizce kökte, Türkçe `/tr` altında.
-- **Neredeyse tamamı statik.** 510 sayfa derlemede üretiliyor. İstek başına
+- **Neredeyse tamamı statik.** 948 sayfa derlemede üretiliyor. İstek başına
   çizilen tek şey kişiye ait olanlar: `/settings`, `/studio` ve `/u/...`.
 - **Tarayıcıdan üçüncü tarafa istek yok.** Tek sinyal sitenin kendi çerezsiz
   analitiği; giriş, raf ve kompozisyon uçlarının hepsi aynı köken.
-- **Her parfümde "nerede bulunur" satırı var** — 52/52, 59 bağlantı; hepsi
+- **150 parfümün 72'sinde "nerede bulunur" satırı var** — 80 bağlantı; hepsi
   tek tek açılıp ürünün adı görülerek yazıldı, arama sayfası yok. (Yalnız
   biri ürüne değil markanın kataloğuna gidiyor: o koku hiçbir yerde
   satılmıyor, gerekçesi kodda yazılı.)
+  ⚠️ **"Hepsinde var" DENMEZ.** Bir zamanlar doğruydu (52/52) ve katalog
+  büyürken sessizce yanlışa döndü. Alanı boş olan parfümde satır hiç
+  çizilmiyor, yani ziyaretçi eksik bir şey görmüyor — ama iddia edilirse
+  yalan olur.
 - **Hesap isteğe bağlı.** Girişsiz gezinti hiçbir şey saklamıyor — çerez yok,
   hesap yok, takip yok.
 - **Renk = koku ailesi**, sitenin her yerinde aynı; birkaç sayfa sonra
@@ -52,8 +64,8 @@ kullanılabilir, başlık olarak değil.
 - **Burun raporu** — raflardan okunan portre: baskın aileler yüzdeyle, dört
   eksendeki yer, koleksiyonun genişliği, aradaki yabancı, ve sıradaki beş
   öneri. Aynı benzerlik motoru; kişinin parfümleri tek bir sentetik parfümde
-  birleştirilip 52'nin cetveliyle ölçülüyor.
-- **Kompozisyon aracı** — 136 notadan kendi parfümünü kur; site evrim
+  birleştirilip 150'nin cetveliyle ölçülüyor.
+- **Kompozisyon aracı** — 158 notadan kendi parfümünü kur; site evrim
   eğrisini çiziyor ve haritada en yakınları söylüyor. Üç notaya kadar
   ücretsiz.
 
@@ -94,10 +106,11 @@ kazıyan yüzlerce site var, elle küratörlenen yok.
 
 Duyuruda bunları kendin söylemek, birinin bulup yazmasından her zaman iyi:
 
-- **52 parfüm az.** Doğru. Amaç katalog değil, okunabilir bir seçki; yenisi
+- **150 parfüm az.** Doğru. Amaç katalog değil, okunabilir bir seçki; yenisi
   ekleniyor.
-- **Parfümör 49/52.** Üçünde marka burnu açıklamadı; arandı, bulunamadı —
-  uydurulmadı, "bilinmiyor" da yazılmadı, satır yalnızca yılı gösteriyor.
+- **Parfümör 128/150.** Yirmi ikisinde marka burnu açıklamadı; arandı,
+  bulunamadı — uydurulmadı, "bilinmiyor" da yazılmadı, satır yalnızca yılı
+  gösteriyor.
 - **Lisans "tüm hakları saklı".** Kod okunabilir ama serbest değil. HN'de
   bu soru gelir; cevabı hazır olsun: seçki, tarifler ve ölçümler özgün iş.
   (Bunu değiştirmek istersen ayrı bir karar — söyle, konuşalım.)

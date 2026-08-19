@@ -16,7 +16,7 @@ sorular metni keskinleştirir, PH'ye o keskin hâliyle çıkarsın. PH'de gün
 ## Tagline (60 karakter sınırı)
 
 Adaylar:
-1. `A map of scent — 52 perfumes, drawn from data` (45)
+1. `A map of scent — 150 perfumes, drawn from data` (46)
 2. `Perfume as data: no photographs, just structure` (47)
 3. `See how perfumes relate — and how they unfold` (45)
 
@@ -24,8 +24,8 @@ Adaylar:
 
 ## Description (260 karakter)
 
-> 52 perfumes on a map where position comes from what their notes share.
-> Every perfume has an evolution signature that turns on its own, and 136
+> 150 perfumes on a map where position comes from what their notes share.
+> Every perfume has an evolution signature that turns on its own, and 158
 > notes have their own pages. No photographs — everything is drawn from
 > data. Free, no signup.
 

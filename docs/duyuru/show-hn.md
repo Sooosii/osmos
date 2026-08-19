@@ -21,9 +21,9 @@ saat boş olacağın bir gün seç; gönderip ortadan kaybolmak en büyük hata.
 
 Başlık biçim işi, kişisel anlatı değil — bunları olduğu gibi kullanabilirsin.
 
-1. `Show HN: A map of 52 perfumes, drawn from what their notes share`
+1. `Show HN: A map of 150 perfumes, drawn from what their notes share`
 2. `Show HN: OSMOS – perfume as data, no photographs anywhere`
-3. `Show HN: I mapped 52 perfumes by note similarity; no images, all canvas`
+3. `Show HN: I mapped 150 perfumes by note similarity; no images, all canvas`
 4. `Show HN: A scent map where position comes from shared notes`
 
 **Öneri: 1.** Somut sayı taşıyor, ne olduğunu tek okumada anlatıyor, abartı
@@ -43,7 +43,7 @@ cümlelerinle, kendi sıranla yaz. Kısa olsun — 5-8 cümle yeter.
 - Bu iki şeyin ikisi de çizilebilir. Fotoğraf gerekmiyor.
 
 **Ne yaptın:**
-- 52 parfüm, 136 nota. Her nota iki sayı (tepe dakikası, yarı ömür) ve dört
+- 150 parfüm, 158 nota. Her nota iki sayı (tepe dakikası, yarı ömür) ve dört
   karakter ekseni taşıyor.
 - Konum = üç kanalın (aile, karakter, paylaşılan nota) kosinüs uzaklığı,
   klasik MDS + SMACOF ile iki boyuta indirilmiş.
@@ -60,7 +60,7 @@ cümlelerinle, kendi sıranla yaz. Kısa olsun — 5-8 cümle yeter.
 **Dürüstlük payı (mutlaka söyle, ilk yorumda):**
 - Veri elle yazıldı, öznel. Fragrantica kazınmadı.
 - Eğri bir model, ölçüm değil.
-- 52 az; seçki büyüyor.
+- 150 az; seçki büyüyor.
 
 **Kapanış:** ne tür geri bildirim istediğini söyle — örneğin "harita
 akrabalıkları doğru buluyor mu, sizin burnunuz ne diyor". Somut soru, "ne

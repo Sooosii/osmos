@@ -1,6 +1,6 @@
 # OSMOS
 
-An attempt to make scent readable. 52 perfumes and 136 notes; there are no
+An attempt to make scent readable. 150 perfumes and 158 notes; there are no
 photographs anywhere — everything on screen is drawn from data.
 
 **[osmos.me](https://osmos.me)** — the site is live.
@@ -9,7 +9,7 @@ photographs anywhere — everything on screen is drawn from data.
 
 ![The scent space](docs/preview/space.png)
 
-<sub>The door: 52 perfumes on a plane where position comes from shared notes.
+<sub>The door: 150 perfumes on a plane where position comes from shared notes.
 Colour is the dominant family, size the third component. Drag, zoom, touch a
 point.</sub>
 
@@ -39,9 +39,9 @@ route below exists in both.
 
 | path | what |
 |---|---|
-| `/` | **The scent space** — the door. 52 perfumes on a plane where position comes from shared notes. Drag, zoom, touch a point. Sliders let you search by feel instead of by name, and the query travels in the address: `?feel=0.9,,0.2` |
+| `/` | **The scent space** — the door. 150 perfumes on a plane where position comes from shared notes. Drag, zoom, touch a point. Sliders let you search by feel instead of by name, and the query travels in the address: `?feel=0.9,,0.2` |
 | `/perfume/[id]` | A perfume: house and year, a turning evolution signature, its notes, its neighbours in the space |
-| `/notes` | The index of 136 materials, grouped by volatility band |
+| `/notes` | The index of 158 materials, grouped by volatility band |
 | `/note/[id]` | A note: its own measurements, and the turning constellation of perfumes that carry it |
 | `/evolution`, `/space` | Verification screens — internal tools, not indexed |
 | `/u/[username]` | A profile: four perfumes and a signature drawn from them |
@@ -70,7 +70,7 @@ it, tried it, want it — and once three perfumes are marked the site can read a
 character axes, how wide your taste ranges, which perfume is the odd one out,
 and what to try next. It is the same similarity engine the map runs on; your
 perfumes are merged into one synthetic perfume and measured with the same ruler
-as the other 52. The report says how many perfumes it was read from, because a
+as the other 150. The report says how many perfumes it was read from, because a
 portrait drawn from three is not the same as one drawn from twenty.
 
 Signed in, the map knows you too: the perfumes you own wear a thin ring.
@@ -82,9 +82,11 @@ Everything stored and how to delete it is on [`/privacy`](https://osmos.me/priva
 
 Three sets, all written by hand under `src/data/`:
 
-- **`perfume-sets/`** — 52 perfumes. Each with its notes by tier (top / heart /
-  base) and weight, plus house, year and perfumer.
-- **`note-sets/`** — 136 notes, split across three files by volatility band.
+- **`perfume-sets/`** — 150 perfumes on the map (154 records; four exist only
+  for tenant demos). Each with its notes by tier (top / heart / base) and
+  weight, plus house, year and perfumer.
+- **`note-sets/`** — 158 notes, split by volatility band across `base.ts`,
+  `heart.ts`, `top.ts` and `expansion.ts`.
   Each carries family weights, volatility (peak minute + half-life) and four
   character axes: temperature, texture, cleanliness, proximity.
 - **`families.ts`** — 15 scent families and their colours. **Colour means
