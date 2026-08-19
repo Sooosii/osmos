@@ -57,7 +57,7 @@ const PARFUM_DEGIL = /glass|ambalaj|hammadde|kozmed|shopify\.com|apkpure|threads
 
 const adaylar = db.prepare(`
   SELECT domain, shop_name, country, product_count, score, segment, instagram,
-         marka_ortusmesi, urun_ortusmesi
+         marka_ortusmesi, urun_ortusmesi, updated_at
   FROM leads
   WHERE instagram IS NOT NULL
     AND urun_ortusmesi > 0
@@ -81,24 +81,46 @@ const adaylar = db.prepare(`
     || (b.marka_ortusmesi ?? 0) - (a.marka_ortusmesi ?? 0)
     || b.score - a.score);
 
+/*
+  Defter, başlığın kendisini yazıyor. Sebebi ölçüldü: dosya 19 Ağustos'ta
+  yeniden kurulduğunda hâlâ "Ilk parti" diyordu — oysa ilk parti çoktan
+  gitmişti — ve iki satır arayla hem o günün tarihini hem "Liste 16 Ağustosta
+  ölçüldü" cümlesini taşıyordu. Kendi kendisiyle çelişen bir çalışma sayfası,
+  sahibi ya gereksiz işe ya da doğru sayıya güvenmemeye iter.
+*/
+const yazilan = db.prepare('SELECT COUNT(DISTINCT domain) n FROM temas WHERE sonuc = ?').get('gonderildi').n;
+/*
+  ⚠️ `otomatik` burada SAYILMIYOR. Hazır yanıt (Instagram karşılama mesajı)
+  yalnız mesajın ulaştığını söylüyor; metnin işe yarayıp yaramadığına dair
+  hiçbir kanıt taşımıyor. Sayılsaydı "iki cevap geldi, 15/güne çık" kararı
+  bir botun üstünde dururdu.
+*/
+const cevaplayan = db.prepare(
+  "SELECT COUNT(DISTINCT domain) n FROM temas WHERE sonuc NOT IN ('gonderildi', 'otomatik')",
+).get().n;
+const olculen = db.prepare('SELECT COUNT(*) n FROM leads WHERE urun_ortusmesi IS NOT NULL').get().n;
+const ortusen = db.prepare('SELECT COUNT(*) n FROM leads WHERE urun_ortusmesi > 0').get().n;
+
 const parti = adaylar.slice(0, 10);
 
 const satirlar = [
-  '# Ilk parti — 10 mesaj',
+  '# Sıradaki parti — 10 mesaj',
   '',
-  '> 🔓 Serbest. Karar kuralı `docs/b2b/gonderim-akisi.md` başında: **10 mesaj →',
-  '> oku → karar.** Bitmeden 11. mesaj atılmıyor.',
+  `> Defterden: **${yazilan} dükkâna yazıldı**, ${cevaplayan} tanesi cevap verdi.`,
+  '> Karar kuralı `docs/b2b/gonderim-akisi.md` başında: **10 mesaj → oku → karar**',
+  '> — iki ya da daha çok cevap: metin çalışıyor, 15/güne çıkılır · bir cevap: tek',
+  '> değişken değiştirilip 10 daha · sıfır: aynı metinle devam **edilmez**.',
   '',
-  `Ölçüm tarihi: ${new Date().toISOString().slice(0, 10)} · örtüşmesi ölçülen dükkân:`,
-  `${db.prepare('SELECT COUNT(*) n FROM leads WHERE urun_ortusmesi IS NOT NULL').get().n} ·`,
-  `örtüşmesi sıfırdan büyük: ${db.prepare('SELECT COUNT(*) n FROM leads WHERE urun_ortusmesi > 0').get().n}`,
+  `Parti kuruldu: ${new Date().toISOString().slice(0, 10)} · sırada bekleyen uygun aday: ${adaylar.length}`,
+  `· örtüşmesi ölçülen dükkân: ${olculen} · örtüşmesi sıfırdan büyük: ${ortusen}`,
   '',
   '⚠️ **Sıra puana göre DEĞİL, örtüşmeye göre.** Puan "iyi hedef mi" der; örtüşme',
   '"evet derse kaç saatimi yer" der. Nischengold 13 örtüşmeyle bir günde kuruldu;',
   '1 örtüşmeli bir evet 6-8 saatlik veri girişi demek.',
   '',
   '⚠️ **Her mesajdan önce kanıt adresini AÇ.** Sayı tutmuyorsa mesajı gönderme,',
-  'atla. Liste 16 Ağustos\'ta ölçüldü, kataloglar değişiyor.',
+  'atla. Sayılar veritabanındaki son ölçümden geliyor ve her hedefin kendi',
+  '**sayım tarihi** yazılı — katalog o tarihten sonra değişmiş olabilir.',
   '',
   '⚠️ Attıktan sonra: `cd leadgen && node src/cli.ts temas <domain> gonderildi`',
   '',
@@ -114,6 +136,7 @@ parti.forEach((r, i) => {
     `- **Instagram:** @${r.instagram}`,
     `- **Alan adı:** ${r.domain}${r.country ? ` · ${r.country}` : ''}`,
     `- **Örtüşen parfüm: ${r.urun_ortusmesi}** · ortak marka ${r.marka_ortusmesi ?? '-'} · katalog ${r.product_count ?? '?'} ürün`,
+    `- Sayım tarihi: ${(r.updated_at ?? '').slice(0, 10) || 'bilinmiyor'}`,
     `- **Kanıt adresi:** ${t.kanit}`,
     '',
     '```',

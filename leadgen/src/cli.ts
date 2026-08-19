@@ -155,9 +155,19 @@ async function main(): Promise<void> {
       TEK işi tekrarı önlemek olduğu için bu, aracın kendisini işlevsiz kılan
       bir hataydı. `temas-argumanlari.test.ts` kaydırmayı tutuyor.
     */
+    /*
+      ⚠️ **`otomatik`, `cevap`tan AYRI bir sonuç — ölçülerek ayrıldı
+      (2026-08-19).** perfume-parlour.pk'ten DM'e saniyeler içinde bir
+      "Assalamualaikum … Welcome to Perfume Parlour" karşılaması geldi: hazır
+      yanıt, insan değil. `cevap` diye yazılsaydı karar kuralının saydığı
+      sayıyı şişirirdi ve *"iki cevap geldi, metin çalışıyor, 15/güne çık"*
+      kararı bir botun üstünde dururdu. Otomatik yanıt yalnız şunu kanıtlıyor:
+      mesaj ulaştı ve hesap canlı. Metne dair hiçbir şey söylemiyor.
+    */
     const [domain, sonuc, ...notParcalari] = argumanlar;
     if (domain === undefined || sonuc === undefined) {
-      log('kullanim: node src/cli.ts temas <domain> <gonderildi|cevap|red|ilgilendi> [not]');
+      log('kullanim: node src/cli.ts temas <domain>'
+        + ' <gonderildi|cevap|red|ilgilendi|otomatik> [not]');
       process.exit(1);
     }
     const kanal = tumLeadler(db).find((l) => l.domain === domain)?.instagram === null ? 'mail' : 'dm';
