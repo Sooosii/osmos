@@ -47,6 +47,19 @@ export interface ToplamaRaporu {
   readonly toplamYeniAday: number;
   readonly toplamGercekUsd: number;
   readonly bekleyenOnaylar: readonly string[];
+  /**
+   * Apify'ın KENDI aylık kullanım rakamı — ölçülemezse `null`.
+   *
+   * ⚠️ **Yerel `spend` defteri gerçeği söylemiyor ve bu ölçüldü (2026-08-20):
+   * defter $2.03 derken Apify $4.72 diyordu.** Aradaki $2.69 muhtemelen
+   * actor ücreti dışındaki platform kullanımı; ne olursa olsun defter EKSIK.
+   *
+   * Bütçe kapısı zaten Apify'ın rakamını okuyor, yani harcama güvende. Asıl
+   * risk İNSANDA: komutun bastığı "toplam $2.03" satırına bakan kişi $3
+   * kaldığını sanır, oysa kalan $0.28'di. Bu yüzden gerçek rakam rapora
+   * konuluyor ve ekrana basılıyor.
+   */
+  readonly apifyAylikUsd: number | null;
 }
 
 type Log = (s: string) => void;
@@ -354,5 +367,6 @@ export async function topla(
     toplamYeniAday: kanallar.reduce((s, k) => s + k.yeniAday, 0),
     toplamGercekUsd: toplamGercek,
     bekleyenOnaylar,
+    apifyAylikUsd: await istemci.aylikKullanimUsd(),
   };
 }

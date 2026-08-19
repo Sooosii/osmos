@@ -12,6 +12,7 @@ import { acVeritabani, ekleTemas, toplamHarcama, tumLeadler, upsertLead } from '
 import { ApifyIstemcisi } from './apify/istemci.ts';
 import { topla } from './apify/topla.ts';
 import { ACTORLAR, type ActorAdi } from './apify/actors.ts';
+import { AYLIK_TAVAN_USD } from './apify/butce.ts';
 import { elemedenGecer } from './apify/kanallar/eleme.ts';
 import { zenginlestirHepsi } from './enrich/index.ts';
 import { katalogParfumSayisi, katalogTohumlari, varsayilanKatalogDizini } from './seed.ts';
@@ -170,7 +171,19 @@ async function main(): Promise<void> {
 
     const rapor = await topla(db, istemci, mod, onayla, log, yalnizKanal);
     log(`[topla] ${rapor.mod} bitti · ${rapor.toplamYeniAday} yeni aday ·`
-      + ` bu koşu $${rapor.toplamGercekUsd.toFixed(4)} · toplam $${toplamHarcama(db).toFixed(4)}`);
+      + ` bu koşu $${rapor.toplamGercekUsd.toFixed(4)} · yerel defter $${toplamHarcama(db).toFixed(4)}`);
+    /*
+      ⚠️ Yerel defter EKSIK sayıyor (ölçüldü 2026-08-20: defter $2.03, Apify
+      $4.72). Karar verilecek rakam Apify'ınki; ekrana o basılıyor ve kalan
+      kredi açıkça yazılıyor.
+    */
+    if (rapor.apifyAylikUsd !== null) {
+      const kalan = AYLIK_TAVAN_USD - rapor.apifyAylikUsd;
+      log(`[topla] ⚠️ APIFY'a göre bu ay $${rapor.apifyAylikUsd.toFixed(4)}/$${AYLIK_TAVAN_USD.toFixed(2)}`
+        + ` kullanıldı — kalan $${kalan.toFixed(4)}`);
+    } else {
+      log('[topla] ⚠️ Apify aylık kullanımı OKUNAMADI — kalan kredi bilinmiyor');
+    }
     for (const b of rapor.bekleyenOnaylar) log(`[topla] ONAY BEKLIYOR → ${b}`);
   }
 
