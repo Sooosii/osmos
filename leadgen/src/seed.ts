@@ -11,7 +11,7 @@
  * aynı borudan geçiyor; ayıklamayı puan yapıyor. Elle ayıklamak, ölçüm yerine
  * benim tahminimi listeye sokmak olurdu.
  */
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { normalizeDomain } from './domain.ts';
 
@@ -52,16 +52,62 @@ export function varsayilanKatalogDizini(): string {
 }
 
 /**
+ * Yalnız kiracı demoları için girilmiş, ana sitenin uzaylarına GİRMEYEN
+ * parfüm gruplarının dosya adları.
+ *
+ * `osmos-catalog.ts`ten türetiliyor, elle yazılmıyor: orada
+ * `OSMOS_TENANT_ONLY` hangi grupları topluyorsa, o grupların geldiği dosyalar
+ * buradan düşüyor. Dosya adı değişirse eşleşme kendiliğinden düzeliyor.
+ */
+export function kiraciyaOzelDosyalar(katalogDizini: string): ReadonlySet<string> {
+  const yol = join(katalogDizini, '..', 'osmos-catalog.ts');
+  if (!existsSync(yol)) return new Set();
+  const metin = readFileSync(yol, 'utf8');
+
+  const blok = /OSMOS_TENANT_ONLY[^=]*=\s*\[([^\]]*)\]/s.exec(metin);
+  if (blok === null) return new Set();
+
+  const adlar = new Set([...blok[1].matchAll(/\.\.\.([A-Z0-9_]+)/g)].map((m) => m[1]));
+
+  /*
+    ⚠️ Ad eşleşmesi TAM, "içeriyor" değil. `satir.includes(ad)` yazılsaydı
+    `SPACE_3_C` arayan bir tur `SPACE_3_CX`i de yakalardı ve yanlış dosya
+    sayımdan düşerdi — sessizce, çünkü sonuç yine makul bir sayı olurdu.
+  */
+  const dosyalar = new Set<string>();
+  for (const satir of metin.split('\n')) {
+    const ithal = /^import\s*\{([^}]*)\}\s*from\s*'\.\/perfume-sets\/([^']+)'/.exec(satir);
+    if (ithal === null) continue;
+    const isimler = ithal[1].split(',').map((x) => x.trim());
+    if (isimler.some((isim) => adlar.has(isim))) dosyalar.add(`${ithal[2]}.ts`);
+  }
+  return dosyalar;
+}
+
+/**
  * Kataloğdaki parfüm sayısı — mektuptaki güven cümlesinin kaynağı.
  *
  * ⚠️ Sabit yazılmıyor, HER KOŞUDA sayılıyor. Sebep: bu sayı müşteriye giden
  * metne giriyor ve katalog büyüdükçe elle güncellenmesi unutulur. Unutulan
  * bir sayı, doğrulanabilir olsun diye konmuş bir cümleyi yalana çevirir —
  * dükkân sahibi adrese girip beş saniyede sayabiliyor.
+ *
+ * ⚠️ **Kiracıya özel kayıtlar SAYILMIYOR (2026-08-19'da düzeltildi).** Sayım
+ * bütün dosyaları tarıyordu ve 154 buluyordu; oysa `space-3-c.ts`teki dört
+ * Matière Première kaydı yalnız kiracı demoları için girilmiş ve ana sitenin
+ * uzaylarına hiç girmiyor (gerekçesi `osmos-catalog.ts`te: ana kataloğa
+ * eklendiklerinde uzay renkleri kaymıştı). Yani mektup *"154 fragrances are
+ * mapped"* diyordu, osmos.me'de sayılabilen ise **150**.
+ *
+ * Fark küçük ama cümlenin bütün değeri doğrulanabilir olmasında: sayan
+ * dükkân sahibi tutmayan bir rakam bulursa, mektubun geri kalanı da şüpheli
+ * hâle gelir. Aynı disiplin `parti-dogrula` komutunun da sebebi.
  */
 export function katalogParfumSayisi(katalogDizini: string): number {
+  const haric = kiraciyaOzelDosyalar(katalogDizini);
   let toplam = 0;
   for (const dosya of readdirSync(katalogDizini).filter((d) => d.endsWith('.ts') && !d.endsWith('.test.ts'))) {
+    if (haric.has(dosya)) continue;
     const metin = readFileSync(join(katalogDizini, dosya), 'utf8');
     toplam += (metin.match(/^ {4}id: '/gm) ?? []).length;
   }
