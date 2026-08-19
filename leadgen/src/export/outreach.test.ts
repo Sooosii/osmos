@@ -43,8 +43,21 @@ test('Turkiye de Instagram varsa kanal DM', () => {
   assert.equal(kanalSec({ email: 'info@x.com', instagram: 'x', country: 'TR' }), 'dm');
 });
 
-test('yurt disinda e-posta varsa kanal mail', () => {
-  assert.equal(kanalSec({ email: 'info@x.com', instagram: 'x', country: 'US' }), 'mail');
+/*
+  ⚠️ EMEKLIYE AYRILAN KURAL. Bu sinama bir zamanlar "yurt disinda e-posta
+  varsa kanal mail" diyordu ve `kanalSec`in `country === 'TR'` sartini
+  savunuyordu. Kural 2026-08-18'de olculerek dustu: bilinen en buyuk hedef
+  grubu Almanya (57 dukkan) ve UWG §7 izinsiz ticari e-postayi B2B'de bile
+  yasakliyor — eski kural e-postasi olan her Alman dukkanini tam da yasak olan
+  kanala yolluyordu. Kod duzeldi ama bu satir eski davranisi savunmaya devam
+  etti ve o gunden beri kirmizi duruyordu.
+
+  Yeni kural: Instagram varsa DM, ulkeye BAKILMAZ. Genis kapi
+  `kanal.test.ts`te (yedi ulke birden olculuyor); burada yalniz komsu
+  satirlarla ayni yeri gosteren tek bir olcum kaliyor.
+*/
+test('yurt disinda da Instagram varsa kanal DM', () => {
+  assert.equal(kanalSec({ email: 'info@x.com', instagram: 'x', country: 'US' }), 'dm');
 });
 
 test('e-posta yoksa Instagram varsa yine DM', () => {

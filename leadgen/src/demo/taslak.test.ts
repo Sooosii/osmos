@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import { adresAdaylari, katalogTaslagi, kiraciKimligi, type DukkanUrunu } from './taslak.ts';
 import type { KatalogParfumu } from './markalar.ts';
 
@@ -37,7 +38,7 @@ describe('adres adayları', () => {
   const sonuc = adresAdaylari(DUKKAN, BIZIMKILER);
 
   it('yalniz gercekten satilan parfumler cikiyor', () => {
-    expect(sonuc.map((a) => a.id).sort()).toEqual([
+    assert.deepEqual(sonuc.map((a) => a.id).sort(), [
       'matiere-premiere-radical-rose',
       'nasomatto-baraonda',
     ]);
@@ -50,18 +51,24 @@ describe('adres adayları', () => {
     demo "sizin kataloğunuzdan kurdum" diyemezdi.
   */
   it('marka tutmayan ad eslesmesi ELENIYOR', () => {
-    expect(sonuc.map((a) => a.id)).not.toContain('profumum-roma-neroli');
+    assert.ok(
+      !sonuc.map((a) => a.id).includes('profumum-roma-neroli'),
+      'baska evin ayni adli parfumu secime girdi',
+    );
   });
 
   it('Extrait tuzagi: temel surum seciliyor, oteki aday kayboluyor DEGIL', () => {
     const gul = sonuc.find((a) => a.id === 'matiere-premiere-radical-rose');
-    expect(gul?.secim.handle).toBe('radical-rose');
-    expect(gul?.adaylar).toHaveLength(2);
-    expect(gul?.adaylar.map((x) => x.handle)).toContain('radical-rose-extrait');
+    assert.equal(gul?.secim.handle, 'radical-rose');
+    assert.equal(gul?.adaylar.length, 2);
+    assert.ok(
+      (gul?.adaylar ?? []).map((x) => x.handle).includes('radical-rose-extrait'),
+      'oteki aday listeden dusmus — gozle bakan kisi tuzagi goremez',
+    );
   });
 
   it('tek adayli parfumde de secim dogru', () => {
-    expect(sonuc.find((a) => a.id === 'nasomatto-baraonda')?.secim.handle).toBe('baraonda');
+    assert.equal(sonuc.find((a) => a.id === 'nasomatto-baraonda')?.secim.handle, 'baraonda');
   });
 });
 
@@ -80,26 +87,29 @@ describe('katalog taslağı', () => {
   it('HER adres DOGRULANMADI isaretiyle cikiyor', () => {
     const adresSayisi = metin.split("'https://ornek.com/products/").length - 1;
     const isaretSayisi = metin.split('DOGRULANMADI').length - 1;
-    expect(adresSayisi).toBe(2);
+    assert.equal(adresSayisi, 2);
     /* Her adresin işareti + dosya başındaki açıklamada iki geçiş. */
-    expect(isaretSayisi).toBeGreaterThanOrEqual(adresSayisi);
+    assert.ok(
+      isaretSayisi >= adresSayisi,
+      `${adresSayisi} adres var ama ${isaretSayisi} isaret — isaretsiz adres yayina gider`,
+    );
   });
 
   it('birden cok adayli satirda otekiler de yaziyor', () => {
-    expect(metin).toContain('radical-rose-extrait');
+    assert.ok(metin.includes('radical-rose-extrait'));
   });
 
   it('derlenebilir bicimde: secki ve adresler ayni kimlikleri tasiyor', () => {
-    expect(metin).toContain("'matiere-premiere-radical-rose',");
-    expect(metin).toContain("'matiere-premiere-radical-rose': 'https://ornek.com/products/radical-rose'");
-    expect(metin).toContain('ORNEK_CATALOG');
+    assert.ok(metin.includes("'matiere-premiere-radical-rose',"));
+    assert.ok(metin.includes("'matiere-premiere-radical-rose': 'https://ornek.com/products/radical-rose'"));
+    assert.ok(metin.includes('ORNEK_CATALOG'));
   });
 });
 
 describe('kiracı kimliği', () => {
   it('alan adindan kimlik cikariyor', () => {
-    expect(kiraciKimligi('nischengold.com')).toBe('nischengold');
-    expect(kiraciKimligi('www.fragrance-lord.co.uk')).toBe('fragrance-lord');
+    assert.equal(kiraciKimligi('nischengold.com'), 'nischengold');
+    assert.equal(kiraciKimligi('www.fragrance-lord.co.uk'), 'fragrance-lord');
   });
 });
 
@@ -124,12 +134,12 @@ describe('biçim şüphesi', () => {
 
   it('sac parfumu ISARETLENIYOR', () => {
     const s = adresAdaylari([urun('cdc-hair', 'BDK Crème de Cuir Hair perfume 50ML')], bizim);
-    expect(s[0]?.bicimSupheli).toBe(true);
+    assert.equal(s[0]?.bicimSupheli, true);
   });
 
   it('mum ve sabun da isaretleniyor', () => {
     for (const b of ['BDK Creme de Cuir Candle', 'BDK Creme de Cuir Soap Bar']) {
-      expect(adresAdaylari([urun('x', b)], bizim)[0]?.bicimSupheli, b).toBe(true);
+      assert.equal(adresAdaylari([urun('x', b)], bizim)[0]?.bicimSupheli, true, b);
     }
   });
 
@@ -140,7 +150,7 @@ describe('biçim şüphesi', () => {
   */
   it('normal parfum sisesi isaretlenmiyor', () => {
     for (const b of ['Nasomatto Baraonda 30ml', 'Nasomatto Baraonda EDP', 'Nasomatto Baraonda Extrait']) {
-      expect(adresAdaylari([urun('x', b)], bizim)[0]?.bicimSupheli, b).toBe(false);
+      assert.equal(adresAdaylari([urun('x', b)], bizim)[0]?.bicimSupheli, false, b);
     }
   });
 });

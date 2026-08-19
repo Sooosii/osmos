@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
 import { acilisCumlesi } from './outreach.ts';
 import { URUN_TAVANI } from '../enrich/platform.ts';
 import type { Evidence, Lead } from '../types.ts';
@@ -35,49 +36,63 @@ const lead = (product_count: number, notes: string | null = null): Lead => ({
   product_count,
 } as unknown as Lead);
 
-describe('sayı iddiası', () => {
-  it('tavanin ALTINDA gercek sayi soyleniyor', () => {
-    const a = acilisCumlesi(lead(313), kanit, 'en');
-    expect(a?.cumle).toContain('I counted 313 fragrances');
-    expect(a?.kisa).toContain('I counted the 313 fragrances');
-  });
+/*
+  ⚠️ Iki yardımcı, cümle ÜRETİLMEDİĞİNDE sınamanın sessizce geçmesini
+  engelliyor. `acilisCumlesi` `undefined` dönebiliyor ve "içermiyor" denetimi
+  o durumda kendiliğinden doğru çıkardı — yani kapı, asıl korktuğumuz durumda
+  (metin hiç kurulmamış) açık kalırdı.
+*/
+function icerir(metin: string | undefined, parca: string): void {
+  if (typeof metin !== 'string') assert.fail(`cumle uretilmedi, "${parca}" aranamadi`);
+  assert.ok(metin.includes(parca), `"${parca}" bulunamadi — gelen: ${metin}`);
+}
 
-  /*
-    Asıl kapı. "counted" kelimesi tavanda GEÇMEMELİ — sayılmadı, tarama durdu.
-  */
-  it('tavanda "saydim" DEMIYOR', () => {
-    const a = acilisCumlesi(lead(URUN_TAVANI), kanit, 'en');
-    expect(a?.cumle).not.toContain('I counted');
-    expect(a?.cumle).toContain('runs past');
-    expect(a?.kisa).not.toContain('I counted');
-  });
+function icermez(metin: string | undefined, parca: string): void {
+  if (typeof metin !== 'string') assert.fail(`cumle uretilmedi, "${parca}" denetlenemedi`);
+  assert.ok(!metin.includes(parca), `"${parca}" gecmemeliydi — gelen: ${metin}`);
+}
 
-  it('tavanda Turkce de iddia etmiyor', () => {
-    const a = acilisCumlesi(lead(URUN_TAVANI), kanit, 'tr');
-    expect(a?.cumle).not.toContain('saydım');
-    expect(a?.cumle).toContain("'den fazla");
-  });
+test('tavanin ALTINDA gercek sayi soyleniyor', () => {
+  const a = acilisCumlesi(lead(313), kanit, 'en');
+  icerir(a?.cumle, 'I counted 313 fragrances');
+  icerir(a?.kisa, 'I counted the 313 fragrances');
+});
 
-  /*
-    ⚠️ **Sayı eşiği tek başına yetmiyor.** Tarama bir sayfa getirilemediğinde de
-    kırılıyor ve toplam orada kalıyor — 1000'in ÇOK altında. Ölçüldü
-    (2026-08-19): scentido.com kayıtta 250 ürünle duruyordu, gerçekte 490.
-    Kayıt bunu nota yazmıştı (); eksik olan metnin onu okumasıydı.
-  */
-  it('kayittaki (tavan) isareti sayidan BAGIMSIZ olarak iddiayi kaldiriyor', () => {
-    const a = acilisCumlesi(lead(250, 'urun sayisi 250+ (tavan)'), kanit, 'en');
-    expect(a?.cumle).not.toContain('I counted');
-    expect(a?.cumle).toContain('runs past 250');
-  });
+/*
+  Asıl kapı. "counted" kelimesi tavanda GEÇMEMELİ — sayılmadı, tarama durdu.
+*/
+test('tavanda "saydim" DEMIYOR', () => {
+  const a = acilisCumlesi(lead(URUN_TAVANI), kanit, 'en');
+  icermez(a?.cumle, 'I counted');
+  icerir(a?.cumle, 'runs past');
+  icermez(a?.kisa, 'I counted');
+});
 
-  it('isaret YOKSA sayi gercek sayilir', () => {
-    const a = acilisCumlesi(lead(977), kanit, 'en');
-    expect(a?.cumle).toContain('I counted 977');
-  });
+test('tavanda Turkce de iddia etmiyor', () => {
+  const a = acilisCumlesi(lead(URUN_TAVANI), kanit, 'tr');
+  icermez(a?.cumle, 'saydım');
+  icerir(a?.cumle, "'den fazla");
+});
 
-  /* Tavanın üstü de aynı muameleyi görmeli — sayı yine gerçek değil. */
-  it('tavanin USTU de iddia degil', () => {
-    const a = acilisCumlesi(lead(URUN_TAVANI + 500), kanit, 'en');
-    expect(a?.cumle).not.toContain('I counted');
-  });
+/*
+  ⚠️ **Sayı eşiği tek başına yetmiyor.** Tarama bir sayfa getirilemediğinde de
+  kırılıyor ve toplam orada kalıyor — 1000'in ÇOK altında. Ölçüldü
+  (2026-08-19): scentido.com kayıtta 250 ürünle duruyordu, gerçekte 490.
+  Kayıt bunu nota yazmıştı (); eksik olan metnin onu okumasıydı.
+*/
+test('kayittaki (tavan) isareti sayidan BAGIMSIZ olarak iddiayi kaldiriyor', () => {
+  const a = acilisCumlesi(lead(250, 'urun sayisi 250+ (tavan)'), kanit, 'en');
+  icermez(a?.cumle, 'I counted');
+  icerir(a?.cumle, 'runs past 250');
+});
+
+test('isaret YOKSA sayi gercek sayilir', () => {
+  const a = acilisCumlesi(lead(977), kanit, 'en');
+  icerir(a?.cumle, 'I counted 977');
+});
+
+/* Tavanın üstü de aynı muameleyi görmeli — sayı yine gerçek değil. */
+test('tavanin USTU de iddia degil', () => {
+  const a = acilisCumlesi(lead(URUN_TAVANI + 500), kanit, 'en');
+  icermez(a?.cumle, 'I counted');
 });

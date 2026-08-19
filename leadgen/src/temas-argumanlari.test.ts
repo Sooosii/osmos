@@ -1,4 +1,5 @@
-import { afterAll, describe, expect, it } from 'vitest';
+import { after, test } from 'node:test';
+import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -23,8 +24,12 @@ import { tmpdir } from 'node:os';
  * yolu, tek kaydırma riski.
  */
 
-const CLI = resolve(__dirname, 'cli.ts');
-const KOK = resolve(__dirname, '..');
+/*
+  ⚠️ `import.meta.dirname`, `__dirname` DEĞİL: paket `type: module` ve dosya
+  `node --test` altında koşuyor — orada `__dirname` tanımsız.
+*/
+const CLI = resolve(import.meta.dirname, 'cli.ts');
+const KOK = resolve(import.meta.dirname, '..');
 const gecici = mkdtempSync(join(tmpdir(), 'leadgen-sinama-'));
 
 /** Yorumları düşürür — aranan şey bir ANLATIM değil, gerçek bir okuma. */
@@ -34,41 +39,39 @@ function kodSadece(kaynak: string): string {
   return kaynak.replace(blok, '').replace(satir, '');
 }
 
-afterAll(() => { rmSync(gecici, { recursive: true, force: true }); });
+after(() => { rmSync(gecici, { recursive: true, force: true }); });
 
-describe('temas argümanları', () => {
-  it('elle argv okumuyor — tek ayristirma yolu komutOku', () => {
-    const kaynak = readFileSync(CLI, 'utf8');
-    const dal = kaynak.slice(kaynak.indexOf("if (komut === 'temas')"));
-    const govde = kodSadece(dal.slice(0, dal.indexOf("if (komut === 'enrich'")));
-
-    /*
-      ⚠️ Yorum ayıklama şart: bu dosyanın ve komutun kendi açıklaması hatayı
-      anlatırken `argv`den söz ediyor. Sınama ilk yazıldığında tam da ona
-      takıldı ve yeşil sanılan bir kapı kırmızı döndü.
-    */
-    expect(govde).not.toContain('process.argv');
-    expect(govde).toContain('argumanlar');
-  });
+test('elle argv okumuyor — tek ayristirma yolu komutOku', () => {
+  const kaynak = readFileSync(CLI, 'utf8');
+  const dal = kaynak.slice(kaynak.indexOf("if (komut === 'temas')"));
+  const govde = kodSadece(dal.slice(0, dal.indexOf("if (komut === 'enrich'")));
 
   /*
-    Asıl kanıt: komut gerçekten çalıştırılıp ne bastığı okunuyor. Kaynak
-    denetimi tek başına kaydırmayı yakalamazdı — eski kod da "argümanları
-    okuyor" gibi görünüyordu.
+    ⚠️ Yorum ayıklama şart: bu dosyanın ve komutun kendi açıklaması hatayı
+    anlatırken `argv`den söz ediyor. Sınama ilk yazıldığında tam da ona
+    takıldı ve yeşil sanılan bir kapı kırmızı döndü.
   */
-  it('domain ve sonuc dogru sirada okunuyor', () => {
-    const cikti = execFileSync(
-      process.execPath,
-      [CLI, 'temas', 'ornek-dukkan.test', 'gonderildi', 'sinama'],
-      {
-        cwd: KOK,
-        encoding: 'utf8',
-        /* Sınamanın defteri AYRI: canlı defter kirlenmesin (bkz. cli.ts LEADGEN_DB). */
-        env: { ...process.env, LEADGEN_DB: join(gecici, 'sinama.db') },
-      },
-    );
+  assert.ok(!govde.includes('process.argv'), 'temas dali process.argv okuyor');
+  assert.ok(govde.includes('argumanlar'), 'temas dali komutOku argumanlarini okumuyor');
+});
 
-    expect(cikti).toContain('ornek-dukkan.test → gonderildi');
-    expect(cikti).not.toContain('temas → ornek-dukkan.test');
-  });
+/*
+  Asıl kanıt: komut gerçekten çalıştırılıp ne bastığı okunuyor. Kaynak
+  denetimi tek başına kaydırmayı yakalamazdı — eski kod da "argümanları
+  okuyor" gibi görünüyordu.
+*/
+test('domain ve sonuc dogru sirada okunuyor', () => {
+  const cikti = execFileSync(
+    process.execPath,
+    [CLI, 'temas', 'ornek-dukkan.test', 'gonderildi', 'sinama'],
+    {
+      cwd: KOK,
+      encoding: 'utf8',
+      /* Sınamanın defteri AYRI: canlı defter kirlenmesin (bkz. cli.ts LEADGEN_DB). */
+      env: { ...process.env, LEADGEN_DB: join(gecici, 'sinama.db') },
+    },
+  );
+
+  assert.ok(cikti.includes('ornek-dukkan.test → gonderildi'), `beklenmeyen cikti: ${cikti}`);
+  assert.ok(!cikti.includes('temas → ornek-dukkan.test'), `argumanlar kaydi: ${cikti}`);
 });
