@@ -11,6 +11,7 @@ import { Neighbors } from '@/components/Neighbors';
 import { PerfumeNotes } from '@/components/PerfumeNotes';
 import { ScreenFrame, type FrameReadout } from '@/components/ScreenFrame';
 import { KaynakKunyesi } from '@/components/KaynakKunyesi';
+import { SaticiBaglantisi } from '@/components/SaticiBaglantisi';
 import { ShelfPicker } from '@/components/ShelfPicker';
 import { getDict, localeFor, say } from '@/i18n/dict';
 import { withLocale } from '@/i18n/locale';
@@ -258,16 +259,22 @@ export default async function PerfumePage({
                       telefonda sarıyor ve ok, adından kopup alt satıra tek
                       başına düşüyordu (390 px'te ölçüldü). Ad ile oku aynı
                       parçada tutuyor; satır yine sarıyor, ama satıcı adları
-                      bütün kalıyor.
+                      bütün kalıyor. Sınıf artık `SaticiBaglantisi` içinde.
+
+                      ⚠️ Bağlantı bir istemci bileşenine çıkarıldı çünkü
+                      tıklaması SAYILIYOR (`/api/tiklama`). Sayılan şey
+                      müşteriye satılan sözün kendisi: harita ziyaretçiyi onun
+                      ürün sayfasına bırakıyor mu, kaç kez. Yıllık yenileme
+                      ücretinin arkasındaki tek rakam bu.
+
+                      ⚠️ Katalog istemciye PROP geçiyor, ithal EDILMIYOR —
+                      `kiraci-sizinti.test.ts`in tuttuğu kural.
                     */}
-                    <a
-                      href={retailer.url}
-                      target="_blank"
-                      rel="sponsored nofollow noopener"
-                      className="whitespace-nowrap transition-colors hover:text-white/80"
-                    >
-                      {retailer.name} ↗
-                    </a>
+                    <SaticiBaglantisi
+                      perfumeId={perfume.id}
+                      name={retailer.name}
+                      url={retailer.url}
+                    />
                   </span>
                 ))}
               </p>

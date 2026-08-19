@@ -174,7 +174,7 @@ export const TR: Dict = {
         'Bu siteyi hesapsız gezmek hiçbir şey saklamıyor: çerez yok, hesap yok, takip yok. Ziyaretler sitenin kendi çerezsiz ölçümüyle sayılıyor ve o ölçüm kimseyi tanıyamıyor.',
         'Hesap açarsan üç şey saklanıyor: giriş yaptığın e-posta adresi, seçtiğin kullanıcı adı ve satır, bir de seçtiğin dört parfüm. Giriş ayrıca bir çerez bırakıyor — tek işi seni girişte tutmak.',
         'Profilin, ayarlardan gizlemediğin sürece herkese açık. Hesabını silmek bunların hepsini bir anda ve kalıcı olarak siliyor.',
-        'Bazı parfüm sayfalarında mağazalara giden bağlantılar var. Bir bağlantı ortaklık bağlantısıysa, oradan yapılan alışveriş siteye komisyon yazabilir. Ödediğin fiyatı hiç değiştirmiyor, ve haritada hangi parfümlerin durduğunu ya da onlar hakkında ne yazıldığını hiç etkilemiyor.',
+        'Bazı parfüm sayfalarında mağazalara giden bağlantılar var. Bir bağlantı ortaklık bağlantısıysa, oradan yapılan alışveriş siteye komisyon yazabilir. Ödediğin fiyatı hiç değiştirmiyor, ve haritada hangi parfümlerin durduğunu ya da onlar hakkında ne yazıldığını hiç etkilemiyor. Hangi mağaza bağlantısına basıldığı sayılıyor; kimin bastığı sayılmıyor.',
       ],
     },
   },

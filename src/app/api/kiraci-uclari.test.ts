@@ -33,6 +33,8 @@ const API = resolve(__dirname);
 const ACIK: Readonly<Record<string, string>> = {
   'perfume-search/route.ts':
     'Arama kutusu kiracıda da çiziliyor ve uç kiracının KENDI katalogunu basıyor.',
+  'tiklama/route.ts':
+    'Turnike: müşteriye satılan yenileme ücretinin (€290/yıl) karşılığı bu sayaç — haritanın onun ürün sayfalarına kaç ziyaretçi bıraktığı. Kiracıda kapatmak, satılan sözü ölçülemez hâle geri döndürürdü. Kiracı kimliği gövdeden değil activeTenant() ile alınıyor, sayaçlar karışmıyor.',
 };
 
 function rotaDosyalari(dizin: string): string[] {

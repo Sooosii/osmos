@@ -211,7 +211,7 @@ export const EN = {
           zayıf kalıyordu. Son cümle editoryal bağımsızlık sözü — hem
           doğru hem incelemede istenen şey.
         */
-        'Some perfume pages carry links to shops. Where a link is an affiliate link, buying through it may earn this site a commission. It never changes the price you pay, and it never affects which perfumes are on the map or what is written about them.',
+        'Some perfume pages carry links to shops. Where a link is an affiliate link, buying through it may earn this site a commission. It never changes the price you pay, and it never affects which perfumes are on the map or what is written about them. Which shop link was pressed is counted; who pressed it is not.',
       ],
     },
   },
