@@ -18,8 +18,29 @@ import { kanitlar, tumLeadler } from '../db.ts';
 import type { Evidence, Lead } from '../types.ts';
 import { csvYaz } from './csv.ts';
 
-export type Dil = 'tr' | 'en';
+/*
+  ⚠️ **Almanca ÖLÇÜMLE eklendi (2026-08-19).** Uzun süre yalnız `tr` ve `en`
+  vardı ve sonucu şuydu: üçüncü partide dört Alman dükkânına Ingilizce taslak
+  çıktı, elle çevrildi. Liste sayıldığında iş ölçeği göründü — bilinen en
+  büyük grup **Almanya (39 DM hedefi)**, üstüne Avusturya ve Isviçre (8);
+  toplam **47**, Türkçenin iki katından fazla. Elle çeviri her partide
+  tekrarlanacak bir vergiydi.
+*/
+export type Dil = 'tr' | 'en' | 'de';
 export type Kanal = 'dm' | 'mail' | 'yok';
+
+/**
+ * Dile göre metin seçer.
+ *
+ * ⚠️ **`dil === 'tr' ? … : …` kalıbı üçüncü dilde sessizce bozuluyordu.** Iki
+ * dallı ifadede Ingilizce hem "Ingilizce" hem "geri kalan her şey" demekti;
+ * Almanca eklenince Alman dükkânı hiçbir hata vermeden Ingilizce dala düşerdi.
+ * `Record<Dil, string>` her dili AÇIKÇA yazmaya zorluyor — dördüncü dil
+ * eklendiği gün eksik satırları derleyici gösteriyor, ölçüm değil.
+ */
+function cumleSec(dil: Dil, secenekler: Record<Dil, string>): string {
+  return secenekler[dil];
+}
 
 /*
   ⚠️ Türkçeye ÖZGÜ işaretler. `ü` ve `ö` bilerek YOK: ikisi de Almancada
@@ -48,7 +69,16 @@ const ALMANCA_SOZCUK = /\b(kaufen|günstig|versand|exklusive|düfte|nischendüft
  */
 export function dilIzi(metin: string | null): Dil | null {
   if (metin === null || metin.trim() === '') return null;
-  if (ALMANCA_SOZCUK.test(metin)) return null;
+  /*
+    ⚠️ Almanca kapısı artık yalnız ELEMIYOR, KARAR da veriyor. Eskiden buradan
+    `null` dönüyordu ve dükkân Ingilizceye düşüyordu — "Almanca yazmaktansa
+    Ingilizce yaz" değil, "Türkçe yazma" demek istenmişti; ikisi karıştı.
+    Sözcükler Ingilizcede karşılığı olmayacak kadar Almancaya özgü
+    (`kaufen`, `günstig`, `bestellen`…), yani olumlu işaret olarak da güvenli.
+    Ölçüldü: `allyours.com` tam bu durumdaydı — ülkesi bilinmiyor, başlığı
+    Almanca, taslağı Ingilizce çıkıyordu.
+  */
+  if (ALMANCA_SOZCUK.test(metin)) return 'de';
   return TURKCE_HARF.test(metin) || TURKCE_SOZCUK.test(metin) ? 'tr' : null;
 }
 
@@ -70,9 +100,17 @@ export function sayfaMetni(lead: Pick<Lead, 'shop_name'>, kanit: readonly Eviden
   return [lead.shop_name ?? '', ana?.snippet ?? ''].join(' ').trim();
 }
 
+/*
+  ⚠️ Almanca konuşulan ülkeler TEK LISTE: Almanya, Avusturya, Isviçre. Isviçre
+  çok dilli ve bu bilerek göze alındı — listedeki Isviçre dükkânları Almanca
+  bölgede (Nischengold Konstanz sınırında, CHF ile satıyor) ve yanlış tahminin
+  bedeli Ingilizce yazmakla aynı, daha kötü değil.
+*/
+const ALMANCA_ULKELER = new Set(['DE', 'AT', 'CH']);
+
 export function dilSec(country: string | null, sayfaMetni: string | null = null): Dil {
   if (country === 'TR') return 'tr';
-  if (country !== null) return 'en';
+  if (country !== null) return ALMANCA_ULKELER.has(country) ? 'de' : 'en';
   return dilIzi(sayfaMetni) ?? 'en';
 }
 
@@ -214,16 +252,24 @@ export function acilisCumlesi(lead: Lead, kanit: readonly Evidence[], dil: Dil):
     const sayiKanit = bul('urun-sayisi') ?? platformKanit;
     return {
       kaynakUrl: sayiKanit.url,
-      cumle: dil === 'tr'
-        ? (tavanda
+      cumle: cumleSec(dil, {
+        tr: tavanda
           ? `Kataloğunuzda ${n}'den fazla parfüm var ve hepsi tek bir listede duruyor.`
-          : `Kataloğunuzda ${n} parfüm saydım ve hepsi tek bir listede duruyor.`)
-        : (tavanda
+          : `Kataloğunuzda ${n} parfüm saydım ve hepsi tek bir listede duruyor.`,
+        de: tavanda
+          ? `Ihr Katalog umfasst mehr als ${n} Düfte, und alle stehen in einer einzigen Liste.`
+          : `Ich habe ${n} Düfte in Ihrem Katalog gezählt, und alle stehen in einer einzigen Liste.`,
+        en: tavanda
           ? `Your catalogue runs past ${n} fragrances, all of them in a single list.`
-          : `I counted ${n} fragrances in your catalogue, all of them in a single list.`),
-      kisa: dil === 'tr'
-        ? (tavanda ? `kataloğunuzdaki ${n}'den fazla parfüm` : `kataloğunuzdaki ${n} parfümü saydım`)
-        : (tavanda ? `your catalogue runs past ${n} fragrances` : `I counted the ${n} fragrances in your catalogue`),
+          : `I counted ${n} fragrances in your catalogue, all of them in a single list.`,
+      }),
+      kisa: cumleSec(dil, {
+        tr: tavanda ? `kataloğunuzdaki ${n}'den fazla parfüm` : `kataloğunuzdaki ${n} parfümü saydım`,
+        de: tavanda
+          ? `Ihr Katalog umfasst mehr als ${n} Düfte`
+          : `ich habe die ${n} Düfte in Ihrem Katalog gezählt`,
+        en: tavanda ? `your catalogue runs past ${n} fragrances` : `I counted the ${n} fragrances in your catalogue`,
+      }),
     };
   }
 
@@ -231,19 +277,26 @@ export function acilisCumlesi(lead: Lead, kanit: readonly Evidence[], dil: Dil):
   if (ana !== undefined && ana.snippet.trim() !== '') {
     return {
       kaynakUrl: ana.url,
-      cumle: dil === 'tr'
-        ? `${ana.url} adresindeki dükkânınızı gezdim ("${ana.snippet}").`
-        : `I browsed your shop at ${ana.url} ("${ana.snippet}").`,
-      kisa: dil === 'tr' ? 'dükkânınızı gezdim' : 'I browsed your shop',
+      cumle: cumleSec(dil, {
+        tr: `${ana.url} adresindeki dükkânınızı gezdim ("${ana.snippet}").`,
+        de: `Ich habe mich in Ihrem Shop unter ${ana.url} umgesehen ("${ana.snippet}").`,
+        en: `I browsed your shop at ${ana.url} ("${ana.snippet}").`,
+      }),
+      kisa: cumleSec(dil, {
+        tr: 'dükkânınızı gezdim',
+        de: 'ich habe mich in Ihrem Shop umgesehen',
+        en: 'I browsed your shop',
+      }),
     };
   }
   return null;
 }
 
-const KONU = {
+const KONU: Record<Dil, string> = {
   tr: 'kataloğunuz için bir koku haritası — ücretsiz örnek',
+  de: 'eine Duftkarte für Ihren Katalog — ein kostenloses Beispiel',
   en: 'a scent map for your catalogue — a free sample',
-} as const;
+};
 
 /**
  * Güven cümlesi — ŞİRKET YERİNE ÜRÜN.
@@ -257,9 +310,11 @@ const KONU = {
  * Şirket yalnız fatura aşamasında konuşulur, açılış cümlesinde değil.
  */
 export function guvenCumlesi(parfumSayisi: number, dil: Dil): string {
-  return dil === 'tr'
-    ? `Bugün ${parfumSayisi} parfüm notalarına göre haritalanmış durumda.`
-    : `Right now ${parfumSayisi} fragrances are mapped by their notes.`;
+  return cumleSec(dil, {
+    tr: `Bugün ${parfumSayisi} parfüm notalarına göre haritalanmış durumda.`,
+    de: `Zurzeit sind ${parfumSayisi} Düfte nach ihren Noten kartiert.`,
+    en: `Right now ${parfumSayisi} fragrances are mapped by their notes.`,
+  });
 }
 
 /**
@@ -415,6 +470,37 @@ export function mektupGovdesi(lead: Lead, acilis: Acilis | null, dil: Dil, parfu
       + ' bir daha yazmam.',
     ].join('\n');
   }
+  if (dil === 'de') {
+    return [
+      `Guten Tag${hitap},`,
+      '',
+      'ich bin Soroush und entwickle die Duftkarte unter osmos.me.',
+      '',
+      'OSMOS kartiert Düfte nach ihren Noten: statt eine Liste zu durchsuchen,'
+      + ' bewegt sich ein Besucher von einem Duft zu denen, die ihm wirklich'
+      + ` ähnlich riechen. ${guvenCumlesi(parfumSayisi, dil)}`,
+      '',
+      /*
+        ⚠️ Mektupta gözlem cümlesi PARAGRAF BAŞINDA duruyor, yani orada büyük
+        harf doğru. Ama arkasından gelen uzun tireden sonra cümle devam ediyor
+        ve Almancada orası küçük harf: *"…gezählt — dasselbe kann ich…"*.
+        Gözlem yoksa paragraf bu kelimeyle başlıyor ve büyük harf gerekiyor.
+      */
+      `${gozlem}${gozlem === '' ? 'Dasselbe' : 'dasselbe'} kann ich aus Ihrem`
+      + ' Katalog bauen: Ihre Düfte, Ihre Marke, unter Ihrer eigenen Adresse.'
+      + ' Ihre Besucher wandern über eine Karte, statt eine Produktliste zu scrollen.',
+      '',
+      'Ich kann Ihnen ein kostenloses Beispiel erstellen: ich baue es aus einer'
+      + ' Auswahl Ihres Katalogs und schicke Ihnen den Link — und nehme es am'
+      + ' selben Tag wieder offline, wenn es Ihnen nicht gefällt.',
+      '',
+      'Möchten Sie es sich ansehen?',
+      '',
+      'Soroush · osmos.me',
+      'Wenn Sie keine weiteren Nachrichten möchten, antworten Sie mit „Stopp" —'
+      + ' dann schreibe ich Ihnen nicht wieder.',
+    ].join('\n');
+  }
   return [
     `Hello${hitap},`,
     '',
@@ -466,7 +552,17 @@ function basHarfBuyut(metin: string): string {
 
 export function dmTaslagi(lead: Lead, acilis: Acilis | null, dil: Dil): string {
   const hitap = hitapAdi(lead);
-  const gozlem = acilis === null ? '' : `${basHarfBuyut(acilis.kisa)} — `;
+  /*
+    ⚠️ **Almancada bas harf BÜYÜTÜLMÜYOR ve bu bir dilbilgisi kuralı.** Gözlem
+    cümlesi burada "Hallo Name," virgülünden SONRA geliyor, yani cümle devam
+    ediyor. `basHarfBuyut` Ingilizce için doğru ("I" her yerde büyük) ve Türkçe
+    için de ("Merhaba!" ünlemden sonra yeni cümle) — ama Almancada
+    *"Hallo, Ich habe…"* üretiyordu. Alman bir okur için gözle görülür bir
+    özensizlik, üstelik mesajın tamamı o dilde yazıldığı hâlde.
+  */
+  const gozlem = acilis === null
+    ? ''
+    : `${dil === 'de' ? acilis.kisa : basHarfBuyut(acilis.kisa)} — `;
   /*
     ⚠️ **"bir kez kaydır" ölçümle kondu, nezaketten değil.** 390 px'te bakıldı:
     `osmos.me`ye telefondan giren kişinin ilk gördüğü şey harita değil **kapı** —
@@ -482,6 +578,18 @@ export function dmTaslagi(lead: Lead, acilis: Acilis | null, dil: Dil): string {
       + ' gezilebilir bir haritaya çeviriyorum (açılınca bir kez kaydırın).'
       + ' Aynısını sizin kataloğunuzla, sizin markanızla kurabilirim;'
       + ' ücretsiz bir örnek hazırlayıp adresini göndereyim mi?';
+  }
+  /*
+    ⚠️ Almanca metin Nischengold ve ParfumGroup'a GERÇEKTEN gönderilen iki
+    mesajın kaydından geliyor, makine çevirisinden değil. "einmal scrollen"
+    kaydırma satırının Almancası ve aynı ölçümden doğdu; Sie hitabı Almanya'da
+    iş yazışmasının varsayılanı.
+  */
+  if (dil === 'de') {
+    return `Hallo${hitap}, ${gozlem}ich verwandle Duftkataloge in eine Karte,`
+      + ' durch die man sich nach Geruch bewegt: osmos.me (einmal scrollen).'
+      + ' Dasselbe kann ich aus Ihrem Katalog unter Ihrer eigenen Marke bauen;'
+      + ' soll ich Ihnen ein kostenloses Beispiel erstellen und den Link schicken?';
   }
   return `Hi${hitap}! ${gozlem}I turn fragrance catalogues into a map you can`
     + ' wander by scent — osmos.me (give it one scroll). I can build the same from'

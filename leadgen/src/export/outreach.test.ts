@@ -390,9 +390,15 @@ test('Turkceye ozgu harfler dil izi sayiliyor', () => {
 });
 
 /* ⚠️ Almanca da u/o kullaniyor; Turkce sanilmamali. */
-test('Almanca sayfa Turkce sayilmiyor', () => {
-  assert.equal(dilIzi('Exklusive Parfümproben günstig kaufen'), null);
-  assert.equal(dilIzi('Nischendüfte online entdecken'), null);
+/*
+  ⚠️ Bu sinamanin IDDIASI degismedi, beklenen degeri degisti. Almanca sayfa
+  hala Turkce SAYILMIYOR — ama artik Ingilizceye dusmuyor, `de` donuyor.
+  Eski hali `null` bekliyordu ve o `null` iki ayri sey demekti: "Turkce degil"
+  ve "dil bilinmiyor". Almanca eklenince ikisi ayrildi.
+*/
+test('Almanca sayfa Turkce sayilmiyor — Almanca sayiliyor', () => {
+  assert.equal(dilIzi('Exklusive Parfümproben günstig kaufen'), 'de');
+  assert.equal(dilIzi('Nischendüfte online entdecken'), 'de');
   assert.equal(dilIzi('Independent perfumery, London'), null);
   assert.equal(dilIzi(null), null);
 });
@@ -408,9 +414,37 @@ test('ulkesi bilinmeyen ama sayfasi Turkce olana Turkce yaziliyor', () => {
   Turkce bir urun adi gecmesi o dukkani Turk yapmaz; yanlis dilde mesaj,
   dilsiz mesajdan kotu.
 */
+/*
+  ⚠️ Iddia ayni, beklenen deger degisti: bilinen ulke sayfa metnini eziyor.
+  DE + Turkce gorunumlu sayfa artik `en` degil `de` donuyor — kural
+  guclendi, zayiflamadi: sayfa metni yine ulkeyi ezmiyor.
+*/
 test('bilinen ulke sayfa metnini eziyor', () => {
-  assert.equal(dilSec('DE', 'Uygun Fiyatlı Dekant Parfümler'), 'en');
+  assert.equal(dilSec('DE', 'Uygun Fiyatlı Dekant Parfümler'), 'de');
   assert.equal(dilSec('TR', 'Independent perfumery'), 'tr');
+});
+
+/*
+  Almanca konusulan uc ulke tek listede. Isvicre cok dilli ve bu bilerek goze
+  alindi: listedeki Isvicre dukkanlari Almanca bolgede ve yanlis tahminin
+  bedeli Ingilizce yazmakla ayni.
+*/
+test('Almanca konusulan ulkelere Almanca yaziliyor', () => {
+  for (const u of ['DE', 'AT', 'CH']) {
+    assert.equal(dilSec(u, null), 'de', `ulke: ${u}`);
+  }
+  assert.equal(dilSec('GB', null), 'en');
+  assert.equal(dilSec('CA', null), 'en');
+});
+
+/*
+  ⚠️ Asil kazanc burada ve olculdu: ulkesi BILINMEYEN 353 dukkan var ve
+  bazilarinin sayfasi Almanca. allyours.com tam bu durumdaydi — ulke yok,
+  baslik Almanca, taslak Ingilizce cikiyordu.
+*/
+test('ulkesi bilinmeyen ama sayfasi Almanca olana Almanca yaziliyor', () => {
+  assert.equal(dilSec(null, 'Nischendüfte günstig kaufen'), 'de');
+  assert.equal(dilSec(null, 'Independent perfumery'), 'en');
 });
 
 /*
