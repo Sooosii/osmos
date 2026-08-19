@@ -40,6 +40,28 @@
 > ve dekant dükkânlarını gösteriyor.** Türkiye için önce ÖLÇÜLEBILIR hedef
 > lazım (WooCommerce ölçümü ya da elle bakılmış bir liste).
 
+> ## ✅ 2026-08-20 — Istanbul ölçüldü, YÜZ YÜZE KANAL AÇILDI
+>
+> Yukarıdaki eleme **iki sebeple** yeniden bakılmayı hak ediyordu ve bakıldı:
+>
+> ⚠️ **① Eleme kırık bir ölçüme dayanıyordu.** Örtüşme hesabı dükkânın
+> `products.json`unu tek sayfa (250 ürün) okuyordu; gerisi görülmüyordu.
+> Sayfalama düzeltilince havuzun tamamında örtüşme ikiye katlandı — ≥10
+> örtüşen dükkân **6'dan 63'e** çıktı. Türkiye'yi eleyen sayı da o koddan
+> geliyordu.
+>
+> ⚠️ **② Yukarıdaki liste dükkânı ONLINE ölçüyor, oysa yüz yüze kanalın
+> ölçütü başka:** Istanbul'da kapısından girilebilen mağaza + online katalog +
+> **yayınlanmış nota piramidi**. Bu üçünü birden arayan elle bir liste hiç
+> yapılmamıştı.
+>
+> Yapıldı: **üç dükkân üçünü de karşılıyor** — NOIR Parfüm (Nişantaşı),
+> Parfumane (Nişantaşı · Kapalıçarşı · Galata), Home of Scents (Mall of
+> Istanbul · Akasya). Karar kuralı (≥3) karşılandı, kanal açıldı.
+>
+> Tam ölçüm, elenenler, alıntılanmış nota örnekleri, hangi dükkâna önce
+> gidileceği ve yeniden açılan fiyat sorusu: **`docs/b2b/istanbul-olcumu.md`**.
+
 **Kanal sırası:** Instagram DM → mail → telefon.
 DM ilk sırada çünkü Almanya (en büyük bilinen hedef grubu, 57 dükkân) izinsiz
 ticari e-postayı B2B'de bile yasaklıyor; DM o kuralın kapsamında değil.
