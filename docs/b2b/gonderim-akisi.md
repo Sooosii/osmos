@@ -3,15 +3,25 @@
 > 🔓 **AÇILDI — 2026-08-18.** Şirket kararları verildi, evrak sahip tarafından
 > halledildi, ilk mesaj (Nischengold) gitti.
 >
-> ⚠️ **Ama 15/gün ile BAŞLAMIYOR.** Ilk parti **10 mesaj**; sonra durup okunuyor.
-> Gerekçe: mesajın işe yaradığına dair kanıt yok ve yanlış bir metin 233 dükkânı
-> geri dönülmez biçimde yakar. Karar kuralı önceden yazıldı:
+> ⚠️ **Ama 15/gün ile BAŞLAMADI.** Ilk parti **10 mesaj**tı; sonra durulup
+> okundu. Gerekçe: mesajın işe yaradığına dair kanıt yoktu ve yanlış bir metin
+> 233 dükkânı geri dönülmez biçimde yakardı. Karar kuralı önceden yazılmıştı:
 >
 > | 10 mesajdan gelen cevap | ne yapılır |
 > |---|---|
 > | **≥2** (red bile olsa) | metin çalışıyor → 15/gün |
 > | **1** | tek değişken değiştirilip 10 daha |
 > | **0** | aynı metinle devam **edilmez** — önce gönderen hesap ve kanal gözden geçirilir |
+>
+> ✅ **KURAL KARŞILANDI (2026-08-19): iki dükkân cevap verdi**, yani metin
+> çalışıyor ve parti boyu **15**. Cevaplar: `scentitude.com` WhatsApp numarası
+> bıraktı · `nicheessence.com` kapı bekçisi yönetime iletti.
+>
+> ⚠️ **Bir üçüncü "cevap" SAYILMADI ve sebebi kuralın kendisini koruyor:**
+> `perfume-parlour.pk` saniyeler içinde hazır bir karşılama mesajı döndü.
+> Bot yanıtı, metnin işe yaradığına dair sıfır kanıt taşıyor; sayılsaydı
+> "15/güne çık" kararı bir botun üstünde dururdu. Deftere `otomatik` diye
+> yazılıyor ve sayaç yalnız `cevap|ilgilendi|red` sayıyor.
 >
 > ✅ **Teslim engeli kalktı (2026-08-19):** kiracının `locales` dizisinde ilk
 > yazılan dil artık öneksiz olan dil. Ölçüldü — `['tr','en']` kiracısında `/`
@@ -67,11 +77,26 @@ başlıktan geldiği için doğru. Bugünkü ilk onun dördü dekantçı.
 
 | Dosya | Ne var |
 |---|---|
-| `leadgen/data/dm-listesi.md` | **233 hesap**, güne bölünmüş (günde 15, ~16 gün). Her mesajın altında kanıt adresi ve hazır taslak. **45'i Türkçe** — dükkânın sayfası Türkçeyse mesaj da Türkçe |
+| `leadgen/data/ilk-parti.md` | **Günün partisi** — `parti-kur.mjs` üretiyor, defterden okuyup kendi başlığını yazıyor. Çalışılan dosya bu |
+| `leadgen/data/gonderim-konsolu.html` | Aynı partinin tıklanabilir hâli — `parti-konsol` üretiyor |
+| `leadgen/data/dm-listesi.md` | Tam DM listesi, güne bölünmüş. Temas edilenleri kendiliğinden atlıyor |
 | `leadgen/data/outreach.csv` | 486 satır — DM ve mail, `kanal` sütunuyla ayrılmış |
-| `leadgen/data/demo-adaylari.md` | **7 hedef**: raflarında bizde de olan parfüm var |
+| `leadgen/data/demo-adaylari.md` | Raflarında bizde de olan parfüm bulunan hedefler |
 | `docs/b2b/nischengold-mesaj.md` | **Nischengold ayrı ele alınıyor**: demosu zaten canlı, mesajı Almanca ve DM ile gidiyor |
 | `leadgen/data/leads_ranked.csv` | 735 aday, tam liste |
+
+⚠️ **Mesaj dili artık üç: `tr` · `de` · `en`** (2026-08-19). Almanca ölçümle
+eklendi: bilinen en büyük grup Almanya (39 DM hedefi) + Avusturya/Isviçre (8),
+Türkçenin iki katından fazla. Ülke DE/AT/CH ise Almanca; ülke bilinmiyorsa
+sayfa metnindeki Almanca sözcükler karar veriyor. Ölçüldü: **63 hedef**
+Ingilizceden Almancaya geçti.
+
+⚠️ **Parti havuzunun ölçütü değişti (2026-08-19).** Eskiden `urun_ortusmesi > 0`
+şartı vardı ve havuzu 396 adaydan **42**'ye düşürüyordu. Şimdi şart
+`product_count IS NOT NULL` — yani sayılmış, doğrulanabilir bir rakam
+kurulabilen her dükkân listeye giriyor (**208**), örtüşme ise eleme değil
+**sıralama** ölçütü. Gerekçe: mail eklemek boru hattına 34 yeni hedef
+getiriyordu, bu satırı gevşetmek 166.
 
 ---
 
@@ -85,32 +110,70 @@ göndermeden önce bakmaya değer: onlara satılacak bir şey olmayabilir.
 ⚠️ Beş mecra listeden **çıkarıldı** (apkpure.net, threads.com, snapchat.com,
 gmail.com, faire.com) — hiçbiri parfüm işletmesi değildi.
 
-## Günün akışı (15 mesaj, ~40 dakika)
+## Günün akışı — dört komut
 
-**1. Listeyi aç.** `dm-listesi.md` içinde o günün başlığı.
-
-**2. Her mesajdan önce KANIT ADRESİNİ AÇ.**
-⚠️ Bu adım atlanamaz. Taslaktaki cümle *"kataloğunuzdaki 235 parfümü saydım"*
-diyorsa, o sayı sayfada gerçekten olmalı. Katalog değişmiş olabilir — liste
-16 Ağustos'ta ölçüldü. **Sayı tutmuyorsa mesajı gönderme, atla.** İlk cevapta
-yakalanan bir yanlış, o dükkânı temelli kapatır.
-
-**3. Taslağı yapıştır, hitabı gözden geçir.** Ad tuhaf duruyorsa hitabı tamamen
-düş — adsız "Hi," robot gibi bir addan iyi. (Bu kural koda da girdi: `temizAd`.)
-
-**4. Attıktan sonra deftere yaz:**
-
-```
+```bash
 cd leadgen
+node scripts/parti-kur.mjs 15     # partiyi kur (varsayılan 15)
+node src/cli.ts parti-dogrula     # sayı iddialarını dükkânın kataloğuna karşı DENETLE
+node src/cli.ts parti-konsol --sun # gönderim konsolunu aç → http://localhost:4500
+```
+
+**1. Partiyi kur.** Sıra örtüşmeye göre: örtüşmesi yüksek dükkân üstte, çünkü
+"evet" derse teslim bir günde biter. Ölçülmemiş kayıtlar en sonda.
+
+**2. `parti-dogrula` KOŞ — bu adım elle yapılmıyor artık.**
+⚠️ Kural aynı: taslaktaki *"kataloğunuzdaki 235 parfümü saydım"* cümlesi
+sayfada gerçekten olmalı. Değişen şey denetimin **araçla** yapılması: komut her
+hedefin kataloğunu şimdi sayıp kayıttaki sayıyla karşılaştırıyor ve kayan
+varsa **çıkış kodu 1** dönüyor.
+
+⚠️ Bunun neden araca döndüğü ölçüldü: aynı denetim üç parti boyunca elde
+tutulan geçici bir betikle yapıldı ve **her seferinde kayan sayı buldu**
+(2. partide 1/10, 3. partide 3/10). Dördüncüde betik dört hedefte `NaN` bastı —
+taslaklar Almanca çıkmıştı ve betiğin kalıbı yalnız Ingilizce biliyordu.
+Araç bu yüzden metni ayrıştırmıyor, **kayıttaki sayıyı** gerçekle karşılaştırıyor;
+o soru dilden bağımsız.
+
+Kayan sayı çıkarsa: veritabanındaki `product_count` düzeltilir, sonra
+`export` + `parti-kur` yeniden koşulur. Düzeltme dosyaya elle yazılmaz.
+
+**3. Konsolu aç ve gönder.** Her kartta `Kanıtı aç` · `DM'i aç` ·
+`Metni kopyala` · `gönderildi`.
+
+⚠️ `DM'i aç` hesap arama adımını siliyor: `ig.me/m/<hesap>` doğrudan o kişinin
+DM penceresini açıyor (ölçüldü: 302 ile `instagram.com/m/<hesap>`).
+
+⚠️ Hitabı yine gözden geçir. Ad tuhaf duruyorsa hitabı tamamen düş — adsız
+"Hi," robot gibi bir addan iyi. (Bu kural koda da girdi: `temizAd`.)
+
+**4. Deftere yaz.** Konsolun altında işaretlediklerin için hazır komut duruyor;
+kopyala, terminale yapıştır. Tek tek de yazılabilir:
+
+```bash
 node src/cli.ts temas <domain> gonderildi
 ```
 
-Cevap gelince aynı komut: `cevap` · `ilgilendi` · `red`.
+Cevap gelince aynı komut: `cevap` · `ilgilendi` · `red` · `otomatik` · `elendi`.
 ⚠️ Bunun tek amacı **tekrarı önlemek**. Aynı kişiye ikinci kez aynı mesajı
 atmak, hiç atmamaktan kötü.
 
+⚠️ **`otomatik` ile `cevap` ayrı ve bu bilinçli.** Instagram karşılama mesajı
+(perfume-parlour.pk'te oldu) yalnız "mesaj ulaştı, hesap canlı" diyor; metnin
+işe yarayıp yaramadığına dair kanıt taşımıyor. `cevap` yazılsaydı karar
+kuralının saydığı sayı bir botun üstünde dururdu.
+⚠️ **`elendi`** hiç yazılmayacak dükkânı defterde tutuyor — gerekçesiyle, ve
+o dükkân bir daha hiçbir partide çıkmıyor.
+
 **5. Günde 15'i geçme.** Botla atma. Instagram soğuk DM için API vermiyor;
 otomatik gönderim hesabı kapattırır.
+
+⚠️⚠️ **Gönderimi otomatikleştirme önerisi geldi ve REDDEDILDI (2026-08-19).**
+Sahip "hesabımı sana vereyim, sen at" dedi. Parola alınmadı ve tarayıcı
+oturumundan otomatik DM de atılmıyor. Gerekçe sayıyla: o hesap **396 hedefin
+tek kapısı**; kapanırsa kaybedilen bir parti değil kanalın tamamı. Konsol
+arama ve kopyalama adımlarını siliyor, **"Gönder"e insan basıyor** — sayfa da
+bu yüzden hiçbir şeyi kendiliğinden açmıyor ve sıradakine geçmiyor.
 
 ---
 
