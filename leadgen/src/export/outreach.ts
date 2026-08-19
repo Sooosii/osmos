@@ -292,7 +292,18 @@ export function acilisCumlesi(lead: Lead, kanit: readonly Evidence[], dil: Dil):
   return null;
 }
 
-const KONU: Record<Dil, string> = {
+/**
+ * Mektubun konu satırı — **tek kaynak**.
+ *
+ * ⚠️ **Bir kopyası `ilk-tur.ts`te yaşıyordu ve BAYATLAMIŞTI (2026-08-19'da
+ * ölçüldü).** Orada hâlâ *"2 haftalık ücretsiz pilot"* yazıyordu, oysa gövde
+ * çoktan *"ücretsiz örnek"* diyordu — yani `ilk-tur.md`den atılacak bir mail,
+ * konusuyla gövdesi birbirini yalanlayarak gidecekti. Satılan şeyi iki farklı
+ * adla anan bir mesaj, açan kişiye ilk saniyede özensizlik olarak okunur.
+ *
+ * Bu yüzden dışa açık ve tek: konu satırı bir yerde değişiyor.
+ */
+export const KONU: Record<Dil, string> = {
   tr: 'kataloğunuz için bir koku haritası — ücretsiz örnek',
   de: 'eine Duftkarte für Ihren Katalog — ein kostenloses Beispiel',
   en: 'a scent map for your catalogue — a free sample',

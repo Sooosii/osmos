@@ -16,7 +16,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { kanitlar, temasKurulanlar, tumLeadler } from '../db.ts';
-import { acilisCumlesi, dilSec, dmTaslagi, kanalSec, mektupGovdesi, sayfaMetni, temizAd } from './outreach.ts';
+import { KONU, acilisCumlesi, dilSec, dmTaslagi, kanalSec, mektupGovdesi, sayfaMetni, temizAd } from './outreach.ts';
 import type { Dil } from './outreach.ts';
 import type { Lead } from '../types.ts';
 
@@ -79,12 +79,6 @@ function mailBlok(lead: Lead, sira: number, konu: string, govde: string, kanitUr
     '',
   ].join('\n');
 }
-
-const KONU: Record<Dil, string> = {
-  tr: 'benzer parfüm önerisi — 2 haftalık ücretsiz pilot',
-  de: 'Duftempfehlungen nach Geruch — ein kostenloser Pilot für zwei Wochen',
-  en: 'similar-fragrance recommendations — a free two-week pilot',
-} as const;
 
 export function yazIlkTur(db: DatabaseSync, yol: string, parfumSayisi: number): IlkTurOzeti {
   const gorulen = temasKurulanlar(db);
