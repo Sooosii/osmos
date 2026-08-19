@@ -1,5 +1,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
+import {
+  hesabaZatenYazildi, platformHesabi, yazilanHesaplariTopla,
+} from '../src/export/aday-suzgeci.ts';
 
 /**
  * Ilk partiyi ÖRTÜŞMEYE göre kurar — puana göre değil.
@@ -51,31 +54,57 @@ for (const r of csv.slice(1)) {
 
 const db = new DatabaseSync('data/leads.db');
 const temas = new Set(db.prepare('SELECT DISTINCT domain FROM temas').all().map((r) => r.domain));
+const yazilanHesaplar = yazilanHesaplariTopla(
+  db.prepare('SELECT domain, instagram FROM leads WHERE instagram IS NOT NULL').all(),
+  temas,
+);
 
 /* Parfüm satmayan işletmeler — şişe/ambalaj toptancıları, belgede sayılı. */
 const PARFUM_DEGIL = /glass|ambalaj|hammadde|kozmed|shopify\.com|apkpure|threads|snapchat|gmail|faire/i;
 
+/*
+  Havuzun ölçütü: SAYILMIŞ bir rakamı olan her dükkân.
+
+  ⚠️ **Burada bir zamanlar "urun_ortusmesi > 0" şartı vardı ve havuzu 396
+  adaydan 42'ye düşürüyordu.** Sahip hacim istedi ve ölçüm onu haklı çıkardı:
+  darboğaz kanal değil bu satırdı. Mail eklemek boru hattına 34 yeni hedef
+  getiriyordu, bu şartı gevşetmek ~165.
+
+  ⚠️ Ama süzgeç KALDIRILMADI, ölçütü değişti. Mesajın bütün gücü sayılmış ve
+  dükkânın kendi sayfasından doğrulanabilir bir rakamda; ürün sayısı olmayan
+  188 dükkâna gidecek metin "dükkânınızı gezdim"e düşüyor ve akışın kendi
+  kuralına göre (kanıt satırı olmayan iddia yazılmaz) zayıf. Örtüşme artık
+  eleme değil SIRALAMA ölçütü — aşağıdaki sıralamada.
+
+  ⚠️⚠️ **Bu yorum SQL şablon dizesinin İÇİNDEYDİ ve betiği bozdu.** Şablon
+  dizesinde blok yorum diye bir şey yok: metnin kendisi. Içindeki ters tırnak
+  da dizeyi tam orada kapattı ve dosya `SyntaxError` verdi. Sınamalar `.mjs`
+  dosyalarını kapsamıyor, `tsc` de bakmıyor — yani hata ancak betik gerçekten
+  koşturulunca göründü. Değiştirdikten sonra KOŞTUR.
+*/
 const adaylar = db.prepare(`
   SELECT domain, shop_name, country, product_count, score, segment, instagram,
          marka_ortusmesi, urun_ortusmesi, updated_at
   FROM leads
   WHERE instagram IS NOT NULL
-    /*
-      ⚠️ **Burada bir zamanlar `urun_ortusmesi > 0` yazıyordu ve havuzu 396
-      adaydan 42'ye düşürüyordu.** Sahip hacim istedi ve ölçüm onu haklı
-      çıkardı: darboğaz kanal değil bu satırdı. Mail eklemek 34 yeni hedef
-      getiriyordu, bu satırı gevşetmek ~165.
-
-      ⚠️ Ama süzgeç KALDIRILMADI, ölçütü değişti. Mesajın bütün gücü sayılmış
-      ve dükkânın kendi sayfasından doğrulanabilir bir rakamda; ürün sayısı
-      olmayan 188 dükkâna gidecek metin "dükkânınızı gezdim"e düşüyor ve
-      akışın kendi kuralına göre (kanıt satırı olmayan iddia yazılmaz) zayıf.
-      Örtüşme artık eleme değil SIRALAMA ölçütü — aşağıdaki `.sort`ta.
-    */
     AND product_count IS NOT NULL
     AND segment != 'nis-parfum-evi'
 `).all()
   .filter((r) => !temas.has(r.domain))
+  /*
+    ⚠️ **Alan adı yetmiyor, GELEN KUTUSUNA da bakılıyor.** Bir işletmenin iki
+    alan adı olabiliyor ve defter yalnız alan adına baktığı için tekrar
+    koruması kaçırıyordu. Gerçek partide yakalandı: 1. sırada
+    `visionaryfragranceseu.com` duruyordu, hesabı `@visionaryfragrancesgb` —
+    ilk partide yazılan `visionaryfragrances.com` ile aynı kutu.
+  */
+  .filter((r) => !hesabaZatenYazildi(r.instagram, yazilanHesaplar))
+  /*
+    ⚠️ Dükkânın değil PLATFORMUN hesabı: bazı temalar altbilgide "Powered by
+    Shopify" rozetini bağlıyor ve kazıyıcı onu hesap sanıyor. Iki dükkânda
+    `@shopify` çıktı.
+  */
+  .filter((r) => !platformHesabi(r.instagram))
   .filter((r) => !PARFUM_DEGIL.test(r.domain))
   .filter((r) => taslaklar.has(r.domain))
   .filter((r) => taslaklar.get(r.domain).dil !== 'tr')
