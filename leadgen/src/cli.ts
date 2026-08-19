@@ -163,11 +163,18 @@ async function main(): Promise<void> {
       sayıyı şişirirdi ve *"iki cevap geldi, metin çalışıyor, 15/güne çık"*
       kararı bir botun üstünde dururdu. Otomatik yanıt yalnız şunu kanıtlıyor:
       mesaj ulaştı ve hesap canlı. Metne dair hiçbir şey söylemiyor.
+
+      ⚠️ **`elendi` ise hiç yazılmayacak dükkânı defterde tutuyor.** Defterin
+      dışlama listesi zaten partileri kuruyor; eleme kararı oraya yazılınca
+      dükkân bir daha hiçbir partide çıkmıyor ve GEREKÇESI notta duruyor.
+      Ilk kullanımı rojadoveperfumery.com oldu: 227 ürünün 96'sı (%42) kendi
+      markası, yani dükkân değil parfüm evi. Eleme kuralı (`marka_ortusmesi
+      === 1`) 16 markası olduğu için onu görmüyordu.
     */
     const [domain, sonuc, ...notParcalari] = argumanlar;
     if (domain === undefined || sonuc === undefined) {
       log('kullanim: node src/cli.ts temas <domain>'
-        + ' <gonderildi|cevap|red|ilgilendi|otomatik> [not]');
+        + ' <gonderildi|cevap|red|ilgilendi|otomatik|elendi> [not]');
       process.exit(1);
     }
     const kanal = tumLeadler(db).find((l) => l.domain === domain)?.instagram === null ? 'mail' : 'dm';

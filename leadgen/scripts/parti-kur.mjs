@@ -90,13 +90,18 @@ const adaylar = db.prepare(`
 */
 const yazilan = db.prepare('SELECT COUNT(DISTINCT domain) n FROM temas WHERE sonuc = ?').get('gonderildi').n;
 /*
-  ⚠️ `otomatik` burada SAYILMIYOR. Hazır yanıt (Instagram karşılama mesajı)
-  yalnız mesajın ulaştığını söylüyor; metnin işe yarayıp yaramadığına dair
-  hiçbir kanıt taşımıyor. Sayılsaydı "iki cevap geldi, 15/güne çık" kararı
-  bir botun üstünde dururdu.
+  ⚠️ Sayaç DIŞLAMA değil, İZİN listesiyle çalışıyor — ve bu bilinçli. Kural
+  şu: yalnız bir İNSANIN verdiği karşılık cevaptır.
+
+  Dışlama listesi ("gonderildi ve otomatik hariç her şey") bir kez yazıldı ve
+  ilk yeni sonuç değerinde sessizce yanlışa döndü: `elendi` eklenince eleme
+  kararı "cevap" diye sayılacaktı. Sayının dayandığı karar ağır — >=2 cevap
+  varsa 233 kişilik liste 15/gün hızına açılıyor — yani şişmesi ucuz değil.
+  Yeni bir sonuç değeri eklendiğinde burada GÖRÜNMEZ; sayılması isteniyorsa
+  bilerek yazılır.
 */
 const cevaplayan = db.prepare(
-  "SELECT COUNT(DISTINCT domain) n FROM temas WHERE sonuc NOT IN ('gonderildi', 'otomatik')",
+  "SELECT COUNT(DISTINCT domain) n FROM temas WHERE sonuc IN ('cevap', 'ilgilendi', 'red')",
 ).get().n;
 const olculen = db.prepare('SELECT COUNT(*) n FROM leads WHERE urun_ortusmesi IS NOT NULL').get().n;
 const ortusen = db.prepare('SELECT COUNT(*) n FROM leads WHERE urun_ortusmesi > 0').get().n;
