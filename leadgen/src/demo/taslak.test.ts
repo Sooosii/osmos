@@ -154,3 +154,84 @@ describe('biçim şüphesi', () => {
     }
   });
 });
+
+/**
+ * ⚠️ **Ölçülmüş hata (2026-08-19, nicheessence.com): taslağın 7 adresinin
+ * 7'si de 404 dönüyordu.**
+ *
+ * Sebep tek satırdı: adresler `lead.domain`den kuruluyordu ve o
+ * `normalizeDomain`den geçtiği için `www.`siz. Dükkân yalnız `www.` üstünden
+ * yayın yapıyordu — `hedefKatalogu` katalogu zaten doğru host'tan okumuştu ama
+ * hangi host olduğunu ATIYORDU.
+ *
+ * Hatanın sınıfı bu deponun en sevmediği sınıf: dosya derleniyor, harita
+ * çiziliyor, sınamalar yeşil — yalnızca ziyaretçi hiçbir yere varamıyor. Ve
+ * demo müşteriye "her yol sizin ürün sayfanızda bitiyor" diye sunuluyor.
+ */
+describe('taslak adresleri katalogu VEREN host\'tan kuruluyor', () => {
+  const adaylar = adresAdaylari(DUKKAN, BIZIMKILER);
+
+  it('verilen host adreslere birebir giriyor', () => {
+    const metin = katalogTaslagi('ornek', 'Örnek', 'www.ornek.com', adaylar);
+    assert.ok(
+      metin.includes("'https://www.ornek.com/products/"),
+      'www.li host adrese girmedi',
+    );
+    assert.ok(
+      !metin.includes("'https://ornek.com/products/"),
+      'www. dusurulmus — 404 uretecek adres yazildi',
+    );
+  });
+
+  it('host www.siz verilirse www eklenmiyor — uydurma yapilmiyor', () => {
+    const metin = katalogTaslagi('ornek', 'Örnek', 'ornek.com', adaylar);
+    assert.ok(metin.includes("'https://ornek.com/products/"));
+    assert.ok(!metin.includes("'https://www.ornek.com/products/"));
+  });
+});
+
+/**
+ * ⚠️ **Ölçülmüş hata (2026-08-19, nicheessence.com).** Dükkân aynı kokuyu hem
+ * 3 ml numune hem şişe satıyor ve "en kısa başlık kazanır" kuralı numuneyi
+ * seçiyordu:
+ *
+ *     "Zoologist Hummingbird EDP Sample"     (31) ← seçilen
+ *     "Zoologist Deluxe Bottle Hummingbird"  (35)
+ *
+ * Demo, müşterinin $270'lık şişesi yerine $18'lik numunesine bağlanıyordu.
+ * Satılan sözün tamamı o sayfaya giden yol olduğu icin bu ticari bir hata.
+ */
+describe('numune, sise varken kazanamaz', () => {
+  const BIZIM: readonly KatalogParfumu[] = [
+    { id: 'zoologist-hummingbird', ad: 'Hummingbird', marka: 'Zoologist' },
+  ];
+
+  it('sise adayi varsa numune SECILMEZ', () => {
+    const dukkan: readonly DukkanUrunu[] = [
+      { handle: 'zoologist-hummingbird-edp-sample-3ml', baslik: 'Zoologist Hummingbird EDP Sample' },
+      { handle: 'zoologist-deluxe-bottle-hummingbird', baslik: 'Zoologist Deluxe Bottle Hummingbird' },
+    ];
+    const [aday] = adresAdaylari(dukkan, BIZIM);
+    assert.equal(aday?.secim.handle, 'zoologist-deluxe-bottle-hummingbird');
+    assert.equal(aday?.yalnizNumune, false);
+  });
+
+  it('yalniz numune varsa yine baglaniyor AMA isaretleniyor', () => {
+    const dukkan: readonly DukkanUrunu[] = [
+      { handle: 'zoologist-hummingbird-edp-sample-3ml', baslik: 'Zoologist Hummingbird EDP Sample' },
+    ];
+    const [aday] = adresAdaylari(dukkan, BIZIM);
+    assert.equal(aday?.secim.handle, 'zoologist-hummingbird-edp-sample-3ml');
+    assert.equal(aday?.yalnizNumune, true);
+  });
+
+  it('olcu birimi numune isareti DEGIL — 75ml sise sise kalir', () => {
+    const dukkan: readonly DukkanUrunu[] = [
+      { handle: 'mdci-peche-cardinal-edp-75ml-without-bust', baslik: 'MDCI Peche Cardinal EDP 75ml Without Bust' },
+      { handle: 'mdci-peche-cardinal-edp-sample-3ml', baslik: 'MDCI Peche Cardinal EDP Sample' },
+    ];
+    const [aday] = adresAdaylari(dukkan, [{ id: 'mdci-peche-cardinal', ad: 'Peche Cardinal', marka: 'MDCI' }]);
+    assert.equal(aday?.secim.handle, 'mdci-peche-cardinal-edp-75ml-without-bust');
+    assert.equal(aday?.yalnizNumune, false);
+  });
+});

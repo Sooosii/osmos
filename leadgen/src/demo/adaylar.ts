@@ -21,8 +21,17 @@ import {
 import type { DukkanUrunu } from './taslak.ts';
 import type { Lead } from '../types.ts';
 
-/** Kaç ürün okunacak — marka listesi için bu kadarı yetiyor. */
+/** Sayfa başına ürün — Shopify'ın tavanı. */
 const URUN_SINIRI = 250;
+
+/**
+ * En çok kaç sayfa okunacak (5.000 ürün).
+ *
+ * ⚠️ Sınırsız değil ve bilerek: sayfalama bir dükkâna onlarca istek atabilir
+ * ve `naziceGetir` host başına sırayla gidiyor, yani süre gerçek. Bu tavana
+ * dayanan bir dükkân zaten bizim seçkimizin hedefi değil.
+ */
+const EN_COK_SAYFA = 20;
 
 interface ShopifyUrun { readonly vendor?: string; readonly title?: string; readonly handle?: string }
 interface ShopifyListe { readonly products?: readonly ShopifyUrun[] }
@@ -36,6 +45,17 @@ export interface AdayOlcumu {
 }
 
 export interface HedefKatalogu {
+  /**
+   * Katalogu GERÇEKTEN veren host — ürün adresleri bundan kurulur.
+   *
+   * ⚠️ **Bu alan ölçülmüş bir hatadan doğdu (2026-08-19).** Host bilinip
+   * atılıyordu; taslak sonra adresleri `lead.domain`den kuruyordu ve o
+   * `normalizeDomain` yüzünden `www.`siz. Yalnız `www.` üstünden yayın yapan
+   * bir dükkânda taslağın **her adresi 404** oluyordu — nicheessence.com'da
+   * 7/7 ölçüldü. Üstelik sessizce: dosya derleniyor, harita çiziliyor,
+   * yalnızca ziyaretçi hiçbir yere varamıyor.
+   */
+  readonly host: string;
   readonly markalar: readonly string[];
   /** Marka + ad birleşik başlıklar — ürün eşleştirmesi bunun üstünde. */
   readonly basliklar: readonly string[];
@@ -48,14 +68,44 @@ export interface HedefKatalogu {
   readonly urunler: readonly DukkanUrunu[];
 }
 
+/**
+ * Bir host'un BÜTÜN ürünleri — Shopify sayfa başına en çok 250 veriyor.
+ *
+ * ⚠️ **Sayfalama ölçülmüş bir hatadan sonra eklendi (2026-08-19).** Tek
+ * istek atılıyordu ve dükkânın ilk 250 ürünü okunuyordu; gerisi hiç
+ * görülmüyordu. Sonucu nicheessence.com'da görüldü: eşleştirici yalnız
+ * **3 ml numune** sayfalarını buldu, çünkü asıl şişeler ilk 250'nin dışında
+ * kalmıştı. Demo, müşterinin $320'lık şişesi yerine $18'lik numunesine
+ * bağlanıyordu — yani "her yol sizin ürün sayfanızda bitiyor" sözü teknik
+ * olarak doğru, ticari olarak yanlıştı.
+ *
+ * Ayrıca örtüşme OLDUĞUNDAN AZ ölçülüyordu: bulunamayan her ürün "bu dükkânda
+ * yok" sayılıyordu ve demo seçkisi gereksiz yere küçülüyordu.
+ *
+ * `null` = bu host Shopify katalogu vermiyor (öbür adayı dene).
+ */
+async function hostUrunleri(host: string): Promise<readonly ShopifyUrun[] | null> {
+  const hepsi: ShopifyUrun[] = [];
+  for (let sayfa = 1; sayfa <= EN_COK_SAYFA; sayfa += 1) {
+    const c = await naziceGetir(`https://${host}/products.json?limit=${URUN_SINIRI}&page=${sayfa}`);
+    const veri = jsonAyristir<ShopifyListe>(c);
+    const urunler = veri?.products;
+    /* Ilk sayfa okunamadıysa bu host Shopify değil; sonrakiler sadece son. */
+    if (urunler === undefined) return sayfa === 1 ? null : hepsi;
+    hepsi.push(...urunler);
+    /* Dolu olmayan sayfa sonuncudur — bir istek daha atmaya gerek yok. */
+    if (urunler.length < URUN_SINIRI) break;
+  }
+  return hepsi;
+}
+
 /** Bir hedefin katalogunu okur. */
 export async function hedefKatalogu(lead: Lead): Promise<HedefKatalogu | null> {
   for (const host of adayHostlar(lead.domain, lead.seed_url)) {
-    const c = await naziceGetir(`https://${host}/products.json?limit=${URUN_SINIRI}`);
-    const veri = jsonAyristir<ShopifyListe>(c);
-    const urunler = veri?.products;
-    if (urunler === undefined) continue;
+    const urunler = await hostUrunleri(host);
+    if (urunler === null) continue;
     return {
+      host,
       markalar: urunler.flatMap((u) => (u.vendor === undefined || u.vendor.trim() === '' ? [] : [u.vendor])),
       basliklar: urunler.map((u) => `${u.vendor ?? ''} ${u.title ?? ''}`),
       urunler: urunler.flatMap((u) => (u.handle === undefined ? [] : [{

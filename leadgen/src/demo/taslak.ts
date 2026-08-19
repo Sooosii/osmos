@@ -44,6 +44,15 @@ export interface AdresAdayi {
    * sessizce haritaya girerdi.
    */
   readonly bicimSupheli: boolean;
+  /**
+   * Dükkân bu kokunun YALNIZ numunesini satıyor — şişe adayı hiç yok.
+   *
+   * ⚠️ Hata değil, **karar**: numune de gerçek bir ürün sayfası ve o kokuyu
+   * gerçekten satıyor. Ama demo müşteriye "her yol sizin ürün sayfanızda
+   * bitiyor" diye sunuluyor; $18'lik bir numuneye bitmesi ile $320'lık şişeye
+   * bitmesi aynı cümle değil. Işaret duruyor ki gözle bakan kişi seçsin.
+   */
+  readonly yalnizNumune: boolean;
 }
 
 /**
@@ -53,6 +62,25 @@ export interface AdresAdayi {
  * BURADA YOK — olsaydı her ürün işaretlenir ve işaret anlamını yitirirdi.
  */
 const BICIM_IZI = /(hair|candle|soap|shower|body|lotion|cream(?!e)|deodorant|oil|balm|shampoo|set|bundle|discovery|sampler)/i;
+
+/**
+ * Numune / dekant izi — aynı kokunun küçük porsiyonu.
+ *
+ * ⚠️ **"En kısa başlık kazanır" kuralı burada TERSINE çalışıyor ve bu ölçüldü
+ * (2026-08-19, nicheessence.com).** Dükkân aynı kokuyu hem numune hem şişe
+ * satıyor ve numunenin adı daha kısa olabiliyor:
+ *
+ *     "Zoologist Hummingbird EDP Sample"     (31) ← kural bunu seçiyordu
+ *     "Zoologist Deluxe Bottle Hummingbird"  (35)
+ *
+ * Sonuç: demo, müşterinin $270'lık şişesi yerine $18'lik numunesine
+ * bağlanıyordu. Teknik olarak doğru adres, ticari olarak yanlış sayfa — ve
+ * satılan şeyin tamamı o sayfaya giden yol.
+ *
+ * ⚠️ `ml` BURADA YOK: `mdci-peche-cardinal-edp-75ml-without-bust` gerçek bir
+ * şişe. Ölçü birimi numune işareti değil.
+ */
+const NUMUNE_IZI = /(\bsamples?\b|\bdecants?\b|travel\s*spray|\brefills?\b|\bvial\b|\batomi[sz]er\b)/i;
 
 /**
  * Kimlikten adaya.
@@ -86,8 +114,21 @@ export function adresAdaylari(
       .map((t) => t.urun);
     if (adaylar.length === 0) continue;
 
-    const secim = [...adaylar].sort((x, y) => x.baslik.length - y.baslik.length)[0];
-    cikti.push({ id: b.id, secim, adaylar, bicimSupheli: BICIM_IZI.test(secim.baslik) });
+    /*
+      Numune, şişe varken kazanamaz — uzunluk kuralı ancak aynı gruptayken
+      geçerli. Yalnız numune varsa yine bağlanıyoruz (bağlantısızlıktan iyi),
+      ama işaretleyerek.
+    */
+    const sisleler = adaylar.filter((u) => !NUMUNE_IZI.test(u.baslik));
+    const havuz = sisleler.length > 0 ? sisleler : adaylar;
+    const secim = [...havuz].sort((x, y) => x.baslik.length - y.baslik.length)[0];
+    cikti.push({
+      id: b.id,
+      secim,
+      adaylar,
+      bicimSupheli: BICIM_IZI.test(secim.baslik),
+      yalnizNumune: sisleler.length === 0,
+    });
   }
 
   return cikti;
@@ -111,7 +152,15 @@ const ISARET = 'DOGRULANMADI';
 export function katalogTaslagi(
   kimlik: string,
   magazaAdi: string,
-  domain: string,
+  /**
+   * Ürün adreslerinin kurulacağı host.
+   *
+   * ⚠️ **`lead.domain` DEĞIL.** O `normalizeDomain`den geçmiş, yani `www.`siz;
+   * yalnız `www.` üstünden yayın yapan dükkânda her adres 404 dönüyordu
+   * (nicheessence.com, 7/7). Burada beklenen şey `hedefKatalogu`nun katalogu
+   * gerçekten okuduğu host.
+   */
+  host: string,
   adaylar: readonly AdresAdayi[],
 ): string {
   const sabit = kimlik.toUpperCase().replace(/-/g, '_');
@@ -127,7 +176,10 @@ export function katalogTaslagi(
     if (a.bicimSupheli) {
       parcalar.push(`⚠️ BIÇIM ŞÜPHELI — parfüm şişesi olmayabilir: "${a.secim.baslik}"`);
     }
-    return `  /* ${parcalar.join(' · ')} */\n  '${a.id}': 'https://${domain}/products/${a.secim.handle}',`;
+    if (a.yalnizNumune) {
+      parcalar.push(`⚠️ YALNIZ NUMUNE — dükkânda şişesi yok: "${a.secim.baslik}"`);
+    }
+    return `  /* ${parcalar.join(' · ')} */\n  '${a.id}': 'https://${host}/products/${a.secim.handle}',`;
   }).join('\n');
 
   return `import type { Perfume } from '../../types';
@@ -138,7 +190,7 @@ import { deriveTenantCatalog } from '../derive';
  * ${magazaAdi}'in rafı.
  *
  * ⚠️ **TASLAK — elle doğrulanmadan yayına gitmez.** Bu dosya
- * \`leadgen kiraci-taslak ${domain}\` ile üretildi. Her adres bir ÖNERİ:
+ * \`leadgen kiraci-taslak\` ile üretildi (kaynak host: ${host}). Her adres bir ÖNERİ:
  * eşleşen ürünlerin en kısa başlıklısı seçildi, çünkü \`Extrait\`/\`Intense\`
  * sürümleri hep ek kelimeyle geliyor ve bizim kayıtlarımız temel sürüm.
  *

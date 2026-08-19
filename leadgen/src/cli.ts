@@ -410,7 +410,12 @@ async function main(): Promise<void> {
     const magaza = temizAd(lead.shop_name) ?? kimlik;
     const dizin = join(VERI, `taslak-${kimlik}`);
     mkdirSync(dizin, { recursive: true });
-    writeFileSync(join(dizin, 'catalog.ts'), katalogTaslagi(kimlik, magaza, domain, adaylar));
+    /*
+      ⚠️ Adresler `domain`den DEĞİL, katalogu gerçekten veren host'tan
+      kuruluyor — `www.` yalnızca orada var olabiliyor ve olmadığında
+      taslağın her adresi 404 dönüyordu.
+    */
+    writeFileSync(join(dizin, 'catalog.ts'), katalogTaslagi(kimlik, magaza, katalog.host, adaylar));
     writeFileSync(join(dizin, 'kayit.txt'), kayitTaslagi(kimlik, magaza));
 
     const bakilacak = adaylar.filter((a) => a.adaylar.length > 1 || a.bicimSupheli);
