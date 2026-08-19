@@ -99,6 +99,47 @@ not olarak mı?*
 
 ---
 
+## D. YURT IÇI müşteri — 2026-08-20'de açıldı, cevabı YOK
+
+Istanbul ölçümü üç uygun dükkân buldu (`docs/b2b/istanbul-olcumu.md`) ve
+sahibin kararı fiyatın **aynı kalması**, TL karşılığıyla verilmesi. Ama yurt içi
+satış, bugüne kadar hazırlanan her şeyden **farklı** bir fatura demek:
+
+⚠️ **Yukarıdaki A ve B bölümlerinin tamamı hizmet İHRACATI varsayıyor.** Yurt
+içi müşteride istisna 302 de, §13b satırı da geçersiz.
+
+**D1 — KDV.** Yurt içi müşteriye kesilen faturada KDV **%20** uygulanıyor,
+değil mi? Istisna 302 (hizmet ihracatı) burada kullanılamaz diye anlıyorum —
+doğru mu?
+
+> Cevap:
+
+**D2 — Para birimi.** Fiyat €490 olarak belirlendi ama müşteri Türkiye'de
+yerleşik. **32 sayılı Karar'ın 2018 değişikliği** yerleşikler arasındaki
+sözleşmelerde döviz kısıtı getiriyor. Bu iş için sözleşme ve fatura **TL**
+olmak zorunda mı, yoksa dövize endeksli düzenlenebilir mi?
+
+> Cevap:
+
+⚠️ Bunun sonucu var: TL sabitlenirse **yıllık ücret enflasyonla eriyor.**
+Cevaba göre teklifte "yıllık ücret her yenilemede güncellenir" satırı
+yazılacak — ya da dövize endeksleme mümkünse o yazılacak.
+
+**D3 — Tahsilat.** Yurt içinde SWIFT yok, aynı gün EFT/havale. Paranın yine
+**babanın şirketinin** hesabına girmesi gerekiyor; yurt içi satışta bunun
+ek bir şartı var mı?
+
+> Cevap:
+
+**D4 — Fiyat.** Müşteriye söylenecek rakam: **27.500 TL + KDV** kurulum
+(20 parfüme kadar) ve **16.500 TL/yıl**. KDV dahil mi hariç mi yazmak
+zorundayız — perakende bir işletmeye kesilen hizmet faturasında hangisi
+doğru?
+
+> Cevap:
+
+---
+
 ## Dönünce ne olacak
 
 A1 ve A2 bitince **teklif gönderilebilir hâle geliyoruz.** Ilk DM zaten serbest

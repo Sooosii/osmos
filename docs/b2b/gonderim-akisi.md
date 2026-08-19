@@ -59,8 +59,19 @@
 > Parfumane (Nişantaşı · Kapalıçarşı · Galata), Home of Scents (Mall of
 > Istanbul · Akasya). Karar kuralı (≥3) karşılandı, kanal açıldı.
 >
-> Tam ölçüm, elenenler, alıntılanmış nota örnekleri, hangi dükkâna önce
-> gidileceği ve yeniden açılan fiyat sorusu: **`docs/b2b/istanbul-olcumu.md`**.
+> ⚠️ **Kanal aynı gün telefona döndü:** sahip dükkânlara gitmeyeceğini söyledi.
+> Hedefler geçerli — üçü de Türkçe konuşuyor ve telefon sahibin açabildiği
+> kanal. **Bu üç hedef için sıra: telefon → DM → mail** (ana listeden farklı;
+> UWG §7 Almanya'ya ait, Türkiye'de telefon açık).
+>
+> ✅ **Fiyat kararı verildi:** aynı fiyat, TL karşılığıyla — **27.500 TL + KDV**
+> kurulum, **16.500 TL/yıl**. Indirim yok; ölçüt zaten pazarın üst ucunu
+> seçmişti. ⚠️ Ama yurt içi fatura başka: KDV %20, istisna 302 ve §13b
+> geçersiz, para birimi muhtemelen TL zorunlu — dördü de
+> `musavir-gorusmesi.md` §D'de, **cevap gelmeden Türk müşteriye teklif gitmez.**
+>
+> Tam ölçüm, elenenler, alıntılanmış nota örnekleri ve hangi dükkânın önce
+> aranacağı: **`docs/b2b/istanbul-olcumu.md`**.
 
 **Kanal sırası:** Instagram DM → mail → telefon.
 DM ilk sırada çünkü Almanya (en büyük bilinen hedef grubu, 57 dükkân) izinsiz

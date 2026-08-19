@@ -1,6 +1,11 @@
-# Istanbul ölçümü — yüz yüze kanal açılsın mı
+# Istanbul ölçümü — üç uygun dükkân, kanal TELEFON
 
-**Tarih:** 2026-08-20 · **Sonuç: KANAL AÇILIYOR** (eşik 3, bulunan 3)
+**Tarih:** 2026-08-20 · **Sonuç: üç dükkân ölçütü karşıladı (eşik 3, bulunan 3)**
+
+⚠️ Ölçüm *yüz yüze* kanal için yapıldı ve eşiği geçti; ama sahip aynı gün
+**dükkânlara gitmeyeceğini** söyledi. Hedefler geçerli, **kanal telefona
+döndü** — ayrıntı en altta. Ölçütün kendisi (fiziksel mağaza şartı dahil)
+olduğu gibi bırakıldı: sonuca göre ölçüt değiştirilmez.
 
 **Ilgili:** `gonderim-akisi.md` (Türkiye neden sıraya girmemişti) · `teklif.md`
 (nota şartı) · `kapanis.md` (cevaptan sonrası)
@@ -26,8 +31,10 @@ katlandı (≥10 örtüşen dükkân 6'dan 63'e). Yani Türkiye'yi eleyen sayı 
 
 Bir dükkân şu üçünü birden karşılıyorsa sayılıyor:
 
-1. **Istanbul'da fiziksel mağaza** — kapısından girilebilmeli, yüz yüze kanalın
-   tamamı buna dayanıyor.
+1. **Istanbul'da fiziksel mağaza** — ölçüm anında yüz yüze kanal içindi.
+   ⚠️ Kanal telefona dönünce bu şart GEREKSIZ hale geldi, ama liste yeniden
+   süzülmedi: mağazası olan dükkân zaten ciddiyet işareti ve üçü de geçti.
+   Bir sonraki turda şart gevşetilirse havuz büyür.
 2. **Online katalog** — ürünlerin adresi olmalı; harita her yolu müşterinin
    kendi ürün sayfasında bitiriyor.
 3. **Yayınlanmış nota piramidi** — ⚠️ pazarlık dışı: notası olmayan parfüm
@@ -79,7 +86,7 @@ kaybettiriyordu.
 
 ---
 
-## Hangi dükkâna önce gidilecek
+## Hangi dükkân önce aranacak
 
 **1. Home of Scents** — çünkü tek uygun aday **çok markalı** ve rafındaki
 markalardan **7 parfüm zaten bizim kataloğumuzda**:
@@ -102,17 +109,52 @@ hazır.
 
 ---
 
-## Açık kalan karar: fiyat
+## ✅ Fiyat KARARI (2026-08-20): aynı fiyat, TL karşılığıyla
 
-⚠️ **Bu ölçüm fiyat sorusunu yeniden açıyor ve kararı sahip verecek.**
-€490 + €290/yıl bir Türk butiği için ağır; sahibin duran kararı ise
-*"fiyat sabit, taviz yok"* (2026-08-19).
+**27.500 TL + KDV** kurulum (20 parfüme kadar) · **16.500 TL/yıl.**
+Kur 1 € ≈ 56 TL (19 Ağustos).
 
-Iki şey aynı anda doğru:
-- Fiyatı düşürmek, Avrupa/Körfez'de savunulan fiyatı zayıflatır.
-- Yüz yüze kanalın tamamı fiyat yüzünden hiç açılmayabilir.
+⚠️ **Indirim YOK ve gerekçesi ölçüldü: "€490 Türk butiği için ağır" varsayımı
+BU ÜÇ DÜKKÂN için yanlıştı.** Ölçüt zaten pazarın üst ucunu seçmişti — AVM
+mağazası olan bir dağıtıcı markası, üç şubeli bir ev, Nişantaşı butiği.
+Ölçek referansı: Parfumane'ın kendi 50 ml parfümü **3.290 TL**. Yani kurulum
+≈ 8 şişe, yıllık ücret ≈ **5 şişe**. Harita yılda beş ek satış getirirse
+yıllık kendini ödüyor — ve turnike (`/api/tiklama`) tam da bunu sayıyor.
 
-Plan bunu varsaymıyor; kanal açıldı, karar sorulacak.
+Indirmenin iki bedeli olurdu: Avrupa/Körfez'de savunulan fiyat zayıflar, ve
+indirime ihtiyacı olmayan dükkâna "bu iş ucuz" denir.
+
+⚠️ **Tutar aynı ama FATURA bambaşka.** Yurt içi satışta KDV **%20** uygulanıyor;
+hizmet ihracatı istisnası (302) ve §13b reverse charge satırı **geçersiz**.
+Ayrıca para birimi muhtemelen TL olmak zorunda (32 sayılı Karar, 2018
+değişikliği) — bu **hukuki bir soru ve doğrulanmadı**; dördü de
+`musavir-gorusmesi.md` §D'ye yazıldı, cevap bekliyor.
+
+⚠️ **TL sabitlenirse yıllık ücret enflasyonla erir.** Müşavirin cevabına göre
+teklife ya "yıllık ücret her yenilemede güncellenir" satırı girecek ya da
+dövize endeksleme yazılacak. Karar verilmeden Türk müşteriye teklif gitmez.
+
+✅ **Iyi taraf: tahsilat çok kolaylaşıyor.** SWIFT yok, ara banka masrafı yok,
+havale formu yok — aynı gün EFT. Uluslararası satışta işaretlenen sürtünme
+(`kapanis.md` §4) yurt içinde sıfır.
+
+---
+
+## ⚠️ KANAL DEĞIŞTI: yüz yüze DÜŞTÜ, telefon devraldı (2026-08-20)
+
+Sahip ölçümden sonra **dükkânlara gitmeyeceğini** söyledi. Ölçüm boşa gitmiyor:
+bulunan üç dükkân **Türkçe konuşuyor**, ve telefon sahibin açabildiği kanal
+(*"Türkiye'deyse telefon açarım"*, 2026-08-19). Almanca yazışmada olmayan iki
+şey burada var: dil engeli yok ve karar veren kişiye doğrudan ulaşılıyor.
+
+**Yeni kanal sırası bu üç hedef için:** telefon → Instagram DM → mail.
+⚠️ Ana listedeki sıradan (DM → mail → telefon) FARKLI, ve sebebi dil: UWG §7
+Almanya için geçerli, Türkiye'de telefon açık ve en yüksek dönüşümlü kanal.
+
+⚠️ **Demo sırası da değişiyor.** Yüz yüze giderken tablette hazır demo mantıklıydı;
+telefonda değil. Ana akışın kuralı geri geliyor: **önce cevap, sonra demo**
+(`gonderim-akisi.md`). Yani "ilgilenir misiniz" → "evet, görelim" → demo kurulur
+→ link gönderilir.
 
 ---
 
