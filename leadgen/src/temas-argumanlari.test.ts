@@ -75,3 +75,50 @@ test('domain ve sonuc dogru sirada okunuyor', () => {
   assert.ok(cikti.includes('ornek-dukkan.test → gonderildi'), `beklenmeyen cikti: ${cikti}`);
   assert.ok(!cikti.includes('temas → ornek-dukkan.test'), `argumanlar kaydi: ${cikti}`);
 });
+
+/** Sınama defteri ayrı; komutu gerçekten çalıştırıp bastığı satırı okuyor. */
+function temasKos(argumanlar: readonly string[]): string {
+  return execFileSync(process.execPath, [CLI, 'temas', ...argumanlar], {
+    cwd: KOK,
+    encoding: 'utf8',
+    env: { ...process.env, LEADGEN_DB: join(gecici, 'kanal.db') },
+  });
+}
+
+/*
+  ⚠️ **Kanal TAHMIN ediliyordu ve ilk gerçek mail gönderiminde yanlış yazdı
+  (2026-08-19).** Eski kural "Instagram'ı varsa dm" idi; o, dükkâna hangi
+  kanaldan ULAŞILABILECEĞINI söylüyor, mesajın hangi kanaldan GITTIĞINI değil.
+  ParfumGroup'a DM'e verdikleri adresten mail atıldı ve defter `dm` yazdı.
+*/
+test('--kanal verilirse deftere O yaziliyor', () => {
+  const cikti = temasKos(['ornek-mail.test', 'gonderildi', '--kanal', 'mail']);
+  assert.ok(cikti.includes('(mail)'), `kanal yazilmamis: ${cikti}`);
+});
+
+/*
+  ⚠️ Bu sınama önce YANLIŞ yazıldı ve ölçüm düzeltti: kayıtta olmayan bir alan
+  adında `mail` bekliyordum, `dm` çıktı. Sebep `undefined?.instagram === null`
+  ifadesinin **false** dönmesi — kayıt yoksa `undefined`, `null` değil.
+  Davranış doğru (partiler DM'den gidiyor, varsayılan da o olmalı); yanlış
+  olan beklentiydi. Kayda geçiyor ki bir dahaki okuyan "kusur" sanmasın.
+*/
+test('--kanal yoksa varsayilan dm', () => {
+  const cikti = temasKos(['bilinmeyen-dukkan.test', 'gonderildi']);
+  assert.ok(cikti.includes('(dm)'), `varsayilan turetme bozulmus: ${cikti}`);
+});
+
+/*
+  Uydurma kanal SESSIZCE kabul edilmiyor: defterdeki `kanal` sütunu sonradan
+  sayılacak bir alan ve "maıl" gibi bir yazım hatası sayımı bozardı.
+*/
+test('bilinmeyen kanal REDDEDILIYOR', () => {
+  let dustu = false;
+  try {
+    temasKos(['ornek.test', 'gonderildi', '--kanal', 'guvercin']);
+  } catch (e) {
+    dustu = true;
+    assert.ok(String((e as { stdout?: string }).stdout).includes('bilinmeyen kanal'));
+  }
+  assert.ok(dustu, 'uydurma kanal kabul edildi');
+});

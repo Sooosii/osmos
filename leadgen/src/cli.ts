@@ -183,12 +183,30 @@ async function main(): Promise<void> {
     const [domain, sonuc, ...notParcalari] = argumanlar;
     if (domain === undefined || sonuc === undefined) {
       log('kullanim: node src/cli.ts temas <domain>'
-        + ' <gonderildi|cevap|red|ilgilendi|otomatik|elendi> [not]');
+        + ' <gonderildi|cevap|red|ilgilendi|otomatik|elendi> [not]'
+        + ' [--kanal dm|mail|telefon|whatsapp]');
       process.exit(1);
     }
-    const kanal = tumLeadler(db).find((l) => l.domain === domain)?.instagram === null ? 'mail' : 'dm';
-    ekleTemas(db, { domain, kanal, sonuc, not: notParcalari.join(' ') || null });
-    log(`[temas] ${domain} → ${sonuc} (${kanal})`);
+    /*
+      ⚠️ **Kanal TAHMIN ediliyordu ve ilk gerçek mail gönderiminde yanlış
+      yazdı (2026-08-19).** Eski kural şuydu: dükkânın Instagram'ı varsa `dm`,
+      yoksa `mail`. Ama o, dükkâna hangi kanaldan ULAŞILABILECEĞINI söylüyor —
+      mesajın hangi kanaldan GITTIĞINI değil. ParfumGroup'a DM'e verdikleri
+      adresten mail atıldı; dükkânın Instagram'ı olduğu için defter `dm` yazdı.
+
+      Defterin işi olan biteni kaydetmek; tahmin ettiği anda kayıt olmaktan
+      çıkıp varsayım oluyor. `--kanal` verilirse o yazılıyor, verilmezse eski
+      türetme **varsayılan olarak** duruyor (partiler DM'den gidiyor).
+    */
+    const KANALLAR = ['dm', 'mail', 'telefon', 'whatsapp'];
+    if (kanal !== null && !KANALLAR.includes(kanal)) {
+      log(`[temas] bilinmeyen kanal "${kanal}" — gecerli: ${KANALLAR.join('|')}`);
+      process.exit(1);
+    }
+    const kanalYazilan = kanal
+      ?? (tumLeadler(db).find((l) => l.domain === domain)?.instagram === null ? 'mail' : 'dm');
+    ekleTemas(db, { domain, kanal: kanalYazilan, sonuc, not: notParcalari.join(' ') || null });
+    log(`[temas] ${domain} → ${sonuc} (${kanalYazilan})`);
   }
 
   if (komut === 'parti-dogrula') {
