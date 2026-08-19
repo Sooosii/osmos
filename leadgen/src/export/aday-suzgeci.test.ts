@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { hesabaZatenYazildi, platformHesabi, yazilanHesaplariTopla } from './aday-suzgeci.ts';
+import {
+  hesabaGoreTekille, hesabaZatenYazildi, platformHesabi, yazilanHesaplariTopla,
+} from './aday-suzgeci.ts';
 
 /**
  * Iki eleme kuralının kapısı — ikisi de gerçek bir partide yakalandı.
@@ -39,6 +41,49 @@ test('hesabi olmayan kayit yanlislikla eslesmiyor', () => {
   assert.equal(yazilan.size, 0, 'null hesap kumeye girmis');
   assert.equal(hesabaZatenYazildi(null, yazilan), false);
   assert.equal(hesabaZatenYazildi('', yazilan), false);
+});
+
+/*
+  ⚠️⚠️ `hesabaZatenYazildi` bunu YAKALAMIYOR — o yalniz daha once yazilmis
+  hesaplara bakiyor. Besinci parti kuruldugunda 9. ve 10. siralarda
+  parfumexquis.com ile parfumexquis.us yan yana duruyordu: iki alan adi, tek
+  hesap, yani tek oturumda ayni kutuya iki mesaj.
+*/
+test('ayni hesabi tasiyan IKINCI aday partiden dusuyor', () => {
+  const parti = [
+    { domain: 'parfumexquis.com', instagram: 'parfum.exquis', ortusme: 2 },
+    { domain: 'parfumexquis.us', instagram: '@Parfum.Exquis', ortusme: 2 },
+    { domain: 'baska.com', instagram: 'baska', ortusme: 1 },
+  ];
+  const kalan = hesabaGoreTekille(parti);
+  assert.deepEqual(kalan.map((k) => k.domain), ['parfumexquis.com', 'baska.com']);
+});
+
+/*
+  Giris ortusmeye gore sirali geliyor, yani "birincisi" en iyisi demek —
+  ayni isletmenin iki kaydindan is yuku dusuk olani kaliyor.
+*/
+test('tekillestirmede ILK (en iyi) kayit kaliyor', () => {
+  const kalan = hesabaGoreTekille([
+    { domain: 'zayif.com', instagram: 'ayni', ortusme: 9 },
+    { domain: 'guclu.com', instagram: 'ayni', ortusme: 1 },
+  ]);
+  assert.equal(kalan.length, 1);
+  assert.equal(kalan[0].domain, 'zayif.com');
+});
+
+/*
+  ⚠️ Hesabi olmayan kayitlar BIRBIRININ kopyasi degil: `null` bir kimlik degil,
+  bilgi eksikligi. Hepsini tek "null" hesabinda toplamak biri disinda hepsini
+  elerdi.
+*/
+test('hesabi olmayan kayitlar birbirini elemiyor', () => {
+  const kalan = hesabaGoreTekille([
+    { domain: 'a.com', instagram: null },
+    { domain: 'b.com', instagram: null },
+    { domain: 'c.com', instagram: '' },
+  ]);
+  assert.equal(kalan.length, 3);
 });
 
 /*

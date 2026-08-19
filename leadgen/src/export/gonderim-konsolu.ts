@@ -17,6 +17,7 @@
  * Bu yüzden sayfa hiçbir şeyi kendiliğinden açmıyor ve sıradakine geçmiyor:
  * otomatik akış, otomatik gönderime giden ilk adımdır.
  */
+import { createHash } from 'node:crypto';
 import type { PartiHedefi } from './parti-dogrula.ts';
 
 /**
@@ -44,6 +45,24 @@ export function htmlKacir(metin: string): string {
  */
 export function jsonGom(veri: unknown): string {
   return JSON.stringify(veri).replace(/</g, '\\u003c');
+}
+
+/**
+ * `localStorage` anahtarını ayıran damga.
+ *
+ * ⚠️ **Tarih TEK BAŞINA yetmiyor ve bu ölçülerek görüldü.** 19 Ağustos'ta parti
+ * dört kez yeniden kuruldu (ölçüm bitti, süzgeç değişti, iki kötü aday elendi).
+ * Dördü de `Parti kuruldu: 2026-08-19` yazıyordu, yani aynı anahtarı
+ * paylaşıyorlardı — bir öncekinde işaretlenmiş bir dükkân yeni partide
+ * **gönderilmiş gibi** görünür ve atlanırdı. Sessiz bir kayıp: hata vermez,
+ * yalnız o dükkâna hiç yazılmaz.
+ *
+ * Hedef listesinin özeti damgaya giriyor: içerik değişince anahtar değişiyor,
+ * aynı parti yeniden üretilince işaretler duruyor.
+ */
+export function partiDamgasi(tarih: string, alanAdlari: readonly string[]): string {
+  const ozet = createHash('sha256').update(alanAdlari.join(',')).digest('hex').slice(0, 8);
+  return `${tarih}-${ozet}`;
 }
 
 /** DM'i doğrudan açan adres — hesap arama adımını siliyor. */

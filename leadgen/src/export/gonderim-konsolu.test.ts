@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { dmAdresi, htmlKacir, jsonGom, konsolHtml } from './gonderim-konsolu.ts';
+import { dmAdresi, htmlKacir, jsonGom, konsolHtml, partiDamgasi } from './gonderim-konsolu.ts';
 import { partiHedefleri } from './parti-dogrula.ts';
 import type { PartiHedefi } from './parti-dogrula.ts';
 
@@ -90,6 +90,33 @@ test('damga localStorage anahtarina giriyor', () => {
   const b = konsolHtml({ hedefler: [hedef()], damga: '2026-08-26' });
   assert.ok(a.includes("'osmos-gonderim-2026-08-19'"));
   assert.ok(b.includes("'osmos-gonderim-2026-08-26'"));
+});
+
+/*
+  ⚠️⚠️ ASIL KAPI — tarih TEK BASINA yetmiyor ve bu olculerek gorundu.
+  19 Agustos'ta parti DORT kez yeniden kuruldu (olcum bitti, suzgec degisti,
+  iki kotu aday elendi) ve dordu de "Parti kuruldu: 2026-08-19" yaziyordu.
+  Ayni anahtari paylassalardi, bir oncekinde isaretlenmis bir dukkan yeni
+  partide GONDERILMIS gibi gorunur ve atlanirdi — sessiz bir kayip.
+*/
+test('ayni gun kurulan FARKLI parti farkli damga aliyor', () => {
+  const dun = partiDamgasi('2026-08-19', ['a.com', 'b.com']);
+  const sonra = partiDamgasi('2026-08-19', ['a.com', 'c.com']);
+  assert.notEqual(dun, sonra, 'icerik degistigi halde damga ayni kaldi');
+  assert.ok(dun.startsWith('2026-08-19-'), `tarih dusmus: ${dun}`);
+});
+
+/*
+  Ters yon de onemli: ayni parti yeniden uretilince isaretler DURMALI, yoksa
+  konsolu tazelemek yapilan isi siler.
+*/
+test('ayni parti yeniden uretilince damga DEGISMIYOR', () => {
+  const alanlar = ['a.com', 'b.com', 'c.com'];
+  assert.equal(partiDamgasi('2026-08-19', alanlar), partiDamgasi('2026-08-19', [...alanlar]));
+});
+
+test('farkli gun farkli damga', () => {
+  assert.notEqual(partiDamgasi('2026-08-19', ['a.com']), partiDamgasi('2026-08-20', ['a.com']));
 });
 
 /*

@@ -23,7 +23,7 @@ import { yazIlkTur } from './export/ilk-tur.ts';
 import {
   katalogSay, karsilastir, partiAlanAdlari, partiHedefleri, tavandaMi,
 } from './export/parti-dogrula.ts';
-import { konsolHtml } from './export/gonderim-konsolu.ts';
+import { konsolHtml, partiDamgasi } from './export/gonderim-konsolu.ts';
 import { hedefKatalogu, olcAdaylar, yazDemoRaporu } from './demo/adaylar.ts';
 import {
   adresAdaylari, katalogTaslagi, kayitTaslagi, kiraciKimligi,
@@ -271,11 +271,21 @@ async function main(): Promise<void> {
       process.exit(1);
     }
     /*
-      Damga partinin KURULUŞ tarihinden geliyor, bugünün tarihinden değil:
-      konsol ertesi gün yeniden üretilse bile aynı partinin işaretleri durmalı.
-      Satır yoksa dosyanın kendisi damga olur.
+      Damga `localStorage` anahtarını ayırıyor: hangi partinin hangi işaretleri
+      taşıdığını o belirliyor.
+
+      ⚠️ Tarih TEK BAŞINA yetmiyor ve bu ölçülerek görüldü: 19 Ağustos'ta parti
+      dört kez yeniden kuruldu (ölçüm bitti, süzgeç değişti, iki kötü aday
+      elendi). Dördü de `Parti kuruldu: 2026-08-19` yazıyordu, yani aynı
+      anahtarı paylaşıyorlardı — bir öncekinde işaretlenmiş bir dükkân yeni
+      partide **gönderilmiş gibi** görünecekti ve atlanırdı. Sessiz bir kayıp:
+      hata vermez, yalnız o dükkâna hiç yazılmaz.
+
+      Hedef listesinin özeti damgaya giriyor: parti içeriği değişince anahtar
+      da değişiyor, aynı parti yeniden üretilince işaretler duruyor.
     */
-    const damga = /^Parti kuruldu: (\S+)/m.exec(metin)?.[1] ?? 'parti';
+    const tarih = /^Parti kuruldu: (\S+)/m.exec(metin)?.[1] ?? 'parti';
+    const damga = partiDamgasi(tarih, hedefler.map((h) => h.domain));
     const cikti = join(VERI, 'gonderim-konsolu.html');
     writeFileSync(cikti, konsolHtml({ hedefler, damga }), 'utf8');
 

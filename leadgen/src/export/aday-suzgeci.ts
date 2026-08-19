@@ -52,6 +52,37 @@ export function platformHesabi(instagram: string | null): boolean {
   return PLATFORM_HESAPLARI.has(instagram.trim().toLowerCase().replace(/^@/, ''));
 }
 
+/**
+ * Aynı hesabı taşıyan adaylardan yalnız BIRINCISINI bırakır.
+ *
+ * ⚠️ **`hesabaZatenYazildi` bunu yakalamıyor: o yalnız DAHA ÖNCE yazılmış
+ * hesaplara bakıyor, aynı partinin içindeki tekrara değil.** Beşinci parti
+ * kurulduğunda 9. ve 10. sıralarda `parfumexquis.com` ile `parfumexquis.us`
+ * yan yana duruyordu — iki alan adı, tek hesap (`@parfum.exquis`), yani tek
+ * oturumda aynı kutuya iki mesaj.
+ *
+ * ⚠️ Giriş sıralı geldiği için "birincisi" en iyisi demek: liste örtüşmeye göre
+ * dizili, yani aynı işletmenin iki kaydından örtüşmesi yüksek olanı kalıyor.
+ *
+ * ⚠️ Hesabı olmayan kayıt elenmiyor — `null` bir kimlik değil, bilgi
+ * eksikliği; hepsini tek bir "null" hesabında toplamak onları birbirinin
+ * kopyası sayardı.
+ */
+export function hesabaGoreTekille<T extends { readonly instagram: string | null }>(
+  adaylar: readonly T[],
+): readonly T[] {
+  const gorulen = new Set<string>();
+  const cikti: T[] = [];
+  for (const a of adaylar) {
+    if (a.instagram === null || a.instagram.trim() === '') { cikti.push(a); continue; }
+    const anahtar = a.instagram.trim().toLowerCase().replace(/^@/, '');
+    if (gorulen.has(anahtar)) continue;
+    gorulen.add(anahtar);
+    cikti.push(a);
+  }
+  return cikti;
+}
+
 /** Temas kurulmuş kayıtların hesapları — karşılaştırma için küçük harfe iniyor. */
 export function yazilanHesaplariTopla(
   kayitlar: readonly { readonly domain: string; readonly instagram: string | null }[],

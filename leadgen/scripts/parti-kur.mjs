@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import {
-  hesabaZatenYazildi, platformHesabi, yazilanHesaplariTopla,
+  hesabaGoreTekille, hesabaZatenYazildi, platformHesabi, yazilanHesaplariTopla,
 } from '../src/export/aday-suzgeci.ts';
 
 /**
@@ -177,7 +177,13 @@ if (!Number.isInteger(istenen) || istenen < 1) {
   process.exit(1);
 }
 
-const parti = adaylar.slice(0, istenen);
+/*
+  ⚠️ **Tekilleştirme SIRALAMADAN SONRA, dilimlemeden ÖNCE.** Sırayı bozmadan
+  aynı hesabın ikinci kaydını düşürüyor; sonra 15 alınıyor, yoksa parti eksik
+  kalırdı. Beşinci partide `parfumexquis.com` ve `parfumexquis.us` 9. ve 10.
+  sıralarda yan yana çıkmıştı — iki alan adı, tek gelen kutusu.
+*/
+const parti = hesabaGoreTekille(adaylar).slice(0, istenen);
 
 const satirlar = [
   `# Sıradaki parti — ${parti.length} mesaj`,
