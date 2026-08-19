@@ -153,10 +153,16 @@ export function konsolHtml({ hedefler, damga }: KonsolSecenekleri): string {
   function tazele() {
     var atilan = hedefler.filter(function (h) { return durum[h.domain]; });
     document.getElementById('ilerleme').textContent = atilan.length;
+    /*
+      ⚠️ Kanal AÇIKÇA yazılıyor (--kanal dm), türetmeye bırakılmıyor. Türetme
+      dükkâna hangi kanaldan ulaşılabileceğini söylüyor, mesajın hangi kanaldan
+      gittiğini değil; ikisi bir kez ayrıştı ve defter yanlış yazdı.
+      Bu sayfadan giden her mesaj DM, o yüzden burada bilinen bir gerçek var.
+    */
     document.getElementById('komut').textContent = atilan.length === 0
       ? '—'
       : 'cd leadgen && for d in ' + atilan.map(function (h) { return h.domain; }).join(' ')
-        + '; do node src/cli.ts temas "$d" gonderildi "Instagram DM, @soroshzs"; done';
+        + '; do node src/cli.ts temas "$d" gonderildi "Instagram DM, @soroshzs" --kanal dm; done';
   }
 
   /*
