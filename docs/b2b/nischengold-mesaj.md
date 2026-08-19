@@ -134,10 +134,32 @@ Gövde: yukarıdaki metnin aynısı, sonuna tek satır eklenerek:
 > Wenn Sie diese Nachricht nicht erhalten möchten, antworten Sie mit „Stopp" —
 > ich lösche Ihre Adresse dann aus meinen Unterlagen.
 
-⚠️ Gönderilirse `MAIL_REPLY_TO` hâlâ çalışmıyor (`osmos.me` kökünün MX kaydı
-yok, yani `merhaba@osmos.me` posta ALAMIYOR). Cevap gelebilecek bir adres
-yazılmadan mail gönderilmez — cevabı düşen bir soğuk mail, hiç atılmamış
-maildan kötü.
+⚠️ **Cevap gelebilecek bir adres yazılmadan mail gönderilmez** — cevabı düşen
+bir soğuk mail, hiç atılmamış maildan kötü.
+
+⚠️⚠️ **MX kaydı var demek kutu var demek DEĞİL — ölçüldü (2026-08-19).**
+`osmos.me`ye Zoho kuruldu ve zonda her şey göründü: `mx.zoho.eu`, SPF
+`include:zohomail.eu`, `zmail._domainkey`, Zoho doğrulama kaydı. Buna bakıp
+"posta engeli kalktı" denildi. Sonra `soroush@osmos.me`ye bir deneme maili
+atıldı ve **sert döndü**:
+
+```
+550 5.1.1 User does not exist - <soroush@osmos.me>
+```
+
+Alan adı Zoho'da kuruluydu ama **kullanıcı hiç oluşturulmamıştı.** Yani DNS'e
+bakarak "mail çalışıyor" sonucuna varmak yanlış; tek geçerli ölçüm o adrese
+**gerçekten bir mail atıp** ne döndüğüne bakmaktır.
+
+⚠️ Bu ölçümün bedeli görüldü: kapı bekçisine `soroush@osmos.me` adresi
+verilmişti (nicheessence, 2026-08-18). Yönetim o adrese yazdıysa maili geri
+dönmüş, bizde hiçbir iz kalmamıştır — "cevap gelmedi" sanılan şey aslında
+"cevap düştü" olabilir.
+
+⚠️ Gönderim tarafı ayrı ve sağlam: Resend'de `osmos.me` DKIM ve SPF
+doğrulanmış durumda (`send.osmos.me` üzerinden), yani `@osmos.me` adına mail
+ATILABILIYOR. Resend panelindeki `partially_failed` durumu bir arıza değil —
+düşen kayıt Resend'in *gelen* posta MX'i ve o iş bilerek Zoho'ya verildi.
 
 ---
 
