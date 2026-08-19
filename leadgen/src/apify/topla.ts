@@ -9,6 +9,7 @@
  */
 import type { DatabaseSync } from 'node:sqlite';
 import { ekleHarcama, upsertLead } from '../db.ts';
+import type { Durum } from '../types.ts';
 import { ACTORLAR, SONDA, TAM_KADRO, type ActorAdi } from './actors.ts';
 import { AYLIK_TAVAN_USD, butceKapisi, tahminKur, type Karar } from './butce.ts';
 
@@ -50,24 +51,44 @@ export interface ToplamaRaporu {
 
 type Log = (s: string) => void;
 
-/** Adayları veritabanına yazar; kaç tanesinin YENİ olduğunu döndürür. */
+/**
+ * Adayları veritabanına yazar; kaç tanesinin YENİ olduğunu döndürür.
+ *
+ * ⚠️ **Var olan adayın `durum`u KORUNUYOR — ölçülmüş bir hasardan sonra
+ * (2026-08-20).** Burada her adaya `durum: 'yeni'` yazılıyordu ve
+ * `upsertLead` o alanı COALESCE'siz basıyor. Sonuç: bir kanal daha önce
+ * zenginleştirilmiş bir alan adını yeniden görünce **zenginleştirme durumu
+ * siliniyordu.**
+ *
+ * Bedeli sessiz ve gerçek: `durum` `zenginlestirildi` olmayan aday
+ * `demo-adaylari`nın süzgecinden ve gönderim listelerinden düşüyor. Yani
+ * "yeni aday topla" komutu, eldeki adayları listeden DÜŞÜRÜYORDU. Tek bir
+ * sondada 36 aday böyle geri gitti.
+ *
+ * ⚠️ Aynı gerekçe `source` için de geçerli olurdu ama orada `upsertLead`
+ * zaten dokunmuyor; kural yalnız `durum`da kırıktı.
+ */
 function adaylariYaz(
   db: DatabaseSync,
   adaylar: readonly Aday[],
   instagramlar?: ReadonlyMap<string, string>,
 ): number {
-  const oncekiler = new Set(
-    (db.prepare('SELECT domain FROM leads').all() as unknown as { domain: string }[]).map((r) => r.domain),
+  const mevcutDurum = new Map<string, Durum>(
+    (db.prepare('SELECT domain, durum FROM leads').all() as unknown as {
+      domain: string; durum: Durum;
+    }[]).map((r) => [r.domain, r.durum]),
   );
   let yeni = 0;
   for (const a of adaylar) {
-    if (!oncekiler.has(a.domain)) yeni += 1;
+    const onceki = mevcutDurum.get(a.domain);
+    if (onceki === undefined) yeni += 1;
     upsertLead(db, {
       domain: a.domain,
       shop_name: a.shopName === '' ? null : a.shopName,
       seed_url: a.seedUrl,
       source: a.kaynak,
-      durum: 'yeni',
+      /* Yeni alan adı 'yeni' başlar; var olanın durumu OLDUĞU GIBI kalır. */
+      durum: onceki ?? 'yeni',
       instagram: instagramlar?.get(a.domain) ?? null,
     });
   }
@@ -245,7 +266,20 @@ export async function topla(
     bittiğinde hepsini baştan koşturmak, çalışanlar için İKİNCİ kez para
     ödemek demek.
   */
-  const sira = yalnizKanal === undefined ? tumSira : tumSira.filter((k) => k === yalnizKanal);
+  /*
+    ⚠️ **Boş liste bir kez SESSIZCE oluştu ve komutu işlevsiz yaptı.** Kural
+    `yalnizKanal === undefined` idi; çağıran taraf `null` geçince eşitlik
+    tutmadı, filtre hiçbir kanalla eşleşmedi ve `topla` *"0 yeni aday ·
+    $0.0000"* yazıp başarıyla döndü. Yani "yeni aday bul" komutu hiçbir şey
+    yapmıyordu ve bunu söylemiyordu.
+
+    Artık YOKLUK (undefined/null/boş) "hepsini koş" demek; kanal verilmişse
+    ve hiçbiriyle eşleşmiyorsa aşağıda patlıyor — sessizce boş dönmüyor.
+  */
+  const sira = yalnizKanal ? tumSira.filter((k) => k === yalnizKanal) : tumSira;
+  if (sira.length === 0) {
+    throw new Error(`topla: bilinmeyen kanal "${String(yalnizKanal)}" — hicbir kanal kosmayacakti`);
+  }
 
   for (const kanal of sira) {
     const { a, adet, tahmin, karar } = kanalKarari(kanal, mod, aylikHarcanan, onaylandi);

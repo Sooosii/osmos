@@ -11,6 +11,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { acVeritabani, ekleTemas, toplamHarcama, tumLeadler, upsertLead } from './db.ts';
 import { ApifyIstemcisi } from './apify/istemci.ts';
 import { topla } from './apify/topla.ts';
+import { ACTORLAR, type ActorAdi } from './apify/actors.ts';
 import { elemedenGecer } from './apify/kanallar/eleme.ts';
 import { zenginlestirHepsi } from './enrich/index.ts';
 import { katalogParfumSayisi, katalogTohumlari, varsayilanKatalogDizini } from './seed.ts';
@@ -144,7 +145,30 @@ async function main(): Promise<void> {
     if (mod === 'sonda' && !sonda) {
       log('[topla] --onayla verilmedi → yalnız SONDA koşuyor. Tam koşu için: topla --onayla');
     }
-    const rapor = await topla(db, istemci, mod, onayla, log, kanal as never);
+    /*
+      ⚠️ **`as never` kastı GERÇEK bir hatayı gizliyordu (2026-08-20'de
+      ölçüldü).** `--kanal` verilmediğinde CLI `null` üretiyor, `topla` ise
+      `undefined` bekliyor; `null === undefined` yanlış olduğu için kanal
+      listesi `filter(k => k === null)` ile **boşalıyordu**. Sonuç: komut
+      hiçbir kanalı koşmuyor ve *"sonda bitti · 0 yeni aday · $0.0000"*
+      yazıp başarıyla dönüyordu.
+
+      TypeScript bunu yakalayacaktı (`string | null` ≠ `ActorAdi | undefined`);
+      kast onu susturmuştu. Kast kaldırıldı, dönüşüm açıkça yapılıyor ve
+      bilinmeyen kanal adı REDDEDILIYOR — sessizce hiçbir şey yapmaktansa
+      durmak.
+    */
+    const kanalAdlari = Object.keys(ACTORLAR) as ActorAdi[];
+    let yalnizKanal: ActorAdi | undefined;
+    if (kanal !== null) {
+      if (!(kanalAdlari as string[]).includes(kanal)) {
+        log(`[topla] bilinmeyen kanal "${kanal}" — gecerli: ${kanalAdlari.join('|')}`);
+        process.exit(1);
+      }
+      yalnizKanal = kanal as ActorAdi;
+    }
+
+    const rapor = await topla(db, istemci, mod, onayla, log, yalnizKanal);
     log(`[topla] ${rapor.mod} bitti · ${rapor.toplamYeniAday} yeni aday ·`
       + ` bu koşu $${rapor.toplamGercekUsd.toFixed(4)} · toplam $${toplamHarcama(db).toFixed(4)}`);
     for (const b of rapor.bekleyenOnaylar) log(`[topla] ONAY BEKLIYOR → ${b}`);

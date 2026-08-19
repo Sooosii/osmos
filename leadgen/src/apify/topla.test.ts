@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { toplamHarcama, tumLeadler } from '../db.ts';
+import { toplamHarcama, tumLeadler, upsertLead } from '../db.ts';
 import { geciciVeritabani } from '../sinama-db.ts';
 import { ApifyIstemcisi, type Getirici } from './istemci.ts';
 import { topla } from './topla.ts';
@@ -199,5 +199,93 @@ test('her actor cagrisinda APIFY tarafinda sert harcama tavani var', async () =>
     assert.ok(deger >= 0.5, `Apify alt sinirinin altinda tavan: ${deger}`);
     assert.ok(deger <= 2, `tavan supheli derecede yuksek: ${deger}`);
   }
+  db.close();
+});
+
+/**
+ * ⚠️ **Sessiz hata (2026-08-20): `topla` HICBIR kanal kosmuyordu.**
+ *
+ * CLI `--kanal` verilmediginde `null` gecmisti, `topla` ise `undefined`
+ * bekliyordu. `null === undefined` yanlis oldugu icin kanal listesi
+ * `filter(k => k === null)` ile bosaliyor, komut hicbir sey yapmadan
+ * *"sonda bitti · 0 yeni aday · $0.0000"* yazip BASARIYLA donuyordu.
+ * Yani "yeni aday bul" komutu islevsizdi ve bunu soylemiyordu.
+ *
+ * TypeScript yakalayacakti; cagri yerindeki `as never` kasti susturmustu.
+ *
+ * Bu sinama iki seyi tutuyor: yokluk "hepsini kos" demek, ve eslesmeyen bir
+ * kanal adi SESSIZCE bos donmek yerine patlar.
+ */
+test('kanal verilmezse BUTUN kanallar kosuyor — sessizce bos donmuyor', async () => {
+  const db = geciciVeritabani();
+  const { istemci, kosular } = sahteIstemci();
+  const rapor = await topla(db, istemci, 'sonda', false, sessiz);
+  assert.equal(rapor.kanallar.length, 4, 'dort kanalin hepsi raporda olmali');
+  assert.ok(kosular.length > 0, 'hicbir actor cagrilmadi — komut islevsiz');
+  db.close();
+});
+
+test('null kanal da "hepsi" sayiliyor — eski hatanin tam bicimi', async () => {
+  const db = geciciVeritabani();
+  const { istemci } = sahteIstemci();
+  /* Cagiran taraf bir gun yine null gecerse komut islevsiz kalmamali. */
+  const rapor = await topla(db, istemci, 'sonda', false, sessiz, null as never);
+  assert.equal(rapor.kanallar.length, 4);
+  db.close();
+});
+
+test('bilinmeyen kanal adi PATLIYOR, bos donmuyor', async () => {
+  const db = geciciVeritabani();
+  const { istemci } = sahteIstemci();
+  await assert.rejects(
+    () => topla(db, istemci, 'sonda', false, sessiz, 'boyleBirKanalYok' as never),
+    /bilinmeyen kanal/,
+  );
+  db.close();
+});
+
+/**
+ * ⚠️ **Olculmus hasar (2026-08-20): "yeni aday topla", ELDEKI adaylari
+ * listeden dusuruyordu.**
+ *
+ * `adaylariYaz` her adaya `durum: 'yeni'` yaziyordu ve `upsertLead` o alani
+ * COALESCE'siz basiyor. Bir kanal daha once zenginlestirilmis bir alan adini
+ * yeniden gorunce zenginlestirme durumu SILINIYORDU.
+ *
+ * Bedeli sessiz: `durum` `zenginlestirildi` olmayan aday `demo-adaylari`
+ * suzgecinden ve gonderim listelerinden dusuyor. Tek bir sondada 36 aday
+ * boyle geri gitti.
+ *
+ * ⚠️ Kanal SUZULMEDEN kosuluyor: `instagramProfil` tek basina cagrildiginda
+ * kullanici listesi bos kaliyor ve actor hic calismiyor — o kurulumla sinama
+ * bos gecerdi (bir kez oyle yazildi ve yakalandi).
+ */
+test('var olan adayin durumu KORUNUYOR — toplama, eldekini listeden dusurmez', async () => {
+  const db = geciciVeritabani();
+
+  /* Zaten olculmus bir aday. */
+  upsertLead(db, {
+    domain: 'sondadukkan.com',
+    source: 'google',
+    durum: 'zenginlestirildi',
+    email: 'info@sondadukkan.com',
+    product_count: 300,
+  });
+
+  const { istemci } = sahteIstemci({
+    aylikUsd: 0,
+    serp: [{ organicResults: [{ url: 'https://sondadukkan.com/products/a', title: 'Sonda Dukkan' }] }],
+    gonderi: [{ ownerUsername: 'decantci' }],
+    profil: [{ username: 'decantci', fullName: 'Decantci', externalUrl: 'https://decantci.com' }],
+  });
+  await topla(db, istemci, 'sonda', false, sessiz);
+
+  const lead = tumLeadler(db).find((l) => l.domain === 'sondadukkan.com');
+  assert.equal(lead?.durum, 'zenginlestirildi', 'durum silinmis — aday listeden duser');
+  assert.equal(lead?.email, 'info@sondadukkan.com', 'zengin veri de korunmali');
+
+  /* Ayni kosuda GERCEKTEN yeni olan aday 'yeni' baslamali. */
+  const taze = tumLeadler(db).find((l) => l.domain === 'decantci.com');
+  assert.equal(taze?.durum, 'yeni');
   db.close();
 });
