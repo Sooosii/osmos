@@ -82,18 +82,61 @@ export async function katalogSay(domain: string): Promise<number | null> {
   return toplam;
 }
 
+export interface PartiHedefi {
+  readonly sira: number;
+  readonly ad: string;
+  readonly instagram: string | null;
+  readonly domain: string;
+  /** `**Örtüşen parfüm: 4** · ortak marka 11 · katalog 377 ürün` satırının tamamı. */
+  readonly ozet: string;
+  readonly sayimTarihi: string | null;
+  readonly kanit: string | null;
+  readonly mesaj: string;
+}
+
 /**
- * Parti dosyasındaki alan adları.
+ * Parti dosyasındaki hedefler.
  *
  * ⚠️ Hedefler VERITABANINDAN değil DOSYADAN okunuyor ve bu bilinçli: gönderimi
  * yapan kişi elindeki dosyaya bakıyor. Dosya ile veritabanı ayrışmışsa
  * doğrulanması gereken şey dosyadır.
+ *
+ * ⚠️⚠️ **Tek ayrıştırıcı.** Hem `parti-dogrula` hem gönderim konsolu buradan
+ * besleniyor; ikinci bir ayrıştırıcı yazılmayacak. Bu depo o hatayı bir kez
+ * yedi: `urunAnahtari` ile `markaAnahtari` ayrışınca aksanlı marka yazan
+ * dükkânların hepsi sessizce eşleşmiyordu (ölçüm: örtüşen dükkân 69 → 80).
  */
-export function partiAlanAdlari(metin: string): readonly string[] {
-  const cikti: string[] = [];
-  for (const satir of metin.split('\n')) {
-    const e = /^- \*\*Alan adı:\*\* ([^\s·]+)/.exec(satir);
-    if (e !== null) cikti.push(e[1]);
+export function partiHedefleri(metin: string): readonly PartiHedefi[] {
+  const cikti: PartiHedefi[] = [];
+
+  for (const blok of metin.split(/^## /m).slice(1)) {
+    const baslik = /^(\d+)\.\s*(.*)$/.exec(blok.split('\n')[0].trim());
+    const domain = /^- \*\*Alan adı:\*\* ([^\s·]+)/m.exec(blok)?.[1];
+    /* Alan adı olmayan bir blok hedef değil — uydurulmuyor, atlanıyor. */
+    if (baslik === null || domain === undefined) continue;
+
+    /*
+      Mesaj üç ters tırnak arasında. Bloğun içinde başka kod çiti yok; olsaydı
+      ilk çift alınırdı ve o da doğru olurdu — mesaj her zaman ilk çit.
+    */
+    const parcalar = blok.split('```');
+
+    cikti.push({
+      sira: Number(baslik[1]),
+      ad: baslik[2],
+      instagram: /^- \*\*Instagram:\*\* @?(\S+)/m.exec(blok)?.[1] ?? null,
+      domain,
+      ozet: /^- (\*\*Örtüşen parfüm.*)$/m.exec(blok)?.[1].replace(/\*\*/g, '') ?? '',
+      sayimTarihi: /^- Sayım tarihi: (\S+)/m.exec(blok)?.[1] ?? null,
+      kanit: /^- \*\*Kanıt adresi:\*\* (\S+)/m.exec(blok)?.[1] ?? null,
+      mesaj: parcalar.length > 1 ? parcalar[1].trim() : '',
+    });
   }
+
   return cikti;
+}
+
+/** Yalnız alan adları — `partiHedefleri`den türüyor, ayrı bir okuma DEĞİL. */
+export function partiAlanAdlari(metin: string): readonly string[] {
+  return partiHedefleri(metin).map((h) => h.domain);
 }

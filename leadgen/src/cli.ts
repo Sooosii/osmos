@@ -21,8 +21,9 @@ import { temizAd, yazOutreachCsv } from './export/outreach.ts';
 import { yazDmListesi } from './export/dm-listesi.ts';
 import { yazIlkTur } from './export/ilk-tur.ts';
 import {
-  katalogSay, karsilastir, partiAlanAdlari, tavandaMi,
+  katalogSay, karsilastir, partiAlanAdlari, partiHedefleri, tavandaMi,
 } from './export/parti-dogrula.ts';
+import { konsolHtml } from './export/gonderim-konsolu.ts';
 import { hedefKatalogu, olcAdaylar, yazDemoRaporu } from './demo/adaylar.ts';
 import {
   adresAdaylari, katalogTaslagi, kayitTaslagi, kiraciKimligi,
@@ -69,7 +70,7 @@ const log = (s: string): void => { process.stdout.write(`${s}\n`); };
 
 const KOMUTLAR = [
   'seed', 'topla', 'enrich', 'demo-adaylari', 'kiraci-taslak', 'score', 'export', 'report', 'temas',
-  'parti-dogrula', 'hepsi',
+  'parti-dogrula', 'parti-konsol', 'hepsi',
 ] as const;
 type Komut = typeof KOMUTLAR[number];
 
@@ -79,6 +80,8 @@ interface Secenekler {
   readonly sonda: boolean;
   readonly onayla: boolean;
   readonly kanal: string | null;
+  /** `parti-konsol --sun` — sayfayi localhost'ta sunar (pano guvenli baglam ister). */
+  readonly sun: boolean;
   /** Komuttan sonraki serbest argümanlar — `temas <domain> <sonuc>` gibi. */
   readonly argumanlar: readonly string[];
 }
@@ -91,6 +94,7 @@ function komutOku(): Secenekler {
       sonda: { type: 'boolean' },
       onayla: { type: 'boolean' },
       kanal: { type: 'string' },
+      sun: { type: 'boolean' },
     },
   });
   const ham = positionals[0] ?? '';
@@ -105,13 +109,14 @@ function komutOku(): Secenekler {
     sonda: values.sonda === true,
     onayla: values.onayla === true,
     kanal: typeof values.kanal === 'string' ? values.kanal : null,
+    sun: values.sun === true,
     argumanlar: positionals.slice(1),
   };
 }
 
 async function main(): Promise<void> {
   ortamiYukle();
-  const { komut, sinir, sonda, onayla, kanal, argumanlar } = komutOku();
+  const { komut, sinir, sonda, onayla, kanal, sun, argumanlar } = komutOku();
   const db = acVeritabani(DB_YOLU);
 
   if (komut === 'seed' || komut === 'hepsi') {
@@ -227,6 +232,63 @@ async function main(): Promise<void> {
       log('   veritabanindaki product_count guncellenir, sonra: export + parti-kur');
     }
     if (kayan > 0 || okunamayan > 0) process.exit(1);
+  }
+
+  if (komut === 'parti-konsol') {
+    /*
+      Partiyi Chrome'da açılabilen tek bir yerel sayfaya çeviriyor: her hedefte
+      "DM'i aç" (hesap arama yok) ve "metni kopyala". Sunucu ve bağımlılık yok.
+
+      ⚠️ Gönder'e insan basıyor — gerekçe `gonderim-konsolu.ts` başlığında.
+    */
+    const kaynak = join(VERI, 'ilk-parti.md');
+    if (!existsSync(kaynak)) {
+      log(`[parti-konsol] ${kaynak} yok — once: node scripts/parti-kur.mjs`);
+      process.exit(1);
+    }
+    const metin = readFileSync(kaynak, 'utf8');
+    const hedefler = partiHedefleri(metin);
+    if (hedefler.length === 0) {
+      log('[parti-konsol] parti dosyasinda hedef bulunamadi');
+      process.exit(1);
+    }
+    /*
+      Damga partinin KURULUŞ tarihinden geliyor, bugünün tarihinden değil:
+      konsol ertesi gün yeniden üretilse bile aynı partinin işaretleri durmalı.
+      Satır yoksa dosyanın kendisi damga olur.
+    */
+    const damga = /^Parti kuruldu: (\S+)/m.exec(metin)?.[1] ?? 'parti';
+    const cikti = join(VERI, 'gonderim-konsolu.html');
+    writeFileSync(cikti, konsolHtml({ hedefler, damga }), 'utf8');
+
+    const dmsiz = hedefler.filter((h) => h.instagram === null).length;
+    log(`[parti-konsol] ${cikti} yazildi — ${hedefler.length} hedef (damga ${damga})`);
+    if (dmsiz > 0) log(`[parti-konsol] ⚠️ ${dmsiz} hedefte Instagram hesabi yok, DM dugmesi cikmadi`);
+
+    /*
+      ⚠️ **`--sun` bir kolaylık değil, ölçülemeyen bir belirsizliği kaldırıyor.**
+      Sayfa `file://` ile açılabiliyor ama panoya yazma orada Chrome sürümüne
+      göre engellenebiliyor — ve konsolun bütün değeri "metni kopyala"da.
+      `localhost` güvenli bağlam sayılıyor, yani pano her koşulda çalışıyor.
+      Gerçek tarayıcıda ölçüldü (2026-08-19): `isSecureContext` true, pano
+      yazma çalışıyor, konsolda 0 hata.
+
+      Sayfanın kendisinde yine de bir geri düşüş var (metni seçip Ctrl+C),
+      çünkü dosyayı elle açan biri bu bayrağı bilmeyebilir.
+    */
+    if (sun) {
+      const { createServer } = await import('node:http');
+      const kapi = 4500;
+      createServer((_istek, cevap) => {
+        cevap.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+        cevap.end(readFileSync(cikti));
+      }).listen(kapi, () => {
+        log(`[parti-konsol] sunuluyor: http://localhost:${kapi}  (durdurmak icin Ctrl+C)`);
+      });
+      return;
+    }
+    log(`[parti-konsol] tarayicida ac: ${cikti}`);
+    log('[parti-konsol] pano calismazsa: node src/cli.ts parti-konsol --sun');
   }
 
   if (komut === 'enrich' || komut === 'hepsi') {

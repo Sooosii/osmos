@@ -60,7 +60,19 @@ const adaylar = db.prepare(`
          marka_ortusmesi, urun_ortusmesi, updated_at
   FROM leads
   WHERE instagram IS NOT NULL
-    AND urun_ortusmesi > 0
+    /*
+      ⚠️ **Burada bir zamanlar `urun_ortusmesi > 0` yazıyordu ve havuzu 396
+      adaydan 42'ye düşürüyordu.** Sahip hacim istedi ve ölçüm onu haklı
+      çıkardı: darboğaz kanal değil bu satırdı. Mail eklemek 34 yeni hedef
+      getiriyordu, bu satırı gevşetmek ~165.
+
+      ⚠️ Ama süzgeç KALDIRILMADI, ölçütü değişti. Mesajın bütün gücü sayılmış
+      ve dükkânın kendi sayfasından doğrulanabilir bir rakamda; ürün sayısı
+      olmayan 188 dükkâna gidecek metin "dükkânınızı gezdim"e düşüyor ve
+      akışın kendi kuralına göre (kanıt satırı olmayan iddia yazılmaz) zayıf.
+      Örtüşme artık eleme değil SIRALAMA ölçütü — aşağıdaki `.sort`ta.
+    */
+    AND product_count IS NOT NULL
     AND segment != 'nis-parfum-evi'
 `).all()
   .filter((r) => !temas.has(r.domain))
@@ -77,7 +89,18 @@ const adaylar = db.prepare(`
     kendi adını taşıyor, marka sayısı o yüzden sıfırlanıyor.
   */
   .filter((r) => r.marka_ortusmesi !== 1)
-  .sort((a, b) => b.urun_ortusmesi - a.urun_ortusmesi
+  /*
+    ⚠️ **Ölçülmemiş (`null`) örtüşme, sıfırla BIR TUTULMUYOR.** Ikisi farklı
+    şey: "ölçüldü, ortak parfüm çıkmadı" ile "hiç bakılmadı". Ölçülmemiş kayıt
+    en sona düşüyor — üstteki sıralarda ne kadar iş olacağı bilinen dükkânlar
+    duruyor.
+
+    ⚠️ Ölçülmemiş kayıtta bir KAPI da kör: parfüm evi kuralı
+    `marka_ortusmesi === 1`e bakıyor ve o alan da `null`. Bu yüzden
+    `demo-adaylari` ölçümü partiden ÖNCE koşuluyor; ölçülemeyenler (Shopify
+    olmayanlar) listenin dibinde ve gözle bakılarak gönderiliyor.
+  */
+  .sort((a, b) => (b.urun_ortusmesi ?? -1) - (a.urun_ortusmesi ?? -1)
     || (b.marka_ortusmesi ?? 0) - (a.marka_ortusmesi ?? 0)
     || b.score - a.score);
 
