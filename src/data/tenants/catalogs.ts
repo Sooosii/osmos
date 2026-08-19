@@ -1,5 +1,6 @@
 import type { Perfume } from '../types';
 import { DEMO_SELVA_CATALOG } from './demo-selva/catalog';
+import { NICHEESSENCE_CATALOG } from './nicheessence/catalog';
 import { NISCHENGOLD_CATALOG } from './nischengold/catalog';
 import { SCENTITUDE_CATALOG } from './scentitude/catalog';
 
@@ -17,6 +18,7 @@ import { SCENTITUDE_CATALOG } from './scentitude/catalog';
  */
 export const TENANT_CATALOGS: Readonly<Record<string, readonly Perfume[]>> = {
   'demo-selva': DEMO_SELVA_CATALOG,
+  nicheessence: NICHEESSENCE_CATALOG,
   nischengold: NISCHENGOLD_CATALOG,
   scentitude: SCENTITUDE_CATALOG,
 };

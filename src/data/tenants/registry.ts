@@ -171,4 +171,32 @@ const SCENTITUDE: Tenant = {
   locales: ['en'],
 };
 
-export const TENANTS: readonly Tenant[] = [OSMOS, DEMO_SELVA, NISCHENGOLD, SCENTITUDE];
+/**
+ * Niche Essence — Toronto'lu niş perakendeci (Kanada).
+ *
+ * ⚠️ 18 Ağustos'ta Instagram DM'ine kapı bekçisi cevap verdi: "adını bırak,
+ * yönetime iletelim". Ad ve adres bırakıldı, sonra sessizlik. Demo o açılmış
+ * konuşmayı sürdürmek için kuruluyor — soğuk temas değil.
+ *
+ * ⚠️ `indexable: false` ve talep edilirse aynı gün kaldırılır; Nischengold ve
+ * Scentitude ile aynı kural.
+ *
+ * ⚠️ Dükkân Ingilizce satıyor (Kanada, CAD), yani `/` Ingilizce açılıyor.
+ * Bu demonun **17 parfümü** var — bugüne kadarki en genişi, ve sayı bir
+ * ölçüm düzeltmesinden geldi: dükkânın katalogu tek sayfa okunurken 7
+ * görünüyordu.
+ */
+const NICHEESSENCE: Tenant = {
+  id: 'nicheessence',
+  name: 'Niche Essence',
+  title: { en: 'Niche Essence — scent map', tr: 'Niche Essence — koku haritasi' },
+  description: {
+    en: 'The Niche Essence shelf, drawn as a map of scent.',
+    tr: 'Niche Essence rafi, koku haritasi olarak cizildi.',
+  },
+  features: { accounts: false, notify: false, feed: false },
+  indexable: false,
+  locales: ['en'],
+};
+
+export const TENANTS: readonly Tenant[] = [OSMOS, DEMO_SELVA, NISCHENGOLD, SCENTITUDE, NICHEESSENCE];
