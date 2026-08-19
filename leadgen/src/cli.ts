@@ -7,7 +7,7 @@
  */
 import { parseArgs } from 'node:util';
 import { join } from "node:path";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { acVeritabani, ekleTemas, toplamHarcama, tumLeadler, upsertLead } from './db.ts';
 import { ApifyIstemcisi } from './apify/istemci.ts';
 import { topla } from './apify/topla.ts';
@@ -20,6 +20,9 @@ import { yazLeadsCsv } from './export/leads.ts';
 import { temizAd, yazOutreachCsv } from './export/outreach.ts';
 import { yazDmListesi } from './export/dm-listesi.ts';
 import { yazIlkTur } from './export/ilk-tur.ts';
+import {
+  katalogSay, karsilastir, partiAlanAdlari, tavandaMi,
+} from './export/parti-dogrula.ts';
 import { hedefKatalogu, olcAdaylar, yazDemoRaporu } from './demo/adaylar.ts';
 import {
   adresAdaylari, katalogTaslagi, kayitTaslagi, kiraciKimligi,
@@ -65,7 +68,8 @@ const DB_YOLU = process.env.LEADGEN_DB?.trim() || join(VERI, 'leads.db');
 const log = (s: string): void => { process.stdout.write(`${s}\n`); };
 
 const KOMUTLAR = [
-  'seed', 'topla', 'enrich', 'demo-adaylari', 'kiraci-taslak', 'score', 'export', 'report', 'temas', 'hepsi',
+  'seed', 'topla', 'enrich', 'demo-adaylari', 'kiraci-taslak', 'score', 'export', 'report', 'temas',
+  'parti-dogrula', 'hepsi',
 ] as const;
 type Komut = typeof KOMUTLAR[number];
 
@@ -180,6 +184,49 @@ async function main(): Promise<void> {
     const kanal = tumLeadler(db).find((l) => l.domain === domain)?.instagram === null ? 'mail' : 'dm';
     ekleTemas(db, { domain, kanal, sonuc, not: notParcalari.join(' ') || null });
     log(`[temas] ${domain} → ${sonuc} (${kanal})`);
+  }
+
+  if (komut === 'parti-dogrula') {
+    /*
+      Akışın pazarlık dışı kuralını araca çeviriyor: "her mesajdan önce kanıt
+      adresini AÇ; sayı tutmuyorsa gönderme."
+
+      ⚠️ **Çıkış kodu 1 dönüyor ve bu bilinçli.** Rapor basıp 0 dönseydi
+      kayan sayı ekranda kaybolurdu; gönderim günü elli satır arasında bir
+      uyarı görülmüyor.
+    */
+    const dosya = join(VERI, 'ilk-parti.md');
+    if (!existsSync(dosya)) {
+      log(`[parti-dogrula] ${dosya} yok — once: node scripts/parti-kur.mjs`);
+      process.exit(1);
+    }
+    const alanAdlari = partiAlanAdlari(readFileSync(dosya, 'utf8'));
+    const leadler = tumLeadler(db);
+    let kayan = 0;
+    let okunamayan = 0;
+
+    for (const domain of alanAdlari) {
+      const lead = leadler.find((l) => l.domain === domain);
+      if (lead?.product_count === null || lead?.product_count === undefined) {
+        log(`  ?  ${domain.padEnd(28)} kayitta urun sayisi yok — sayi iddiasi da yok`);
+        continue;
+      }
+      const tavanda = tavandaMi(lead.product_count, lead.notes);
+      const bugun = await katalogSay(domain);
+      const { durum, aciklama } = karsilastir(lead.product_count, tavanda, bugun);
+      if (durum === 'kaymis') kayan += 1;
+      if (durum === 'olculemedi') okunamayan += 1;
+      const isaret = durum === 'tutuyor' ? 'OK' : (durum === 'kaymis' ? 'KAYMIS' : 'OKUNAMADI');
+      log(`  ${isaret.padEnd(9)} ${domain.padEnd(28)} ${aciklama}`);
+    }
+
+    log('');
+    log(`[parti-dogrula] ${alanAdlari.length} hedef · ${kayan} kaymis · ${okunamayan} okunamadi`);
+    if (kayan > 0) {
+      log('⚠️ KAYAN SAYI VAR. Duzeltmeden gonderme:');
+      log('   veritabanindaki product_count guncellenir, sonra: export + parti-kur');
+    }
+    if (kayan > 0 || okunamayan > 0) process.exit(1);
   }
 
   if (komut === 'enrich' || komut === 'hepsi') {

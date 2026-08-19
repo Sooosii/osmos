@@ -106,10 +106,29 @@ const cevaplayan = db.prepare(
 const olculen = db.prepare('SELECT COUNT(*) n FROM leads WHERE urun_ortusmesi IS NOT NULL').get().n;
 const ortusen = db.prepare('SELECT COUNT(*) n FROM leads WHERE urun_ortusmesi > 0').get().n;
 
-const parti = adaylar.slice(0, 10);
+/*
+  ⚠️ **Parti boyu artık sabit 10 değil, ama TAVANI var ve tavan hesabı
+  koruyor.** Sahibin gerekçesi doğru: soğuk erişimde dönüşüm binde birkaç, yani
+  tek gerçek kaldıraç hacim. Sınırlayıcı olan da cevap oranı değil kanalın
+  kendisi — Instagram soğuk DM'e API vermiyor, gönderim elle yapılıyor ve
+  günde 15'i aşan bir hesap kapanma riskine giriyor. Tek gönderen hesap
+  sahibin KENDI hesabı; o kapanırsa 400'lük liste değil, kanalın tamamı gider.
+
+  Karar kuralı 15'e zaten izin veriyor (10 mesajdan 2 cevap geldi), o yüzden
+  varsayılan 15. Daha büyüğü isteniyorsa bilerek yazılır — ve tavan hatırlatma
+  satırı basar.
+*/
+const GUNLUK_TAVAN = 15;
+const istenen = Number(process.argv[2] ?? GUNLUK_TAVAN);
+if (!Number.isInteger(istenen) || istenen < 1) {
+  console.error(`kullanim: node scripts/parti-kur.mjs [parti-boyu]  (varsayilan ${GUNLUK_TAVAN})`);
+  process.exit(1);
+}
+
+const parti = adaylar.slice(0, istenen);
 
 const satirlar = [
-  '# Sıradaki parti — 10 mesaj',
+  `# Sıradaki parti — ${parti.length} mesaj`,
   '',
   `> Defterden: **${yazilan} dükkâna yazıldı**, ${cevaplayan} tanesi cevap verdi.`,
   '> Karar kuralı `docs/b2b/gonderim-akisi.md` başında: **10 mesaj → oku → karar**',
@@ -165,4 +184,10 @@ parti.forEach((r, i) => {
   );
 });
 console.log('');
-console.log(`toplam uygun aday: ${adaylar.length}`);
+console.log(`toplam uygun aday: ${adaylar.length} · bu partiden sonra kalan: ${Math.max(0, adaylar.length - parti.length)}`);
+if (istenen > GUNLUK_TAVAN) {
+  console.log('');
+  console.log(`UYARI: ${istenen} mesaj gunluk tavan olan ${GUNLUK_TAVAN}in ustunde.`);
+  console.log('Instagram soguk DM icin API vermiyor; gonderim elle yapiliyor ve');
+  console.log('tek gonderen hesap sahibin KENDI hesabi. Kapanirsa kanal tamamen gider.');
+}
