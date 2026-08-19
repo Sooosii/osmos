@@ -25,6 +25,7 @@ import {
 } from './export/parti-dogrula.ts';
 import { konsolHtml, partiDamgasi } from './export/gonderim-konsolu.ts';
 import { hedefKatalogu, olcAdaylar, yazDemoRaporu } from './demo/adaylar.ts';
+import { takipAdaylari, takipMetni, EN_AZ_GUN } from './takip.ts';
 import {
   adresAdaylari, katalogTaslagi, kayitTaslagi, kiraciKimligi,
 } from './demo/taslak.ts';
@@ -70,7 +71,7 @@ const log = (s: string): void => { process.stdout.write(`${s}\n`); };
 
 const KOMUTLAR = [
   'seed', 'topla', 'enrich', 'demo-adaylari', 'kiraci-taslak', 'score', 'export', 'report', 'temas',
-  'parti-dogrula', 'parti-konsol', 'hepsi',
+  'takip', 'parti-dogrula', 'parti-konsol', 'hepsi',
 ] as const;
 type Komut = typeof KOMUTLAR[number];
 
@@ -207,6 +208,34 @@ async function main(): Promise<void> {
       ?? (tumLeadler(db).find((l) => l.domain === domain)?.instagram === null ? 'mail' : 'dm');
     ekleTemas(db, { domain, kanal: kanalYazilan, sonuc, not: notParcalari.join(' ') || null });
     log(`[temas] ${domain} → ${sonuc} (${kanalYazilan})`);
+  }
+
+  if (komut === 'takip') {
+    /*
+      Cevap gelmeyen dükkânlara TEK hatırlatma.
+
+      ⚠️ **Bu komut mesaj GÖNDERMIYOR** — depoda hiçbir şey göndermiyor ve bu
+      pazarlık dışı (`docs/b2b/gonderim-akisi.md`). Listeyi ve tek cümlelik
+      metni basıyor; "Gönder"e insan basıyor, sonra `temas` ile deftere
+      yazıyor. Deftere yazıldığı an dükkân bu listeden kendiliğinden düşüyor:
+      "iki hatırlatma yok" kuralı böyle uygulanıyor.
+    */
+    const gun = sinir ?? EN_AZ_GUN;
+    const adaylar = takipAdaylari(db, tumLeadler(db), new Date(), gun);
+
+    if (adaylar.length === 0) {
+      log(`[takip] ${gun} gündür cevapsız bekleyen yok.`);
+    } else {
+      log(`[takip] ${adaylar.length} dükkân ${gun}+ gündür cevapsız — her birine TEK hatırlatma:
+`);
+      for (const a of adaylar) {
+        const nereye = a.kanal === 'mail' ? (a.email ?? '(adres yok)') : (a.instagram ?? '(hesap yok)');
+        log(`  ${a.domain}  ·  ${a.gecenGun} gün  ·  ${a.kanal} → ${nereye}  ·  ${a.dil}`);
+        log(`    ${takipMetni(a.dil)}`);
+        log(`    kaydet: node src/cli.ts temas ${a.domain} gonderildi "hatirlatma" --kanal ${a.kanal}
+`);
+      }
+    }
   }
 
   if (komut === 'parti-dogrula') {

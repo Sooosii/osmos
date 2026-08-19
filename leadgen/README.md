@@ -26,8 +26,20 @@ node src/cli.ts score             # puan + olcek tazeler (aga CIKMAZ)
 node src/cli.ts export            # leads_ranked.csv + outreach.csv
 node src/cli.ts report            # report.md
 node src/cli.ts hepsi             # seed → enrich → score → export → report
+node src/cli.ts takip             # 7+ gundur cevapsiz dukkanlar + tek cumlelik hatirlatma
+node src/cli.ts takip --sinir 14  # esigi degistir (varsayilan 7 gun)
 npm test                          # 148 saf sinama, aga cikmaz, para harcamaz
 ```
+
+⚠️ **`takip` MESAJ GONDERMEZ** — listeyi ve metni basar, "Gonder"e insan basar,
+sonra `temas <domain> gonderildi "hatirlatma"` ile deftere yazar. Deftere
+yazildigi an dukkan listeden duser: **iki hatirlatma yok** kurali
+(`docs/b2b/teklif.md`) boyle uygulaniyor — ayri bir "takip edildi" sutunu
+tutulsaydi, deftere yazmayi unutan biri ayni kisiye ucuncu kez yazabilirdi.
+
+⚠️ Konusma baslamis dukkanlar listede CIKMAZ (`cevap`/`ilgilendi`/`red`/
+`elendi`). `otomatik` ise takip hakkini yakmaz: bot karsilamasini insan hic
+gormedi.
 
 ⚠️ **`hepsi` Apify'i CAGIRMAZ.** Para harcayan tek adimin "hepsini yap"
 komutuna gizlenmesi, yanlislikla harcamanin en kolay yolu olurdu. Toplama
