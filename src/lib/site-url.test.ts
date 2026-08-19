@@ -92,3 +92,48 @@ describe('pageAlternates — canonical', () => {
     expect(alt.types['application/rss+xml']).toBe('/feed.xml');
   });
 });
+
+/**
+ * ⚠️ **Ölçülmüş kusur (2026-08-20, nicheessence yayına alınırken).**
+ *
+ * Kiracının `<head>`i `/feed.xml`e `rel="alternate"` veriyordu, ama o uç
+ * kiracıda 404 dönüyor (`features.feed: false`). Yani müşterinin sitesinin
+ * başlığında var olmayan bir beslemeye bağlantı duruyordu — sessizce: sayfa
+ * çalışır, yalnız besleme okuyucusu ve arama motoru boşa gider.
+ *
+ * Kapalı özelliğin sayfaları 404 (`requireAccounts`), uçları 404
+ * (`ucKapali`); başlıktaki bağlantısı da olmamalı.
+ */
+describe('feed baglantisi kiracinin ozelligine bagli', () => {
+  test('feed ACIKKEN baglanti var', () => {
+    expect(pageAlternates('en', '/notes').types).toEqual({
+      'application/rss+xml': '/feed.xml',
+    });
+  });
+
+  test('feed KAPALIYKEN baglanti hic cizilmiyor', async () => {
+    /*
+      `activeTenant()` derleme zamanı değişkeninden geliyor ve sınamada
+      değiştirilemiyor; bu yüzden modül taze ithal edilip kiracı katmanı
+      feed'i kapalı bir kiracıymış gibi veriliyor. Ölçülen şey kayıt değil
+      DAVRANIŞ: çıktıda `types` alanı hiç bulunmamalı.
+    */
+    vi.resetModules();
+    vi.doMock('@/lib/tenant', async () => {
+      const gercek = await vi.importActual<typeof import('@/lib/tenant')>('@/lib/tenant');
+      return {
+        ...gercek,
+        activeTenant: () => ({
+          ...gercek.activeTenant(),
+          features: { accounts: false, notify: false, feed: false },
+        }),
+      };
+    });
+
+    const { pageAlternates: kapali } = await import('@/lib/site-url');
+    expect(kapali('en', '/notes').types).toBeUndefined();
+
+    vi.doUnmock('@/lib/tenant');
+    vi.resetModules();
+  });
+});

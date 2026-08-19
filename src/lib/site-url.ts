@@ -10,7 +10,7 @@
  * adres sessizce çalışır, eksik adres çalışmaz ve fark edilir.
  */
 import { withLocale, type Locale } from '@/i18n/locale';
-import { aktifDiller } from '@/lib/tenant';
+import { activeTenant, aktifDiller } from '@/lib/tenant';
 
 const FALLBACK = 'http://localhost:3000';
 
@@ -74,7 +74,12 @@ export function pageAlternates(
 ): {
   readonly canonical: string;
   readonly languages: Record<Locale, string>;
-  readonly types: Readonly<Record<string, string>>;
+  /**
+   * Besleme bağlantısı — **feed kapalı kiracıda hiç bulunmuyor**, bu yüzden
+   * isteğe bağlı. Zorunlu bırakılsaydı kapalı kiracıda 404'e giden bir
+   * `rel="alternate"` yazmak zorunda kalırdık.
+   */
+  readonly types?: Readonly<Record<string, string>>;
 } {
   return {
     /*
@@ -95,6 +100,17 @@ export function pageAlternates(
     */
     canonical: absolute(withLocale(locale, path)),
     languages: languageAlternates(path),
-    types: { 'application/rss+xml': '/feed.xml' },
+    /*
+      ⚠️ **Feed kapalı kiracıda bu satır HİÇ çizilmiyor.** Ölçüldü
+      (2026-08-20, nicheessence yayına alınırken): `<head>` `/feed.xml`e
+      `rel="alternate"` veriyordu ama uç kiracıda 404 dönüyor
+      (`features.feed: false`). Yani müşterinin sitesinin başlığında, var
+      olmayan bir beslemeye giden bir bağlantı duruyordu — ve bu sessiz:
+      sayfa çalışır, yalnız besleme okuyucusu ve arama motoru boşa gider.
+
+      Kapalı özelliğin sayfaları 404, uçları 404; başlıktaki bağlantısı da
+      olmamalı. Aynı cümle her yerde kurulmalı.
+    */
+    ...(activeTenant().features.feed ? { types: { 'application/rss+xml': '/feed.xml' } } : {}),
   };
 }
