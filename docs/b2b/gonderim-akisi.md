@@ -110,13 +110,14 @@ göndermeden önce bakmaya değer: onlara satılacak bir şey olmayabilir.
 ⚠️ Beş mecra listeden **çıkarıldı** (apkpure.net, threads.com, snapchat.com,
 gmail.com, faire.com) — hiçbiri parfüm işletmesi değildi.
 
-## Günün akışı — dört komut
+## Günün akışı — beş komut
 
 ```bash
 cd leadgen
 node scripts/parti-kur.mjs 15     # partiyi kur (varsayılan 15)
 node src/cli.ts parti-dogrula     # sayı iddialarını dükkânın kataloğuna karşı DENETLE
 node src/cli.ts parti-konsol --sun # gönderim konsolunu aç → http://localhost:4500
+node src/cli.ts takip             # 7+ gündür cevapsız kalanlar + tek cümlelik hatırlatma
 ```
 
 **1. Partiyi kur.** Sıra örtüşmeye göre: örtüşmesi yüksek dükkân üstte, çünkü
@@ -165,7 +166,25 @@ kuralının saydığı sayı bir botun üstünde dururdu.
 ⚠️ **`elendi`** hiç yazılmayacak dükkânı defterde tutuyor — gerekçesiyle, ve
 o dükkân bir daha hiçbir partide çıkmıyor.
 
-**5. Günde 15'i geçme.** Botla atma. Instagram soğuk DM için API vermiyor;
+**5. Takip et — haftada bir.** `node src/cli.ts takip` yedi günü dolmuş ve
+cevapsız kalan dükkanları, her birinin **kendi dilindeki** tek cümleyle basıyor.
+
+⚠️ **Bu adım yeni ve bir boşluğu kapatıyor (2026-08-19).** Kural
+`teklif.md`de yazılıydı ama otomasyonu yoktu ve sistem **tek atışlıktı**:
+`temasKurulanlar()` tarihe hiç bakmıyor, yazılan dükkan bir daha hiçbir partide
+çıkmıyordu. 36 dükkana yazıldı, hiçbiri bir daha hatırlanmadı — oysa
+hatırlatma, cevap oranını yükselten en ucuz hamle.
+
+⚠️ **Komut mesaj GÖNDERMIYOR** — yukarıdaki 5. maddenin kuralı burada da
+geçerli. Listeyi ve metni basıyor, "Gönder"e insan basıyor, sonra deftere
+yazılıyor. Deftere yazıldığı an dükkan listeden düşüyor: **iki hatırlatma yok**
+kuralı böyle uygulanıyor, ayrı bir sütun tutulmadan.
+
+⚠️ Konuşma başlamış dükkanlar listede **çıkmıyor** (`cevap`/`ilgilendi`/`red`/
+`elendi`) — sıcak bir konuşmaya soğuk hatırlatma göndermek, hiç göndermemekten
+kötü. `otomatik` ise hakkı yakmıyor: bot karşılamasını insan hiç görmedi.
+
+**6. Günde 15'i geçme.** Botla atma. Instagram soğuk DM için API vermiyor;
 otomatik gönderim hesabı kapattırır.
 
 ⚠️⚠️ **Gönderimi otomatikleştirme önerisi geldi ve REDDEDILDI (2026-08-19).**
@@ -195,6 +214,11 @@ Yani demo **cevaptan sonra** kuruluyor. Sırası:
 4. **Kiracı kaydını yaz** (`src/data/tenants/registry.ts`): `indexable: false`,
    kendi dilleri, kendi adı.
 5. **Yayına al**, linki gönder.
+
+⚠️ **Buradan sonrası `docs/b2b/kapanis.md`de:** teklif → VAT ID + notalar →
+%50 → kurulum → teslim → %50 → yıllık rapor. O dosya "evet" anında doğaçlama
+yapılmasın diye boşken yazıldı; ödeme talimatı bloğu ve ilk ödeme günü kontrol
+listesi orada.
 
 ---
 

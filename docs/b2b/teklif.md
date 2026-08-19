@@ -59,7 +59,10 @@ bakılır; teklif metni sabit kalır, indirim sözlü konuşulmaz.
 > - **Your VAT ID**, for the invoice.
 >
 > **Price.** €490 to build, €290 per year after that. The yearly fee covers
-> hosting and two catalogue updates a year.
+> hosting, two catalogue updates a year, and a monthly report: how many
+> visitors the map sent to your product pages, and which fragrances they came
+> from. The count is a floor — it is measured in the browser, so anyone with an
+> ad blocker is not counted and the real number is higher.
 >
 > This is a founding price for the first three shops, and I would rather say why
 > than pretend it is a promotion: I want three references and honest feedback
@@ -92,6 +95,17 @@ bakılır; teklif metni sabit kalır, indirim sözlü konuşulmaz.
   meşrulaştırmıyor; "üç referans istiyorum" diyor.
 - ⚠️ **Dürüst karşı argüman metnin içinde.** Sonradan çıkan bir sınır güveni
   yıkar; baştan söylenen bir sınır güven kurar.
+- ⚠️ **Aylık rapor fiyat satırına eklendi, fiyat DEĞİŞMEDİ** (2026-08-19).
+  Sebep: yenileme ücretinin arkasında hiçbir argüman yoktu. "Barındırma ve iki
+  güncelleme" bir maliyet kalemi; müşteri ikinci yıl "ne aldım" diye sorduğunda
+  gösterilecek tek rakam yoktu ve satılan sözün kendisi (*"it feeds the place
+  that sells"*) ölçülmüyordu. Turnike (`/api/tiklama`) o rakamı üretiyor:
+  €290/yıl artık barındırma değil, **rapora abonelik.**
+- ⚠️ **"Floor" kelimesi pazarlık dışı.** Sayım tarayıcıda başlıyor, engelleyicisi
+  olan ziyaretçi sayılmıyor. Rakamı olduğundan büyük söylemek, ikinci ay
+  düzeltilecek bir iddia demekti; eksik saydığını baştan söylemek ise aynı
+  rakamı savunulabilir yapıyor. Aynı cümle raporun kendisinde de var
+  (`scripts/tiklama-raporu.ts`).
 - ⚠️ **Unvan ve VAT ID teklifte, faturada değil** (sahibin 2026-08-18 kararı).
   Müşteri her yerde OSMOS görüyor; fatura başka unvanla gelince parayı gönderecek
   muhasebeci ödemeyi durdurup sorar — tam tahsilat anında güven sarsılır.
@@ -106,6 +120,14 @@ Teklif bir kez gönderilir. Hatırlatma en erken **bir hafta** sonra ve tek
 cümleyle: *"Bir şey sormak isterseniz buradayım; istemezseniz bir daha
 yazmam."* Iki hatırlatma yok.
 
-**Ilgili:** `docs/b2b/gonderim-akisi.md` · `docs/b2b/sirket-ve-fatura.md` ·
+⚠️ **Bu kural artık ARAÇ** (2026-08-19): `cd leadgen && node src/cli.ts takip`
+yedi günü dolmuş ve cevapsız kalan dükkanları, her birinin kendi dilindeki tek
+cümleyle basıyor. Kural yalnız burada yazılıyken uygulanmıyordu — 36 dükkana
+yazılmış, hiçbiri bir daha hatırlanmamıştı. Komut mesaj göndermiyor; deftere
+yazıldığı an dükkan listeden düşüyor ve "iki hatırlatma yok" kendiliğinden
+uygulanıyor.
+
+**Ilgili:** `docs/b2b/kapanis.md` (cevaptan sonrası) ·
+`docs/b2b/gonderim-akisi.md` · `docs/b2b/sirket-ve-fatura.md` ·
 `docs/b2b/kiraci-yayina-alma.md` (teslim yolu) ·
 `docs/b2b/nischengold-mesaj.md` (ilk temas)
