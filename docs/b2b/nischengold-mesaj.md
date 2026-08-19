@@ -147,14 +147,50 @@ atıldı ve **sert döndü**:
 550 5.1.1 User does not exist - <soroush@osmos.me>
 ```
 
-Alan adı Zoho'da kuruluydu ama **kullanıcı hiç oluşturulmamıştı.** Yani DNS'e
-bakarak "mail çalışıyor" sonucuna varmak yanlış; tek geçerli ölçüm o adrese
-**gerçekten bir mail atıp** ne döndüğüne bakmaktır.
+DNS'e bakarak "mail çalışıyor" sonucuna varmak yanlış; tek geçerli ölçüm o
+adrese **gerçekten bir mail atıp** ne döndüğüne bakmaktır.
 
-⚠️ Bu ölçümün bedeli görüldü: kapı bekçisine `soroush@osmos.me` adresi
-verilmişti (nicheessence, 2026-08-18). Yönetim o adrese yazdıysa maili geri
-dönmüş, bizde hiçbir iz kalmamıştır — "cevap gelmedi" sanılan şey aslında
-"cevap düştü" olabilir.
+⚠️⚠️ **VE SEBEP TAHMIN EDILDIĞI GIBI ÇIKMADI.** Ilk teşhis "kullanıcı hiç
+oluşturulmamış" idi ve **yanlıştı** — Zoho panelindeki kullanıcı listesi
+görülünce anlaşıldı: kutu vardı, adı başkaydı.
+
+| adres | durum |
+|---|---|
+| `soroush@osmos.me` | **hiç var olmadı** — dört sert dönüş |
+| `soroush.sehat@osmos.me` | ✅ `delivered` (2026-08-19'da ölçüldü) |
+
+Kutuyu kuran kişi `soroush.sehat` yazdı, adresi paylaşan kişi `soroush` sandı,
+ve arada hiçbir ölçüm yoktu. Hata DNS'te, Zoho'da ya da kodda değildi —
+**iki insanın aynı adresi farklı hatırlamasındaydı.**
+
+## ⚠️⚠️ KURAL: bir adres dışarıya verilmeden ÖNCE ölçülür
+
+Bir e-posta adresi bir müşteriye, bir belgeye ya da bir mesaja yazılmadan önce
+o adrese bir mail atılır ve **düştüğü görülür.** Hatırlanan adres, doğrulanmış
+adres değildir.
+
+Bedeli ölçüldü: `soroush@osmos.me` üç ayrı yerde gerçekmiş gibi duruyordu —
+nicheessence'ın kapı bekçisine söylendi (2026-08-18), bu belgeye yazıldı,
+hafızaya işlendi. Yönetim o adrese yazdıysa maili geri dönmüştür ve bizde
+hiçbir iz yoktur: **"cevap gelmedi" sanılan şey "cevap düştü" olabilir.**
+Iki gerçek cevaptan biri böyle kopmuş olabilir.
+
+⚠️ Adresi kurtarma denemesi de takıldı: `soroush@osmos.me` Zoho'da takma ad
+olarak eklenemiyor, *"already assigned to another user within your
+organization"* diyor — organizasyonda bir kimliğe ayrılmış ama arkasında
+posta kutusu yok. Yani "Zoho adı tanıyor" ile "o adres mail alıyor" da ayrı
+şeyler.
+
+**Ölçüm yöntemi — ev bağlantısından SMTP testi yapılamadığı için önemli:**
+`mx.zoho.eu:25` ya zaman aşımına düşüyor ya `550 dynamic/residential IP`
+diyor; ikisi de kutu hakkında hiçbir şey söylemiyor. Çalışan yöntem Resend:
+adrese mail at, sonra `GET /emails/{id}` ile `last_event` sorgula.
+`bounced` dönerse `diagnosticCode` sebebi birebir veriyor.
+⚠️ Her sert dönüş gönderen itibarını aşındırıyor ve adres Resend'in
+**bastırma listesine** giriyor; sonraki denemeler `suppressed` dönüp hiç
+gönderilmiyor. Liste `GET /suppressions` ile okunur, `DELETE
+/suppressions/{id}` ile temizlenir. Yani bu ölçüm ucuz değil — körlemesine
+tekrarlanmaz.
 
 ⚠️ Gönderim tarafı ayrı ve sağlam: Resend'de `osmos.me` DKIM ve SPF
 doğrulanmış durumda (`send.osmos.me` üzerinden), yani `@osmos.me` adına mail
