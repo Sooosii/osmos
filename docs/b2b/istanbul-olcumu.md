@@ -88,6 +88,13 @@ kaybettiriyordu.
 
 ## Hangi dükkân önce aranacak
 
+> ⚠️ **BU SIRA DÜZELDİ (2026-08-20): numaralar ölçüldü.**
+> Aşağıdaki gerekçe (Home of Scents önce, çünkü tek çok markalı aday)
+> geçerli — ama telefon kanalında **numarası olmayan tek dükkan o.**
+> Gerçek sıra: **NOIR (+90 212 220 92 13) → Parfumane (0850 821 74 94)
+> → Home of Scents (numara yok, Instagram DM'e düşüyor).**
+> Konuşma metni: `docs/b2b/istanbul-telefon.md`.
+
 **1. Home of Scents** — çünkü tek uygun aday **çok markalı** ve rafındaki
 markalardan **7 parfüm zaten bizim kataloğumuzda**:
 

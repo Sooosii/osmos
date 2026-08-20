@@ -175,7 +175,7 @@ Kayan sayı çıkarsa: veritabanındaki `product_count` düzeltilir, sonra
 **3. Konsolu aç ve gönder.** Her kartta `Kanıtı aç` · `DM'i aç` ·
 `Metni kopyala` · `gönderildi`.
 
-⚠️ `DM'i aç` hesap arama adımını siliyor: `ig.me/m/<hesap>` doğrudan o kişinin
+⚠️ `DM'i aç` hesap arama adımını siliyor: `ig.me/m/<hesap>` doğrudan o kisinin
 DM penceresini açıyor (ölçüldü: 302 ile `instagram.com/m/<hesap>`).
 
 ⚠️ Hitabı yine gözden geçir. Ad tuhaf duruyorsa hitabı tamamen düş — adsız
@@ -189,7 +189,7 @@ node src/cli.ts temas <domain> gonderildi
 ```
 
 Cevap gelince aynı komut: `cevap` · `ilgilendi` · `red` · `otomatik` · `elendi`.
-⚠️ Bunun tek amacı **tekrarı önlemek**. Aynı kişiye ikinci kez aynı mesajı
+⚠️ Bunun tek amacı **tekrarı önlemek**. Aynı kisiye ikinci kez aynı mesajı
 atmak, hiç atmamaktan kötü.
 
 ⚠️ **`otomatik` ile `cevap` ayrı ve bu bilinçli.** Instagram karşılama mesajı
@@ -226,6 +226,74 @@ oturumundan otomatik DM de atılmıyor. Gerekçe sayıyla: o hesap **396 hedefin
 tek kapısı**; kapanırsa kaybedilen bir parti değil kanalın tamamı. Konsol
 arama ve kopyalama adımlarını siliyor, **"Gönder"e insan basıyor** — sayfa da
 bu yüzden hiçbir şeyi kendiliğinden açmıyor ve sıradakine geçmiyor.
+
+---
+
+## "Hayır" cevabı geldiğinde — sözün ikinci yarısı
+
+⚠⚠ **Bu bölüm yoktu ve eksikliği gerçek bir cevap geldiğinde görüldü**
+(Parfums Lubner, 2026-08-20). Akışta *"evet"* dalı yazılıydı, *"hayır"*
+dalı yazılı değildi — tıpkı *"talep edilirse aynı gün kaldırılır"* sözünün
+ADIMI'nın hiçbir belgede olmaması gibi.
+
+**Giden mesaj bir söz veriyor** (`outreach.ts`):
+*"… dann schreibe ich Ihnen nicht wieder."* Red geldiği an o söz borca
+dönüyor. Üç adım, sırasıyla:
+
+1. **Deftere yaz — ÖNCE.**
+   ```bash
+   cd leadgen && node src/cli.ts temas <domain> red "<kendi cümleleri>" --kanal dm
+   ```
+   ⚠️ Bu adım atlanırsa `takip` o dükkanı 7 gün sonra listeye koyar ve
+   **reddedene ikinci mesaj gider.** Kapı SQL'de duruyor
+   (`sonuc IN ('cevap','ilgilendi','red','elendi')` dışlanıyor) ama kapıyı
+   çalıştıran şey kaydın kendisi.
+
+2. **Kısa bir kapanış yaz** (aşağıdaki şablon). ⚠️ **Yeniden satış
+   denemesi DEĞIL.** Itiraz karşılama, indirim, "bir de şunu görseniz"
+   yok — verilen söz tam olarak bunu yasaklıyor. Inisiyatif karşı tarafta
+   bırakılıyor.
+
+3. **Bir daha yazma.** Yeni bir parti kurulurken bile.
+
+### Şablon — Almanca, `Sie` (giden mesaj `Sie` ile yazılmıştı)
+
+> Hallo zusammen,
+>
+> vielen Dank für die schnelle und freundliche Rückmeldung — das ist
+> überhaupt kein Problem. Wie versprochen melde ich mich nicht wieder.
+>
+> Sollte es irgendwann doch einmal passen, wissen Sie ja, wo Sie mich finden.
+> Ich wünsche Ihnen weiterhin viel Erfolg mit Ihrem Sortiment!
+>
+> Herzliche Grüße
+> Soroush Sehat
+
+### `du` varyantı — karşı taraf `du` ile yazdıysa
+
+> Hey ihr Lieben,
+>
+> danke für die schnelle und liebe Rückmeldung — alles gut! Wie versprochen
+> melde ich mich nicht wieder.
+>
+> Falls es irgendwann doch mal passt, wisst ihr ja, wo ihr mich findet.
+> Weiterhin viel Erfolg mit eurer schönen Auswahl!
+>
+> Liebe Grüße
+> Soroush
+
+⚠️ **En değerli satır "Wie versprochen melde ich mich nicht wieder."**
+Soğuk mesajın opt-out sözünü gerçekten tutan çok az kisi var; tutmak
+bedava ve tam olarak bu işin satış iddiasıyla (*"ölçtüğümü olduğu gibi
+söylüyorum"*) aynı yerden geliyor.
+
+⚠️ **Sayı iddiası, link ve demo teklifi YOK.** Kapanış mesajının işi
+ilişkiyi temiz bırakmak; içine bir şey daha sıkıştırmak onu kapanış
+olmaktan çıkarır.
+
+⚠️ Demo kurulmuşsa (`<kimlik>.osmos.me`) red aynı zamanda **kaldırma**
+demektir: `kiraci-yayina-alma.md` §6. Lubner için demo kurulmamıştı
+(mesaj örneği teklif ediyordu, henüz yapmamıştı) — kaldırılacak bir şey yok.
 
 ---
 

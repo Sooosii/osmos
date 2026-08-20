@@ -93,3 +93,28 @@ test('platformun kendisi alan adi sayilmiyor', () => {
   assert.equal(normalizeDomain('https://myshopify.com'), null);
   assert.equal(normalizeDomain('https://bigcartel.com'), null);
 });
+
+/*
+  ⚠️ Ozel kayit registry'leri de kamu son eki gibi davraniyor ve bunu OLCUM
+  buldu, tahmin degil: defterde `uk.com` diye bir kayit duruyordu ve hafizada
+  "dukkan degil, alan adi servisi — elle elendi isaretlensin" diye yaziliydi.
+  Kanit satirina bakildi, gercek adres cikti: `https://scentsamples.uk.com/`
+  — 1000+ urunlu, Shopify uzerinde gercek bir numune dukkani, yani tam hedef
+  kitle. Elenseydi gecerli bir aday sessizce silinecekti.
+
+  `uk.com` CentralNic'in ucuncu duzey satan registry'si; `myshopify.com` ile
+  ayni sinif. Cikarilirsa `<dukkan>.uk.com` adreslerinin hepsi yine tek satira
+  coker ve bu sefer hatasi da olmaz — sadece yanlis olur.
+*/
+test('ozel kayit registryleri altindaki dukkanlar kendi kimligini koruyor', () => {
+  assert.equal(normalizeDomain('https://scentsamples.uk.com/'), 'scentsamples.uk.com');
+  assert.notEqual(
+    normalizeDomain('https://a.uk.com'),
+    normalizeDomain('https://b.uk.com'),
+    'iki ayri dukkan tek satira cokmemeli',
+  );
+});
+
+test('ozel kayit registrysinin kendisi alan adi sayilmiyor', () => {
+  assert.equal(normalizeDomain('https://uk.com'), null);
+});

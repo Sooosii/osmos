@@ -24,6 +24,28 @@
  * ⚠️ **Sayım başarısız olursa hiçbir şey olmuyor.** Beacon yoksa (eski
  * tarayıcı) ya da istek düşerse bağlantı yine çalışıyor: ziyaretçinin yolunu
  * hiçbir koşulda sayaç kesmiyor.
+ *
+ * ✅ **JS bedeli ÖLÇÜLDÜ (2026-08-20, Next 16.2.12 üretim derlemesi).**
+ * Açık uç olarak duruyordu: bu bileşen parfüm sayfasına bir istemci adası
+ * getirdi ve artış hiç ölçülmemişti.
+ *
+ * | rota | ham | brotli |
+ * |---|---:|---:|
+ * | `/[lang]/perfume/[id]` | 728.9 KB | **192.6 KB** |
+ * | `/[lang]/note/[id]` (komşu) | 656.7 KB | 175.2 KB |
+ *
+ * Turnikeyi taşıyan parça (`api/tiklama` ve `sendBeacon` izleri onda):
+ * 36.2 KB ham / **11.2 KB brotli**. Eşik aşılmadı, iş açılmıyor.
+ *
+ * ⚠️ **11.2 KB bir TAVAN, turnikenin kendi bedeli değil.** Aynı parçada
+ * `useSession` ve `shelf` kodu da var — parça sayfanın bütün istemci adası.
+ * Turnikenin tek başına rakamı isteniyorsa tek yol A/B derleme (`aa482a4^`
+ * ile karşılaştırma); bugün karar için gerekmedi, tavan zaten küçük.
+ *
+ * ⚠️ Rakamlar `.next/diagnostics/route-bundle-stats.json`dan geldi;
+ * `npm run build` çıktısı Next 16'da boyut sütunu **basmıyor**. Hafızadaki
+ * eski 269/294 KB rakamları tarayıcı transfer ölçümüydü — aynı birim değil,
+ * doğrudan karşılaştırılmamalı.
  */
 
 interface SaticiBaglantisiProps {

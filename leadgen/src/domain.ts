@@ -32,6 +32,22 @@ const IKINCI_DUZEY = new Set([
   */
   'myshopify.com', 'bigcartel.com', 'ecwid.com', 'storenvy.com',
   'wixsite.com', 'square.site', 'shoplineapp.com', 'company.site',
+  /*
+    ⚠️ Özel kayıt registry'leri de aynı sınıf: `uk.com` bir alan adı değil,
+    CentralNic'in üçüncü düzey sattığı bir son ek. Listede olmadığı için
+    `scentsamples.uk.com` deftere çıplak **`uk.com`** diye yazılmıştı.
+
+    ⚠️ Bunu bulan şey kayıt değil KANIT satırıydı. Hafızada "uk.com dükkan
+    değil, alan adı servisi — elle `elendi` işaretlensin" yazılıydı ve
+    yanlıştı: `evidence` tablosundaki adres `https://scentsamples.uk.com/`,
+    1000+ ürünlü gerçek bir Shopify numune dükkanı. Elenseydi tam hedef
+    kitleden bir aday sessizce silinirdi.
+
+    Kardes son ekler (`eu.com`, `us.com`, `de.com`, `com.de`, `za.com`…)
+    aynı registry'nin ürünü ama defterde geçmiyorlar — ölçüldü, tahminle
+    liste şişirilmedi. Biri çıkarsa buraya bir satır.
+  */
+  'uk.com',
 ]);
 
 /**
