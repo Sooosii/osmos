@@ -72,7 +72,19 @@ export function takipAdaylari(
         SELECT domain FROM temas WHERE sonuc IN ('cevap','ilgilendi','red','elendi')
       )
     GROUP BY domain
-    HAVING COUNT(*) = 1
+    /*
+      ⚠⚠ **Ölçüt kayıt sayısı değil TEMAS GÜNÜ — ve farkı gerçek bir
+      kayıp gösterdi.** Eskiden COUNT(*) = 1 yazıyordu, yani "bir kez
+      yazılmış olanı hatırlat" demek isteniyordu. Ama 20 Ağustos'ta
+      homeofscents.com.tr'ye **aynı gün hem mail hem DM** gitti (sahibin
+      kararı) ve defterde iki gonderildi satırı oluştu. Kural onu "zaten
+      hatırlatılmış" saydı ve listeden **temelli** düşürdü — canlı bir hedef,
+      hiçbir yerde hata çıkmadan, bir daha hiç hatırlatılmayacaktı.
+
+      Aynı gün kaç kanaldan yazılırsa yazılsın o **tek bir temastır**;
+      hatırlatma ise tanımı gereği **başka bir gün** olur.
+    */
+    HAVING COUNT(DISTINCT date(tarih)) = 1
     ORDER BY ilk_tarih ASC
   `).all() as unknown as HamSatir[];
 

@@ -138,3 +138,34 @@ test('hatirlatma TEK CUMLE ve satis yapmiyor', () => {
     assert.ok(metin.length < 130, `${dil}: tek cumle olmali`);
   }
 });
+
+/*
+  ⚠️ GERCEK BIR KAYIP: ayni gun IKI KANALDAN yazmak, "ikinci hatirlatma"
+  sanilip dukkani takip listesinden temelli dusuruyordu.
+
+  20 Agustos'ta homeofscents.com.tr'ye once mail sonra DM gitti (sahibin
+  karari, iki kanal ayni gun). Defterde iki `gonderildi` satiri olustu ve
+  `HAVING COUNT(*) = 1` onu eledi — yani o dukkan bir daha HIC
+  hatirlatilmayacakti. Hicbir yerde hata cikmiyordu.
+
+  Dogru olcut kayit sayisi degil TEMAS GUNU: ayni gun kac kanaldan yazilirsa
+  yazilsin o tek bir temastir; hatirlatma ise BASKA bir gun olur.
+*/
+test('ayni gun iki kanal TEK temastir — takip hakki yanmiyor', () => {
+  const db = hazirla();
+  temasYaz(db, 'de-shop.com', 'gonderildi', 8, 'mail');
+  temasYaz(db, 'de-shop.com', 'gonderildi', 8, 'dm');
+  const a = takipAdaylari(db, tumLeadler(db), SIMDI);
+  assert.equal(a.length, 1, 'ayni gun iki kanal dukkani listeden DUSURMEMELI');
+  assert.equal(a[0].domain, 'de-shop.com');
+  db.close();
+});
+
+test('AMA baska gun ikinci mesaj hatirlatmadir — hak yaniyor', () => {
+  const db = hazirla();
+  temasYaz(db, 'de-shop.com', 'gonderildi', 20, 'mail');
+  temasYaz(db, 'de-shop.com', 'gonderildi', 10, 'dm');
+  assert.equal(takipAdaylari(db, tumLeadler(db), SIMDI).length, 0,
+    'farkli gunlerdeki ikinci mesaj hatirlatma sayilir');
+  db.close();
+});
