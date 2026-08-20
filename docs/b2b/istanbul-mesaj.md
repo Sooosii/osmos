@@ -188,10 +188,11 @@ rakamla yeniden hesaplandı**:
 - **Parfumane:** kendi 50 ml parfümü **3.290 TL** → yıllık ≈ **altı şişe**,
   kurulum ≈ on şişe.
 
-⚠️ **YAZILI TEKLİF İÇİN TÜRKÇE ŞABLON HENÜZ YOK.** `teklif.md` İngilizce
-ve **ihracat** varsayıyor (KDV %0 · istisna 302 · §13b reverse charge ·
-SWIFT) — yurt içinde dördü de geçersiz. "Evet" gelirse **önce o şablon
-yazılacak**, teklif ondan sonra gider.
+✅ **YAZILI TEKLİF ŞABLONU HAZIR:** `docs/b2b/teklif-yurtici.md`.
+İhracat sürümünün (`teklif.md`) çevirisi değil, **ayrı belge** — orada
+geçerli dört şey (KDV %0 · istisna 302 · §13b · SWIFT) yurt içinde
+geçersiz. ⚠️ İçinde iki boşluk kaldı ve **ikisi de sende**: şirketin tam
+unvanı `[şirket]` ve teslim süresi `[X]`.
 
 ⚠️ Faturada **ad değil ŞIRKETİN unvanı** yazılıyor (müşavir): ne OSMOS ne
 Soroush Sehat. Müşteri bunu **teklif aşamasında** öğreniyor, fatura anında

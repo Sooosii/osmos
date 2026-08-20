@@ -4,6 +4,11 @@
 > bir metne çeviriyor. Fiyat ve kapsam `gonderim-akisi.md` §"Satarken
 > söylenecekler"de, unvan ve VAT ID kararı `sirket-ve-fatura.md`de.
 
+⚠️ **BU BELGE YURT DIŞI IÇIN.** Türkiye'de yerleşik müşteriye
+**`teklif-yurtici.md`** gidiyor — çeviri değil, ayrı belge: buradaki KDV %0,
+istisna 302, §13b reverse charge ve SWIFT yurt içinde **geçersiz**.
+Karıştırılırsa fatura reddedilir.
+
 **Dil: Ingilizce.** Ilk partideki on hedefin dili Ingilizce (GB, AE, EG, PK, DE,
 CA). Nischengold cevap verirse Almancası bundan türetilir — sahibin duran kararı
 *"Almanca ancak cevap gelirse"*.

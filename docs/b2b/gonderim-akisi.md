@@ -74,9 +74,9 @@
 > ⚠️ TL zorunlu olduğu için yıllık ücret eriyor — teklife
 > *"sonraki yıllarda yenileme tarihindeki geçerli fiyat üzerinden"* satırı girecek.
 >
-> ⚠⚠ **AMA YAZILI TEKLİF HÂLÂ GİDEMEZ:** `teklif.md` İngilizce ve **ihracat**
-> varsayıyor (KDV %0, 302, §13b, SWIFT) — yurt içinde dördü de geçersiz.
-> **Türkçe domestik şablon yazılmadı**; "evet" gelirse ilk iş o.
+> ✅ **Türkçe teklif şablonu YAZILDI:** `docs/b2b/teklif-yurtici.md`.
+> ⚠️ Içinde iki boşluk var ve **teklif gitmeden dolması şart**: şirketin
+> tam unvanı ve teslim süresi. Ikisi de sahipte.
 >
 > Tam ölçüm, elenenler, alıntılanmış nota örnekleri ve hangi dükkânın önce
 > aranacağı: **`docs/b2b/istanbul-olcumu.md`**.
