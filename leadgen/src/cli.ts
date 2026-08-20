@@ -330,7 +330,17 @@ async function main(): Promise<void> {
 
       ⚠️ Gönder'e insan basıyor — gerekçe `gonderim-konsolu.ts` başlığında.
     */
-    const kaynak = join(VERI, 'ilk-parti.md');
+    /*
+      ⚠️ **Kaynak dosya artik argumanla secilebiliyor** ve varsayilan
+      degismedi. Sebep: `ilk-parti.md` bekleyen 15 hedefi tutuyordu ve Istanbul
+      icin ayri bir konsol gerekince tek yol onu EZMEKTI — yani bekleyen
+      partiyi silmek. Ayri parti dosyalari artik yan yana durabiliyor.
+
+      ⚠️ Cikti adi kaynaktan turuyor, sabit degil: iki konsol birbirinin
+      uzerine yazsaydi ayni sessiz kayip bir adim ileri tasinmis olurdu.
+    */
+    const partiAdi = argumanlar[0] ?? 'ilk-parti.md';
+    const kaynak = join(VERI, partiAdi);
     if (!existsSync(kaynak)) {
       log(`[parti-konsol] ${kaynak} yok — once: node scripts/parti-kur.mjs`);
       process.exit(1);
@@ -357,7 +367,7 @@ async function main(): Promise<void> {
     */
     const tarih = /^Parti kuruldu: (\S+)/m.exec(metin)?.[1] ?? 'parti';
     const damga = partiDamgasi(tarih, hedefler.map((h) => h.domain));
-    const cikti = join(VERI, 'gonderim-konsolu.html');
+    const cikti = join(VERI, `gonderim-konsolu${partiAdi === 'ilk-parti.md' ? '' : `-${partiAdi.replace(/\.md$/, '')}`}.html`);
     writeFileSync(cikti, konsolHtml({ hedefler, damga }), 'utf8');
 
     const dmsiz = hedefler.filter((h) => h.instagram === null).length;
