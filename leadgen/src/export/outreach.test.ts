@@ -546,3 +546,54 @@ test('tek harfli belirtecler ad sayilmiyor', () => {
 test('seyahat boyu kategorisi hitap olmuyor', () => {
   assert.equal(temizAd('Travel & Discovery Sets'), null);
 });
+
+/*
+  ⚠️ GERCEK KAYIP (2026-08-20): parfuemerie-brueckner.com'a INGILIZCE DM
+  gitti — Alman bir parfumeriye, ustelik hitabi da bozuktu.
+
+  Sebep dil izinin uc ayri kacagiydi ve ucu de ayni 48 karakterlik dizede:
+    "Abfullung von Duften Parfumerie Bruckner-Bublitz"
+  - "Duften" -> liste "dufte" diyor, sondaki \b cekimli hali reddediyor
+  - "Abfullung" -> listede hic yok
+  - "Parfumerie" -> listede hic yok
+
+  Almanca cekimli bir dil; TAM KELIME listesi bu isi yapamaz. Isaretler
+  artik KOK olarak araniyor.
+*/
+test('Almanca KOKLERI cekimli haliyle de tutuyor', () => {
+  assert.equal(dilIzi('Abfüllung von Düften Parfümerie Brückner-Bublitz'), 'de');
+  assert.equal(dilIzi('Düften'), 'de', 'cekimli hal');
+  assert.equal(dilIzi('Abfüllung'), 'de');
+  assert.equal(dilIzi('Parfümerie Brückner'), 'de');
+  assert.equal(dilIzi('Duftberatung & Abfüllungen'), 'de');
+});
+
+/*
+  ⚠️ Genisleme her seferinde YANLIS POZITIF riski tasiyor: Almanca sanilan
+  bir Ingiliz/Fransiz dukkanina Almanca yazmak, Ingilizce yazmaktan kotu.
+  Bu sinama genislemenin sinirini tutuyor.
+*/
+test('Ingilizce ve Fransizca dukkanlar Almancaya DUSMUYOR', () => {
+  assert.equal(dilIzi('Perfume Samples and Decants Online'), null);
+  assert.equal(dilIzi('Scent Split: Largest Collection of Niche Fragrances'), null);
+  assert.equal(dilIzi('Parfumerie Generale — Paris'), null, 'Fransizca parfumerie (umlautsuz)');
+  assert.equal(dilIzi('Luxury Fragrance Boutique'), null);
+});
+
+/*
+  ⚠️ AYNI HATANIN IKINCI YUZU — olcumle yakalandi, gozle degil.
+  Kok listesine gecince "parfumproben" KAYBOLDU: kokun basindaki sinir,
+  isaretin bir BILESIGIN ortasinda durmasina izin vermiyor.
+
+  Almanca bilesik kuran bir dil: Parfumproben, Nischendufte, Duftproben,
+  Abfullungen. Isaret hem basta hem ortada olabilir, o yuzden kok
+  listesinde SINIR YOK. Kokler zaten Ingilizce/Fransizcada gecmeyecek
+  bicimde secildi, yani sinirsiz aramak yanlis pozitif uretmiyor —
+  bir alttaki sinama bunu tutuyor.
+*/
+test('Almanca BILESIK kelimelerin icindeki isaret de tutuyor', () => {
+  assert.equal(dilIzi('parfümproben'), 'de', 'bilesigin ortasinda');
+  assert.equal(dilIzi('Nischendüfte online'), 'de');
+  assert.equal(dilIzi('Duftproben Set'), 'de');
+  assert.equal(dilIzi('Abfüllungen'), 'de');
+});

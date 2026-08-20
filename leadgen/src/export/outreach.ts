@@ -54,7 +54,32 @@ const TURKCE_SOZCUK = /\b(fiyat|fiyatları|fiyatlı|kargo|sepet|ücretsiz|indiri
   karar VERİLMİYOR: Alman bir dükkâna Türkçe yazmak, İngilizce yazmaktan
   kötü. Şüphede kalınca dil seçilmiyor, İngilizceye düşülüyor.
 */
-const ALMANCA_SOZCUK = /\b(kaufen|günstig|versand|exklusive|düfte|nischendüfte|parfümproben|parfumproben|entdecken|unsere|bestellen)\b/iu;
+/*
+  ⚠⚠ **İşaretler TAM KELİME değil KÖK.** Önce tam kelime listesiydi ve
+  gerçek bir kayıp verdi (2026-08-20): parfuemerie-brueckner.com'a İngilizce
+  DM gitti çünkü sayfa metni "Abfüllung von Düften Parfümerie
+  Brückner-Bublitz" idi ve **üç işaret birden kaçtı**: düfte listedeydi ama
+  metinde DüfteN vardı ve sondaki sinir cekimli hâli reddetti; abfüllung ve
+  parfümerie ise listede hiç yoktu.
+
+  Almanca hem çekimli hem **BİLEŞİK** kuran bir dil — tam kelime listesi bu
+  işi yapamaz. İşaret hem sonuna ek alıyor (Düfte→Düften) hem bir bileşiğin
+  ORTASINDA duruyor (Parfüm+proben, Nischen+düfte). O yüzden kelime sınırı
+  HİÇ YOK — kök nerede geçerse geçsin sayılıyor.
+
+  ⚠️ Bu iki aşamada öğrenildi: önce son sınır kaldırıldı (Düften için),
+  sonra ölçüm `parfümproben`in KAYBOLDUĞUNU gösterdi ve baş sınır da kalktı.
+
+  ⚠️ Kökler İngilizce ve Fransızcada karşılığı OLMAYACAK biçimde seçildi:
+  d[uü]ft (İngilizcede yok), kauf, abfüllung, bestell, entdeck, exklusiv
+  (İngilizce "exclusive" C ile), parfümerie (Fransızca "parfumerie"
+  UMLAUTSIZ). Bir sınama bu sınırı tutuyor.
+
+  ⚠️ Asıl risk yanlış pozitif: Alman sanılan bir dükkana Almanca yazmak,
+  İngilizce yazmaktan **kötü**. Liste genişlerken her kök için
+  "İngilizcede/Fransızcada bu harf dizisi geçer mi" ayrıca sorulacak.
+*/
+const ALMANCA_SOZCUK = /(kauf|günstig|versand|exklusiv|d[uü]ft|abfüllung|parfümerie|nischen|entdeck|unsere|bestell|proben)/iu;
 
 /**
  * Sayfa metninden dil izi — ülke uzantısı susunca tek kalan kanıt.
