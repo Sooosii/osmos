@@ -128,6 +128,64 @@ değiştirince yeniden dağıtım şart.
 bilerek böyle: sessizce OSMOS'a düşmek, müşterinin alan adı altında OSMOS'un
 kataloğunu yayınlamak demekti.
 
+## 3b. ⚠⚠ TURNIKEYI BAĞLA — atlanırsa sayaç SESSIZCE sıfır sayar
+
+**Bu adım yoktu ve eksikliği canlıda ölçüldü (2026-08-20).** Nischengold
+18 Ağustos'tan beri yayındaydı ve turnikesi **hiç saymıyordu**: projede
+`KV_REST_API_*` yoktu, `storeReady()` düşüyor, uç **503** dönüyordu. Yani
+gerçek bir müşteriye gönderilen demoda, **€290/yıl'ı savunan tek rakam**
+toplanmıyordu. Hiçbir yerde hata çıkmıyordu — site kusursuz çalışıyordu.
+
+⚠️ **503 doğru davranış, kusur değil** (`tiklama-store.ts`): *"sessizce
+kaybolan sayaç, olmayan sayactan kötüdür."* Kusur, uç doğru davranırken
+kimsenin bakmamış olmasıydı.
+
+**Yapılışı — sır kopyalanmaz, KAYNAK bağlanır:**
+
+```bash
+npx vercel link --project osmos --yes
+npx vercel integration list                 # kaynak adını verir
+npx vercel integration-resource connect <kaynak> <kimlik> --yes
+npx vercel link --project <kimlik> --yes
+npx vercel env ls production                # beş KV degiskeni gorunmeli
+```
+
+⚠️ **`vercel env pull` + elle kopyalama YANLIŞ YOL.** `osmos`taki KV
+değişkenleri `Sensitive` işaretli, yani zaten geri okunamıyor — ve okunsa
+bile sırrı bir dosyaya döküp yapıştırmak gereksiz bir risk.
+`integration-resource connect` aynı Upstash deposunu ikinci projeye bağlıyor
+ve değişkenleri **Vercel'in kendisi** enjekte ediyor.
+
+⚠️ **Aynı depoyu paylaşmak güvenli** ve gerekçesi kodda yazılı: anahtar
+kiracı önekli (`tiklama:<kiracı>:<YYYY-MM>`), sayaçlar karışmıyor.
+
+⚠⚠ **Bağladıktan sonra YENIDEN DAĞITIM ŞART.** Var olan dağıtım kendi
+ortam anlık görüntüsünü taşıyor; değişken eklemek onu değiştirmiyor.
+
+```bash
+npx vercel redeploy <mevcut-uretim-dagitimi> --target production
+```
+
+⚠️ **`vercel deploy --prod` KULLANMA** — o, yerel dizini yayına iter ve
+çalışılan dal master değilse **denetlenmemiş kodu müşterinin sitesine
+gönderir.** `redeploy` aynı kaynağı yeni ortamla yeniden kuruyor.
+Mevcut dağıtım: `npx vercel inspect <adres>`.
+
+**Kanıt — tek ölçüm:**
+
+```bash
+curl -s -o /dev/null -w "%{http_code}
+" -X POST   -H "content-type: application/json" -d '{}' https://<adres>/api/tiklama
+```
+
+**503 = KV yok (sayaç ölü) · 400 = KV bağlı (sayıyor).** Gövde bilerek
+geçersiz: kapı sırası `storeReady()` → gövde olduğu için 400 görmek deponun
+ayakta olduğunu kanıtlıyor ve **sayaca çöp satır yazmıyor.**
+
+Nischengold'da ölçüldü: **503 → 400** (2026-08-20).
+
+---
+
 ## 4. Alan adı
 
 Demo için: `<kimlik>.osmos.me`.
