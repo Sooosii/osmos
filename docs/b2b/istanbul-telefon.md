@@ -16,7 +16,7 @@ tek dükkan o.**
 |---|---|---|---|
 | 1 | **NOIR Parfüm** | **+90 212 220 92 13** | kendi sitesi (2026-08-20) |
 | 2 | **Parfumane** | **0850 821 74 94** | kendi sitesi (2026-08-20) |
-| 3 | **Home of Scents** | ❌ **yayınlamıyor** | sitede yalnız `info@homeofscents.com.tr` |
+| 3 | **Home of Scents** | ❌ **yayınlamıyor** — aranan yerler aşağıda | sitede yalnız `info@homeofscents.com.tr` |
 
 **Sıra bu yüzden NOIR → Parfumane → Home of Scents.** Ilk ikisi bugün
 aranabilir; üçüncüsü için önce numara lazım (Google Maps'te Mall of Istanbul
@@ -25,6 +25,12 @@ ya da Akasya şubesi) — bulunamazsa kanal **Instagram DM** (`@homeofscents`).
 ⚠️ **NOIR'ın 212 numarası Nişantaşı ile tutarlı** (Avrupa yakası sabit hat).
 Parfumane'ınki 0850, yani çağrı merkezi tipi hat — mağazaya değil merkeze
 düşer, karar vereni bulmak bir adım daha uzun olabilir.
+
+⚠️ **Home of Scents'in numarası GERÇEKTEN yok, aranmadı değil:** ana
+sayfa, `/iletisim`, JSON-LD `telephone` alanı, WhatsApp/`wa.me` bağlantısı ve
+geniş numara kalıbı — hepsi boş döndü (2026-08-20). Kalan yollar: Google
+Maps'te **Mall of Istanbul** ya da **Akasya Acıbadem** şubesi, ya da AVM'nin
+mağaza rehberi. Bulunamazsa kanal **Instagram DM** (`@homeofscents`).
 
 ⚠️ **Parfumane'ın Instagram'ı `@_bekirkantarci`** — şirket değil, bir KIŞI
 hesabı (muhtemelen sahibi). Telefonda takılırsan ikinci kanal orası ve
@@ -118,13 +124,43 @@ Satılan şey o değil.
 > var. Haritada duran şey tam olarak o: hangi kokunun neye yakın olduğu."
 
 **Home of Scents** (çok markalı — TEK örtüşen aday):
-> "Rafınızdaki markalardan **yedisi** bizim kataloğumuzda da var — Nishane,
-> Xerjoff, Goldfield & Banks gibi. Yani sizin için örnek kurmak en hızlısı."
->
-> ⚠️ **Bu MARKA örtüşmesi, ürün örtüşmesi değil.** Söylemeden önce o
-> parfümlerin gerçekten rafta olduğu ürün sayfasından doğrulanacak. 20
-> dükkanda ölçüldü: marka örtüşmesi 25 olanda ürün örtüşmesi 4 çıktı.
-> Doğrulanmadıysa **sayı söylenmez**, "rafınızda ortak markalar var" denir.
+> "Rafınızdaki parfümlerden **beşi** bizim kataloğumuzda da var — Nishane
+> EGE ve Nanshe, Goldfield & Banks'in ikisi, Van Cleef Moonlight Patchouli.
+> Yani sizin için örnek kurmak en hızlısı."
+
+✅ **DOĞRULANDI (2026-08-20) — ve sayı 7 DEĞIL 5.** 1440 ürünlük site
+haritası indirildi, beş ürün sayfası tek tek açıldı (HTTP 200, marka ve
+fiyat görüldü):
+
+| parfüm | adres | fiyat |
+|---|---|---|
+| Nishane **EGE** | `/urun/ege-100-ml-parfum` | 12.200 TL |
+| Nishane **Nanshe** | `/urun/nanshe-100-ml-parfum` | 12.200 TL |
+| G&B **Bohemian Lime** | `/urun/bohemian-lime-edp-100-ml-parfum` | 10.800 TL |
+| G&B **Ingenious Ginger** | `/urun/ingenious-ginger-edp-100-ml-parfum` | 10.800 TL |
+| VC&A **Moonlight Patchouli** | `/urun/moonlight-patchouli-edp-75-ml-parfum` | 19.535 TL |
+
+❌ **Rafta OLMAYAN ikisi: Xerjoff Mamluk ve Jimmy Choo MAN ICE.** Iki
+marka da satılıyor, ama o iki parfüm yok. **"Yedi" denirse ikisi
+tutmayacaktı** — depodaki *"marka örtüşmesi ürün örtüşmesi değil"*
+dersinin bu dükkandaki karşılığı.
+
+⚠⚠ **Otomatik eşleştirme denendi ve IKI YANLIŞ POZITIF üretti** — ad
+eşleştiren, markaya bakmayan bir tarama 6 sonuç verdi:
+- *Profumum Roma **Neroli*** → dükkandaki ürün **"Neroli Amara"**, başka
+  bir parfüm. (Hafızadaki tuzağın birebir tekrarı: aynı kayıt daha önce
+  Matière Première "Neroli Oranger" ile eşleşmişti.)
+- *Argos **Pour Femme*** → dükkanda **altı** ayrı "Pour Femme" var,
+  hiçbiri Argos değil.
+
+Aynı tarama **EGE'yi kaçırdı** (üç harfli ad, uzunluk filtresine takıldı).
+**Elle doğrulama kazandı; sayı telefonda ancak bu yüzden söylenebilir.**
+
+✅ **FIYAT ARGUMANI BU DÜKKANDA ÇOK DAHA GÜÇLÜ.** Rafındaki şişeler
+**10.800–19.535 TL**. Yani yıllık ücret (16.500 TL) ≈ **bir buçuk şişe**,
+kurulum (27.500 TL) ≈ **iki buçuk şişe**. Parfumane için yazılan "beş
+şişe" ölçeği burada kullanılmayacak — bu dükkanda rakam daha da küçük
+duruyor.
 
 ---
 
