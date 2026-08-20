@@ -26,7 +26,7 @@ import {
   katalogSay, karsilastir, partiAlanAdlari, partiHedefleri, tavandaMi,
 } from './export/parti-dogrula.ts';
 import { konsolHtml, partiDamgasi } from './export/gonderim-konsolu.ts';
-import { hedefKatalogu, olcAdaylar, yazDemoRaporu } from './demo/adaylar.ts';
+import { hedefKatalogu, olcAdaylar, olculecekAdaylar, yazDemoRaporu } from './demo/adaylar.ts';
 import { takipAdaylari, takipMetni, EN_AZ_GUN } from './takip.ts';
 import {
   adresAdaylari, katalogTaslagi, kayitTaslagi, kiraciKimligi,
@@ -85,6 +85,8 @@ interface Secenekler {
   readonly kanal: string | null;
   /** `parti-konsol --sun` — sayfayi localhost'ta sunar (pano guvenli baglam ister). */
   readonly sun: boolean;
+  /** `demo-adaylari --yalniz-yeni` — yalnizca hic olculmemis hedefleri gez. */
+  readonly yalnizYeni: boolean;
   /** Komuttan sonraki serbest argümanlar — `temas <domain> <sonuc>` gibi. */
   readonly argumanlar: readonly string[];
 }
@@ -98,11 +100,13 @@ function komutOku(): Secenekler {
       onayla: { type: 'boolean' },
       kanal: { type: 'string' },
       sun: { type: 'boolean' },
+      'yalniz-yeni': { type: 'boolean' },
     },
   });
   const ham = positionals[0] ?? '';
   if (!(KOMUTLAR as readonly string[]).includes(ham)) {
-    log(`kullanim: node src/cli.ts <${KOMUTLAR.join('|')}> [--sinir N] [--sonda] [--onayla] [--kanal <ad>]`);
+    log(`kullanim: node src/cli.ts <${KOMUTLAR.join('|')}> [--sinir N] [--sonda] [--onayla]`
+      + ' [--kanal <ad>] [--yalniz-yeni]');
     process.exit(1);
   }
   const sinir = values.sinir === undefined ? null : Number.parseInt(values.sinir, 10);
@@ -113,13 +117,14 @@ function komutOku(): Secenekler {
     onayla: values.onayla === true,
     kanal: typeof values.kanal === 'string' ? values.kanal : null,
     sun: values.sun === true,
+    yalnizYeni: values['yalniz-yeni'] === true,
     argumanlar: positionals.slice(1),
   };
 }
 
 async function main(): Promise<void> {
   ortamiYukle();
-  const { komut, sinir, sonda, onayla, kanal, sun, argumanlar } = komutOku();
+  const { komut, sinir, sonda, onayla, kanal, sun, yalnizYeni, argumanlar } = komutOku();
   const db = acVeritabani(DB_YOLU);
 
   if (komut === 'seed' || komut === 'hepsi') {
@@ -408,9 +413,30 @@ async function main(): Promise<void> {
     const bizimkiler = osmosMarkalari(dizin);
     const parfumlerimiz = osmosParfumleri(dizin);
     log(`[demo] kataloğumuzda ${parfumlerimiz.length} parfüm / ${bizimkiler.size} marka var`);
-    const sonuclar = await olcAdaylar(db, bizimkiler, parfumlerimiz, sinir ?? 200, log);
-    const n = yazDemoRaporu(sonuclar, join(VERI, 'demo-adaylari.md'));
-    log(`[demo] demo-adaylari.md — ${n} hedefe demo bugün kurulabilir`);
+    const sonuclar = await olcAdaylar(db, bizimkiler, parfumlerimiz, sinir ?? 200, log, yalnizYeni);
+    /*
+      ⚠⚠ **`--yalniz-yeni` ana rapora YAZMAZ, kendi dosyasina yazar.**
+      `yazDemoRaporu` her cagrildiginda dosyayi bastan kuruyor ve yalniz O
+      kosunun sonuclarini iceriyor. Bayrak ana rapora yazsaydi, 156 hedeflik
+      liste dort satira duser ve bunu hicbir sey soylemezdi — komut yesil
+      biter, eldekini bozardi. (`dee0ac5` tam bu siniftan bir hataydi.)
+
+      ⚠️ Ayni tuzak `--sinir` icin de gecerli ve ESKIDEN BERI vardi:
+      `demo-adaylari --sinir 5` ana raporu bes satira indiriyordu. Sinir artik
+      tam kosu disinda ana rapora dokunmuyor.
+
+      ⚠️ **"Tam kosu" OLCULUYOR, bayraktan cikarilmiyor.** `sinir === null`
+      diye bakmak yanlisti: varsayilan tavan 200 ama uygun hedef 278, yani
+      bayraksiz kosu bile eksik kalabiliyor — buna karsilik `--sinir 500` tam.
+      Olcut bu yuzden niyet degil KAPSAM: kosulan sayi, kosulabilecek sayiya
+      esit mi.
+    */
+    const uygunSayisi = olculecekAdaylar(tumLeadler(db), Number.MAX_SAFE_INTEGER, false).length;
+    const tamKosu = !yalnizYeni && sonuclar.length >= uygunSayisi;
+    const dosya = tamKosu ? 'demo-adaylari.md' : 'demo-adaylari-kismi.md';
+    const n = yazDemoRaporu(sonuclar, join(VERI, dosya));
+    log(`[demo] ${dosya} — ${n} hedefe demo bugün kurulabilir`);
+    if (!tamKosu) log('[demo] kismi kosu: ana rapor (demo-adaylari.md) DEGISMEDI');
   }
 
   if (komut === 'kiraci-taslak') {

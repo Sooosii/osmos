@@ -124,18 +124,42 @@ export async function hedefKatalogu(lead: Lead): Promise<HedefKatalogu | null> {
  * değil; onları ölçmeye çalışmak yanlış sıfırlar üretirdi ve puanlama
  * "ölçüldü, yok" ile "ölçülmedi"yi ayırt ediyor.
  */
+/**
+ * Ölçüme girecek adayları seçer — saf, ağa çıkmıyor.
+ *
+ * ⚠️ **`yalnizYeni` varsayılan olarak KAPALI ve öyle kalmalı.** Ölçüm
+ * bayatlıyor: dükkanın rafı değişiyor, bizim kataloğumuz büyüyor, yani
+ * "bir kez ölçtüm" bir daha bakmamak için gerekçe değil. Bayrak yalnız
+ * **hız** için: 27 yeni hedef eklendiğinde 278 dükkanın tamamını yeniden
+ * gezmek (~40 dk) ücretsiz ama verimsizdi.
+ *
+ * ⚠️ Sınır seçimden SONRA uygulanıyor. Önce kesilseydi, listenin başındaki
+ * ölçülmüş kayıtlar kotayı yer ve `--yalniz-yeni --sinir 5` beş yeni hedef
+ * yerine beşte biri ölçerdi.
+ */
+export function olculecekAdaylar(
+  leadler: readonly Lead[],
+  sinir: number,
+  yalnizYeni: boolean,
+): readonly Lead[] {
+  return leadler
+    .filter((l) => l.platform === 'shopify' && l.durum === 'zenginlestirildi')
+    .filter((l) => !yalnizYeni || l.marka_ortusmesi === null)
+    .slice(0, sinir);
+}
+
 export async function olcAdaylar(
   db: DatabaseSync,
   bizimkiler: ReadonlySet<string>,
   parfumlerimiz: readonly KatalogParfumu[],
   sinir: number,
   log: (s: string) => void,
+  yalnizYeni = false,
 ): Promise<readonly AdayOlcumu[]> {
-  const adaylar = tumLeadler(db)
-    .filter((l) => l.platform === 'shopify' && l.durum === 'zenginlestirildi')
-    .slice(0, sinir);
+  const adaylar = olculecekAdaylar(tumLeadler(db), sinir, yalnizYeni);
 
-  log(`[demo] ${adaylar.length} Shopify hedefinin marka listesi okunacak`);
+  log(`[demo] ${adaylar.length} Shopify hedefinin marka listesi okunacak`
+    + `${yalnizYeni ? ' (yalniz hic olculmemisler)' : ''}`);
   const sonuclar: AdayOlcumu[] = [];
 
   for (const [i, lead] of adaylar.entries()) {
