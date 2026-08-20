@@ -140,6 +140,25 @@ doğru?
 
 ---
 
+**D5 — Ticari e-posta / İYS.** Yurt içindeki bir **işletmeye** (tacir ya da
+esnaf) soğuk ticari e-posta gönderebilir miyim? 6563 sayılı kanun ve Ticari
+Iletişim Yönetmeliği'nde tacir/esnaf için **önceden onay istisnası** olduğunu
+okudum ama emin değilim. **İYS (Ileti Yönetim Sistemi) kaydı** benim için
+zorunlu mu — gönderen babanın şirketiyse ne değişir?
+
+> Cevap:
+
+⚠️ **Bunun kanal sırasına doğrudan etkisi var.** Almanya'da aynı soru
+ölçülmüştü (UWG §7 izinsiz ticari e-postayı B2B'de bile yasaklıyor) ve
+sonuç "önce DM" kuralı oldu. Türkiye için cevap gelene kadar aynı ihtiyat:
+**önce Instagram DM**, e-posta yalnız DM cevapsız kalırsa ve tek seferlik.
+
+⚠️ Instagram DM'in bu kapsamda olup olmadığı da ayrıca sorulacak —
+"ticari elektronik ileti" tanımı SMS/e-posta/arama sayıyor, sosyal medya
+özel mesajı için durum açık değil.
+
+---
+
 ## Dönünce ne olacak
 
 A1 ve A2 bitince **teklif gönderilebilir hâle geliyoruz.** Ilk DM zaten serbest
