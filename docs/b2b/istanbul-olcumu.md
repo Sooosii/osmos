@@ -118,7 +118,13 @@ hazır.
 
 ## ✅ Fiyat KARARI (2026-08-20): aynı fiyat, TL karşılığıyla
 
-**27.500 TL + KDV** kurulum (20 parfüme kadar) · **16.500 TL/yıl.**
+⚠️ **BU RAKAMLAR GÜNCELLENDİ (2026-08-20 akşamı) — aşağısı tarihçe.**
+Müşavir *"KDV dahil yazılacak"* dedi, sahip *"net korunsun"* dedi:
+**33.000 TL kurulum · 19.800 TL/yıl, İKİSİ DE KDV DAHİL** (net 27.500 /
+16.500). Müşteri KDV mükellefi olduğu için ona maliyeti değişmiyor.
+Ayrıntı: `musavir-gorusmesi.md` §"Cevaplar geldi".
+
+Eski karar (tarihçe): **27.500 TL + KDV** kurulum (20 parfüme kadar) · **16.500 TL/yıl.**
 Kur 1 € ≈ 56 TL (19 Ağustos).
 
 ⚠️ **Indirim YOK ve gerekçesi ölçüldü: "€490 Türk butiği için ağır" varsayımı

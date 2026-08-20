@@ -59,16 +59,24 @@
 > Parfumane (Nişantaşı · Kapalıçarşı · Galata), Home of Scents (Mall of
 > Istanbul · Akasya). Karar kuralı (≥3) karşılandı, kanal açıldı.
 >
-> ⚠️ **Kanal aynı gün telefona döndü:** sahip dükkânlara gitmeyeceğini söyledi.
-> Hedefler geçerli — üçü de Türkçe konuşuyor ve telefon sahibin açabildiği
-> kanal. **Bu üç hedef için sıra: telefon → DM → mail** (ana listeden farklı;
-> UWG §7 Almanya'ya ait, Türkiye'de telefon açık).
+> ❌❌ **KANAL: telefon ve yüz yüze KAPALI** (sahip ikisini de ayrı ayrı
+> kapattı). Açık kanal yalnız **Instagram DM ve mail**. Metinler:
+> `docs/b2b/istanbul-mesaj.md`. ✅ 20 Ağustos'ta üçüne de yazıldı.
 >
-> ✅ **Fiyat kararı verildi:** aynı fiyat, TL karşılığıyla — **27.500 TL + KDV**
-> kurulum, **16.500 TL/yıl**. Indirim yok; ölçüt zaten pazarın üst ucunu
-> seçmişti. ⚠️ Ama yurt içi fatura başka: KDV %20, istisna 302 ve §13b
-> geçersiz, para birimi muhtemelen TL zorunlu — dördü de
-> `musavir-gorusmesi.md` §D'de, **cevap gelmeden Türk müşteriye teklif gitmez.**
+> ✅ **FİYAT GÜNCELLENDİ (2026-08-20 akşamı):** **33.000 TL** kurulum ·
+> **19.800 TL/yıl**, **İKİSİ DE KDV DAHİL.** Müşavir "yurt içinde KDV dahil
+> yazılır" dedi; net gelir değişmedi (27.500 / 16.500) ve müşteri KDV
+> mükellefi olduğu için ona maliyeti de aynı. ⚠️ **"+ KDV" denmeyecek.**
+>
+> ✅ **Yurt içi fatura çözüldü:** KDV **%20** · istisna 302 ve §13b geçersiz ·
+> para birimi **TL zorunlu, tahsilat da TL** · fatura **peşinatta** kesiliyor ·
+> faturada **şirketin unvanı** yazılıyor, ad değil.
+> ⚠️ TL zorunlu olduğu için yıllık ücret eriyor — teklife
+> *"sonraki yıllarda yenileme tarihindeki geçerli fiyat üzerinden"* satırı girecek.
+>
+> ⚠⚠ **AMA YAZILI TEKLİF HÂLÂ GİDEMEZ:** `teklif.md` İngilizce ve **ihracat**
+> varsayıyor (KDV %0, 302, §13b, SWIFT) — yurt içinde dördü de geçersiz.
+> **Türkçe domestik şablon yazılmadı**; "evet" gelirse ilk iş o.
 >
 > Tam ölçüm, elenenler, alıntılanmış nota örnekleri ve hangi dükkânın önce
 > aranacağı: **`docs/b2b/istanbul-olcumu.md`**.

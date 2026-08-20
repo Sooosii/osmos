@@ -164,18 +164,38 @@ düşer ve bizde izi kalmaz.
 
 ## Fiyat sorarlarsa
 
-**27.500 TL + KDV** kurulum (20 parfüme kadar) · **16.500 TL/yıl**
+**33.000 TL** kurulum (20 parfüme kadar) · **19.800 TL/yıl**
 (barındırma + yılda iki katalog güncellemesi).
+**İkisi de KDV DAHİL** — müşavirin kararı (2026-08-20): yurt içinde fiyat
+KDV dahil yazılıyor, KDV %20, istisna 302 geçersiz.
 
-⚠️ **Ölçek cümlesi dükkana göre DEĞIŞIYOR** — ikisi de ölçüldü:
+⚠️ **"+ KDV" DEME.** Eski karar 27.500 + KDV idi; rakam değişti çünkü
+**sunum** değişti, net gelir aynı (27.500 / 16.500). Müşteri KDV mükellefi
+bir işletme, KDV'yi indiriyor — yani 33.000 KDV dahil, ona "27.500 + KDV"
+ile **birebir aynıya** mal oluyor. Sorarsa bu söylenebilir.
+
+✅ **Yıllık ücret satırı (D2'nin sonucu).** Para birimi TL zorunlu, yani
+ücret dövize bağlanamıyor ve enflasyonla eriyor. Söylenecek cümle:
+
+> "Yıllık ücret ilk yıl sabit; sonraki yıllarda yenileme tarihindeki
+> geçerli fiyat üzerinden yenileniyor."
+
+⚠️ Ölçek cümlesi dükkana göre değişiyor — ikisi de ölçüldü ve **yeni
+rakamla yeniden hesaplandı**:
 
 - **Home of Scents:** rafındaki şişeler **10.800–19.535 TL** → yıllık ücret
-  ≈ **bir buçuk şişe**, kurulum ≈ iki buçuk şişe.
-- **Parfumane:** kendi 50 ml parfümü **3.290 TL** → yıllık ≈ **beş şişe**.
+  ≈ **bir ile iki şişe arası**. En güçlü ölçek bu dükkanda.
+- **Parfumane:** kendi 50 ml parfümü **3.290 TL** → yıllık ≈ **altı şişe**,
+  kurulum ≈ on şişe.
 
-⚠️⚠️ **YAZILI TEKLIF GITMEZ** — müşavirin §D cevabı (yurt içi KDV %20 ·
-para birimi TL zorunlu mu) gelmeden. Mesajda rakam söylemek serbest;
-**KDV oranı, para birimi ve ödeme koşulları bağlanmaz.**
+⚠️ **YAZILI TEKLİF İÇİN TÜRKÇE ŞABLON HENÜZ YOK.** `teklif.md` İngilizce
+ve **ihracat** varsayıyor (KDV %0 · istisna 302 · §13b reverse charge ·
+SWIFT) — yurt içinde dördü de geçersiz. "Evet" gelirse **önce o şablon
+yazılacak**, teklif ondan sonra gider.
+
+⚠️ Faturada **ad değil ŞIRKETİN unvanı** yazılıyor (müşavir): ne OSMOS ne
+Soroush Sehat. Müşteri bunu **teklif aşamasında** öğreniyor, fatura anında
+değil. Fatura **peşinatta** kesiliyor; tahsilat %50/%50 duruyor.
 
 ## "Bu satış getirir mi?" derlerse
 
